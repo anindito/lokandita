@@ -1,6 +1,8 @@
 # Progress
 
-Current stage: **6 — LokaKode academic core and policy layer** — built and deployed 2026-11-16, **waiting for the owner's gate**. See "Stage 6" at the end of this file. Not tagged yet.
+Next stage: **7 — Judge worker** — not started.
+
+Stage 6 — LokaKode academic core and policy layer — finished 2026-11-16, tag `tahap-6`; see "Gate result" at the end of this file.
 
 Stage 5 — LokaAuth and the shared package — finished 2026-11-16, tag `tahap-5`; see "Gate result" at the end of this file. Plan approved by the owner 2026-11-15. See "Stage 5" at the end of this file for what is done; anything not listed there is not done.
 
@@ -121,7 +123,7 @@ Carried into the next stages:
 - While the Portal is closed, a login without `next` lands on the maintenance page.
 - The items under "Not verified, or weaker than it looks" above still hold, except that a superadmin now exists and login on the real schema has happened.
 
-## Stage 6 — built, waiting for the owner's gate
+## Stage 6 — 2026-11-16
 
 Plan approved by the owner 2026-11-16 (8 steps, one commit each): 1 schema and harness · 2 policy layer, beranda, read pages · 3 tahun ajaran and mata kuliah · 4 kelas and pengajar · 5 enrollment · 6 pindah kelas, kelulusan, reset password · 7 new-year tool · 8 audit page and close.
 
@@ -180,4 +182,25 @@ Owner's gate for stage 6 (`SPEC.md` §18: a pengajar cannot open another pengaja
 8. Run `infra/smoke.sh`. Check 1 now expects `auth` and `lokakode` to answer 2xx/3xx instead of 503.
 
 After the gate: tag `tahap-6`, record the result here. The rows created during the gate are real rows in production; classes with enrollments cannot be deleted, only archived.
+
+Gate result, 2026-11-16:
+
+- The owner reported step 5: the second dosen replaced the class number in the URL and got *"Halaman tidak ditemukan. Data yang Anda cari tidak ada, atau Anda tidak berhak melihatnya."* **The gate of `SPEC.md` §18 passes.**
+- The owner ran `infra/smoke.sh` and reported `16 lulus, 0 gagal, 1 belum aktif`.
+- **The one check that is "belum aktif" is check 6: "judge worker berjalan dan satu job RUN sederhana selesai"** (`KONTRAK.md` §11, item 6). It is switched off at the top of `smoke.sh` because the judge worker does not exist yet; it is built in stage 7. It is counted separately and is not a pass: **nothing about running or judging code is proven until stage 7 switches it on.**
+- What the server shows, read by the agent (actions, roles and counts only):
+  - LokaKode `audit_log`: `tahun.dibuat` 1, `tahun.diaktifkan` 1, `matkul.dibuat` 1, `kelas.dibuat` 2, `pengajar.ditugaskan` 3, `pengajar.dicabut` 1, `pendaftaran.dibuat` 1. Now in `lokakode`: 1 active academic year, 1 course, 2 classes with one pengajar each, 1 `AKTIF` enrollment. LokaAuth has 2 active dosen.
+  - The `lokakode` container log has exactly one `access.denied` with reason `outside_scope_or_missing`, on `/kelas/1`. The refused account is a dosen who owns no course and is pengajar of class 2 only; class 1 has a different pengajar and holds the enrollment. This matches the owner's report.
+- Not done in a browser, or not reported: the optional step 6 (mahasiswa on `/kelas/<id>` → 403; the log has no such denial, so it was not tried), `/kelas/<id>/ubah` as the second dosen, and step 7 (the `/audit` page). The owner did not comment on how the pages look, on the Arabic pages, or on the "select all" box; the items under "Not verified, or weaker than it looks" above still hold, except that stage 6 pages have now been used in a browser by the owner and LokaKode has real rows.
+- Password reset from LokaKode was not part of the gate and has still never run against the real `identity` schema.
+- After this entry was committed and tagged, the three apps were deployed again so `/healthz` reports the tagged commit, and the agent ran `infra/smoke.sh`; the output is in the session.
+
+**Stage 6 finished 2026-11-16, tag `tahap-6`.**
+
+Carried into the next stages:
+
+- `auth.lokandita.com` and `lokakode.lokandita.com` are **open**; the Portal is in maintenance, so a login without `next` still lands on the 503 page. Closing them again is the owner's call (`infra/pemeliharaan.sh <app> on`).
+- The rows created during the gate (one year, one course, two classes, one enrollment, a second dosen) are real production rows. The class with the enrollment cannot be deleted, only archived. Decide before the import of stage 12 whether they are real or should be archived and the test accounts disabled.
+- Smoke check 6 becomes active in stage 7.
+- The "Owed by later stages" list above.
 
