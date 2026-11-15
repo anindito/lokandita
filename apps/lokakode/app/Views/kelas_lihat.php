@@ -19,14 +19,69 @@ $aktif = count(array_filter($pendaftaran, static fn ($p) => $p['status'] === 'AK
         <dt class="redup"><?= lang('Kode.matkul.pengampu') ?></dt>
         <dd><?= esc($orang[$kelas['owner_id']]['nama'] ?? lang('Kode.mhs.akunHilang')) ?></dd>
         <dt class="redup"><?= lang('Kode.kelas.pengajar') ?></dt>
-        <dd><?= view('_pengajar', ['daftar' => $pengajar, 'orang' => $orang]) ?></dd>
+        <dd>
+            <?php if (! $bolehUbah || $pengajar === []): ?>
+                <?= view('_pengajar', ['daftar' => $pengajar, 'orang' => $orang]) ?>
+            <?php else: ?>
+                <ul>
+                <?php foreach ($pengajar as $pid): ?>
+                    <?php $nm = $orang[$pid]['nama'] ?? lang('Kode.mhs.akunHilang'); ?>
+                    <li>
+                        <?= esc($nm) ?>
+                        <form method="post" action="/kelas/<?= (int) $kelas['id'] ?>/pengajar/hapus" class="inline">
+                            <?= csrf_field() ?>
+                            <input type="hidden" name="user_id" value="<?= esc($pid) ?>">
+                            <button type="submit" class="tombol tombol-sekunder" aria-label="<?= esc(lang('Kode.kelas.cabutLabel', [$nm])) ?>"><?= lang('Kode.kelas.cabut') ?></button>
+                        </form>
+                    </li>
+                <?php endforeach ?>
+                </ul>
+            <?php endif ?>
+        </dd>
         <dt class="redup"><?= lang('Kode.kelas.kapasitas') ?></dt>
         <dd><?= $kelas['capacity'] !== null ? (int) $kelas['capacity'] : lang('Kode.kelas.tanpaBatas') ?></dd>
     </dl>
     <?php if ((int) $kelas['boleh_kelola'] !== 1): ?>
         <p class="petunjuk"><?= lang('Kode.kelas.hanyaLihat') ?></p>
+    <?php elseif (! $bolehUbah): ?>
+        <p class="petunjuk"><?= lang('Kode.kelas.tahunArsip') ?></p>
     <?php endif ?>
 </div>
+
+<?php if ($bolehUbah): ?>
+    <h2><?= lang('Kode.kelas.kelola') ?></h2>
+    <div class="kartu">
+        <form method="post" action="/kelas/<?= (int) $kelas['id'] ?>/pengajar">
+            <?= csrf_field() ?>
+            <label for="nomor_induk"><?= lang('Kode.kelas.nomorPengajar') ?></label>
+            <input type="text" id="nomor_induk" name="nomor_induk" class="ltr" value="<?= esc($nomorPengajar) ?>" maxlength="40" required>
+            <div class="baris-tombol">
+                <button type="submit" class="tombol"><?= lang('Kode.kelas.tambahPengajar') ?></button>
+            </div>
+        </form>
+
+        <div class="baris-tombol">
+            <a class="tombol tombol-sekunder" href="/kelas/<?= (int) $kelas['id'] ?>/ubah"><?= lang('Kode.kelas.ubah') ?></a>
+            <form method="post" action="/kelas/<?= (int) $kelas['id'] ?>/arsip">
+                <?= csrf_field() ?>
+                <input type="hidden" name="arsip" value="<?= $kelas['archived_at'] === null ? '1' : '0' ?>">
+                <button type="submit" class="tombol tombol-sekunder"><?= $kelas['archived_at'] === null ? lang('Kode.kelas.arsipkan') : lang('Kode.kelas.bukaArsip') ?></button>
+            </form>
+        </div>
+        <p class="petunjuk"><?= lang('Kode.kelas.arsipInfo') ?></p>
+
+        <?php if ($pendaftaran === []): ?>
+            <form method="post" action="/kelas/<?= (int) $kelas['id'] ?>/hapus">
+                <?= csrf_field() ?>
+                <label class="centang"><input type="checkbox" name="yakin" value="1" required> <?= lang('Kode.kelas.hapusYakin') ?></label>
+                <div class="baris-tombol">
+                    <button type="submit" class="tombol tombol-bahaya"><?= lang('Kode.kelas.hapus') ?></button>
+                </div>
+            </form>
+        <?php endif ?>
+        <p class="petunjuk"><?= lang('Kode.kelas.hapusInfo') ?></p>
+    </div>
+<?php endif ?>
 
 <h2><?= lang('Kode.kelas.daftar') ?></h2>
 <p class="redup"><?= lang('Kode.kelas.jumlah', [count($pendaftaran), $aktif]) ?></p>

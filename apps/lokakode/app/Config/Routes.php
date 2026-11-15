@@ -29,6 +29,14 @@ $routes->group('', ['filter' => 'masuk:superadmin,dosen'], static function (Rout
     $routes->get('mata-kuliah', 'MataKuliah::index');
     $routes->get('mata-kuliah/(:num)', 'MataKuliah::lihat/$1');
     $routes->get('kelas/(:num)', 'Kelas::lihat/$1');
+    // Mengubah kelas: superadmin dan pengampu (BaseController::kelasUntukDiubah).
+    $routes->post('mata-kuliah/(:num)/kelas', 'Kelas::simpan/$1');
+    $routes->get('kelas/(:num)/ubah', 'Kelas::sunting/$1');
+    $routes->post('kelas/(:num)', 'Kelas::perbarui/$1');
+    $routes->post('kelas/(:num)/arsip', 'Kelas::arsip/$1');
+    $routes->post('kelas/(:num)/hapus', 'Kelas::hapus/$1');
+    $routes->post('kelas/(:num)/pengajar', 'Kelas::tambahPengajar/$1');
+    $routes->post('kelas/(:num)/pengajar/hapus', 'Kelas::hapusPengajar/$1');
 });
 
 // Superadmin saja (SPEC.md §3): tahun ajaran dan mata kuliah.

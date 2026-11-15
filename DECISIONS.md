@@ -2,6 +2,9 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-16 — Deleting a class needs a ticked "Saya yakin" box and is refused with 409 while any enrollment (any status) or class-move record points at it; an archived class stays readable — the CSP forbids an inline confirm dialog, and a checkbox works without JavaScript.
+- 2026-11-16 — For a dosen, everything in an archived academic year is read-only (403 with an explanation); the superadmin can still correct it. A pengampu's new class always goes into the active year.
+- 2026-11-16 — Changing a class has three answers: 404 when the class is outside what the user may see, 403 when they see it but do not manage it (a pengajar who is not the pengampu), 403 with a reason when the year is archived.
 - 2026-11-16 — A new academic year is created archived and becomes active only through "Aktifkan", which archives the current one in the same transaction; there is no separate "archive" button — "exactly one active" then cannot be broken from the UI, and activation is reversible by activating the old year again.
 - 2026-11-16 — Course codes are stored upper-case, 2–20 characters of `A–Z`, `0–9` and `-` (so `TS-PY` fits); the pengampu is entered by nomor induk and must be an active `dosen`.
 - 2026-11-16 — The shared test for the re-sent session cookie accepts `Max-Age` within 2 seconds of 43200 — the value is computed when the response is sent, so a page that takes longer to build crossed a second boundary and failed the exact match.

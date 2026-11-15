@@ -16,8 +16,12 @@ use Lokandita\Auth\UserDirectory;
 final class MataKuliah extends BaseController
 {
     private const PESAN = [
-        'disimpan' => ['sukses', 'Kode.pesan.disimpan'],
+        'disimpan'      => ['sukses', 'Kode.pesan.disimpan'],
+        'kelas-dihapus' => ['sukses', 'Kode.pesan.kelasDihapus'],
     ];
+
+    // Galat form "tambah kelas" di halaman mata kuliah: ?galat=<kunci>.
+    private const GALAT_KELAS = ['kelasNama', 'kelasNamaDipakai', 'kelasKapasitas'];
 
     public function index(): ResponseInterface
     {
@@ -163,7 +167,8 @@ final class MataKuliah extends BaseController
         $kelas      = $tahun === null ? [] : $akademik->daftarKelas((int) $tahun['id'], $id);
         $pengajar   = $akademik->pengajar(array_map(static fn ($k) => (int) $k['id'], $kelas));
 
-        $ids = [$matkul['owner_id']];
+        $galat = (string) $this->request->getGet('galat');
+        $ids   = [$matkul['owner_id']];
         foreach ($pengajar as $daftar) {
             $ids = array_merge($ids, $daftar);
         }
@@ -176,7 +181,12 @@ final class MataKuliah extends BaseController
             'kelas'      => $kelas,
             'pengajar'   => $pengajar,
             'orang'      => UserDirectory::byIds($ids),
-            'pesan'      => $this->pesanDariQuery(self::PESAN),
+            // Kelas baru: pengelola mata kuliah; dosen hanya pada tahun ajaran yang aktif.
+            'bolehTambahKelas' => $tahun !== null && (int) $matkul['boleh_kelola'] === 1
+                && ($tahun['status'] === 'active' || $this->akses()->superadmin()),
+            'pesan'      => in_array($galat, self::GALAT_KELAS, true)
+                ? [['jenis' => 'galat', 'teks' => lang('Kode.galat.' . $galat)]]
+                : $this->pesanDariQuery(self::PESAN),
         ]);
     }
 }

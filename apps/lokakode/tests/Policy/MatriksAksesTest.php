@@ -39,6 +39,7 @@ final class MatriksAksesTest extends KodeCase
     {
         $semua = array_fill_keys(self::PELAKU, 'ok');
         $staf  = ['mhsA' => 403] + $semua;
+        $kelolaXA = ['superadmin' => 'ok', 'pengampuX' => 'ok', 'pengampuY' => 404, 'pengajarA' => 403, 'pengajarB' => 404, 'mhsA' => 403];
         // Superadmin saja: semua yang lain 403, apa pun lingkupnya.
         $admin = ['superadmin' => 'ok'] + array_fill_keys(self::PELAKU, 403);
 
@@ -58,6 +59,17 @@ final class MatriksAksesTest extends KodeCase
             'GET mata-kuliah/{n}/ubah'       => ['/mata-kuliah/' . $d['matkulX'] . '/ubah', $admin],
             // Pengampu X sekalipun tidak boleh mengubah mata kuliahnya sendiri.
             'POST mata-kuliah/{n}'           => ['/mata-kuliah/' . $d['matkulX'], $admin],
+
+            // Mengubah kelas XA: superadmin dan pengampu X. Pengajar A melihat kelas itu
+            // tetapi bukan pengelola (403); pengajar B dan pengampu Y tidak melihatnya (404).
+            'GET kelas/{n}/ubah'            => ['/kelas/' . $d['kelasXA'] . '/ubah', $kelolaXA],
+            'POST kelas/{n}'                => ['/kelas/' . $d['kelasXA'], $kelolaXA],
+            'POST kelas/{n}/arsip'          => ['/kelas/' . $d['kelasXA'] . '/arsip', $kelolaXA],
+            'POST kelas/{n}/hapus'          => ['/kelas/' . $d['kelasXA'] . '/hapus', $kelolaXA],
+            'POST kelas/{n}/pengajar'       => ['/kelas/' . $d['kelasXA'] . '/pengajar', $kelolaXA],
+            'POST kelas/{n}/pengajar/hapus' => ['/kelas/' . $d['kelasXA'] . '/pengajar/hapus', $kelolaXA],
+            // Kelas baru di mata kuliah X: kedua pengajar melihat mata kuliahnya, tetapi bukan pengelola.
+            'POST mata-kuliah/{n}/kelas'    => ['/mata-kuliah/' . $d['matkulX'] . '/kelas', ['pengajarB' => 403] + $kelolaXA],
 
             // Gerbang tahap 6: pengajar B tidak bisa membuka kelas XA milik pengajar A.
             'GET kelas/{n}' => ['/kelas/' . $d['kelasXA'], ['pengampuY' => 404, 'pengajarB' => 404] + $staf],
@@ -111,6 +123,51 @@ final class MatriksAksesTest extends KodeCase
                 }
             }
         }
+    }
+
+    /**
+     * Permintaan yang ditolak di atas tidak boleh meninggalkan perubahan apa pun.
+     */
+    public function testPenolakanTidakMengubahData(): void
+    {
+        $d      = $this->dunia();
+        $potret = fn () => [
+            $this->db->query('SELECT * FROM classes ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT class_id, user_id FROM class_teachers ORDER BY class_id, user_id')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT id, class_id, status FROM enrollments ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT id, code, name, owner_id FROM courses ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT id, label, status FROM academic_years ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+        ];
+        $awal = $potret();
+
+        // Isian yang SAH, dikirim oleh yang tidak berhak.
+        $isian = [
+            'POST kelas/{n}'                => ['name' => 'DIBAJAK', 'capacity' => '5'],
+            'POST kelas/{n}/arsip'          => ['arsip' => '1'],
+            'POST kelas/{n}/hapus'          => ['yakin' => '1'],
+            'POST kelas/{n}/pengajar'       => ['nomor_induk' => $d['pengajarB']['nomor_induk']],
+            'POST kelas/{n}/pengajar/hapus' => ['user_id' => $d['pengajarA']['id']],
+            'POST mata-kuliah/{n}/kelas'    => ['name' => 'DIBAJAK'],
+            'POST mata-kuliah/{n}'          => ['code' => 'DIBAJAK', 'name' => 'Dibajak', 'pengampu' => $d['pengajarB']['nomor_induk']],
+            'POST mata-kuliah'              => ['code' => 'BARU100', 'name' => 'Baru', 'pengampu' => $d['pengajarB']['nomor_induk']],
+            'POST tahun-ajaran'             => ['label' => 'Dibajak', 'starts_on' => '2027-02-01', 'ends_on' => '2027-07-31'],
+            'POST tahun-ajaran/{n}'         => ['label' => 'Dibajak', 'starts_on' => '2027-02-01', 'ends_on' => '2027-07-31'],
+        ];
+        foreach ($this->matriks($d) as $pola => [$jalur, $harapan]) {
+            if (! str_starts_with($pola, 'POST ')) {
+                continue;
+            }
+            foreach (self::PELAKU as $p) {
+                if ($harapan[$p] === 'ok') {
+                    continue;
+                }
+                $http = $this->sebagai($d[$p]);
+                $r    = $http->post($jalur, ['csrf' => $this->csrf($http)] + ($isian[$pola] ?? []));
+                $this->assertSame($harapan[$p], $r->status, "{$pola} sebagai {$p}");
+            }
+        }
+        $this->assertSame($awal, $potret(), 'permintaan yang ditolak mengubah data');
+        $this->assertSame(0, $this->hitung('SELECT COUNT(*) FROM audit_log'), 'permintaan yang ditolak tidak menulis audit perubahan');
     }
 
     public function testRutePublikHanyaMengalihkan(): void
