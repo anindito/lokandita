@@ -2,12 +2,16 @@
  * pelari — pengawas kecil yang menjadi proses pertama (PID 1) di setiap
  * kontainer judge.
  *
- *   pelari <batas_cpu_ms> <program> [argumen…]
+ *   pelari <batas_cpu_ms> <batas_wall_ms> <program> [argumen…]
  *
  * Menjalankan program dengan stdin/stdout/stderr kontainer apa adanya, lalu
  * menulis SATU baris laporan ke stderr:
  *
- *   <tanda> exit=<n> signal=<n> cpu_ms=<n> wall_ms=<n> oom=<n> mem_kb=<n>
+ *   <tanda> exit=<n> signal=<n> cpu_ms=<n> wall_ms=<n> wall=<0|1> oom=<n> mem_kb=<n>
+ *
+ * Batas CPU dipaksakan kernel (RLIMIT_CPU: SIGXCPU pada batas, SIGKILL satu
+ * detik kemudian). Batas waktu dinding dipaksakan pelari: saat terlampaui
+ * semua proses dimatikan dan laporan memuat wall=1.
  *
  * Waktu diukur di sini supaya lama menyalakan kontainer tidak dibebankan
  * kepada mahasiswa (keputusan pemilik, tahap 7).
@@ -35,6 +39,15 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
+
+static volatile sig_atomic_t wall_habis = 0;
+
+static void saat_wall_habis(int sinyal)
+{
+	(void)sinyal;
+	wall_habis = 1;
+	kill(-1, SIGKILL); /* semua proses di kontainer kecuali pelari (PID 1) */
+}
 
 static long long ms_sekarang(void)
 {
@@ -70,13 +83,14 @@ int main(int argc, char **argv)
 {
 	char tanda[80] = "";
 
-	if (argc < 3) {
-		fprintf(stderr, "pelari: pemakaian: pelari <batas_cpu_ms> <program> [argumen]\n");
+	if (argc < 4) {
+		fprintf(stderr, "pelari: pemakaian: pelari <batas_cpu_ms> <batas_wall_ms> <program> [argumen]\n");
 		return 2;
 	}
 	long batas_ms = atol(argv[1]);
-	if (batas_ms <= 0) {
-		fprintf(stderr, "pelari: batas_cpu_ms harus positif\n");
+	long batas_wall_ms = atol(argv[2]);
+	if (batas_ms <= 0 || batas_wall_ms <= 0) {
+		fprintf(stderr, "pelari: batas harus positif\n");
 		return 2;
 	}
 
@@ -105,15 +119,26 @@ int main(int argc, char **argv)
 		return 2;
 	}
 	if (anak == 0) {
-		/* Lapis kedua untuk batas CPU: kernel sendiri mematikan proses yang
-		 * melewati batas + 1 detik, walau pelari atau worker tidak sempat. */
+		/* Kernel mengirim SIGXCPU saat batas CPU tercapai dan SIGKILL satu
+		 * detik kemudian, walau pelari atau worker tidak sempat bertindak. */
 		struct rlimit cpu;
-		cpu.rlim_cur = cpu.rlim_max = (rlim_t)((batas_ms + 999) / 1000 + 1);
+		cpu.rlim_cur = (rlim_t)((batas_ms + 999) / 1000);
+		cpu.rlim_max = cpu.rlim_cur + 1;
 		setrlimit(RLIMIT_CPU, &cpu);
-		execvp(argv[2], argv + 2);
-		fprintf(stderr, "pelari: tidak bisa menjalankan %s: %s\n", argv[2], strerror(errno));
+		execvp(argv[3], argv + 3);
+		fprintf(stderr, "pelari: tidak bisa menjalankan %s: %s\n", argv[3], strerror(errno));
 		_exit(127);
 	}
+
+	struct sigaction aksi;
+	memset(&aksi, 0, sizeof aksi);
+	aksi.sa_handler = saat_wall_habis;
+	sigaction(SIGALRM, &aksi, NULL);
+	struct itimerval jam;
+	memset(&jam, 0, sizeof jam);
+	jam.it_value.tv_sec = batas_wall_ms / 1000;
+	jam.it_value.tv_usec = (batas_wall_ms % 1000) * 1000;
+	setitimer(ITIMER_REAL, &jam, NULL);
 
 	/* Sebagai PID 1, pelari juga memungut proses yatim sampai program utama selesai. */
 	int status = 0;
@@ -132,6 +157,8 @@ int main(int argc, char **argv)
 			break;
 	}
 	long long wall_ms = ms_sekarang() - mulai;
+	memset(&jam, 0, sizeof jam);
+	setitimer(ITIMER_REAL, &jam, NULL);
 
 	/* Tidak ada proses yang boleh hidup lebih lama daripada program utama. */
 	kill(-1, SIGKILL);
@@ -142,11 +169,11 @@ int main(int argc, char **argv)
 	long long puncak = baca_cgroup("/sys/fs/cgroup/memory.peak", NULL);
 
 	char laporan[256];
-	int n = snprintf(laporan, sizeof laporan, "\n%s exit=%d signal=%d cpu_ms=%lld wall_ms=%lld oom=%lld mem_kb=%lld\n",
+	int n = snprintf(laporan, sizeof laporan, "\n%s exit=%d signal=%d cpu_ms=%lld wall_ms=%lld wall=%d oom=%lld mem_kb=%lld\n",
 		tanda,
 		WIFEXITED(status) ? WEXITSTATUS(status) : -1,
 		WIFSIGNALED(status) ? WTERMSIG(status) : 0,
-		cpu_ms, wall_ms, oom < 0 ? 0 : oom, puncak < 0 ? -1 : puncak / 1024);
+		cpu_ms, wall_ms, wall_habis ? 1 : 0, oom < 0 ? 0 : oom, puncak < 0 ? -1 : puncak / 1024);
 	if (write(2, laporan, (size_t)n) != n)
 		return 3;
 	return 0;

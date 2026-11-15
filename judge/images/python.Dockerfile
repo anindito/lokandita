@@ -19,6 +19,8 @@ RUN mkdir /box /src /opt/mpl \
  && rm /tmp/x.png && chmod -R a+rX /opt/mpl && ls /opt/mpl | grep -q fontlist
 COPY --from=pelari /pelari /usr/local/bin/pelari
 COPY jalankan-python periksa-python /usr/local/bin/
-RUN chmod 0755 /usr/local/bin/pelari /usr/local/bin/jalankan-python /usr/local/bin/periksa-python
+# Daftar akun image tidak perlu terbaca oleh program yang dinilai (SPEC.md §10).
+RUN chmod 0755 /usr/local/bin/pelari /usr/local/bin/jalankan-python /usr/local/bin/periksa-python \
+ && chmod 0600 /etc/passwd /etc/group
 WORKDIR /box
 USER 65534:65534

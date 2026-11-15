@@ -89,3 +89,30 @@ def galat_mysql(sambung, sql: str) -> int:
         with pytest.raises(pymysql.err.MySQLError) as info:
             cur.execute(sql)
     return info.value.args[0]
+
+
+@pytest.fixture()
+def jalan():
+    """Mengompilasi dan menjalankan satu program di kotak pasir; mengembalikan kotak.Hasil."""
+    from lokandita_judge import kotak
+
+    def _jalan(bahasa: str, sumber: str, stdin: bytes = b"", **batas):
+        d = kotak.siapkan_dir_job()
+        try:
+            k = kotak.kompilasi(bahasa, sumber, d)
+            assert k.ok, f"kompilasi gagal ({k.alasan}): {k.log}"
+            return kotak.jalankan(bahasa, d, stdin, **batas)
+        finally:
+            kotak.buang_dir_job(d)
+
+    return _jalan
+
+
+@pytest.fixture(autouse=True)
+def tidak_ada_sisa():
+    """Setelah setiap tes: tidak ada kontainer judge dan tidak ada direktori job yang tertinggal."""
+    from lokandita_judge import kotak
+
+    yield
+    assert kotak.kontainer_judge() == [], "ada kontainer judge yang tertinggal"
+    assert not kotak.DIR_JOB.exists() or list(kotak.DIR_JOB.iterdir()) == [], "ada direktori job yang tertinggal"

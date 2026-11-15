@@ -23,7 +23,9 @@ FROM dasar
 COPY --from=pelari /pelari /usr/local/bin/pelari
 COPY kompilasi /usr/local/bin/kompilasi
 # /box dan /src adalah titik kait: tmpfs dan direktori job (hanya-baca).
-RUN mkdir /box /src && chmod 0755 /usr/local/bin/pelari /usr/local/bin/kompilasi
+# Daftar akun image tidak perlu terbaca oleh program yang dinilai (SPEC.md §10).
+RUN mkdir /box /src && chmod 0755 /usr/local/bin/pelari /usr/local/bin/kompilasi \
+ && chmod 0600 /etc/passwd /etc/group
 ENV LANG=C.UTF-8 HOME=/box TMPDIR=/box
 WORKDIR /box
 USER 65534:65534

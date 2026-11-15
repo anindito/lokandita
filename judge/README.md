@@ -8,3 +8,5 @@ Worker penilai (Python 3.12) — `SPEC.md` §10, `KONTRAK.md` §6.
 - `.env.example` — variabel wajib (`KONTRAK.md` §10).
 - `images/` — Dockerfile `judge-c`, `judge-cpp`, `judge-python`, dan `pelari.c` (pengawas di dalam kontainer). Bangun dengan `judge/bangun-image.sh`.
 - `seccomp/` — `judge.json` dibuat oleh `buat-profil.py` dari profil bawaan Docker; jangan disunting dengan tangan.
+- `lokandita_judge/kotak.py` — kotak pasir: semua bendera Docker ada di `bendera_kontainer`. `mesin.py` — RUN dan penilaian per tes. `banding.py` — mode perbandingan keluaran.
+- `var/` — direktori kerja per job (tidak masuk Git), dikaitkan hanya-baca ke kontainer.

@@ -191,7 +191,13 @@ lokakode.judge_jobs
 | `VALIDATE` | `{ language, generator, reference_solution, samples_count, hidden_count, time_limit_ms, allowed_concepts[], comparison_mode }` |
 | `ANALYZE` | `{ language, source, required_concepts[] }` |
 
-`result` verdict codes: `AC`, `WA`, `CE`, `RE`, `TLE`, `MLE`, `OLE`, `CONCEPT_NOT_MET`, and for a job as a whole `FAILED`.
+`result` verdict codes: `AC`, `WA`, `CE`, `RE`, `TLE`, `MLE`, `OLE`, `CONCEPT_NOT_MET`, `OK` (a `RUN` that finished normally; nothing was compared), and for a job as a whole `FAILED`.
+
+For `RUN` the result holds `{ verdict, compile_log, stdout, stderr, exit_code, signal, duration_ms, memory_kb }` with verdict `OK`, `RE`, `TLE`, `MLE` or `OLE`; `stdout` and `stderr` are UTF-8 text (invalid bytes replaced), each cut at 1 MB. On a compile failure it holds only `{ verdict: "CE", compile_log, compile_error }`, where `compile_error` is `compiler` (the compiler refused the source), `timeout` (10 s), `memory` or `output_too_large`.
+
+Limits the worker applies to a payload: `language` is `c`, `cpp` or `python`; `source` at most 256 KB; `stdin` at most 1 MB. A payload outside them gives `FAILED` with `result.error = "invalid_payload"` and a `message`; it is not retried.
+
+Time: `duration_ms` is CPU time of the program, measured inside the container; starting the container is not counted. `TLE` means the CPU time passed the limit (2 s for C and C++, 5 s for Python), or the wall-clock time passed 2 × limit + 1 s (a program that sleeps or waits).
 
 For `SUBMIT` the result holds per-test `{ index, verdict, duration_ms }`, `compile_log`, `passed`, `total`, and the list of concepts found. It never holds test input or expected output.
 
