@@ -1,6 +1,8 @@
 # Progress
 
-Current stage: **4 — Skeleton and infrastructure** — built and verified by the agent on 2026-11-15; **waiting for the owner's manual gate**. Tag `tahap-4` is created after the owner confirms.
+Current stage: **5 — LokaAuth and the shared package** — not started.
+
+Stage 4 — Skeleton and infrastructure — finished 2026-11-15, tag `tahap-4`.
 
 Server prepared 2026-11-15: Ubuntu 24.04.5, kernel 6.8, 4 vCPU, 8 GB RAM, 4 GB swap, Docker 29.9, Compose 5.7, Python 3.12, Claude Code 2.1.
 
@@ -33,5 +35,11 @@ Owner's gate for stage 4:
 
 1. Open `https://lokandita.com`, `https://www.lokandita.com`, `https://auth.lokandita.com`, `https://lokakode.lokandita.com` in a browser: valid certificate, maintenance page (`www` redirects to the apex).
 2. Run `infra/smoke.sh`.
+
+Gate result, 2026-11-15:
+
+- The owner ran `infra/smoke.sh` and reported `11 lulus, 0 gagal, 4 belum aktif`. Smoke check 1 covers the gate of `SPEC.md` §18 (maintenance page over HTTPS with a valid certificate on every host).
+- The owner did not explicitly report the browser check (item 1 above). How the page looks in a browser remains unconfirmed in this file.
+- The previous session was cut off by the usage limit after the last stage-4 commit. In the closing session the agent re-ran only `infra/smoke.sh` and `infra/cek-env.sh` (both passed). `infra/tes-infra.sh`, `infra/backup.sh` and `infra/uji-restore.sh` were **not** re-run, by the owner's decision; their results above are from the earlier session.
 
 Next: stage 5 — LokaAuth and the shared package. Not started.
