@@ -1,0 +1,16 @@
+{
+    "name": "lokandita/auth",
+    "description": "Kode bersama ketiga aplikasi Lokandita: klien LokaAuth, pemeriksaan sesi, menu akun.",
+    "type": "library",
+    "version": "0.1.0",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.3",
+        "codeigniter4/framework": "^4.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Lokandita\\Auth\\": "src/"
+        }
+    }
+}

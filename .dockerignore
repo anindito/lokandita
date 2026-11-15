@@ -1,0 +1,8 @@
+.git
+docs
+judge
+**/.env
+**/vendor
+**/writable
+**/node_modules
+infra/caddy/bendera

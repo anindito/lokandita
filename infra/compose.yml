@@ -1,0 +1,132 @@
+# Lokandita — satu server. Nama kontainer, jaringan dan port: KONTRAK.md §9.
+# Jalankan lewat infra/deploy.sh, bukan `docker compose up --build`.
+name: lokandita
+
+x-log: &log
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "5"
+
+x-app: &app
+  restart: unless-stopped
+  depends_on:
+    mysql:
+      condition: service_healthy
+    redis:
+      condition: service_healthy
+  healthcheck:
+    test: ["CMD", "curl", "-fsS", "--max-time", "3", "http://127.0.0.1:8080/healthz"]
+    interval: 15s
+    timeout: 5s
+    retries: 4
+    start_period: 10s
+  <<: *log
+
+services:
+  caddy:
+    image: caddy:2.11.9-alpine
+    container_name: caddy
+    restart: unless-stopped
+    command: ["caddy", "run", "--config", "/srv/caddy/Caddyfile", "--adapter", "caddyfile"]
+    environment:
+      DOMAIN: ${DOMAIN}
+      CONTACT_EMAIL: ${CONTACT_EMAIL}
+      ACME_EMAIL: ${ACME_EMAIL}
+      ACME_CA: ${ACME_CA}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./caddy:/srv/caddy:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [edge]
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:2019/config/"]
+      interval: 15s
+      timeout: 5s
+      retries: 4
+    <<: *log
+
+  mysql:
+    image: mysql:8.4.13
+    container_name: mysql
+    restart: unless-stopped
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci", "--default-time-zone=+00:00"]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks: [data]
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_ROOT_PASSWORD\" mysqladmin ping -h 127.0.0.1 -uroot --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    <<: *log
+
+  redis:
+    image: redis:7.4.12-alpine
+    container_name: redis
+    restart: unless-stopped
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDISCLI_AUTH\" --appendonly yes"]
+    environment:
+      # redis-cli di dalam kontainer memakai variabel ini untuk masuk.
+      REDISCLI_AUTH: ${REDIS_PASSWORD}
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    networks: [data]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    <<: *log
+
+  auth:
+    image: lokandita/auth:aktif
+    container_name: auth
+    env_file: ../apps/auth/.env
+    networks:
+      edge:
+      data:
+      internal:
+        aliases: [auth-internal]
+    <<: *app
+
+  lokakode:
+    image: lokandita/lokakode:aktif
+    container_name: lokakode
+    env_file: ../apps/lokakode/.env
+    networks: [edge, internal, data]
+    <<: *app
+
+  portal:
+    image: lokandita/portal:aktif
+    container_name: portal
+    env_file: ../apps/portal/.env
+    networks: [edge, internal, data]
+    <<: *app
+
+networks:
+  edge:
+    name: edge
+  internal:
+    name: internal
+    internal: true
+  data:
+    name: data
+
+volumes:
+  caddy_data:
+  caddy_config:
+  mysql_data:
+  redis_data:

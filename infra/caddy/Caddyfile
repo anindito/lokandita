@@ -1,0 +1,85 @@
+# Edge Lokandita. Nama host berasal dari DOMAIN di infra/.env.
+#
+# Setiap host berada dalam mode pemeliharaan sampai berkas
+# infra/caddy/bendera/<app>.buka ada (lihat infra/pemeliharaan.sh).
+# /internal/* selalu dijawab 404 dari internet (KONTRAK.md §5).
+
+{
+	email {$ACME_EMAIL}
+	acme_ca {$ACME_CA}
+}
+
+(dasar) {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+}
+
+(tolak_internal) {
+	@internal path /internal /internal/*
+	respond @internal "Not Found" 404
+}
+
+(pemeliharaan) {
+	root * /srv/caddy/situs
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy same-origin
+		Content-Security-Policy "default-src 'none'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+	}
+
+	@aset path /_pemeliharaan/*
+	handle @aset {
+		header Cache-Control "public, max-age=3600"
+		file_server
+	}
+
+	handle {
+		header Retry-After 3600
+		header Cache-Control no-store
+		rewrite * /index.html
+		templates
+		file_server {
+			status 503
+		}
+	}
+}
+
+# import situs <nama kontainer aplikasi>
+(situs) {
+	import dasar
+	route {
+		import tolak_internal
+
+		@buka file {
+			root /srv/caddy/bendera
+			try_files /{args[0]}.buka
+		}
+		reverse_proxy @buka {args[0]}:8080
+
+		import pemeliharaan
+	}
+}
+
+{$DOMAIN} {
+	import situs portal
+}
+
+www.{$DOMAIN} {
+	import dasar
+	route {
+		import tolak_internal
+		redir https://{$DOMAIN}{uri} permanent
+	}
+}
+
+auth.{$DOMAIN} {
+	import situs auth
+}
+
+lokakode.{$DOMAIN} {
+	import situs lokakode
+}

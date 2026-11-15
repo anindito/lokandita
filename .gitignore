@@ -7,3 +7,5 @@ __pycache__/
 writable/
 *.log
 .secrets/
+# status buka/tutup tiap host adalah keadaan server, bukan kode
+infra/caddy/bendera/*.buka
