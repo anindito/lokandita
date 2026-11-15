@@ -5,8 +5,8 @@ set -euo pipefail
 AKAR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export AKAR
 
-# Komponen yang punya .env sendiri (KONTRAK.md §10). judge/ menyusul di tahap 7.
-KOMPONEN=(infra apps/auth apps/lokakode apps/portal)
+# Komponen yang punya .env sendiri (KONTRAK.md §10).
+KOMPONEN=(infra apps/auth apps/lokakode apps/portal judge)
 APLIKASI=(auth lokakode portal)
 
 gagal() {

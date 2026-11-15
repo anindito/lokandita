@@ -197,7 +197,9 @@ For `SUBMIT` the result holds per-test `{ index, verdict, duration_ms }`, `compi
 
 For `VALIDATE` the result holds `{ ok, reasons[] }` where a reason is `{ code, message, line?, column? }`, plus `required_concepts[]` detected in the reference solution.
 
-The worker connects to MySQL and Redis on `127.0.0.1` (published to loopback only) with its own MySQL user limited to the tables it needs.
+The worker connects to MySQL and Redis on `127.0.0.1` (published to loopback only). Its MySQL user is `judge_worker`, which has `SELECT` and `UPDATE` on `judge_jobs` and nothing else: it cannot insert or delete jobs, and cannot read any other table or schema. The grant is given by `infra/mysql-hak-judge.sh` as MySQL root, after the LokaKode migrations; `infra/deploy.sh lokakode` and `infra/tes.sh judge` both run it. A later stage that needs the worker to touch another table adds it to that script and to this section.
+
+`created_by` is `users.id` of §3, or `NULL` for a job made by the system itself (the smoke check); such a job can be read by no user.
 
 Judge containers carry the label `lokandita.judge=true`.
 
@@ -319,7 +321,7 @@ Each app validates its required variables at start and exits naming the missing 
 | `CONTACT_EMAIL` | Shown on the maintenance page |
 | `ACME_EMAIL`, `ACME_CA` | Let's Encrypt account address and directory URL |
 | `MYSQL_ROOT_PASSWORD` | MySQL root; used only by `infra/` scripts through `docker exec` |
-| `DB_PASSWORD_AUTH`, `DB_PASSWORD_LOKAKODE`, `DB_PASSWORD_PORTAL`, `DB_PASSWORD_IDENTITY_READER` | Passwords of the MySQL users below; each must equal the password inside the matching DSN |
+| `DB_PASSWORD_AUTH`, `DB_PASSWORD_LOKAKODE`, `DB_PASSWORD_PORTAL`, `DB_PASSWORD_IDENTITY_READER`, `DB_PASSWORD_JUDGE` | Passwords of the MySQL users below; each must equal the password inside the matching DSN |
 | `REDIS_PASSWORD` | Redis `requirepass`; must equal the password inside every `REDIS_URL` |
 | `BACKUP_DIR`, `BACKUP_RETENTION_DAYS` | `infra/backup.sh` |
 
@@ -337,6 +339,7 @@ MySQL schemas and users, created by `infra/mysql-init.sh` (idempotent, never tou
 | `lokakode_app` | all on `lokakode`, `lokakode_test` |
 | `portal_app` | all on `portal`, `portal_test` |
 | `identity_reader` | none from `mysql-init.sh`; `SELECT` on the three objects of §3 from `infra/mysql-hak-reader.sh` |
+| `judge_worker` | none from `mysql-init.sh`; `SELECT, UPDATE` on `judge_jobs` from `infra/mysql-hak-judge.sh` (§6) |
 
 Rules:
 
@@ -344,7 +347,7 @@ Rules:
 - The `.env` file reaches the container through `env_file` in Compose; it is never copied into an image.
 - In `.env.example`, `{{NAME}}` marks a secret. `infra/buat-env.sh` creates all `.env` files once on a new server and refuses to run if any exists. `infra/cek-env.sh` also fails on an empty value, a leftover `{{…}}`, a quoted value, or a file mode other than 600.
 - `LOKANDITA_APP` and `LOKANDITA_COMMIT` are baked into the image by `infra/deploy.sh`. They are not `.env` variables.
-- `judge/.env` is defined in stage 7.
+- `judge/.env` holds `DB_DSN` (user `judge_worker`), `REDIS_URL` (DB `0`) and `JUDGE_CONCURRENCY` (1–32). The worker runs on the host, so both addresses use `127.0.0.1` instead of the container names. The worker reads `judge/.env.example` as its list of required variables and refuses to start, naming the variable, when one is missing or empty.
 
 `INSTANCE_SECRET` must never change once students have instances. It and `SEB_ENCRYPTION_KEY` are included in every backup.
 
@@ -375,3 +378,4 @@ Values are written without quotes.
 - A second LokaAuth named `auth-tes` runs for the duration of the tests on `identity_test` and Redis DB `15`. Its alias on the `internal` network is `auth-internal-tes`; client apps under test use `AUTH_INTERNAL_URL=http://auth-internal-tes:8080`. When a client app is tested it is also served as `<app>-tes`.
 - Tests talk to these containers over real HTTP (`Lokandita\Auth\Testing\Http`) and to MySQL directly. Nothing is mocked.
 - Redis DB `15` is reserved for tests and is flushed at the start of every run.
+- `infra/tes.sh judge` is the only way to run the worker's tests (pytest, on the host, in `judge/.venv`). It recreates `lokakode_test` through the LokaKode migrations, gives `judge_worker` its grant there, and runs the tests against real MySQL, Redis DB `15` and real Docker. The tests refuse any schema not ending in `_test` and any Redis DB other than `15`, fail when Docker is unavailable, and fail when a test is skipped.

@@ -3,6 +3,8 @@
 # dan HTTP antar-kontainer yang sungguhan. Tidak ada mock.
 #
 #   infra/tes.sh <auth|lokakode|portal> [argumen phpunit…]
+#   infra/tes.sh judge [argumen pytest…]     worker Python: pytest di host, dengan
+#                                            Docker, lokakode_test dan Redis DB 15
 #
 # Yang dilakukan:
 #   1. membangun image lokandita/<app>:tes (dengan PHPUnit) dari pohon kerja;
@@ -16,7 +18,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 cd "$AKAR"
 
 app="${1:-}"
-case "$app" in auth | lokakode | portal) ;; *) gagal "pemakaian: $0 <auth|lokakode|portal> [argumen phpunit]" ;; esac
+case "$app" in auth | lokakode | portal | judge) ;; *) gagal "pemakaian: $0 <auth|lokakode|portal|judge> [argumen]" ;; esac
 shift
 
 tmp="$(mktemp -d)"
@@ -110,6 +112,44 @@ layani() {
 	docker logs --tail 30 "$2" >&2 || true
 	gagal "$2 tidak menjawab /healthz"
 }
+
+# Judge: tabelnya milik LokaKode, jadi skema lokakode_test dibuat oleh migrasi
+# LokaKode; setelah itu pytest berjalan di host sebagai judge_worker.
+if [ "$app" = "judge" ]; then
+	docker info > /dev/null 2>&1 || gagal "Docker tidak tersedia: tes judge gagal, tidak dilewati"
+	skema_auth=identity_test
+	bangun lokakode
+	env_tes lokakode
+	buat_ulang_skema lokakode_test
+	migrasi lokakode lokakode_test
+	"$AKAR/infra/mysql-hak-judge.sh" lokakode_test
+	docker exec redis redis-cli -n 15 flushdb > /dev/null
+	"$AKAR/judge/siapkan-venv.sh" tes
+
+	sed -E -e 's#^(DB_DSN=.*/[a-z]+)$#\1_test#' -e 's#^(REDIS_URL=.*/)[0-9]+$#\115#' judge/.env > "$tmp/judge.env"
+	# Tes juga berperan sebagai web (yang menyisipkan baris): lokakode_app, lewat 127.0.0.1.
+	sed -n -E 's#^DB_DSN=(.*)@mysql:3306/(lokakode_test)$#TES_APP_DSN=\1@127.0.0.1:3306/\2#p' "$tmp/lokakode.env" >> "$tmp/judge.env"
+	chmod 600 "$tmp/judge.env"
+	grep -q '^DB_DSN=.*_test$' "$tmp/judge.env" || gagal "env tes judge: DB_DSN tidak berakhiran _test"
+	grep -q '^REDIS_URL=.*/15$' "$tmp/judge.env" || gagal "env tes judge: REDIS_URL bukan DB 15"
+	grep -q '^TES_APP_DSN=.*_test$' "$tmp/judge.env" || gagal "env tes judge: TES_APP_DSN tidak terbentuk"
+
+	echo "== pytest judge"
+	kode=0
+	(
+		set -a
+		# shellcheck disable=SC1091
+		. "$tmp/judge.env"
+		set +a
+		cd judge && exec .venv/bin/python -m pytest "$@"
+	) || kode=$?
+	if [ "$kode" -ne 0 ]; then
+		echo "tes judge: GAGAL (pytest keluar $kode)"
+		exit "$kode"
+	fi
+	echo "tes judge: LULUS"
+	exit 0
+fi
 
 bangun auth
 env_tes auth

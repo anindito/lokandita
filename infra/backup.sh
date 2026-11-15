@@ -30,7 +30,7 @@ zcat "$tujuan/db.sql.gz" | tail -n 1 | grep -q '^-- Dump completed' \
 	|| gagal "dump tidak lengkap; backup di $tujuan tidak dapat dipakai"
 
 berkas_env=()
-for k in "${KOMPONEN[@]}" judge; do
+for k in "${KOMPONEN[@]}"; do
 	[ -f "$AKAR/$k/.env" ] && berkas_env+=("$k/.env")
 done
 tar -C "$AKAR" -czf "$tujuan/env.tar.gz" "${berkas_env[@]}"

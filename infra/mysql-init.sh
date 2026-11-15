@@ -7,7 +7,9 @@
 #   lokakode, lokakode_test  -> lokakode_app
 #   portal,   portal_test    -> portal_app
 #   identity_reader          -> dibuat TANPA hak; hak SELECT pada view
-#                               diberikan oleh LokaAuth di tahap 5 (KONTRAK.md §3)
+#                               diberikan oleh infra/mysql-hak-reader.sh (KONTRAK.md §3)
+#   judge_worker             -> dibuat TANPA hak; hak pada judge_jobs diberikan
+#                               oleh infra/mysql-hak-judge.sh (KONTRAK.md §6)
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 ENV="$AKAR/infra/.env"
 
@@ -31,6 +33,7 @@ for pasangan in "identity:auth_app:DB_PASSWORD_AUTH" "lokakode:lokakode_app:DB_P
 	done
 done
 buat_pengguna identity_reader DB_PASSWORD_IDENTITY_READER
+buat_pengguna judge_worker DB_PASSWORD_JUDGE
 
 printf '%s' "$sql" | docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot' \
 	|| gagal "mysql-init: perintah SQL ditolak"
@@ -42,5 +45,5 @@ SELECT schema_name AS skema, default_collation_name AS kolasi
  WHERE schema_name NOT IN ('mysql','sys','information_schema','performance_schema')
  ORDER BY 1;
 SELECT user AS pengguna, host FROM mysql.user
- WHERE user IN ('auth_app','lokakode_app','portal_app','identity_reader') ORDER BY 1;
+ WHERE user IN ('auth_app','lokakode_app','portal_app','identity_reader','judge_worker') ORDER BY 1;
 SQL

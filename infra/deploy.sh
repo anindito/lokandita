@@ -110,6 +110,7 @@ if ls "apps/$sasaran/app/Database/Migrations/"*.php > /dev/null 2>&1; then
 	[ "$ada" = "1" ] || gagal "migrasi $sasaran: tabel migrations tidak ada di skema $skema"
 	echo "migrasi $sasaran pada skema $skema: selesai"
 	if [ "$sasaran" = "auth" ]; then "$AKAR/infra/mysql-hak-reader.sh" identity; fi
+	if [ "$sasaran" = "lokakode" ]; then "$AKAR/infra/mysql-hak-judge.sh" lokakode; fi
 fi
 
 compose up -d --no-build --force-recreate --no-deps "$sasaran"
