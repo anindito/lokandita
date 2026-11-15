@@ -30,3 +30,16 @@ $routes->group('', ['filter' => 'masuk:superadmin,dosen'], static function (Rout
     $routes->get('mata-kuliah/(:num)', 'MataKuliah::lihat/$1');
     $routes->get('kelas/(:num)', 'Kelas::lihat/$1');
 });
+
+// Superadmin saja (SPEC.md §3): tahun ajaran dan mata kuliah.
+$routes->group('', ['filter' => 'masuk:superadmin'], static function (RouteCollection $routes): void {
+    $routes->get('tahun-ajaran', 'TahunAjaran::index');
+    $routes->post('tahun-ajaran', 'TahunAjaran::simpan');
+    $routes->get('tahun-ajaran/(:num)', 'TahunAjaran::sunting/$1');
+    $routes->post('tahun-ajaran/(:num)', 'TahunAjaran::perbarui/$1');
+    $routes->post('tahun-ajaran/(:num)/aktifkan', 'TahunAjaran::aktifkan/$1');
+    $routes->get('mata-kuliah/baru', 'MataKuliah::baru');
+    $routes->post('mata-kuliah', 'MataKuliah::simpan');
+    $routes->get('mata-kuliah/(:num)/ubah', 'MataKuliah::sunting/$1');
+    $routes->post('mata-kuliah/(:num)', 'MataKuliah::perbarui/$1');
+});

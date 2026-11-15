@@ -87,7 +87,7 @@
   .ltr { direction: ltr; unicode-bidi: isolate; }
 
   label { display: block; font-weight: 600; margin: 1rem 0 .3rem; }
-  input[type=text], input[type=password], input[type=email], input[type=search], input[type=file], select, textarea {
+  input[type=text], input[type=password], input[type=email], input[type=search], input[type=file], input[type=date], input[type=number], select, textarea {
     width: 100%; padding: .6rem .75rem; font: inherit; color: var(--teks); background: var(--kartu);
     border: 1px solid var(--garis); border-radius: .5rem;
   }

@@ -51,6 +51,20 @@ abstract class BaseController extends Controller
     }
 
     /**
+     * Pesan sesudah pengalihan: ?pesan=<kunci>. Hanya kunci yang terdaftar yang ditampilkan.
+     *
+     * @param array<string, array{0: string, 1: string}> $peta kunci => [jenis, kunci bahasa]
+     *
+     * @return list<array{jenis: string, teks: string}>
+     */
+    protected function pesanDariQuery(array $peta): array
+    {
+        $k = (string) $this->request->getGet('pesan');
+
+        return isset($peta[$k]) ? [['jenis' => $peta[$k][0], 'teks' => lang($peta[$k][1])]] : [];
+    }
+
+    /**
      * Jawaban untuk baris yang tidak ada ATAU di luar hak pengguna. Keduanya
      * sengaja tidak dibedakan, supaya nomor di URL tidak bisa dipakai menebak
      * kelas atau mata kuliah mana yang ada.

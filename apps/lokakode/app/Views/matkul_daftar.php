@@ -2,6 +2,9 @@
 <?= $this->section('isi') ?>
 <?= view('_nav', ['akses' => $akses]) ?>
 <h1><?= lang('Kode.matkul.judul') ?></h1>
+<?php if ($akses->superadmin()): ?>
+    <p><a class="tombol" href="/mata-kuliah/baru"><?= lang('Kode.matkul.tambah') ?></a></p>
+<?php endif ?>
 
 <?php if ($matkul === []): ?>
     <div class="kartu"><p><?= $akses->superadmin() ? lang('Kode.kosong') : lang('Kode.matkul.kosong') ?></p></div>

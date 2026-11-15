@@ -5,5 +5,8 @@
 <nav class="admin-nav" aria-label="<?= lang('Kode.navigasi') ?>">
     <a href="/beranda"><?= lang('Kode.nav.beranda') ?></a>
     <a href="/mata-kuliah"><?= lang('Kode.nav.matkul') ?></a>
+    <?php if ($akses->superadmin()): ?>
+        <a href="/tahun-ajaran"><?= lang('Kode.nav.tahun') ?></a>
+    <?php endif ?>
 </nav>
 <?php endif ?>

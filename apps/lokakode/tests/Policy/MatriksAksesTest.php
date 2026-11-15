@@ -39,6 +39,8 @@ final class MatriksAksesTest extends KodeCase
     {
         $semua = array_fill_keys(self::PELAKU, 'ok');
         $staf  = ['mhsA' => 403] + $semua;
+        // Superadmin saja: semua yang lain 403, apa pun lingkupnya.
+        $admin = ['superadmin' => 'ok'] + array_fill_keys(self::PELAKU, 403);
 
         return [
             'GET beranda' => ['/beranda', $semua],
@@ -46,6 +48,17 @@ final class MatriksAksesTest extends KodeCase
             'GET mata-kuliah' => ['/mata-kuliah', $staf],
             // Pengajar A dan B mengajar kelas di mata kuliah X, jadi boleh melihat mata kuliahnya.
             'GET mata-kuliah/{n}' => ['/mata-kuliah/' . $d['matkulX'], ['pengampuY' => 404] + $staf],
+            'GET tahun-ajaran'               => ['/tahun-ajaran', $admin],
+            'POST tahun-ajaran'              => ['/tahun-ajaran', $admin],
+            'GET tahun-ajaran/{n}'           => ['/tahun-ajaran/' . $d['tahun'], $admin],
+            'POST tahun-ajaran/{n}'          => ['/tahun-ajaran/' . $d['tahun'], $admin],
+            'POST tahun-ajaran/{n}/aktifkan' => ['/tahun-ajaran/' . $d['tahun'] . '/aktifkan', $admin],
+            'GET mata-kuliah/baru'           => ['/mata-kuliah/baru', $admin],
+            'POST mata-kuliah'               => ['/mata-kuliah', $admin],
+            'GET mata-kuliah/{n}/ubah'       => ['/mata-kuliah/' . $d['matkulX'] . '/ubah', $admin],
+            // Pengampu X sekalipun tidak boleh mengubah mata kuliahnya sendiri.
+            'POST mata-kuliah/{n}'           => ['/mata-kuliah/' . $d['matkulX'], $admin],
+
             // Gerbang tahap 6: pengajar B tidak bisa membuka kelas XA milik pengajar A.
             'GET kelas/{n}' => ['/kelas/' . $d['kelasXA'], ['pengampuY' => 404, 'pengajarB' => 404] + $staf],
         ];

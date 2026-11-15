@@ -2,7 +2,12 @@
 <?= $this->section('isi') ?>
 <?= view('_nav', ['akses' => $akses]) ?>
 <h1><span class="ltr"><?= esc($matkul['code']) ?></span> — <?= esc($matkul['name']) ?></h1>
-<p class="redup"><?= lang('Kode.matkul.pengampu') ?>: <?= esc($orang[$matkul['owner_id']]['nama'] ?? lang('Kode.mhs.akunHilang')) ?></p>
+<p class="redup">
+    <?= lang('Kode.matkul.pengampu') ?>: <?= esc($orang[$matkul['owner_id']]['nama'] ?? lang('Kode.mhs.akunHilang')) ?>
+    <?php if ($akses->superadmin()): ?>
+        · <a href="/mata-kuliah/<?= (int) $matkul['id'] ?>/ubah"><?= lang('Kode.matkul.ubah') ?></a>
+    <?php endif ?>
+</p>
 
 <?php if ($tahun === null): ?>
     <div class="kartu"><p><?= $akses->superadmin() ? lang('Kode.tahun.belumAdaAdmin') : lang('Kode.tahun.belumAda') ?></p></div>

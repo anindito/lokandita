@@ -2,6 +2,8 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-16 — A new academic year is created archived and becomes active only through "Aktifkan", which archives the current one in the same transaction; there is no separate "archive" button — "exactly one active" then cannot be broken from the UI, and activation is reversible by activating the old year again.
+- 2026-11-16 — Course codes are stored upper-case, 2–20 characters of `A–Z`, `0–9` and `-` (so `TS-PY` fits); the pengampu is entered by nomor induk and must be an active `dosen`.
 - 2026-11-16 — The shared test for the re-sent session cookie accepts `Max-Age` within 2 seconds of 43200 — the value is computed when the response is sent, so a page that takes longer to build crossed a second boundary and failed the exact match.
 - 2026-11-16 — `tests/Policy/MatriksAksesTest.php` reads the registered routes and fails when a route is missing from its authorisation matrix; each route is then requested by six actors (superadmin, two pengampu, two pengajar, a mahasiswa) — a new endpoint cannot ship without an authorisation and cross-class test.
 - 2026-11-16 — A class or course outside the user's scope answers 404 with the same page as one that does not exist; a role that may never use a page answers 403 — the number in the URL cannot be used to find out which classes exist.
