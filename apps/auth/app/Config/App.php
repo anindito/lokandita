@@ -180,7 +180,13 @@ class App extends BaseConfig
      *
      * @var array<string, string>
      */
-    public array $proxyIPs = [];
+    public array $proxyIPs = [
+        // Aplikasi hanya bisa dijangkau dari jaringan Docker (Caddy di `edge`),
+        // tidak pernah langsung dari internet (KONTRAK.md §9).
+        '172.16.0.0/12'  => 'X-Forwarded-For',
+        '192.168.0.0/16' => 'X-Forwarded-For',
+        '10.0.0.0/8'     => 'X-Forwarded-For',
+    ];
 
     /**
      * --------------------------------------------------------------------------

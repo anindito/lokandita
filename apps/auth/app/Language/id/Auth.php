@@ -1,0 +1,36 @@
+<?php
+
+return [
+    'masuk'              => 'Masuk',
+    'masukPengantar'     => 'Gunakan akun Lokandita Anda.',
+    'nomorInduk'         => 'Nomor induk',
+    'nomorIndukPetunjuk' => 'NIM untuk mahasiswa, NIP untuk dosen.',
+    'kataSandi'          => 'Kata sandi',
+    'lupaSandi'          => 'Lupa kata sandi? Mintalah dosen pengajar atau admin untuk mengatur ulang.',
+    // Teks yang sama untuk kata sandi salah, akun terkunci, dan kode verifikasi salah (SPEC.md §4.2).
+    'loginGagal'         => 'Tidak bisa masuk. Periksa kembali isian Anda. Jika sudah beberapa kali gagal, tunggu sebentar lalu coba lagi.',
+    'sudahKeluar'        => 'Anda sudah keluar.',
+    'akunSaya'           => 'Akun saya',
+    'keAkun'             => 'Ke halaman akun',
+    'nama'               => 'Nama',
+    'peran'              => 'Peran',
+    'gantiSandi'         => 'Ganti kata sandi',
+    'wajibGanti'         => 'Sebelum melanjutkan, gantilah kata sandi sementara Anda dengan kata sandi pilihan sendiri.',
+    'sandiLama'          => 'Kata sandi sekarang',
+    'sandiBaru'          => 'Kata sandi baru',
+    'sandiUlang'         => 'Ulangi kata sandi baru',
+    'sandiAturan'        => 'Paling sedikit {0} karakter, bukan kata sandi yang mudah ditebak, dan berbeda dari tiga kata sandi terakhir Anda.',
+    'simpanSandi'        => 'Simpan kata sandi',
+    'sesiLainDicabut'    => 'Setelah kata sandi diganti, Anda otomatis keluar di perangkat lain.',
+    'sandiDiganti'       => 'Kata sandi sudah diganti.',
+    'periksaIsian'       => 'Ada isian yang perlu diperbaiki.',
+    'sandi'              => [
+        'lamaSalah'      => 'Kata sandi sekarang tidak cocok.',
+        'terlaluPendek'  => 'Kata sandi baru harus paling sedikit {0} karakter.',
+        'terlaluPanjang' => 'Kata sandi baru terlalu panjang (paling banyak 200 karakter).',
+        'terlaluUmum'    => 'Kata sandi ini terlalu mudah ditebak. Pilih yang lain.',
+        'samaNomorInduk' => 'Kata sandi tidak boleh sama dengan nomor induk.',
+        'pernahDipakai'  => 'Kata sandi ini sama dengan salah satu dari tiga kata sandi terakhir Anda.',
+        'tidakSama'      => 'Kedua isian kata sandi baru tidak sama.',
+    ],
+];

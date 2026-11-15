@@ -2,6 +2,15 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-15 — **Open, owner to decide:** the stylesheet is hand-written CSS (`packages/lokandita-auth/aset/lokandita.css`), not Tailwind — downloading the Tailwind binary was refused by the permission system of this session, and it was not worked around. `SPEC.md` §2 still says Tailwind.
+- 2026-11-15 — The account menu and toasts use a small hand-written script without Alpine.js — standard Alpine needs `unsafe-eval`, which the CSP forbids; the menu is a native `<details>` and works without JavaScript.
+- 2026-11-15 — Security headers and the CSP nonce come from `Lokandita\Auth\Filters\SecurityHeaders`, not CI4's CSP class — forty readable lines, identical in the three apps.
+- 2026-11-15 — `form-action` in the CSP lists every Lokandita host — browsers also apply it to the redirect after a form post (login → `next`, Keluar → LokaAuth).
+- 2026-11-15 — `/healthz` is exempt from the CSRF filter — the filter sets a `Secure` cookie and the health check runs over plain HTTP inside the container; found by the tests, it would have failed every deploy.
+- 2026-11-15 — Lockout counter: failures older than 15 minutes are forgotten before the first lock; once locked, the counter survives until a successful login or 24 quiet hours — otherwise waiting out one lock would reset the progression.
+- 2026-11-15 — Attempts made while an account is locked are recorded but neither count nor extend the lock — an attacker must not be able to keep a student locked out forever.
+- 2026-11-15 — Common-password list: the 10-character-and-longer entries of SecLists "10k most common" plus Indonesian and Lokandita-specific entries, and rules for repeated characters and digit runs (`apps/auth/app/Data/kata-sandi-umum.txt`).
+- 2026-11-15 — Until MFA exists (step 4) a superadmin cannot obtain a session at all — never a superadmin session without TOTP, even between commits.
 - 2026-11-15 — `tes.sh` proves a migration ran by looking for the `migrations` table — `spark migrate` exits 0 even when it cannot connect.
 - 2026-11-15 — `DB_DSN` is parsed by `Lokandita\Auth\Dsn` into plain fields — CI4's DSN parser passes the port as a string and mysqli refuses it; found by the first harness run, stage 4 never connected through CI4.
 - 2026-11-15 — Tests are black-box: real HTTP to a second LokaAuth (`auth-tes`) on `identity_test`, plus direct SQL for setup and assertions — in-process feature tests would not exercise cookies, headers and container networking, which is where v1 failed.

@@ -30,6 +30,8 @@ RUN sed -i 's/^Listen 80$/Listen 8080/' /etc/apache2/ports.conf \
 ARG APP
 COPY apps/${APP} /srv/lokandita/apps/${APP}
 COPY --from=vendor /srv/lokandita/apps/${APP}/vendor /srv/lokandita/apps/${APP}/vendor
+# Aset bersama (CSS, JS) disajikan dari host aplikasi itu sendiri: tidak ada CDN.
+COPY packages/lokandita-auth/aset /srv/lokandita/apps/${APP}/public/aset
 COPY infra/docker/mulai.sh /usr/local/bin/mulai.sh
 RUN ln -s /srv/lokandita/apps/${APP} /srv/app \
  && cd /srv/app \

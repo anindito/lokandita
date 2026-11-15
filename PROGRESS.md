@@ -52,5 +52,10 @@ Done:
 
 - Step 1 — `infra/tes.sh`: `infra/tes.sh auth` → 5 tests pass against `identity_test` and a real `auth-tes` container.
 - Step 2 — identity schema: migrations for the seven tables and two views, `infra/mysql-hak-reader.sh`; `infra/tes.sh auth` → 15 tests pass (view hides revoked, expired, inactive and idle sessions; `identity_reader` reads three objects and writes nothing). Exists only in `identity_test` so far.
+- Step 3 — login core: login, lockout, per-IP limit, forced password change, password policy and history, session cookie, sliding session, Keluar, `next` validation, security headers, three languages; `infra/tes.sh auth` → 43 tests, 256 assertions pass. Not deployed.
 
-Not done: steps 3–9. Nothing of stage 5 is deployed.
+Open for the owner:
+
+- **Tailwind is not used.** Downloading the Tailwind binary was refused by this session's permission system; the pages use hand-written CSS instead. Decide: allow the download, or accept plain CSS and change `SPEC.md` §2.
+
+Not done: steps 4–9. Nothing of stage 5 is deployed.

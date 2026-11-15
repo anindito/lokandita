@@ -35,7 +35,13 @@ Every item in this file must be covered by a test that runs against **real conta
 
 Only LokaAuth sets or clears this cookie. The database stores `SHA-256(value)` as lowercase hex, never the value.
 
-CSRF and other per-app cookies use the `__Host-` prefix and therefore carry no `Domain` attribute.
+The cookie is sent with `Max-Age=43200`. LokaAuth sends it again, unchanged, whenever it extends a session, so the cookie slides together with the row in `sessions`.
+
+`GET AUTH_PUBLIC_URL/keluar-selesai` is where a client app sends the browser after it has revoked the session through §5. LokaAuth clears the cookie there only when the session is already dead, so the link cannot be used to log somebody else out.
+
+CSRF and other per-app cookies use the `__Host-` prefix and therefore carry no `Domain` attribute: `__Host-csrf` (form field `csrf`) and `__Host-bahasa` (language chosen before login).
+
+Apps set `Secure` cookies and therefore answer `500` to a cookie-setting page requested without `X-Forwarded-Proto: https` from a trusted proxy. Requests reach apps only through Caddy, which sends it. `/healthz` and `/internal/*` set no cookies and are exempt from CSRF, so they work over plain HTTP inside the Docker networks. Apps take the client address from `X-Forwarded-For` only when the request comes from a private (Docker) address.
 
 ## 3. Identity schema (`identity` database)
 

@@ -1,0 +1,121 @@
+/* Gaya bersama Lokandita. Ditulis tangan, tanpa CDN. Properti logis (inline-start/end)
+   dipakai supaya tata letak otomatis tercermin untuk bahasa Arab. */
+:root {
+  --latar: #f5f6fa;
+  --kartu: #ffffff;
+  --teks: #151a33;
+  --teks-redup: #555c75;
+  --garis: #d5d9e6;
+  --utama: #1f2d7a;
+  --utama-teks: #ffffff;
+  --hijau: #1b7a4b;
+  --emas: #d99a1c;
+  --bahaya: #b3261e;
+  --bahaya-latar: #fdecea;
+  --sukses-latar: #e6f4ec;
+  --fokus: #d99a1c;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --latar: #0f1222;
+    --kartu: #191d33;
+    --teks: #eceef7;
+    --teks-redup: #a9afc7;
+    --garis: #333a5c;
+    --utama: #8ea0ff;
+    --utama-teks: #0f1222;
+    --hijau: #5fd09a;
+    --bahaya: #ff8a80;
+    --bahaya-latar: #3a1a18;
+    --sukses-latar: #14301f;
+  }
+}
+* { box-sizing: border-box; }
+html { font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Arabic", sans-serif; font-size: 16px; }
+body { margin: 0; min-height: 100vh; display: flex; flex-direction: column; background: var(--latar); color: var(--teks); line-height: 1.5; }
+a { color: var(--utama); }
+:focus-visible { outline: 3px solid var(--fokus); outline-offset: 2px; }
+.lewati { position: absolute; inset-inline-start: -999px; }
+.lewati:focus { inset-inline-start: 1rem; top: 1rem; background: var(--kartu); padding: .5rem 1rem; z-index: 50; }
+
+.kepala { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .6rem 1.25rem; background: var(--kartu); border-bottom: 1px solid var(--garis); }
+.merek { display: flex; align-items: center; gap: .6rem; font-weight: 700; font-size: 1.1rem; color: var(--teks); text-decoration: none; }
+.isi { flex: 1; width: 100%; max-width: 72rem; margin: 0 auto; padding: 1.5rem 1.25rem; }
+.isi-sempit { max-width: 26rem; margin: 2rem auto; }
+.kaki { padding: 1rem 1.25rem; text-align: center; color: var(--teks-redup); font-size: .875rem; border-top: 1px solid var(--garis); }
+
+.kartu { background: var(--kartu); border: 1px solid var(--garis); border-radius: .75rem; padding: 1.5rem; }
+h1 { font-size: 1.5rem; margin: 0 0 1rem; }
+h2 { font-size: 1.15rem; margin: 1.5rem 0 .75rem; }
+.redup { color: var(--teks-redup); }
+.kecil { font-size: .875rem; }
+.ltr { direction: ltr; unicode-bidi: isolate; }
+
+label { display: block; font-weight: 600; margin: 1rem 0 .3rem; }
+input[type=text], input[type=password], input[type=email], input[type=search], input[type=file], select, textarea {
+  width: 100%; padding: .6rem .75rem; font: inherit; color: var(--teks); background: var(--kartu);
+  border: 1px solid var(--garis); border-radius: .5rem;
+}
+.petunjuk { font-size: .85rem; color: var(--teks-redup); margin: .3rem 0 0; }
+.galat-kolom { font-size: .875rem; color: var(--bahaya); margin: .3rem 0 0; }
+
+.tombol { display: inline-block; padding: .6rem 1.1rem; font: inherit; font-weight: 600; text-decoration: none; cursor: pointer;
+  border: 1px solid var(--utama); border-radius: .5rem; background: var(--utama); color: var(--utama-teks); }
+.tombol-lebar { width: 100%; margin-top: 1.25rem; }
+.tombol-sekunder { background: transparent; color: var(--utama); }
+.tombol-bahaya { background: var(--bahaya); border-color: var(--bahaya); color: #fff; }
+.tombol:disabled { opacity: .5; cursor: not-allowed; }
+.baris-tombol { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-top: 1rem; }
+
+.bahasa { display: flex; gap: .75rem; justify-content: center; margin-top: 1.25rem; font-size: .875rem; }
+.bahasa [aria-current] { font-weight: 700; text-decoration: none; color: var(--teks); }
+
+/* Toast: di pojok, bisa ditutup, hilang sendiri (lokandita.js). */
+.toast-wadah { position: fixed; top: 4.25rem; inset-inline-end: 1rem; z-index: 40; display: flex; flex-direction: column; gap: .5rem; max-width: min(26rem, calc(100vw - 2rem)); }
+.toast { display: flex; align-items: flex-start; gap: .75rem; padding: .75rem 1rem; border-radius: .5rem; border: 1px solid var(--garis); background: var(--kartu); box-shadow: 0 4px 14px rgba(0, 0, 0, .15); }
+.toast-galat { background: var(--bahaya-latar); border-color: var(--bahaya); }
+.toast-sukses { background: var(--sukses-latar); border-color: var(--hijau); }
+.toast-tutup { margin-inline-start: auto; background: none; border: 0; font-size: 1.25rem; line-height: 1; cursor: pointer; color: inherit; }
+
+/* Menu akun (SPEC.md §4.5). */
+.akun { position: relative; }
+.akun-tombol { display: flex; align-items: center; gap: .6rem; cursor: pointer; list-style: none; padding: .25rem .5rem; border-radius: .5rem; }
+.akun-tombol::-webkit-details-marker { display: none; }
+.akun-inisial { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: 50%; background: var(--utama); color: var(--utama-teks); font-weight: 700; }
+.akun-nama { display: flex; flex-direction: column; line-height: 1.2; text-align: start; }
+.akun-nama small { color: var(--teks-redup); }
+.akun-panel { position: absolute; inset-inline-end: 0; top: calc(100% + .4rem); z-index: 30; min-width: 17rem; padding: .5rem; background: var(--kartu); border: 1px solid var(--garis); border-radius: .75rem; box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
+.akun-siapa { display: flex; flex-direction: column; margin: 0; padding: .5rem .75rem .75rem; border-bottom: 1px solid var(--garis); }
+.akun-siapa span { color: var(--teks-redup); font-size: .875rem; }
+.akun-butir { display: block; width: 100%; padding: .6rem .75rem; font: inherit; text-align: start; text-decoration: none; color: var(--teks); background: none; border: 0; border-radius: .4rem; cursor: pointer; }
+.akun-butir:hover, .akun-butir:focus-visible { background: var(--latar); }
+.akun-form { margin: 0; }
+.akun-bagian { padding: .5rem .75rem; border-top: 1px solid var(--garis); font-size: .9rem; }
+.akun-bagian label { display: flex; gap: .5rem; align-items: flex-start; font-weight: 400; margin: 0; }
+.akun-bahasa { display: flex; gap: .25rem; }
+.akun-bahasa button { flex: 1; padding: .35rem; font: inherit; font-size: .85rem; background: none; color: var(--teks); border: 1px solid var(--garis); border-radius: .4rem; cursor: pointer; }
+.akun-bahasa button[aria-pressed=true] { background: var(--utama); color: var(--utama-teks); border-color: var(--utama); }
+.akun-keluar { color: var(--bahaya); font-weight: 700; border-top: 1px solid var(--garis); border-radius: 0 0 .4rem .4rem; margin-top: .25rem; }
+@media (max-width: 40rem) { .akun-nama { display: none; } }
+
+/* Tabel data. */
+.tabel-wadah { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .925rem; }
+th, td { padding: .5rem .6rem; text-align: start; border-bottom: 1px solid var(--garis); vertical-align: top; }
+th { font-weight: 700; white-space: nowrap; }
+.lencana { display: inline-block; padding: .1rem .5rem; border-radius: 999px; font-size: .8rem; border: 1px solid var(--garis); }
+.lencana-active { border-color: var(--hijau); color: var(--hijau); }
+.lencana-suspended { border-color: var(--emas); color: var(--emas); }
+.lencana-disabled, .lencana-galat { border-color: var(--bahaya); color: var(--bahaya); }
+.saring { display: flex; flex-wrap: wrap; gap: .5rem; align-items: flex-end; margin-bottom: 1rem; }
+.saring > * { flex: 1 1 10rem; }
+.saring label { margin-top: 0; }
+.halaman { display: flex; gap: .5rem; align-items: center; justify-content: center; margin-top: 1rem; }
+.kode-besar { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 1.05rem; direction: ltr; unicode-bidi: isolate; }
+.daftar-kode { columns: 2; padding: 0; list-style: none; }
+.qr { display: block; margin: 1rem auto; background: #fff; padding: .5rem; border-radius: .5rem; max-width: 14rem; }
+.qr svg { display: block; width: 100%; height: auto; }
+
+/* Peringatan sesi hampir habis. */
+.sesi-peringatan { position: fixed; inset-inline: 0; bottom: 0; z-index: 45; display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; justify-content: center; padding: .75rem 1rem; background: var(--emas); color: #151a33; font-weight: 600; }
+.sesi-peringatan[hidden] { display: none; }

@@ -21,8 +21,13 @@ final class Http
     /** @var array<string, list<string>> nama header huruf kecil => nilai-nilainya */
     public array $headers = [];
 
-    public function __construct(private readonly string $baseUrl)
+    /** Alamat klien yang dilaporkan lewat X-Forwarded-For, seperti yang dilakukan Caddy. */
+    public string $ip;
+
+    public function __construct(private readonly string $baseUrl, ?string $ip = null)
     {
+        // Tiap klien tes punya alamat sendiri supaya batas per IP tidak saling mengganggu.
+        $this->ip = $ip ?? sprintf('203.0.%d.%d', random_int(0, 255), random_int(1, 254));
     }
 
     /**
@@ -56,7 +61,9 @@ final class Http
     public function send(string $method, string $path, ?string $body, array $headers = []): self
     {
         $this->headers = [];
-        $lines         = [];
+        // Caddy selalu mengirim dua header ini; tes meniru Caddy.
+        $headers += ['X-Forwarded-Proto' => 'https', 'X-Forwarded-For' => $this->ip];
+        $lines = [];
         foreach ($headers as $name => $value) {
             $lines[] = "{$name}: {$value}";
         }
