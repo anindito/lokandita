@@ -10,6 +10,11 @@ $routes->get('healthz', '\Lokandita\Auth\Controllers\Healthz::index');
 // Tanpa sesi.
 $routes->get('login', 'Login::form');
 $routes->post('login', 'Login::submit');
+// Langkah kedua login: hanya bisa dicapai setelah kata sandi benar (cookie __Host-tunda).
+$routes->get('login/kode', 'MfaLogin::formKode');
+$routes->post('login/kode', 'MfaLogin::kirimKode');
+$routes->get('login/mfa-daftar', 'MfaLogin::formDaftar');
+$routes->post('login/mfa-daftar', 'MfaLogin::kirimDaftar');
 $routes->get('bahasa/(:segment)', 'Language::set/$1');
 $routes->get('keluar-selesai', 'Logout::selesai');
 

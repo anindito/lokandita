@@ -2,6 +2,11 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-15 — The first superadmin is created by `docker exec -it auth php spark akun:superadmin`; the temporary password is printed once in that terminal — there is no web registration and no default account.
+- 2026-11-15 — A TOTP code is accepted once: used codes are remembered in Redis for 2 minutes; clock tolerance is 15 seconds — a code read over a shoulder cannot be replayed.
+- 2026-11-15 — The QR code for enrolment is an inline SVG made by `bacon/bacon-qr-code` — no image extension, no external service sees the secret.
+- 2026-11-15 — The TOTP secret is encrypted with libsodium `secretbox` under `MFA_ENCRYPTION_KEY`; backup codes are 10 random characters stored as SHA-256 — random codes need no slow hash.
+- 2026-11-15 — A wrong TOTP or backup code counts as a login failure for the lockout — otherwise the second step could be guessed without limit.
 - 2026-11-15 — **Open, owner to decide:** the stylesheet is hand-written CSS (`packages/lokandita-auth/aset/lokandita.css`), not Tailwind — downloading the Tailwind binary was refused by the permission system of this session, and it was not worked around. `SPEC.md` §2 still says Tailwind.
 - 2026-11-15 — The account menu and toasts use a small hand-written script without Alpine.js — standard Alpine needs `unsafe-eval`, which the CSP forbids; the menu is a native `<details>` and works without JavaScript.
 - 2026-11-15 — Security headers and the CSP nonce come from `Lokandita\Auth\Filters\SecurityHeaders`, not CI4's CSP class — forty readable lines, identical in the three apps.

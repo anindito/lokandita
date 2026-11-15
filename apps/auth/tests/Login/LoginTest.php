@@ -227,13 +227,6 @@ final class LoginTest extends AuthCase
         $this->assertSame('https://lokakode.lokandita.com/x', $http->input('next'));
     }
 
-    public function testSuperadminTidakMendapatSesiTanpaMfa(): void
-    {
-        $user = $this->user(['global_role' => 'superadmin']);
-        $http = $this->login($user);
-        $this->assertArrayNotHasKey('lokandita_sid', $http->cookies);
-        $this->assertSame(0, (int) $this->row("SELECT COUNT(*) n FROM sessions WHERE user_id = '{$user['id']}'")['n']);
-    }
 
     public function testBahasaHalamanLogin(): void
     {

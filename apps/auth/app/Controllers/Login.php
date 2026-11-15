@@ -6,8 +6,11 @@ namespace App\Controllers;
 
 use App\Libraries\Audit;
 use App\Libraries\LoginGuard;
+use App\Libraries\Mfa;
 use App\Libraries\NextUrl;
+use App\Libraries\Pending;
 use App\Libraries\Sessions;
+use App\Libraries\SignIn;
 use CodeIgniter\HTTP\ResponseInterface;
 
 /**
@@ -48,33 +51,28 @@ final class Login extends BaseController
             return $this->tampilkan($next, $nomor, $this->galat(lang('Auth.loginGagal')), 422);
         }
 
-        // Superadmin wajib MFA; langkah itu belum dibangun, jadi tidak ada sesi tanpa MFA.
-        if ($user['global_role'] === 'superadmin' || (int) $user['mfa_enabled'] === 1) {
-            Audit::log('login.failed', null, $user['id'], ['reason' => 'mfa_not_available', 'nomor_induk' => substr($nomor, 0, 40)]);
+        // Kata sandi benar. Bila akun memakai MFA, sesi baru dibuat setelah langkah kedua.
+        if ((int) $user['mfa_enabled'] === 1) {
+            $jawab = redirect()->to('/login/kode');
+            Pending::start($jawab, ['user_id' => $user['id'], 'next' => $next, 'tahap' => 'kode']);
 
-            return $this->tampilkan($next, $nomor, $this->galat(lang('Auth.loginGagal')), 422);
+            return $jawab;
+        }
+        // Superadmin wajib MFA: pendaftaran dilakukan pada login pertama (SPEC.md §4.3).
+        if ($user['global_role'] === 'superadmin') {
+            $jawab = redirect()->to('/login/mfa-daftar');
+            Pending::start($jawab, [
+                'user_id'    => $user['id'],
+                'next'       => $next,
+                'tahap'      => 'daftar',
+                'secret_enc' => base64_encode(Mfa::encrypt(Mfa::newSecret())),
+            ]);
+
+            return $jawab;
         }
 
-        return $this->masukkan($user, $next);
-    }
-
-    /**
-     * Membuat sesi untuk pengguna yang sudah lolos semua pemeriksaan.
-     *
-     * @param array<string, mixed> $user
-     */
-    private function masukkan(array $user, ?string $next): ResponseInterface
-    {
-        LoginGuard::recordSuccess($user);
-        $token = Sessions::create((string) $user['id'], $this->request->getIPAddress(), (string) $this->request->getUserAgent());
-        Audit::log('login.success', $user['id'], $user['id']);
-
-        $tujuan = (int) $user['must_change_password'] === 1
-            ? '/ganti-password' . ($next !== null ? '?next=' . rawurlencode($next) : '')
-            : NextUrl::orPortal($next);
-
-        $jawab = redirect()->to($tujuan);
-        Sessions::setCookie($jawab, $token);
+        $jawab = redirect()->to(SignIn::target($user, $next));
+        SignIn::complete($user, $this->request, $jawab, 'password');
 
         return $jawab;
     }
