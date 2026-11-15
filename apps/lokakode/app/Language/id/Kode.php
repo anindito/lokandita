@@ -173,7 +173,26 @@ return [
         'kembali'      => 'Kembali ke kelas',
     ],
 
+    'tahunBaru' => [
+        'judul'       => 'Mulai tahun ajaran baru',
+        'tombol'      => 'Mulai tahun ajaran baru',
+        'penjelasan'  => 'Alat ini membuat tahun ajaran baru, menyalin kelas dan pengajarnya dari tahun ajaran yang sedang aktif tanpa mahasiswanya, lalu mengarsipkan tahun ajaran lama. Anda akan melihat ringkasannya lebih dulu.',
+        'dari'        => 'Disalin dari tahun ajaran aktif',
+        'tidakAdaAktif' => 'Belum ada tahun ajaran aktif untuk disalin. Buat tahun ajaran dari halaman Tahun ajaran, lalu aktifkan.',
+        'lihatRingkasan' => 'Lihat ringkasan',
+        'ringkasan'   => 'Ringkasan — belum ada yang disimpan',
+        'baru'        => 'Tahun ajaran baru',
+        'akanDisalin' => '{0} kelas dan {1} penugasan pengajar akan disalin. Mahasiswa tidak ikut disalin.',
+        'tidakDisalin' => '{0} kelas yang sudah diarsipkan tidak disalin.',
+        'masihAktif'  => 'Perhatian: {0} mahasiswa masih berstatus aktif di tahun ajaran {1}. Alat ini tidak mengubah status mereka. Bila mereka sudah selesai, luluskan dulu dari halaman kelasnya; sesudah diarsipkan, hanya superadmin yang bisa mengubahnya.',
+        'kelas'       => 'Kelas disalin',
+        'pengajar'    => 'Penugasan pengajar',
+        'jalankan'    => 'Buat {0} dan arsipkan {1}',
+        'ubahIsian'   => 'Ubah isian',
+    ],
+
     'pesan' => [
+        'tahunBaru'        => 'Tahun ajaran baru dibuat dan diaktifkan; {0} kelas disalin. Tahun ajaran sebelumnya diarsipkan.',
         'dipindah'         => '{0} mahasiswa dipindahkan. Seluruh data mereka ikut pindah.',
         'lulus'            => '{0} mahasiswa dinyatakan lulus.',
         'batalLulus'       => 'Kelulusan {0} mahasiswa dibatalkan; mereka aktif kembali.',

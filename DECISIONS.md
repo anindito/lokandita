@@ -2,6 +2,7 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-16 — The new-year tool copies only classes that are not archived, with their name, capacity and pengajar, in one transaction with archiving the old year and activating the new one; like enrollment it is two requests without stored state, and the second validates everything again.
 - 2026-11-16 — The roster is one form whose buttons carry their own target (`formaction`); its first submit button is disabled and hidden, so pressing Enter in the date field submits nothing — no JavaScript is needed and no action can be triggered by accident. A "select all" box is added by the shared script; without it each row can still be ticked.
 - 2026-11-16 — Resetting a student's password is two requests (a confirmation page, then the reset) and is allowed to whoever may see the class, for students `AKTIF` in that class only; the temporary password is rendered once in the response, never stored or logged in LokaKode — a mis-click during practice would otherwise log a student out.
 - 2026-11-16 — Whole-class graduation is the same request as graduating selected students with `semua=1`; it touches only `AKTIF` rows and never overwrites an earlier graduation date. Cancelling returns the row to `AKTIF` and clears the date.

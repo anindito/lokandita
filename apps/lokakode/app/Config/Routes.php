@@ -52,6 +52,9 @@ $routes->group('', ['filter' => 'masuk:superadmin,dosen'], static function (Rout
 $routes->group('', ['filter' => 'masuk:superadmin'], static function (RouteCollection $routes): void {
     $routes->get('tahun-ajaran', 'TahunAjaran::index');
     $routes->post('tahun-ajaran', 'TahunAjaran::simpan');
+    $routes->get('tahun-ajaran/baru', 'TahunAjaran::baruForm');
+    $routes->post('tahun-ajaran/baru', 'TahunAjaran::baruRingkas');
+    $routes->post('tahun-ajaran/baru/jalankan', 'TahunAjaran::baruJalankan');
     $routes->get('tahun-ajaran/(:num)', 'TahunAjaran::sunting/$1');
     $routes->post('tahun-ajaran/(:num)', 'TahunAjaran::perbarui/$1');
     $routes->post('tahun-ajaran/(:num)/aktifkan', 'TahunAjaran::aktifkan/$1');

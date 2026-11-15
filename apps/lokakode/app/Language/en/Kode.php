@@ -173,7 +173,26 @@ return [
         'kembali'      => 'Back to the class',
     ],
 
+    'tahunBaru' => [
+        'judul'       => 'Start a new academic year',
+        'tombol'      => 'Start a new academic year',
+        'penjelasan'  => 'This tool creates a new academic year, copies the classes and their teachers from the active year without the students, then archives the old year. You will see a summary first.',
+        'dari'        => 'Copied from the active academic year',
+        'tidakAdaAktif' => 'There is no active academic year to copy from. Create one on the Academic years page and activate it.',
+        'lihatRingkasan' => 'Show summary',
+        'ringkasan'   => 'Summary — nothing has been saved yet',
+        'baru'        => 'New academic year',
+        'akanDisalin' => '{0} classes and {1} teacher assignments will be copied. Students are not copied.',
+        'tidakDisalin' => '{0} archived classes are not copied.',
+        'masihAktif'  => 'Note: {0} students are still active in academic year {1}. This tool does not change their status. If they have finished, graduate them from their class page first; once archived, only the superadmin can change them.',
+        'kelas'       => 'Classes copied',
+        'pengajar'    => 'Teacher assignments',
+        'jalankan'    => 'Create {0} and archive {1}',
+        'ubahIsian'   => 'Change the input',
+    ],
+
     'pesan' => [
+        'tahunBaru'        => 'New academic year created and activated; {0} classes copied. The previous year is archived.',
         'dipindah'         => '{0} students moved. All their data moved with them.',
         'lulus'            => '{0} students marked as graduated.',
         'batalLulus'       => 'Graduation of {0} students cancelled; they are active again.',

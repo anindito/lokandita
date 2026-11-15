@@ -3,6 +3,7 @@
 <?= view('_nav', ['akses' => $akses]) ?>
 <h1><?= lang('Kode.nav.tahun') ?></h1>
 <p class="redup"><?= lang('Kode.tahun.aktifkanInfo') ?></p>
+<p><a class="tombol" href="/tahun-ajaran/baru"><?= lang('Kode.tahunBaru.tombol') ?></a></p>
 
 <?php if ($tahun === []): ?>
     <div class="kartu"><p><?= lang('Kode.tahun.kosong') ?></p></div>

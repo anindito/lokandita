@@ -54,6 +54,9 @@ final class MatriksAksesTest extends KodeCase
             'GET tahun-ajaran/{n}'           => ['/tahun-ajaran/' . $d['tahun'], $admin],
             'POST tahun-ajaran/{n}'          => ['/tahun-ajaran/' . $d['tahun'], $admin],
             'POST tahun-ajaran/{n}/aktifkan' => ['/tahun-ajaran/' . $d['tahun'] . '/aktifkan', $admin],
+            'GET tahun-ajaran/baru'            => ['/tahun-ajaran/baru', $admin],
+            'POST tahun-ajaran/baru'           => ['/tahun-ajaran/baru', $admin],
+            'POST tahun-ajaran/baru/jalankan'  => ['/tahun-ajaran/baru/jalankan', $admin],
             'GET mata-kuliah/baru'           => ['/mata-kuliah/baru', $admin],
             'POST mata-kuliah'               => ['/mata-kuliah', $admin],
             'GET mata-kuliah/{n}/ubah'       => ['/mata-kuliah/' . $d['matkulX'] . '/ubah', $admin],
@@ -170,6 +173,8 @@ final class MatriksAksesTest extends KodeCase
             'POST mata-kuliah'              => ['code' => 'BARU100', 'name' => 'Baru', 'pengampu' => $d['pengajarB']['nomor_induk']],
             'POST tahun-ajaran'             => ['label' => 'Dibajak', 'starts_on' => '2027-02-01', 'ends_on' => '2027-07-31'],
             'POST tahun-ajaran/{n}'         => ['label' => 'Dibajak', 'starts_on' => '2027-02-01', 'ends_on' => '2027-07-31'],
+            'POST tahun-ajaran/baru'          => ['label' => 'Dibajak', 'starts_on' => '2027-02-01', 'ends_on' => '2027-07-31'],
+            'POST tahun-ajaran/baru/jalankan' => ['label' => 'Dibajak', 'starts_on' => '2027-02-01', 'ends_on' => '2027-07-31'],
         ];
         foreach ($this->matriks($d) as $pola => [$jalur, $harapan]) {
             if (! str_starts_with($pola, 'POST ')) {
