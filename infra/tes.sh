@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+# Menjalankan PHPUnit sebuah aplikasi di dalam kontainer, terhadap MySQL, Redis
+# dan HTTP antar-kontainer yang sungguhan. Tidak ada mock.
+#
+#   infra/tes.sh <auth|lokakode|portal> [argumen phpunit…]
+#
+# Yang dilakukan:
+#   1. membangun image lokandita/<app>:tes (dengan PHPUnit) dari pohon kerja;
+#   2. membuat ulang skema *_test dari nol dan menjalankan migrasi LokaAuth;
+#   3. menjalankan LokaAuth kedua bernama auth-tes (alias auth-internal-tes di
+#      jaringan internal) yang memakai identity_test dan Redis DB 15;
+#   4. menjalankan PHPUnit; kontainer tes dibuang sesudahnya.
+#
+# Hanya skema berakhiran _test yang disentuh; skrip menolak nama lain.
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+cd "$AKAR"
+
+app="${1:-}"
+case "$app" in auth | lokakode | portal) ;; *) gagal "pemakaian: $0 <auth|lokakode|portal> [argumen phpunit]" ;; esac
+shift
+
+tmp="$(mktemp -d)"
+bersih() {
+	docker rm -f auth-tes "$app-tes" tes-jalan > /dev/null 2>&1 || true
+	rm -rf "${tmp:?}"
+}
+trap bersih EXIT
+bersih_awal() { docker rm -f auth-tes "$app-tes" tes-jalan > /dev/null 2>&1 || true; }
+bersih_awal
+
+bangun() { # <app>
+	docker build --quiet -f infra/docker/app.Dockerfile \
+		--build-arg APP="$1" --build-arg GIT_COMMIT=tes --build-arg COMPOSER_DEV= \
+		-t "lokandita/$1:tes" . > /dev/null
+	echo "image lokandita/$1:tes dibangun"
+}
+
+# env_tes <app> — menyalin .env aplikasi dengan semua tujuan diganti ke versi tes.
+env_tes() {
+	sed -E \
+		-e 's#^(DB_DSN=.*/[a-z]+)$#\1_test#' \
+		-e 's#^(IDENTITY_READER_DSN=.*/identity)$#\1_test#' \
+		-e 's#^(REDIS_URL=.*/)[0-9]+$#\115#' \
+		-e 's#^AUTH_INTERNAL_URL=.*#AUTH_INTERNAL_URL=http://auth-internal-tes:8080#' \
+		"apps/$1/.env" > "$tmp/$1.env"
+	chmod 600 "$tmp/$1.env"
+	grep -q '^DB_DSN=.*_test$' "$tmp/$1.env" || gagal "env tes $1: DB_DSN tidak berakhiran _test"
+	grep -q '^REDIS_URL=.*/15$' "$tmp/$1.env" || gagal "env tes $1: REDIS_URL bukan DB 15"
+}
+
+buat_ulang_skema() { # <skema_test>
+	[[ "$1" =~ ^[a-z]+_test$ ]] || gagal "menolak membuat ulang skema '$1': bukan skema *_test"
+	printf 'DROP DATABASE IF EXISTS `%s`; CREATE DATABASE `%s` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;\n' "$1" "$1" \
+		| docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot' \
+		|| gagal "tidak bisa membuat ulang skema $1"
+	echo "skema $1 dibuat ulang (kosong)"
+}
+
+# jalan <app> <perintah…> — sekali jalan di image tes, di jaringan data dan internal.
+jalan() {
+	local a="$1"
+	shift
+	docker rm -f tes-jalan > /dev/null 2>&1 || true
+	docker create --name tes-jalan --network data --env-file "$tmp/$a.env" \
+		-e AUTH_TES_URL=http://auth-tes:8080 -e AUTH_TES_SKEMA="$skema_auth" -e APP_TES_URL="http://$app-tes:8080" \
+		--entrypoint "$1" "lokandita/$a:tes" "${@:2}" > /dev/null
+	docker network connect internal tes-jalan
+	local kode=0
+	docker start -a tes-jalan || kode=$?
+	docker rm -f tes-jalan > /dev/null 2>&1 || true
+	return "$kode"
+}
+
+# migrasi <app> <skema_test> — spark keluar 0 walau koneksi gagal, jadi hasilnya
+# dibuktikan dengan melihat tabel `migrations` di skema itu.
+migrasi() {
+	local keluaran
+	keluaran="$(jalan "$1" php spark migrate --all 2>&1)" || { echo "$keluaran" >&2; gagal "migrasi $1 gagal"; }
+	if grep -qi 'exception\|error' <<< "$keluaran"; then
+		echo "$keluaran" >&2
+		gagal "migrasi $1 melaporkan galat"
+	fi
+	local ada
+	ada="$(printf "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='%s' AND table_name='migrations';\n" "$2" \
+		| docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N')"
+	[ "$ada" = "1" ] || gagal "migrasi $1: tabel migrations tidak ada di $2"
+	echo "migrasi $1 pada $2: selesai"
+}
+
+# layani <app> <nama kontainer> [alias di jaringan internal]
+layani() {
+	docker run -d --name "$2" --network data --network-alias "$2" --env-file "$tmp/$1.env" "lokandita/$1:tes" > /dev/null
+	docker network connect ${3:+--alias "$3"} internal "$2"
+	local i
+	for ((i = 1; i <= 30; i++)); do
+		if docker exec "$2" curl -fsS --max-time 2 http://127.0.0.1:8080/healthz > /dev/null 2>&1; then
+			echo "$2 melayani HTTP"
+			return 0
+		fi
+		sleep 1
+	done
+	docker logs --tail 30 "$2" >&2 || true
+	gagal "$2 tidak menjawab /healthz"
+}
+
+bangun auth
+env_tes auth
+[ "$app" = "auth" ] || { bangun "$app"; env_tes "$app"; }
+
+skema_auth="$(sed -n 's#^DB_DSN=.*/##p' "$tmp/auth.env")"
+buat_ulang_skema "$skema_auth"
+migrasi auth "$skema_auth"
+if [ -x "$AKAR/infra/mysql-hak-reader.sh" ]; then "$AKAR/infra/mysql-hak-reader.sh" "$skema_auth"; fi
+if [ -f "apps/auth/app/Database/Seeds/TesSeeder.php" ]; then
+	jalan auth php spark db:seed TesSeeder 2>&1 | grep -v '^$' | tail -n 3
+fi
+docker exec redis redis-cli -n 15 flushdb > /dev/null
+layani auth auth-tes auth-internal-tes
+
+if [ "$app" != "auth" ]; then
+	skema_app="$(sed -n 's#^DB_DSN=.*/##p' "$tmp/$app.env")"
+	buat_ulang_skema "$skema_app"
+	if ls "apps/$app/app/Database/Migrations/"*.php > /dev/null 2>&1; then
+		migrasi "$app" "$skema_app"
+	fi
+	layani "$app" "$app-tes"
+fi
+
+echo "== phpunit $app"
+kode=0
+jalan "$app" vendor/bin/phpunit --no-progress --testdox "$@" || kode=$?
+if [ "$kode" -ne 0 ]; then
+	echo "tes $app: GAGAL (phpunit keluar $kode)"
+	exit "$kode"
+fi
+echo "tes $app: LULUS"

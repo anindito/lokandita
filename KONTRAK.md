@@ -275,7 +275,7 @@ Each app validates its required variables at start and exits naming the missing 
 
 Formats:
 
-- `DB_DSN`, `IDENTITY_READER_DSN`: `MySQLi://<user>:<password>@mysql:3306/<schema>`.
+- `DB_DSN`, `IDENTITY_READER_DSN`: `MySQLi://<user>:<password>@mysql:3306/<schema>`. Apps parse it with `Lokandita\Auth\Dsn`, never through CI4's own DSN parser.
 - `REDIS_URL`: `redis://:<password>@redis:6379/<db>`. Redis DB `0` = lokakode (and the judge queue, §6), `1` = auth, `2` = portal.
 - Secrets are lowercase hex (`openssl rand -hex 32`), so they are safe inside a URL without escaping.
 
@@ -318,3 +318,10 @@ Values are written without quotes.
 - Checks 3–5 become active in stage 5 and check 6 in stage 7, by a switch at the top of `smoke.sh`. Until then each prints `BELUM AKTIF`, is counted separately, and is not reported as passed.
 - `infra/tes-infra.sh` tests §9, §10 and the deploy verification against the running containers.
 - A stage is not finished until `smoke.sh` passes after deploy.
+
+## 12. Tests
+
+- `infra/tes.sh <app>` is the only way to run PHPUnit. It builds `lokandita/<app>:tes`, recreates the `*_test` schemas from nothing, runs the LokaAuth migrations on `identity_test`, and refuses any schema whose name does not end in `_test`.
+- A second LokaAuth named `auth-tes` runs for the duration of the tests on `identity_test` and Redis DB `15`. Its alias on the `internal` network is `auth-internal-tes`; client apps under test use `AUTH_INTERNAL_URL=http://auth-internal-tes:8080`. When a client app is tested it is also served as `<app>-tes`.
+- Tests talk to these containers over real HTTP (`Lokandita\Auth\Testing\Http`) and to MySQL directly. Nothing is mocked.
+- Redis DB `15` is reserved for tests and is flushed at the start of every run.

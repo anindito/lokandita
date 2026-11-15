@@ -1,6 +1,6 @@
 # Progress
 
-Current stage: **5 — LokaAuth and the shared package** — not started.
+Current stage: **5 — LokaAuth and the shared package** — **in progress**, plan approved by the owner 2026-11-15. See "Stage 5" at the end of this file for what is done; anything not listed there is not done.
 
 Stage 4 — Skeleton and infrastructure — finished 2026-11-15, tag `tahap-4`.
 
@@ -42,4 +42,14 @@ Gate result, 2026-11-15:
 - The owner did not explicitly report the browser check (item 1 above). How the page looks in a browser remains unconfirmed in this file.
 - The previous session was cut off by the usage limit after the last stage-4 commit. In the closing session the agent re-ran only `infra/smoke.sh` and `infra/cek-env.sh` (both passed). `infra/tes-infra.sh`, `infra/backup.sh` and `infra/uji-restore.sh` were **not** re-run, by the owner's decision; their results above are from the earlier session.
 
-Next: stage 5 — LokaAuth and the shared package. Not started.
+## Stage 5 — in progress
+
+Plan (9 steps, one commit each): 1 test harness · 2 identity schema · 3 login core · 4 MFA and first superadmin · 5 internal API · 6 shared package · 7 superadmin pages · 8 placeholder page in LokaKode and Portal · 9 close (smoke checks 3–5, contract, deploy, restore test).
+
+Owner's decisions for this stage (2026-11-15): lockout 1 / 5 / 15 / 60 minutes after each round of 5 failures; per-IP limit 100 failures per 15 minutes; `suspended` and `disabled` both block login and revoke sessions, `disabled` is hidden from the default list; bulk import refuses `superadmin`; the last active superadmin cannot be disabled or demoted; idle logout is enforced on the server; "export of own data" moved to stage 11; `auth.lokandita.com` is opened only after asking again.
+
+Done:
+
+- Step 1 — `infra/tes.sh`: `infra/tes.sh auth` → 5 tests pass against `identity_test` and a real `auth-tes` container.
+
+Not done: steps 2–9. Nothing of stage 5 is deployed.

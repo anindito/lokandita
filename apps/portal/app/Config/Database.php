@@ -25,7 +25,7 @@ class Database extends Config
      * @var array<string, mixed>
      */
     public array $default = [
-        'DSN'          => '', // diisi dari DB_DSN di __construct()
+        'DSN'          => '', // kolom koneksi diisi dari DB_DSN di __construct()
         'hostname'     => 'localhost',
         'username'     => '',
         'password'     => '',
@@ -195,12 +195,13 @@ class Database extends Config
         parent::__construct();
 
         // KONTRAK.md §10: koneksi ke skema milik aplikasi ini hanya berasal dari DB_DSN.
-        $this->default['DSN'] = (string) env('DB_DSN');
+        $this->default = \Lokandita\Auth\Dsn::apply($this->default, (string) env('DB_DSN'));
 
-        // Ensure that we always set the database group to 'tests' if
-        // we are currently running an automated test suite, so that
-        // we don't overwrite live data on accident.
+        // Tes memakai MySQL sungguhan, pada skema *_test saja (CLAUDE.md, bagian Tests).
+        // TestSchema::dsn() melempar galat bila DB_DSN tidak menunjuk skema *_test.
         if (ENVIRONMENT === 'testing') {
+            \Lokandita\Auth\Testing\TestSchema::dsn((string) env('DB_DSN'));
+            $this->tests = $this->default;
             $this->defaultGroup = 'tests';
         }
     }

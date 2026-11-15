@@ -2,6 +2,11 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-15 — `tes.sh` proves a migration ran by looking for the `migrations` table — `spark migrate` exits 0 even when it cannot connect.
+- 2026-11-15 — `DB_DSN` is parsed by `Lokandita\Auth\Dsn` into plain fields — CI4's DSN parser passes the port as a string and mysqli refuses it; found by the first harness run, stage 4 never connected through CI4.
+- 2026-11-15 — Tests are black-box: real HTTP to a second LokaAuth (`auth-tes`) on `identity_test`, plus direct SQL for setup and assertions — in-process feature tests would not exercise cookies, headers and container networking, which is where v1 failed.
+- 2026-11-15 — The test image is the production Dockerfile with dev dependencies added (`COMPOSER_DEV=`), tag `:tes` — the code under test is built the same way as the code that is deployed.
+- 2026-11-15 — PHPUnit fails on skipped and incomplete tests — a skipped test must not look like a pass.
 - 2026-11-15 — Backups are not encrypted and stay on the server disk (`/srv/lokandita-data/backups`, mode 700), run by the `deploy` user's crontab at 02:00 WIB — owner accepted no off-server copy for now; a crontab needs nothing under `/etc`.
 - 2026-11-15 — Example tests shipped with the CI4 starter were deleted — they pass without testing anything of ours.
 - 2026-11-15 — `deploy.sh` removes older images of the app it just deployed — rollback is `git checkout` plus deploy, and old images only fill the disk.

@@ -4,10 +4,12 @@
 
 FROM composer:2.11.2 AS vendor
 ARG APP
+# infra/tes.sh mengosongkan nilai ini supaya PHPUnit ikut terpasang di image :tes.
+ARG COMPOSER_DEV=--no-dev
 COPY packages/lokandita-auth /srv/lokandita/packages/lokandita-auth
 WORKDIR /srv/lokandita/apps/${APP}
 COPY apps/${APP}/composer.json apps/${APP}/composer.lock ./
-RUN composer install --no-dev --no-interaction --no-progress --no-scripts \
+RUN composer install ${COMPOSER_DEV} --no-interaction --no-progress --no-scripts \
         --optimize-autoloader --ignore-platform-req=ext-intl
 
 FROM php:8.3.36-apache
