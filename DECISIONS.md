@@ -2,6 +2,8 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-15 — `/internal/password-reset` refuses targets that are not mahasiswa — a bug or break-in in a client app must not be able to reset a lecturer or a superadmin.
+- 2026-11-15 — `touch`, `users/{id}` and `lookup` are not written to `audit_log`, only to the container log — a touch every 5 minutes per session would bury the audit page; every denial and every state change is audited.
 - 2026-11-15 — The first superadmin is created by `docker exec -it auth php spark akun:superadmin`; the temporary password is printed once in that terminal — there is no web registration and no default account.
 - 2026-11-15 — A TOTP code is accepted once: used codes are remembered in Redis for 2 minutes; clock tolerance is 15 seconds — a code read over a shoulder cannot be replayed.
 - 2026-11-15 — The QR code for enrolment is an inline SVG made by `bacon/bacon-qr-code` — no image extension, no external service sees the secret.

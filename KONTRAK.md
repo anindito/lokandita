@@ -124,7 +124,18 @@ Failures are **never silent**. Missing or wrong token → `401 {"error":"invalid
 | `POST /internal/users/lookup` | `{ "nomor_induk": ["…"] }` | `{ "found": [{id, nomor_induk, nama, global_role}], "missing": ["…"] }` |
 | `POST /internal/password-reset` | `{ "requested_by": "<uuid>", "user_id": "<uuid>" }` | `{ "temp_password": "…" }`; sets `must_change_password`, revokes the user's sessions |
 
-Authorisation of *who may reset whom* is decided by the calling app before it calls; LokaAuth records `requested_by` and the calling app in the audit log.
+Authorisation of *who may reset whom* is decided by the calling app before it calls; LokaAuth records `requested_by` and the calling app in the audit log. As a second barrier, `/internal/password-reset` only resets accounts whose `global_role` is `mahasiswa`; any other target gets `403 {"error":"target_not_allowed"}`. Other accounts are reset by a superadmin inside LokaAuth.
+
+Details that callers rely on:
+
+- `sid` must look like a cookie value (43 base64url characters), otherwise `422`. A well-formed `sid` of a session that is revoked, expired, idle-expired or unknown gives `404 {"error":"session_not_found"}` for `touch` and `prefs`. `touch` never revives a dead session.
+- `revoke` answers `{ "ok": true }` also for a session that is already dead or unknown.
+- `expires_at` is ISO 8601 in UTC, for example `2026-11-15T22:30:00Z`.
+- `prefs` answers `{ "locale": "id|en|ar", "idle_logout": true|false }`. `idle_logout: false` for a mahasiswa gives `422` with `fields.idle_logout = "forced_on_for_mahasiswa"`.
+- `GET /internal/users/{id}`: unknown id gives `404 {"error":"user_not_found"}`; `lookup` accepts at most 1000 values.
+- A `422` body is `{ "error": "validation_failed", "fields": { "<name>": "<what is wrong>" } }`.
+- A wrong HTTP method on a known path is answered like an unknown path.
+- Written to `audit_log`: every denial (`internal.denied`), `revoke` (`logout`), `prefs` (`prefs.changed`) and `password-reset` (`password.reset`). `touch`, `users/{id}` and `lookup` are read-like and only appear in the container log.
 
 The service token identifies the app; the audit log stores it as `app`.
 

@@ -25,3 +25,16 @@ $routes->group('', ['filter' => 'sesi'], static function (RouteCollection $route
     $routes->post('ganti-password', 'ChangePassword::submit');
     $routes->post('keluar', 'Logout::keluar');
 });
+
+// API internal (KONTRAK.md §5). Dari internet Caddy menjawab 404 untuk /internal/*.
+$routes->group('internal', ['filter' => 'layanan'], static function (RouteCollection $routes): void {
+    $routes->post('session/touch', 'Internal::touch');
+    $routes->post('session/revoke', 'Internal::revoke');
+    $routes->post('session/prefs', 'Internal::prefs');
+    $routes->get('users/(:segment)', 'Internal::user/$1');
+    $routes->post('users/lookup', 'Internal::lookup');
+    $routes->post('password-reset', 'Internal::passwordReset');
+    // Rute internal yang tidak dikenal dijawab JSON, bukan halaman HTML.
+    $routes->add('/', 'Internal::unknown');
+    $routes->add('(:any)', 'Internal::unknown');
+});

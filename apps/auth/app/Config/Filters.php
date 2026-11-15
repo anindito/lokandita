@@ -3,6 +3,7 @@
 namespace Config;
 
 use App\Filters\RequireSession;
+use App\Filters\ServiceToken;
 use CodeIgniter\Config\Filters as BaseFilters;
 use CodeIgniter\Filters\CSRF;
 use CodeIgniter\Filters\ForceHTTPS;
@@ -22,6 +23,7 @@ class Filters extends BaseFilters
         'performance' => PerformanceMetrics::class,
         'keamanan'    => SecurityHeaders::class,
         'sesi'        => RequireSession::class,
+        'layanan'     => ServiceToken::class,
     ];
 
     /**

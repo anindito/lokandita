@@ -5,7 +5,7 @@
 # Cek 3–5 membutuhkan LokaAuth (tahap 5) dan cek 6 membutuhkan judge (tahap 7).
 # Sampai saat itu keduanya dicetak sebagai "BELUM AKTIF" — bukan lulus.
 # Mengaktifkan: ubah angka di bawah menjadi 1 pada tahap yang bersangkutan.
-CEK_AUTH_AKTIF=0   # tahap 5: cek 3, 4, 5
+CEK_AUTH_AKTIF=1   # tahap 5: cek 3, 4, 5 — aktif sejak tahap 5
 CEK_JUDGE_AKTIF=0  # tahap 7: cek 6
 
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
