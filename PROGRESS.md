@@ -1,6 +1,6 @@
 # Progress
 
-Next stage: **6 — LokaKode academic core and policy layer** — not started.
+Current stage: **6 — LokaKode academic core and policy layer** — built and deployed 2026-11-16, **waiting for the owner's gate**. See "Stage 6" at the end of this file. Not tagged yet.
 
 Stage 5 — LokaAuth and the shared package — finished 2026-11-16, tag `tahap-5`; see "Gate result" at the end of this file. Plan approved by the owner 2026-11-15. See "Stage 5" at the end of this file for what is done; anything not listed there is not done.
 
@@ -120,3 +120,64 @@ Carried into the next stages:
 - The three accounts in production are real rows. The dosen and the mahasiswa are kept active for the stage 6 gate; they cannot be deleted, only disabled, and should be disabled before the import of stage 12 unless the owner says they are real.
 - While the Portal is closed, a login without `next` lands on the maintenance page.
 - The items under "Not verified, or weaker than it looks" above still hold, except that a superadmin now exists and login on the real schema has happened.
+
+## Stage 6 — built, waiting for the owner's gate
+
+Plan approved by the owner 2026-11-16 (8 steps, one commit each): 1 schema and harness · 2 policy layer, beranda, read pages · 3 tahun ajaran and mata kuliah · 4 kelas and pengajar · 5 enrollment · 6 pindah kelas, kelulusan, reset password · 7 new-year tool · 8 audit page and close.
+
+Owner's decisions for this stage (2026-11-16): LokaKode keeps its own append-only `audit_log`, written in the same transaction as the change, with a superadmin page; pindah kelas moves the one enrollment row and records the move in `enrollment_moves` (`DIPINDAHKAN` is set by nothing); pengampu and pengajar can reset a student's password; a student without `lokakode` access or not `active` is enrolled and flagged, a non-mahasiswa is refused; the new-year tool only warns about students still `AKTIF`.
+
+Built (LokaKode, `SPEC.md` §5 and the policy layer of §3):
+
+- Schema `lokakode`: `academic_years`, `courses`, `classes`, `class_teachers`, `enrollments`, `enrollment_moves`, `audit_log`. MySQL itself refuses a second active year, a second enrollment per student per course per year, an enrollment pointing at a class of another course, and deleting a class that has enrollments.
+- Policy layer `App\Policy\Akses`: SQL conditions used by every query in `App\Libraries\Akademik`. Outside scope → 404 (same page as "does not exist"); role never allowed → 403; visible but not manager → 403; archived year → read-only for dosen.
+- Pages: `/beranda` (overview for staff with classes without pengajar flagged; own classes for mahasiswa), `/mata-kuliah`, `/mata-kuliah/{id}`, `/kelas/{id}`, `/tahun-ajaran`, `/tahun-ajaran/baru` (new-year tool), `/audit`.
+- Actions: create/edit/activate academic year; create/edit course and change pengampu; create/edit/archive/delete class; assign and remove pengajar; enroll by single entry or CSV with preview; mengundurkan diri; pindah kelas; kelulusan (one, many, whole class, with date) and its cancellation; reset a student's password through LokaAuth; every change audited.
+- Shared package: `ReaderDb`, `UserDirectory` (names read from LokaAuth's `user_directory`, never copied), a "select all" box in the shared script.
+- `KONTRAK.md` §4, §5 and §6 updated; choices recorded in `DECISIONS.md`.
+
+Verified by the agent (commands and output shown in the session), at commit `5599d0f`:
+
+- `infra/tes.sh lokakode` → 83 tests, 932 assertions, all pass. Against real MySQL, a real `lokakode-tes` container and a real `auth-tes` container; nothing mocked.
+  - `tests/Policy/MatriksAksesTest.php`: reads the registered routes and fails if one is missing from the matrix; all 31 LokaKode routes that need a session requested by six actors (superadmin, two pengampu, two pengajar, one mahasiswa); refused requests with valid payloads change no row and no password.
+  - `tests/Policy/LingkupKelasTest.php`: **the gate case** — pengajar A requests `/kelas/<class of pengajar B>` and gets 404 with no name, nomor induk or class name of class B in the page; the answer is byte-for-byte the same as for a class number that does not exist.
+  - Password reset by a pengajar goes through real HTTP to LokaAuth: the shown password is the one that works, the student's old session dies, both audit logs have a row.
+- `infra/tes.sh auth` → 95 tests; `infra/tes.sh portal` → 19 tests. All pass (the shared package changed).
+- `infra/cek-env.sh` → passed. No new environment variable in this stage.
+- `infra/deploy.sh auth`, `lokakode`, `portal` → each verified at `/healthz`. The LokaKode migration ran on the real `lokakode` schema: 7 tables, all empty.
+- `infra/smoke.sh` → 16 passed, 0 failed, 1 not active (check 6, judge, stage 7).
+- Real requests from the Caddy container to the deployed `lokakode`, without a session: `GET /kelas/1`, `/mata-kuliah`, `/tahun-ajaran`, `/audit`, `/beranda` → 302 to the LokaAuth login with the right `next`; `POST /kelas/1/mundur` without CSRF → 403. From the internet `https://lokakode.lokandita.com/kelas/1` → 503 (maintenance).
+- `infra/backup.sh` and `infra/uji-restore.sh` → passed, 19 schemas/tables restored and equal, now including the LokaKode tables (empty).
+- `infra/tes-infra.sh` → 55 passed, 0 failed (stage 5 recorded 54; the earlier difference is still not explained).
+- After this entry was committed the three apps were deployed again so that `/healthz` reports `HEAD`; the smoke result of that deploy is in the session.
+
+Not verified, or weaker than it looks:
+
+- **The gate itself has not been done on the deployed system.** Production has no academic year, course or class, and only one dosen, so the agent could not make the real request "pengajar A opens class B" against the deployed container without inventing production accounts and data. It is proven only by the tests between real containers. The owner's gate below is the real check.
+- **No page of stage 6 has been seen in a browser.** Layout, the Arabic (right-to-left) pages, the roster form with its many buttons, the file upload and the date fields are tested only as HTTP responses.
+- **The "select all" box is JavaScript and is not exercised by any test.** Without it every row can still be ticked by hand.
+- The Arabic texts were written by the agent and not reviewed by an Arabic reader.
+- CSV upload was tested with small files only; the 2000-row limit and the 1 MB limit are enforced in code but not tested at that size.
+- Class capacity only warns (see `DECISIONS.md`); say so if it should block.
+- Password reset from LokaKode has never run against the real `identity` schema.
+
+Owed by later stages (nothing exists yet to do them on):
+
+- Stage 9: after pindah kelas, recompute per-class aggregates and leaderboards (`Pendaftaran::pindah` has the note); refuse submissions from a student whose enrollment is `LULUS`.
+- Stage 7: the judge worker's MySQL user must get no right on the academic tables (`KONTRAK.md` §6).
+- Stage 11: `GET /` of LokaKode is still only a redirect to `/beranda`; the public landing replaces it.
+- Stage 12: seed data (`SPEC.md` §17) and the real CSV files; nothing was read from `/srv/lokandita-data` in this stage.
+
+Owner's gate for stage 6 (`SPEC.md` §18: a pengajar cannot open another pengajar's class by changing the URL):
+
+1. Open the two hosts: `infra/pemeliharaan.sh auth off` and `infra/pemeliharaan.sh lokakode off`. The agent will not run this without being asked.
+2. In LokaAuth as superadmin, create a **second dosen** (`/admin/pengguna/baru`, with access to `lokakode`) and log in once as that dosen to change the password. The three existing accounts already have `lokakode` access.
+3. At `https://lokakode.lokandita.com` as superadmin: *Tahun ajaran* → add one and press **Aktifkan**; *Mata kuliah* → *Tambah mata kuliah* with the first dosen as pengampu.
+4. On the course page add two classes, for example A and B. Open class A and assign the **second dosen** as pengajar. Open class B, assign the first dosen as pengajar, and enroll the mahasiswa (type the nomor induk, *Periksa dulu*, then *Daftarkan 1 mahasiswa*). Note the number in the URL of class B.
+5. In a private window log in as the **second dosen**: the beranda must list class A only. Open class A, then replace the number in the URL with the number of class B → the page must say *Halaman tidak ditemukan* and show nothing about class B. Try `/kelas/<B>/ubah` as well.
+6. Optional: as the mahasiswa, the beranda shows the class; `/kelas/<B>` answers 403.
+7. As superadmin open `/audit`: every step above is listed with who did it.
+8. Run `infra/smoke.sh`. Check 1 now expects `auth` and `lokakode` to answer 2xx/3xx instead of 503.
+
+After the gate: tag `tahap-6`, record the result here. The rows created during the gate are real rows in production; classes with enrollments cannot be deleted, only archived.
+
