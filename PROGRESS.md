@@ -1,6 +1,8 @@
 # Progress
 
-Current stage: **5 — LokaAuth and the shared package** — **built and deployed; the owner reported the gate as passed on 2026-11-16, see "Gate result" at the end** (tag `tahap-5` not set yet: Keluar from a client app was not seen in a browser). Plan approved by the owner 2026-11-15. See "Stage 5" at the end of this file for what is done; anything not listed there is not done.
+Next stage: **6 — LokaKode academic core and policy layer** — not started.
+
+Stage 5 — LokaAuth and the shared package — finished 2026-11-16, tag `tahap-5`; see "Gate result" at the end of this file. Plan approved by the owner 2026-11-15. See "Stage 5" at the end of this file for what is done; anything not listed there is not done.
 
 Stage 4 — Skeleton and infrastructure — finished 2026-11-15, tag `tahap-4`.
 
@@ -104,8 +106,17 @@ Re-run by the agent in the closing session, at commit `f6947a4` (output shown in
 - `infra/backup.sh` and `infra/uji-restore.sh` → passed, 12 schemas/tables restored and equal to the live ones, now with three real user rows.
 - `infra/smoke.sh` → 16 passed, 0 failed, 1 not active (check 6, stage 7).
 
-Still open at the end of stage 5:
+Second browser check, 2026-11-16 00:45 WIB, after the gap above was reported to the owner:
 
-- The three accounts in production are real rows; the dosen and the mahasiswa cannot be deleted, only disabled. The owner has not said whether they are test accounts.
-- The owner has not decided whether `auth.lokandita.com` stays open.
+- The agent redeployed all three apps at `1ae90c3` and opened `lokandita.com` and `lokakode.lokandita.com` at the owner's request.
+- The owner logged in as the dosen, reached `/beranda`, pressed **Keluar** and reported landing back on the login page after it. The audit log shows `logout` by the dosen with `app = lokakode`, and no live session afterwards; both client containers served `/beranda`. **This closes the gap for the dosen, on LokaKode.** Keluar pressed from the Portal, and the same check as mahasiswa, were not done in a browser.
+- The owner then had all three hosts closed. `infra/smoke.sh` with the three hosts in maintenance → 16 passed, 0 failed, 1 not active. The tagged commit differs from `1ae90c3` only in this file.
+
+**Stage 5 finished 2026-11-16, tag `tahap-5`.**
+
+Carried into the next stages:
+
+- All three hosts are in maintenance. The stage 6 gate needs `auth` and `lokakode` opened again (`infra/pemeliharaan.sh <app> off`).
+- The three accounts in production are real rows. The dosen and the mahasiswa are kept active for the stage 6 gate; they cannot be deleted, only disabled, and should be disabled before the import of stage 12 unless the owner says they are real.
+- While the Portal is closed, a login without `next` lands on the maintenance page.
 - The items under "Not verified, or weaker than it looks" above still hold, except that a superadmin now exists and login on the real schema has happened.
