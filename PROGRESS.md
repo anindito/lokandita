@@ -1,6 +1,6 @@
 # Progress
 
-Current stage: **5 — LokaAuth and the shared package** — **built and deployed, waiting for the owner's gate** (no tag `tahap-5` yet). Plan approved by the owner 2026-11-15. See "Stage 5" at the end of this file for what is done; anything not listed there is not done.
+Current stage: **5 — LokaAuth and the shared package** — **built and deployed; the owner reported the gate as passed on 2026-11-16, see "Gate result" at the end** (tag `tahap-5` not set yet: Keluar from a client app was not seen in a browser). Plan approved by the owner 2026-11-15. See "Stage 5" at the end of this file for what is done; anything not listed there is not done.
 
 Stage 4 — Skeleton and infrastructure — finished 2026-11-15, tag `tahap-4`.
 
@@ -88,3 +88,24 @@ Owner's gate for stage 5 (`SPEC.md` §18):
 6. Run `infra/smoke.sh`. Check 1 now expects `auth` to answer 2xx/3xx instead of 503.
 
 After the gate: tag `tahap-5`, record the result here.
+
+Gate result, 2026-11-16 (the session of 2026-11-15 was cut off by the usage limit after the Tailwind commit; this is the closing session):
+
+- The owner reported that his part of the gate is done and fine.
+- What the audit log of the real `identity` schema shows (actions and roles only): superadmin created by `spark akun:superadmin`, logged in, enrolled TOTP, changed the password; created one dosen and one mahasiswa; both logged in and changed their password; 8 `logout` events, no live session left. `auth.lokandita.com` has been open since 2026-11-15 22:25 WIB.
+- **Every one of those logouts was made on `auth.lokandita.com` itself.** `lokandita.com` and `lokakode.lokandita.com` were never opened, their containers never served `/beranda`, and no `logout` came from a client app. **Keluar from a client app, and login reaching LokaKode or the Portal without a second login, have not been seen in a browser**; they are covered only by the tests between real containers.
+- Because the Portal is closed, a successful login without `next` lands on the 503 maintenance page (`SPEC.md` §4.6 sends users to the Portal). This confused the owner during the gate. It stays so until the Portal is opened.
+- "Old session is refused" in the browser is the owner's observation; the audit log cannot show it.
+
+Re-run by the agent in the closing session, at commit `f6947a4` (output shown in the session):
+
+- `infra/tes.sh auth` → 95 tests, 822 assertions; `infra/tes.sh lokakode` → 19 tests, 104 assertions; `infra/tes.sh portal` → 19 tests, 104 assertions. All pass. (95 instead of 94: the Tailwind test.)
+- `infra/tes-infra.sh` → 54 passed, 0 failed. Stage 4 recorded 55; the difference was not investigated.
+- `infra/backup.sh` and `infra/uji-restore.sh` → passed, 12 schemas/tables restored and equal to the live ones, now with three real user rows.
+- `infra/smoke.sh` → 16 passed, 0 failed, 1 not active (check 6, stage 7).
+
+Still open at the end of stage 5:
+
+- The three accounts in production are real rows; the dosen and the mahasiswa cannot be deleted, only disabled. The owner has not said whether they are test accounts.
+- The owner has not decided whether `auth.lokandita.com` stays open.
+- The items under "Not verified, or weaker than it looks" above still hold, except that a superadmin now exists and login on the real schema has happened.
