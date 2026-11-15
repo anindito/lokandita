@@ -38,8 +38,8 @@
                 <td><?= $b['aktor_nomor'] === null ? '—' : '<span class="ltr">' . esc($b['aktor_nomor']) . '</span><br><small>' . esc($b['aktor_nama']) . '</small>' ?></td>
                 <td><?= $b['target_nomor'] === null ? '—' : '<span class="ltr">' . esc($b['target_nomor']) . '</span><br><small>' . esc($b['target_nama']) . '</small>' ?></td>
                 <td><?= esc($b['app']) ?></td>
-                <td class="ltr kecil"><?= esc((string) $b['detail']) ?></td>
-                <td class="ltr kecil" title="<?= esc((string) $b['user_agent']) ?>"><?= esc((string) $b['ip']) ?></td>
+                <td class="ltr text-sm"><?= esc((string) $b['detail']) ?></td>
+                <td class="ltr text-sm" title="<?= esc((string) $b['user_agent']) ?>"><?= esc((string) $b['ip']) ?></td>
             </tr>
         <?php endforeach ?>
         <?php if ($baris === []): ?><tr><td colspan="7" class="redup"><?= lang('Admin.kosong') ?></td></tr><?php endif ?>

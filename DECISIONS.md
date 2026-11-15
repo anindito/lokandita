@@ -2,6 +2,8 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-15 — Existing pages keep their named component classes (`kartu`, `tombol`, `akun-…`) inside Tailwind's `components` layer instead of being rewritten as long utility strings; utilities and the brand colours (`bg-utama`, `text-teks-redup`, …) are used for new markup — the look stays what the tests and the owner's first browser check will see, and the views stay readable. Tailwind's reset (preflight) is on, so paragraph spacing and list markers are restored in the `base` layer.
+- 2026-11-15 — Tailwind CSS 4.3.5 is compiled in a stage of `infra/docker/app.Dockerfile` from the official standalone binary, version pinned and sha256 checked by `ADD --checksum`; the source is `packages/lokandita-auth/gaya/lokandita.css`, the result is served as `/aset/lokandita.css` — owner chose Tailwind (2026-11-15); nothing is downloaded or run on the host, no Node, no CDN. The build fails if the output is empty or still contains uncompiled directives.
 - 2026-11-15 — Test helper `Http` returns itself, so a page's CSRF token and import token are read into variables before the next request — two admin tests had read them from a later response; one failed for that reason and one passed for the wrong reason.
 - 2026-11-15 — Arabic pages use the locale `ar-u-nu-latn` — digits stay Latin (`SPEC.md` §11) without formatting every number by hand.
 - 2026-11-15 — Bulk actions are two requests: the first only counts and names the accounts, the second (with the same list) applies — nothing changes before the superadmin has seen the number.
@@ -23,7 +25,6 @@ Technical choices made during the build, newest first. One line each: date, deci
 - 2026-11-15 — The QR code for enrolment is an inline SVG made by `bacon/bacon-qr-code` — no image extension, no external service sees the secret.
 - 2026-11-15 — The TOTP secret is encrypted with libsodium `secretbox` under `MFA_ENCRYPTION_KEY`; backup codes are 10 random characters stored as SHA-256 — random codes need no slow hash.
 - 2026-11-15 — A wrong TOTP or backup code counts as a login failure for the lockout — otherwise the second step could be guessed without limit.
-- 2026-11-15 — **Open, owner to decide:** the stylesheet is hand-written CSS (`packages/lokandita-auth/aset/lokandita.css`), not Tailwind — downloading the Tailwind binary was refused by the permission system of this session, and it was not worked around. `SPEC.md` §2 still says Tailwind.
 - 2026-11-15 — The account menu and toasts use a small hand-written script without Alpine.js — standard Alpine needs `unsafe-eval`, which the CSP forbids; the menu is a native `<details>` and works without JavaScript.
 - 2026-11-15 — Security headers and the CSP nonce come from `Lokandita\Auth\Filters\SecurityHeaders`, not CI4's CSP class — forty readable lines, identical in the three apps.
 - 2026-11-15 — `form-action` in the CSP lists every Lokandita host — browsers also apply it to the redirect after a form post (login → `next`, Keluar → LokaAuth).

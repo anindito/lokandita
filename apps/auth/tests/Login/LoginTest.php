@@ -29,6 +29,24 @@ final class LoginTest extends AuthCase
         $this->assertDoesNotMatchRegularExpression('#(src|href)="https?://#', $http->body, 'tidak boleh ada aset dari host lain');
     }
 
+    public function testLembarGayaAdalahTailwindTerkompilasiDanDisajikanSendiri(): void
+    {
+        $http = $this->http();
+        $this->assertStringContainsString('href="/aset/lokandita.css', $http->get('/login')->body);
+        $css = $http->get('/aset/lokandita.css');
+        $this->assertSame(200, $css->status);
+        $this->assertStringContainsString('text/css', (string) $css->header('Content-Type'));
+        $this->assertMatchesRegularExpression('/tailwindcss v4\.\d+\.\d+/', $css->body, 'hasil kompilasi Tailwind, bukan berkas sumber');
+        foreach (['@import', '@source', '@apply', '@theme'] as $mentah) {
+            $this->assertStringNotContainsString($mentah, $css->body, 'perintah Tailwind yang belum terkompilasi');
+        }
+        // Komponen bersama, warna merek, dan utilitas yang dipakai di view ikut terkompilasi.
+        foreach (['.kartu', '.tombol', '--utama', '.sr-only', '.text-sm'] as $ada) {
+            $this->assertStringContainsString($ada, $css->body, $ada);
+        }
+        $this->assertDoesNotMatchRegularExpression('#url\(\s*["\']?(https?:)?//#', $css->body, 'tidak boleh memuat apa pun dari host lain');
+    }
+
     public function testNonceBerbedaTiapPermintaan(): void
     {
         $a = (string) $this->http()->get('/login')->header('Content-Security-Policy');

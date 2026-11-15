@@ -53,7 +53,7 @@ $q   = static fn (array $ganti) => '?' . http_build_query(array_filter($ganti + 
         <table>
             <thead>
             <tr>
-                <th scope="col"><span class="hanya-pembaca"><?= lang('Admin.pilih') ?></span></th>
+                <th scope="col"><span class="sr-only"><?= lang('Admin.pilih') ?></span></th>
                 <th scope="col"><?= lang('Auth.nomorInduk') ?></th>
                 <th scope="col"><?= lang('Auth.nama') ?></th>
                 <th scope="col"><?= lang('Auth.peran') ?></th>

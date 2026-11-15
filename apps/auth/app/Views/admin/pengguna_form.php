@@ -65,7 +65,7 @@ $baru = $user === null;
 <?php if (! $baru): ?>
     <h2><?= lang('Admin.tindakan') ?></h2>
     <div class="kartu">
-        <p class="redup kecil">
+        <p class="redup text-sm">
             <?= lang('Admin.dibuat') ?>: <?= esc(\App\Libraries\Clock::lokal($user['created_at'])) ?> ·
             <?= lang('Admin.loginTerakhir') ?>: <?= esc(\App\Libraries\Clock::lokal($user['last_login_at'])) ?> ·
             MFA: <?= (int) $user['mfa_enabled'] === 1 ? lang('Admin.aktif') : lang('Admin.tidakAktif') ?>

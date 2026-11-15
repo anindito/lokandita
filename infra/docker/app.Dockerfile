@@ -12,6 +12,23 @@ COPY apps/${APP}/composer.json apps/${APP}/composer.lock ./
 RUN composer install ${COMPOSER_DEV} --no-interaction --no-progress --no-scripts \
         --optimize-autoloader --ignore-platform-reqs
 
+# Tailwind CSS (SPEC.md §2) dikompilasi di sini, di dalam build, dari berkas biner
+# resmi yang versinya dipatok dan sha256-nya diperiksa. Tidak ada yang dijalankan
+# di host dan tidak ada CDN. Menaikkan versi: ganti versi DAN sha256 (dari
+# sha256sums.txt pada rilis GitHub tailwindlabs/tailwindcss).
+FROM php:8.3.36-apache AS gaya
+ARG APP
+ADD --checksum=sha256:e47695cee3f0d90623a91f3939b08bdee610eb5ad99340adff9d4145b284d6cc --chmod=755 \
+    https://github.com/tailwindlabs/tailwindcss/releases/download/v4.3.5/tailwindcss-linux-x64 /usr/local/bin/tailwindcss
+COPY packages/lokandita-auth/gaya /srv/lokandita/packages/lokandita-auth/gaya
+COPY packages/lokandita-auth/src/Views /srv/lokandita/packages/lokandita-auth/src/Views
+COPY apps/${APP}/app/Views /srv/lokandita/apps/${APP}/app/Views
+# Gagal bila hasilnya kosong atau masih berisi perintah Tailwind yang belum terkompilasi.
+RUN mkdir /keluar \
+ && tailwindcss --input /srv/lokandita/packages/lokandita-auth/gaya/lokandita.css --output /keluar/lokandita.css --minify \
+ && grep -q 'kartu' /keluar/lokandita.css \
+ && ! grep -q -e '@apply' -e '@source' -e '@import' /keluar/lokandita.css
+
 FROM php:8.3.36-apache
 RUN apt-get update \
  && apt-get install -y --no-install-recommends libicu-dev libzip-dev libpng-dev \
@@ -32,6 +49,7 @@ COPY apps/${APP} /srv/lokandita/apps/${APP}
 COPY --from=vendor /srv/lokandita/apps/${APP}/vendor /srv/lokandita/apps/${APP}/vendor
 # Aset bersama (CSS, JS) disajikan dari host aplikasi itu sendiri: tidak ada CDN.
 COPY packages/lokandita-auth/aset /srv/lokandita/apps/${APP}/public/aset
+COPY --from=gaya /keluar/lokandita.css /srv/lokandita/apps/${APP}/public/aset/lokandita.css
 COPY infra/docker/mulai.sh /usr/local/bin/mulai.sh
 RUN ln -s /srv/lokandita/apps/${APP} /srv/app \
  && cd /srv/app \
