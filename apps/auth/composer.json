@@ -17,6 +17,7 @@
         "bacon/bacon-qr-code": "^3.0",
         "codeigniter4/framework": "^4.7",
         "lokandita/auth": "*",
+        "phpoffice/phpspreadsheet": "^5.0",
         "spomky-labs/otphp": "^11.3"
     },
     "require-dev": {

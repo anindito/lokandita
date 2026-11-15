@@ -62,6 +62,27 @@ final class Fixtures
     }
 
     /**
+     * Membuat sesi langsung di basis data (tanpa form login) dan mengembalikan nilai cookie-nya.
+     * Untuk tes yang bukan tentang login itu sendiri.
+     */
+    public static function session(\mysqli $db, string $userId): string
+    {
+        $token = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
+        self::insert($db, 'sessions', [
+            'id'           => self::uuid(),
+            'token_hash'   => hash('sha256', $token),
+            'user_id'      => $userId,
+            'created_at'   => gmdate('Y-m-d H:i:s'),
+            'expires_at'   => gmdate('Y-m-d H:i:s', time() + 43200),
+            'last_seen_at' => gmdate('Y-m-d H:i:s'),
+            'ip'           => '203.0.113.9',
+            'user_agent'   => 'tes',
+        ]);
+
+        return $token;
+    }
+
+    /**
      * @param array<string, mixed> $row
      */
     public static function insert(\mysqli $db, string $table, array $row): void

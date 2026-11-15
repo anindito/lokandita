@@ -56,9 +56,10 @@ Done:
 - Step 4 — MFA: TOTP enrolment at a superadmin's first login, 8 single-use backup codes, encrypted secret, code replay refused, `spark akun:superadmin`; `infra/tes.sh auth` → 52 tests, 391 assertions pass. Not deployed.
 - Step 5 — internal API: six endpoints, service token, JSON errors 401 / 403 / 404 / 422, denials audited; `infra/tes.sh auth` → 66 tests, 487 assertions pass.
 - Steps 6 and 8 (done together, because the package can only be tested inside a client app) — shared package: LokaAuth client, session filter (`KONTRAK.md` §4), full account menu, "Tetap masuk", idle logout, `/keluar` · `/sesi/perpanjang` · `/preferensi` in all three apps, temporary `/beranda` in LokaKode and Portal. `infra/tes.sh auth` → 69 tests; `infra/tes.sh lokakode` → 19 tests; `infra/tes.sh portal` → 19 tests. Keluar from a client app revokes the session in LokaAuth over real HTTP between containers.
+- Step 7 — superadmin pages (`/admin/…`, superadmin only): user list with search, filters and CSV/XLSX export; create and edit (nomor induk fixed); suspend / disable / reactivate; reset password; remove MFA; app access; paste permission; bulk actions with a confirmation that states the number; bulk import with preview (CSV and XLSX); one-time download of temporary passwords; audit page with filters. `infra/tes.sh auth` → 94 tests, 808 assertions pass; `infra/tes.sh lokakode` → 19; `infra/tes.sh portal` → 19. Includes authorisation tests (non-superadmin refused on every admin route, another superadmin cannot run someone else's import preview). Not deployed; no page has been seen in a browser.
 
 Open for the owner:
 
 - **Tailwind is not used.** Downloading the Tailwind binary was refused by this session's permission system; the pages use hand-written CSS instead. Decide: allow the download, or accept plain CSS and change `SPEC.md` §2.
 
-Not done: step 7 (superadmin pages) and step 9 (close). The session-expiry banner and idle logout in the browser are JavaScript and have **not** been exercised by any test; only their server side is tested. Nothing of stage 5 is deployed.
+Not done: step 9 (close). The session-expiry banner and idle logout in the browser are JavaScript and have **not** been exercised by any test; only their server side is tested. Nothing of stage 5 is deployed.

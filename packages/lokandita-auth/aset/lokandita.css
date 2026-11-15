@@ -126,3 +126,12 @@ th { font-weight: 700; white-space: nowrap; }
 /* Peringatan sesi hampir habis. */
 .sesi-peringatan { position: fixed; inset-inline: 0; bottom: 0; z-index: 45; display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; justify-content: center; padding: .75rem 1rem; background: var(--emas); color: #151a33; font-weight: 600; }
 .sesi-peringatan[hidden] { display: none; }
+
+/* Halaman pengelolaan. */
+.admin-nav { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; padding-bottom: .75rem; border-bottom: 1px solid var(--garis); }
+.massal { margin-top: 1rem; }
+fieldset { border: 1px solid var(--garis); border-radius: .5rem; margin: 1rem 0 0; padding: .5rem .75rem .75rem; }
+legend { font-weight: 600; padding: 0 .35rem; }
+.centang { display: flex; gap: .5rem; align-items: center; font-weight: 400; margin: .5rem 0 0; }
+.centang input { width: auto; }
+.hanya-pembaca { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

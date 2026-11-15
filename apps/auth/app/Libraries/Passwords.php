@@ -96,6 +96,36 @@ final class Passwords
     }
 
     /**
+     * Hash untuk kata sandi SEMENTARA yang ACAK (dari self::random(), ±92 bit).
+     *
+     * Tetap Argon2id, tetapi dengan biaya lebih kecil (±40 md, bukan ±300 md),
+     * supaya impor ratusan akun selesai dalam hitungan detik. Aman karena kata
+     * sandi acak sepanjang itu tidak bisa ditebak, dan pemiliknya wajib
+     * menggantinya pada login pertama (hash barunya memakai biaya penuh).
+     * JANGAN dipakai untuk kata sandi pilihan manusia.
+     */
+    public static function hashTemporary(string $randomPassword): string
+    {
+        return password_hash($randomPassword, PASSWORD_ARGON2ID, ['memory_cost' => 19456, 'time_cost' => 2, 'threads' => 1]);
+    }
+
+    /**
+     * Menyimpan hash yang sudah jadi sebagai kata sandi sementara (wajib diganti) dan mencatatnya di riwayat.
+     */
+    public static function setHash(string $userId, string $hash): void
+    {
+        $db = db_connect();
+        $db->table('users')->where('id', $userId)->update([
+            'password_hash'        => $hash,
+            'must_change_password' => 1,
+            'failed_attempts'      => 0,
+            'locked_until'         => null,
+            'updated_at'           => Clock::now(),
+        ]);
+        $db->table('password_history')->insert(['user_id' => $userId, 'password_hash' => $hash, 'created_at' => Clock::now()]);
+    }
+
+    /**
      * Kata sandi acak yang mudah diketik: 4 kelompok, tanpa huruf yang mirip (0/O, 1/l/I).
      */
     public static function random(): string

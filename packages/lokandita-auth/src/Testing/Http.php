@@ -48,6 +48,24 @@ final class Http
     }
 
     /**
+     * Mengirim form multipart dengan satu berkas, seperti <input type="file">.
+     *
+     * @param array<string, string> $fields
+     */
+    public function upload(string $path, array $fields, string $fileField, string $fileName, string $content): self
+    {
+        $batas = '----tes' . bin2hex(random_bytes(8));
+        $badan = '';
+        foreach ($fields as $nama => $nilai) {
+            $badan .= "--{$batas}\r\nContent-Disposition: form-data; name=\"{$nama}\"\r\n\r\n{$nilai}\r\n";
+        }
+        $badan .= "--{$batas}\r\nContent-Disposition: form-data; name=\"{$fileField}\"; filename=\"{$fileName}\"\r\n"
+            . "Content-Type: application/octet-stream\r\n\r\n{$content}\r\n--{$batas}--\r\n";
+
+        return $this->send('POST', $path, $badan, ['Content-Type' => 'multipart/form-data; boundary=' . $batas]);
+    }
+
+    /**
      * @param array<string, string> $headers
      */
     public function postJson(string $path, mixed $data, array $headers = []): self

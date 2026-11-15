@@ -18,4 +18,17 @@ final class Clock
     {
         return (int) strtotime($utcDatetime . ' UTC');
     }
+
+    /**
+     * Waktu UTC dari basis data, ditampilkan dalam Asia/Jakarta (WIB).
+     */
+    public static function lokal(?string $utcDatetime): string
+    {
+        if ($utcDatetime === null || $utcDatetime === '') {
+            return '—';
+        }
+        $t = new \DateTimeImmutable($utcDatetime, new \DateTimeZone('UTC'));
+
+        return $t->setTimezone(new \DateTimeZone('Asia/Jakarta'))->format('d-m-Y H:i') . ' WIB';
+    }
 }

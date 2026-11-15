@@ -10,12 +10,12 @@ COPY packages/lokandita-auth /srv/lokandita/packages/lokandita-auth
 WORKDIR /srv/lokandita/apps/${APP}
 COPY apps/${APP}/composer.json apps/${APP}/composer.lock ./
 RUN composer install ${COMPOSER_DEV} --no-interaction --no-progress --no-scripts \
-        --optimize-autoloader --ignore-platform-req=ext-intl
+        --optimize-autoloader --ignore-platform-reqs
 
 FROM php:8.3.36-apache
 RUN apt-get update \
- && apt-get install -y --no-install-recommends libicu-dev \
- && docker-php-ext-install -j"$(nproc)" intl mysqli pdo_mysql opcache \
+ && apt-get install -y --no-install-recommends libicu-dev libzip-dev libpng-dev \
+ && docker-php-ext-install -j"$(nproc)" intl mysqli pdo_mysql opcache zip gd \
  && pecl install redis-6.2.0 \
  && docker-php-ext-enable redis \
  && rm -rf /var/lib/apt/lists/* /tmp/pear \

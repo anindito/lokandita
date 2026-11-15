@@ -45,6 +45,39 @@ abstract class AuthCase extends TestCase
     }
 
     /**
+     * Klien yang sudah masuk sebagai $user, lewat sesi yang dibuat langsung di basis data.
+     *
+     * @param array<string, mixed> $user
+     */
+    protected function sebagai(array $user): Http
+    {
+        $http = $this->http();
+        $http->cookies['lokandita_sid'] = Fixtures::session($this->db, (string) $user['id']);
+
+        return $http;
+    }
+
+    /**
+     * Superadmin baru yang sudah masuk. Mengembalikan [klien, baris pengguna].
+     *
+     * @return array{0: Http, 1: array<string, mixed>}
+     */
+    protected function admin(): array
+    {
+        $user = $this->user(['global_role' => 'superadmin', 'mfa_enabled' => 1, 'nama' => 'Admin Uji']);
+
+        return [$this->sebagai($user), $user];
+    }
+
+    /**
+     * Token CSRF untuk klien ini (dari halaman mana pun yang memuat form).
+     */
+    protected function csrf(Http $http, string $path = '/'): string
+    {
+        return (string) $http->get($path)->input('csrf');
+    }
+
+    /**
      * @return array<string, mixed>|null
      */
     protected function row(string $sql): ?array

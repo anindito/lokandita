@@ -2,6 +2,14 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-15 — Test helper `Http` returns itself, so a page's CSRF token and import token are read into variables before the next request — two admin tests had read them from a later response; one failed for that reason and one passed for the wrong reason.
+- 2026-11-15 — Arabic pages use the locale `ar-u-nu-latn` — digits stay Latin (`SPEC.md` §11) without formatting every number by hand.
+- 2026-11-15 — Bulk actions are two requests: the first only counts and names the accounts, the second (with the same list) applies — nothing changes before the superadmin has seen the number.
+- 2026-11-15 — CSV and XLSX exports prefix cells that start with `=`, `+`, `-` or `@` with an apostrophe — a student's name must not become a spreadsheet formula on the owner's computer.
+- 2026-11-15 — Import limits: 2000 rows per file, CSV (comma or semicolon) or XLSX, columns `nomor_induk, nama, email, global_role, apps`; rows already registered are left untouched, bad rows are listed with their line number and reason — a preview that saves nothing, then one explicit run.
+- 2026-11-15 — Random temporary passwords are hashed with a cheaper Argon2id setting (about 40 ms instead of about 300 ms, `Passwords::hashTemporary`) — an import of hundreds of accounts must finish in seconds; safe only because these passwords are random (about 92 bits) and must be changed at first login. Human-chosen passwords, including a shared import password, keep the full cost.
+- 2026-11-15 — Temporary passwords and pending import previews live in Redis for 30 minutes, encrypted with `MFA_ENCRYPTION_KEY`, bound to the superadmin who created them (`Brankas`); the password list can be downloaded once, then answers 410 — plaintext passwords never reach MySQL, the audit log or a backup.
+- 2026-11-15 — XLSX is read and written with PhpSpreadsheet 5; the app image gains the PHP extensions `zip` and `gd`, and the Composer build step now uses `--ignore-platform-reqs` — the Composer image has none of the extensions; the runtime image has them all and the test suite runs in that image.
 - 2026-11-15 — `COOKIE_DOMAIN` was added to `apps/lokakode/.env` and `apps/portal/.env` on this server (value `.lokandita.com`, not a secret) — the shared package needs it to re-send the session cookie after a touch.
 - 2026-11-15 — The shared package re-sends `lokandita_sid` after a touch — without it the cookie would die 12 hours after the last visit to LokaAuth while the server-side session was still alive, and "Tetap masuk" would be a lie.
 - 2026-11-15 — If LokaAuth cannot be reached, Keluar in a client app answers 502 and says plainly that the user is still logged in — v1 reported a logout that had not happened.

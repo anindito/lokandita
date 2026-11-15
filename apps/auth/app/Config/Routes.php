@@ -28,6 +28,24 @@ $routes->group('', ['filter' => 'sesi'], static function (RouteCollection $route
     $routes->post('preferensi', 'Akun::preferensi');
 });
 
+// Superadmin saja (SPEC.md §3). Peran diperiksa oleh filter, bukan oleh tampilan.
+$routes->group('admin', ['filter' => 'sesi:superadmin'], static function (RouteCollection $routes): void {
+    $routes->get('pengguna', 'Admin\Pengguna::index');
+    $routes->get('pengguna/ekspor', 'Admin\Pengguna::ekspor');
+    $routes->get('pengguna/baru', 'Admin\Pengguna::baru');
+    $routes->post('pengguna', 'Admin\Pengguna::simpan');
+    $routes->post('pengguna/massal', 'Admin\Pengguna::massal');
+    $routes->get('pengguna/(:segment)', 'Admin\Pengguna::sunting/$1');
+    $routes->post('pengguna/(:segment)', 'Admin\Pengguna::perbarui/$1');
+    $routes->post('pengguna/(:segment)/reset-sandi', 'Admin\Pengguna::resetSandi/$1');
+    $routes->post('pengguna/(:segment)/hapus-mfa', 'Admin\Pengguna::hapusMfa/$1');
+    $routes->get('impor', 'Admin\Impor::form');
+    $routes->post('impor', 'Admin\Impor::unggah');
+    $routes->post('impor/jalankan', 'Admin\Impor::jalankan');
+    $routes->get('kredensial/(:segment)', 'Admin\Kredensial::unduh/$1');
+    $routes->get('audit', 'Admin\AuditLog::index');
+});
+
 // API internal (KONTRAK.md §5). Dari internet Caddy menjawab 404 untuk /internal/*.
 $routes->group('internal', ['filter' => 'layanan'], static function (RouteCollection $routes): void {
     $routes->post('session/touch', 'Internal::touch');

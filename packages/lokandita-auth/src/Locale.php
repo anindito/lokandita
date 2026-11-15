@@ -23,7 +23,8 @@ final class Locale
             $locale = 'id';
         }
         $request->setLocale($locale);
-        service('language')->setLocale($locale);
+        // Angka selalu Latin, juga dalam bahasa Arab (SPEC.md §11).
+        service('language')->setLocale($locale === 'ar' ? 'ar-u-nu-latn' : $locale);
 
         return $locale;
     }
