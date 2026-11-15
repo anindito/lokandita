@@ -106,16 +106,24 @@ $aktif = count(array_filter($pendaftaran, static fn ($p) => $p['status'] === 'AK
 <?php if ($pendaftaran === []): ?>
     <div class="kartu"><p><?= lang('Kode.kelas.daftarKosong') ?></p></div>
 <?php else: ?>
-    <?php if ($bolehUbah): ?><form method="post" action="/kelas/<?= (int) $kelas['id'] ?>/mundur"><?= csrf_field() ?><?php endif ?>
+    <?php /* Satu form untuk semua tindakan pada daftar; setiap tombol membawa tujuannya sendiri (formaction).
+             Tombol pertama sengaja dimatikan: menurut aturan HTML, menekan Enter di kolom tanggal lalu tidak
+             mengirim form sama sekali. Tujuan bawaan form pun tidak mengubah apa-apa (tanpa user_id dijawab 404). */ ?>
+    <form method="post" action="/kelas/<?= (int) $kelas['id'] ?>/reset-sandi" data-daftar-mahasiswa>
+    <?= csrf_field() ?>
+    <button type="submit" disabled hidden></button>
     <div class="tabel-wadah kartu">
         <table>
             <thead>
             <tr>
-                <?php if ($bolehUbah): ?><th scope="col"><span class="sr-only"><?= lang('Kode.mhs.pilih') ?></span></th><?php endif ?>
+                <?php if ($bolehUbah): ?>
+                    <th scope="col"><input type="checkbox" data-pilih-semua aria-label="<?= lang('Kode.mhs.pilihSemua') ?>"></th>
+                <?php endif ?>
                 <th scope="col"><?= lang('Kode.mhs.nomorInduk') ?></th>
                 <th scope="col"><?= lang('Kode.mhs.nama') ?></th>
                 <th scope="col"><?= lang('Kode.mhs.status') ?></th>
                 <th scope="col"><?= lang('Kode.mhs.catatan') ?></th>
+                <th scope="col"><?= lang('Kode.mhs.tindakan') ?></th>
             </tr>
             </thead>
             <tbody>
@@ -141,6 +149,11 @@ $aktif = count(array_filter($pendaftaran, static fn ($p) => $p['status'] === 'AK
                             <span class="lencana lencana-suspended"><?= lang('Kode.mhs.tanpaAkses') ?></span>
                         <?php endif ?>
                     </td>
+                    <td>
+                        <?php if ($o !== null && $p['status'] === 'AKTIF'): ?>
+                            <button type="submit" class="tombol tombol-sekunder" formaction="/kelas/<?= (int) $kelas['id'] ?>/reset-sandi" name="user_id" value="<?= esc($p['user_id']) ?>" aria-label="<?= esc(lang('Kode.mhs.resetLabel', [$o['nama']])) ?>"><?= lang('Kode.mhs.resetSandi') ?></button>
+                        <?php endif ?>
+                    </td>
                 </tr>
             <?php endforeach ?>
             </tbody>
@@ -153,8 +166,30 @@ $aktif = count(array_filter($pendaftaran, static fn ($p) => $p['status'] === 'AK
                 <button type="submit" class="tombol tombol-sekunder" formaction="/kelas/<?= (int) $kelas['id'] ?>/mundur"><?= lang('Kode.mhs.tandaiMundur') ?></button>
             </div>
             <p class="petunjuk"><?= lang('Kode.mhs.mundurPetunjuk') ?></p>
+
+            <?php if ($tujuanPindah !== []): ?>
+                <label for="tujuan"><?= lang('Kode.mhs.pindahKe') ?></label>
+                <select id="tujuan" name="tujuan">
+                    <?php foreach ($tujuanPindah as $t): ?>
+                        <option value="<?= (int) $t['id'] ?>"><?= esc($t['name']) ?> (<?= (int) $t['jumlah_aktif'] ?><?= $t['capacity'] !== null ? ' / ' . (int) $t['capacity'] : '' ?>)</option>
+                    <?php endforeach ?>
+                </select>
+                <div class="baris-tombol">
+                    <button type="submit" class="tombol tombol-sekunder" formaction="/kelas/<?= (int) $kelas['id'] ?>/pindah"><?= lang('Kode.mhs.pindahkan') ?></button>
+                </div>
+                <p class="petunjuk"><?= lang('Kode.mhs.pindahPetunjuk') ?></p>
+            <?php endif ?>
+
+            <label for="tanggal"><?= lang('Kode.mhs.tanggalLulusIsi') ?></label>
+            <input type="date" id="tanggal" name="tanggal" class="ltr" value="<?= esc($hariIni) ?>">
+            <div class="baris-tombol">
+                <button type="submit" class="tombol tombol-sekunder" formaction="/kelas/<?= (int) $kelas['id'] ?>/lulus"><?= lang('Kode.mhs.luluskan') ?></button>
+                <button type="submit" class="tombol tombol-sekunder" formaction="/kelas/<?= (int) $kelas['id'] ?>/lulus" name="semua" value="1"><?= lang('Kode.mhs.luluskanSemua', [$aktif]) ?></button>
+                <button type="submit" class="tombol tombol-sekunder" formaction="/kelas/<?= (int) $kelas['id'] ?>/batal-lulus"><?= lang('Kode.mhs.batalLulus') ?></button>
+            </div>
+            <p class="petunjuk"><?= lang('Kode.mhs.lulusPetunjuk') ?></p>
         </div>
-        </form>
     <?php endif ?>
+    </form>
 <?php endif ?>
 <?= $this->endSection() ?>

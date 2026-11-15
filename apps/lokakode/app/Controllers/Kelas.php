@@ -29,6 +29,12 @@ final class Kelas extends BaseController
         'didaftarkan'       => ['sukses', 'Kode.pesan.didaftarkan'],
         'mundur'            => ['sukses', 'Kode.pesan.mundur'],
         'tidak-ada-pilihan' => ['galat', 'Kode.pesan.tidakAdaPilihan'],
+        'dipindah'          => ['sukses', 'Kode.pesan.dipindah'],
+        'lulus'             => ['sukses', 'Kode.pesan.lulus'],
+        'batal-lulus'       => ['sukses', 'Kode.pesan.batalLulus'],
+        'tujuanSalah'       => ['galat', 'Kode.galat.tujuanSalah'],
+        'tujuanArsip'       => ['galat', 'Kode.galat.tujuanArsip'],
+        'tanggalLulus'      => ['galat', 'Kode.galat.tanggalLulus'],
         'kelasArsip'        => ['galat', 'Kode.galat.kelasArsip'],
         'berkasCsv'         => ['galat', 'Kode.galat.berkasCsv'],
         'nomorKosong'       => ['galat', 'Kode.galat.nomorKosong'],
@@ -279,6 +285,12 @@ final class Kelas extends BaseController
             'orang'         => $orang,
             'berakses'      => UserDirectory::withAccess($idMahasiswa, Aplikasi::kode()),
             'nomorPengajar' => $nomorPengajar,
+            // Tujuan pindah kelas: kelas lain mata kuliah dan tahun yang sama, yang boleh dikelola dan tidak diarsipkan.
+            'tujuanPindah'  => array_values(array_filter(
+                $akademik->daftarKelas((int) $kelas['academic_year_id'], (int) $kelas['course_id']),
+                static fn ($k) => (int) $k['id'] !== $id && (int) $k['boleh_kelola'] === 1 && $k['archived_at'] === null,
+            )),
+            'hariIni'       => (new \DateTimeImmutable('now', new \DateTimeZone('Asia/Jakarta')))->format('Y-m-d'),
             'pesan'         => $pesan,
         ], $status);
     }

@@ -92,6 +92,18 @@ return [
     ],
 
     'mhs' => [
+        'pilihSemua'     => 'Pilih semua',
+        'pindahKe'       => 'Pindahkan ke kelas',
+        'pindahkan'      => 'Pindahkan',
+        'pindahPetunjuk' => 'Pindah kelas hanya di dalam mata kuliah ini. Jawaban dan nilai mahasiswa ikut pindah.',
+        'tanggalLulusIsi' => 'Tanggal kelulusan',
+        'luluskan'       => 'Luluskan yang dipilih',
+        'luluskanSemua'  => 'Luluskan seluruh kelas ({0} aktif)',
+        'batalLulus'     => 'Batalkan kelulusan yang dipilih',
+        'lulusPetunjuk'  => 'Mahasiswa yang lulus tidak bisa lagi mengirim jawaban di kelas ini; datanya tetap bisa dibaca. Kelulusan bisa dibatalkan.',
+        'resetSandi'     => 'Reset sandi',
+        'resetLabel'     => 'Reset kata sandi {0}',
+        'tindakan'       => 'Tindakan',
         'pilih'          => 'Pilih',
         'tindakanPetunjuk' => 'Centang mahasiswa pada daftar di atas, lalu pilih tindakan.',
         'tandaiMundur'   => 'Tandai mengundurkan diri',
@@ -147,7 +159,24 @@ return [
         ],
     ],
 
+    'sandi' => [
+        'judul'        => 'Reset kata sandi mahasiswa',
+        'tanya'        => 'Reset kata sandi mahasiswa ini?',
+        'akibat'       => 'Kata sandi lamanya langsung tidak berlaku dan ia dikeluarkan dari semua aplikasi. Jangan lakukan ini saat ia sedang mengerjakan soal, kecuali memang diminta.',
+        'ya'           => 'Ya, reset kata sandi',
+        'batal'        => 'Batal',
+        'sementara'    => 'Kata sandi sementara',
+        'sekali'       => 'Kata sandi ini hanya ditampilkan sekali dan tidak disimpan. Sampaikan langsung kepada mahasiswa; ia wajib menggantinya saat masuk.',
+        'selesai'      => 'Kata sandi sudah direset',
+        'gagal'        => 'Layanan masuk sedang tidak bisa dihubungi. Kata sandi mahasiswa TIDAK berubah. Coba lagi sebentar lagi.',
+        'bukanMahasiswa' => 'Akun ini bukan akun mahasiswa. Kata sandinya hanya bisa direset oleh superadmin di LokaAuth.',
+        'kembali'      => 'Kembali ke kelas',
+    ],
+
     'pesan' => [
+        'dipindah'         => '{0} mahasiswa dipindahkan. Seluruh data mereka ikut pindah.',
+        'lulus'            => '{0} mahasiswa dinyatakan lulus.',
+        'batalLulus'       => 'Kelulusan {0} mahasiswa dibatalkan; mereka aktif kembali.',
         'didaftarkan'      => '{0} mahasiswa didaftarkan ke kelas ini.',
         'mundur'           => '{0} mahasiswa ditandai mengundurkan diri.',
         'tidakAdaPilihan'  => 'Tidak ada yang diubah. Pilih dulu mahasiswa yang sesuai pada daftar.',
@@ -164,6 +193,9 @@ return [
     ],
 
     'galat' => [
+        'tujuanSalah'        => 'Pilih kelas tujuan lain di mata kuliah dan tahun ajaran yang sama.',
+        'tujuanArsip'        => 'Kelas tujuan sudah diarsipkan dan tidak menerima mahasiswa.',
+        'tanggalLulus'       => 'Isi tanggal kelulusan yang benar.',
         'kelasArsip'         => 'Kelas ini sudah diarsipkan dan tidak menerima mahasiswa baru. Buka kembali kelasnya lebih dulu.',
         'berkasCsv'          => 'Berkas harus berformat .csv dan tidak lebih dari 1 MB.',
         'nomorKosong'        => 'Isi paling sedikit satu nomor induk, atau unggah berkas CSV.',

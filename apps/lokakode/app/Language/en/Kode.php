@@ -92,6 +92,18 @@ return [
     ],
 
     'mhs' => [
+        'pilihSemua'     => 'Select all',
+        'pindahKe'       => 'Move to class',
+        'pindahkan'      => 'Move',
+        'pindahPetunjuk' => 'Students can only move within this course. Their answers and scores move with them.',
+        'tanggalLulusIsi' => 'Graduation date',
+        'luluskan'       => 'Graduate the selected',
+        'luluskanSemua'  => 'Graduate the whole class ({0} active)',
+        'batalLulus'     => 'Cancel graduation of the selected',
+        'lulusPetunjuk'  => 'A graduated student can no longer submit in this class; their data stays readable. Graduation can be cancelled.',
+        'resetSandi'     => 'Reset password',
+        'resetLabel'     => 'Reset the password of {0}',
+        'tindakan'       => 'Actions',
         'pilih'          => 'Select',
         'tindakanPetunjuk' => 'Tick students in the list above, then choose an action.',
         'tandaiMundur'   => 'Mark as withdrawn',
@@ -147,7 +159,24 @@ return [
         ],
     ],
 
+    'sandi' => [
+        'judul'        => 'Reset a student password',
+        'tanya'        => 'Reset the password of this student?',
+        'akibat'       => 'The old password stops working at once and the student is logged out of every app. Do not do this while they are working on problems unless they asked for it.',
+        'ya'           => 'Yes, reset the password',
+        'batal'        => 'Cancel',
+        'sementara'    => 'Temporary password',
+        'sekali'       => 'This password is shown only once and is not stored. Give it to the student directly; they must change it when they log in.',
+        'selesai'      => 'The password has been reset',
+        'gagal'        => 'The login service cannot be reached. The student password has NOT changed. Try again in a moment.',
+        'bukanMahasiswa' => 'This is not a student account. Its password can only be reset by the superadmin in LokaAuth.',
+        'kembali'      => 'Back to the class',
+    ],
+
     'pesan' => [
+        'dipindah'         => '{0} students moved. All their data moved with them.',
+        'lulus'            => '{0} students marked as graduated.',
+        'batalLulus'       => 'Graduation of {0} students cancelled; they are active again.',
         'didaftarkan'      => '{0} students enrolled in this class.',
         'mundur'           => '{0} students marked as withdrawn.',
         'tidakAdaPilihan'  => 'Nothing was changed. Select matching students in the list first.',
@@ -164,6 +193,9 @@ return [
     ],
 
     'galat' => [
+        'tujuanSalah'        => 'Choose another class in the same course and academic year.',
+        'tujuanArsip'        => 'The target class is archived and accepts no students.',
+        'tanggalLulus'       => 'Enter a valid graduation date.',
         'kelasArsip'         => 'This class is archived and accepts no new students. Reopen the class first.',
         'berkasCsv'          => 'The file must be a .csv of at most 1 MB.',
         'nomorKosong'        => 'Enter at least one ID number, or upload a CSV file.',

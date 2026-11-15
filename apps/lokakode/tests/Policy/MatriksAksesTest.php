@@ -72,6 +72,12 @@ final class MatriksAksesTest extends KodeCase
             'POST kelas/{n}/daftar'          => ['/kelas/' . $d['kelasXA'] . '/daftar', $kelolaXA],
             'POST kelas/{n}/daftar/jalankan' => ['/kelas/' . $d['kelasXA'] . '/daftar/jalankan', $kelolaXA],
             'POST kelas/{n}/mundur'          => ['/kelas/' . $d['kelasXA'] . '/mundur', $kelolaXA],
+            'POST kelas/{n}/pindah'          => ['/kelas/' . $d['kelasXA'] . '/pindah', $kelolaXA],
+            'POST kelas/{n}/lulus'           => ['/kelas/' . $d['kelasXA'] . '/lulus', $kelolaXA],
+            'POST kelas/{n}/batal-lulus'     => ['/kelas/' . $d['kelasXA'] . '/batal-lulus', $kelolaXA],
+            // Reset kata sandi: siapa pun yang melihat kelas XA, termasuk pengajar A (SPEC.md §3).
+            // Tanpa user_id jawabannya 404 untuk semua; hak yang sebenarnya diuji di KelulusanDanSandiTest.
+            'POST kelas/{n}/reset-sandi'     => ['/kelas/' . $d['kelasXA'] . '/reset-sandi', array_fill_keys(['superadmin', 'pengampuX', 'pengampuY', 'pengajarA', 'pengajarB'], 404) + ['mhsA' => 403]],
             // Kelas baru di mata kuliah X: kedua pengajar melihat mata kuliahnya, tetapi bukan pengelola.
             'POST mata-kuliah/{n}/kelas'    => ['/mata-kuliah/' . $d['matkulX'] . '/kelas', ['pengajarB' => 403] + $kelolaXA],
 
@@ -156,6 +162,10 @@ final class MatriksAksesTest extends KodeCase
             'POST kelas/{n}/daftar'          => ['nomor' => $calon['nomor_induk']],
             'POST kelas/{n}/daftar/jalankan' => ['nomor' => [$calon['nomor_induk']]],
             'POST kelas/{n}/mundur'          => ['ids' => [$d['daftarA']]],
+            'POST kelas/{n}/pindah'          => ['ids' => [$d['daftarA']], 'tujuan' => (string) $d['kelasXB']],
+            'POST kelas/{n}/lulus'           => ['ids' => [$d['daftarA']], 'tanggal' => '2027-01-31', 'semua' => '1'],
+            'POST kelas/{n}/batal-lulus'     => ['ids' => [$d['daftarA']]],
+            'POST kelas/{n}/reset-sandi'     => ['user_id' => $d['mhsA']['id'], 'yakin' => '1'],
             'POST mata-kuliah/{n}'          => ['code' => 'DIBAJAK', 'name' => 'Dibajak', 'pengampu' => $d['pengajarB']['nomor_induk']],
             'POST mata-kuliah'              => ['code' => 'BARU100', 'name' => 'Baru', 'pengampu' => $d['pengajarB']['nomor_induk']],
             'POST tahun-ajaran'             => ['label' => 'Dibajak', 'starts_on' => '2027-02-01', 'ends_on' => '2027-07-31'],
@@ -166,7 +176,9 @@ final class MatriksAksesTest extends KodeCase
                 continue;
             }
             foreach (self::PELAKU as $p) {
-                if ($harapan[$p] === 'ok') {
+                // Dengan isian yang sah, reset kata sandi memang diizinkan bagi yang melihat kelas XA.
+                $berhak = $pola === 'POST kelas/{n}/reset-sandi' && in_array($p, ['superadmin', 'pengampuX', 'pengajarA'], true);
+                if ($harapan[$p] === 'ok' || $berhak) {
                     continue;
                 }
                 $http = $this->sebagai($d[$p]);
@@ -175,6 +187,7 @@ final class MatriksAksesTest extends KodeCase
             }
         }
         $this->assertSame($awal, $potret(), 'permintaan yang ditolak mengubah data');
+        $this->assertSame($d['mhsA']['password_hash'], $this->idn->query("SELECT password_hash FROM users WHERE id = '{$d['mhsA']['id']}'")->fetch_row()[0], 'kata sandi mahasiswa tidak berubah');
         $this->assertSame(0, $this->hitung('SELECT COUNT(*) FROM audit_log'), 'permintaan yang ditolak tidak menulis audit perubahan');
     }
 

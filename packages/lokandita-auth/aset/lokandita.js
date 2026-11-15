@@ -10,6 +10,18 @@
     window.setTimeout(tutup, 8000);
   });
 
+  // Daftar bercentang: kotak "pilih semua" di kepala tabel. Tanpa skrip ini
+  // setiap baris tetap bisa dicentang satu per satu.
+  document.querySelectorAll('[data-pilih-semua]').forEach(function (semua) {
+    var form = semua.closest('form');
+    if (!form) { return; }
+    semua.addEventListener('change', function () {
+      form.querySelectorAll('input[type=checkbox][name="ids[]"]').forEach(function (kotak) {
+        kotak.checked = semua.checked;
+      });
+    });
+  });
+
   // Menu akun: tutup dengan Escape atau klik di luar.
   document.querySelectorAll('[data-menu-akun]').forEach(function (menu) {
     document.addEventListener('keydown', function (e) {
