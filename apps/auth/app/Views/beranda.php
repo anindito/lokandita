@@ -9,7 +9,7 @@
     </table>
     <div class="baris-tombol">
         <a class="tombol tombol-sekunder" href="/ganti-password"><?= lang('Auth.gantiSandi') ?></a>
-        <a class="tombol tombol-sekunder" href="<?= esc((string) getenv('PORTAL_URL'), 'attr') ?>"><?= lang('Lokandita.kePortal') ?></a>
+        <a class="tombol tombol-sekunder" href="<?= esc((string) getenv('PORTAL_URL')) ?>"><?= lang('Lokandita.kePortal') ?></a>
     </div>
 </div>
 <?= $this->endSection() ?>

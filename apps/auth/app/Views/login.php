@@ -8,10 +8,10 @@
         <form method="post" action="/login" autocomplete="on">
             <?= csrf_field() ?>
             <?php if ($next !== null): ?>
-                <input type="hidden" name="next" value="<?= esc($next, 'attr') ?>">
+                <input type="hidden" name="next" value="<?= esc($next) ?>">
             <?php endif ?>
             <label for="nomor_induk"><?= lang('Auth.nomorInduk') ?></label>
-            <input type="text" id="nomor_induk" name="nomor_induk" value="<?= esc($nomor, 'attr') ?>" class="ltr"
+            <input type="text" id="nomor_induk" name="nomor_induk" value="<?= esc($nomor) ?>" class="ltr"
                    inputmode="text" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus maxlength="40">
             <p class="petunjuk"><?= lang('Auth.nomorIndukPetunjuk') ?></p>
             <label for="password"><?= lang('Auth.kataSandi') ?></label>

@@ -26,4 +26,9 @@ return [
     'kePortal'        => 'Back to the Portal',
     'tidakDitemukan'  => 'Page not found.',
     'formKedaluwarsa' => 'This form has expired. Reload the page and try again.',
+    'beranda'          => 'Home',
+    'halo'             => 'Hello, {0}',
+    'sementara'        => 'You are signed in to {0}. This page is temporary; its content is built in a later stage.',
+    'keluarGagalJudul' => 'You are still signed in',
+    'keluarGagal'      => 'The sign-in service cannot be reached, so your session has not been ended. Press Sign out once more. On a shared computer, do not leave before you are signed out.',
 ];

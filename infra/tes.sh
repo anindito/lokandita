@@ -48,6 +48,10 @@ env_tes() {
 	if [ "$1" = "auth" ]; then
 		sed -n -E 's#^IDENTITY_READER_DSN=(.*/identity)$#TES_READER_DSN=\1_test#p' apps/lokakode/.env >> "$tmp/$1.env"
 	fi
+	# Tes aplikasi klien menyiapkan pengguna langsung di identity_test, lalu login lewat HTTP ke auth-tes.
+	if [ "$1" != "auth" ]; then
+		sed -n -E 's#^DB_DSN=(.*/identity)$#TES_IDENTITY_DSN=\1_test#p' apps/auth/.env >> "$tmp/$1.env"
+	fi
 	grep -q '^DB_DSN=.*_test$' "$tmp/$1.env" || gagal "env tes $1: DB_DSN tidak berakhiran _test"
 	grep -q '^REDIS_URL=.*/15$' "$tmp/$1.env" || gagal "env tes $1: REDIS_URL bukan DB 15"
 }

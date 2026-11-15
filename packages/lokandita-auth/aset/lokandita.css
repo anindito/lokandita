@@ -91,7 +91,14 @@ input[type=text], input[type=password], input[type=email], input[type=search], i
 .akun-butir:hover, .akun-butir:focus-visible { background: var(--latar); }
 .akun-form { margin: 0; }
 .akun-bagian { padding: .5rem .75rem; border-top: 1px solid var(--garis); font-size: .9rem; }
-.akun-bagian label { display: flex; gap: .5rem; align-items: flex-start; font-weight: 400; margin: 0; }
+.akun-bagian { margin: 0; }
+.akun-label { margin: 0 0 .35rem; color: var(--teks-redup); }
+.akun-saklar { display: flex; gap: .6rem; align-items: center; width: 100%; padding: 0; font: inherit; text-align: start; color: var(--teks); background: none; border: 0; cursor: pointer; }
+.akun-saklar:disabled { cursor: not-allowed; opacity: .75; }
+.akun-saklar-tanda { flex: none; position: relative; width: 2.25rem; height: 1.25rem; border-radius: 999px; background: var(--garis); }
+.akun-saklar-tanda::after { content: ""; position: absolute; top: .15rem; inset-inline-start: .15rem; width: .95rem; height: .95rem; border-radius: 50%; background: var(--kartu); }
+.akun-saklar[aria-checked=true] .akun-saklar-tanda { background: var(--hijau); }
+.akun-saklar[aria-checked=true] .akun-saklar-tanda::after { inset-inline-start: 1.15rem; }
 .akun-bahasa { display: flex; gap: .25rem; }
 .akun-bahasa button { flex: 1; padding: .35rem; font: inherit; font-size: .85rem; background: none; color: var(--teks); border: 1px solid var(--garis); border-radius: .4rem; cursor: pointer; }
 .akun-bahasa button[aria-pressed=true] { background: var(--utama); color: var(--utama-teks); border-color: var(--utama); }

@@ -2,6 +2,12 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-15 — `COOKIE_DOMAIN` was added to `apps/lokakode/.env` and `apps/portal/.env` on this server (value `.lokandita.com`, not a secret) — the shared package needs it to re-send the session cookie after a touch.
+- 2026-11-15 — The shared package re-sends `lokandita_sid` after a touch — without it the cookie would die 12 hours after the last visit to LokaAuth while the server-side session was still alive, and "Tetap masuk" would be a lie.
+- 2026-11-15 — If LokaAuth cannot be reached, Keluar in a client app answers 502 and says plainly that the user is still logged in — v1 reported a logout that had not happened.
+- 2026-11-15 — CSRF tokens are stable for 12 hours instead of regenerated per request — regeneration breaks the second tab and the background session ping.
+- 2026-11-15 — HTML attributes are escaped with plain `esc()` inside double quotes — the `attr` context turns every URL into numeric entities, which is valid but unreadable in the page source.
+- 2026-11-15 — The Portal has no logo yet: the branding archive holds only LokaAuth and LokaKode — to settle in stage 11.
 - 2026-11-15 — `/internal/password-reset` refuses targets that are not mahasiswa — a bug or break-in in a client app must not be able to reset a lecturer or a superadmin.
 - 2026-11-15 — `touch`, `users/{id}` and `lookup` are not written to `audit_log`, only to the container log — a touch every 5 minutes per session would bury the audit page; every denial and every state change is audited.
 - 2026-11-15 — The first superadmin is created by `docker exec -it auth php spark akun:superadmin`; the temporary password is printed once in that terminal — there is no web registration and no default account.

@@ -103,6 +103,24 @@ Implemented once in `packages/lokandita-auth`; apps do not reimplement it.
 
 `next` is honoured by LokaAuth only when the scheme is `https` and the host is exactly one of `ALLOWED_HOSTS`.
 
+The five steps are `Lokandita\Auth\Filters\RequireLogin` (filter alias `masuk`). Notes:
+
+- The session is read from MySQL on every request; nothing about it is cached in the app.
+- `next` and every redirect are built from `APP_URL`, never from the client's `Host` header.
+- After a successful touch the filter sends the unchanged cookie again with a fresh `Max-Age` (§2). This is the only case in which code outside LokaAuth emits `lokandita_sid`, and it is the shared package doing it.
+
+Every app, LokaAuth included, answers these three routes; in client apps they are registered by `Lokandita\Auth\Routes::akun()`. All are `POST` with the CSRF field `csrf`:
+
+| Route | Does | Answer |
+|---|---|---|
+| `/keluar` | `revoke` through §5 | redirect to `AUTH_PUBLIC_URL/keluar-selesai`; if LokaAuth cannot be reached: `502` and a page saying the user is **not** logged out |
+| `/sesi/perpanjang` | `touch` through §5, re-sends the cookie | `{ "sisa": <seconds> }`, or `502 {"error":"tidak_bisa_diperpanjang"}` |
+| `/preferensi` | `prefs` through §5; form fields `locale`, `idle_logout` (`0`/`1`), `kembali` (local path) | redirect to `kembali` |
+
+The CSRF token is not regenerated after use and lives 12 hours, so a page that stays open, a second tab, and the background `/sesi/perpanjang` call do not invalidate each other.
+
+`GET /` and `GET /beranda` in LokaKode and Portal are temporary pages of stage 5 (`Lokandita\Auth\Routes::sementara()`), replaced in stages 6 and 11.
+
 ## 5. Internal API (LokaAuth)
 
 | Property | Value |
@@ -270,7 +288,7 @@ Each app validates its required variables at start and exits naming the missing 
 |---|---|---|---|---|
 | `APP_URL` | ✔ | ✔ | ✔ | |
 | `CONTACT_EMAIL` | ✔ | ✔ | ✔ | |
-| `COOKIE_DOMAIN` (`.lokandita.com`) | ✔ | | | |
+| `COOKIE_DOMAIN` (`.lokandita.com`) | ✔ | ✔ | ✔ | |
 | `ALLOWED_HOSTS` (comma list) | ✔ | | | |
 | `PORTAL_URL` | ✔ | ✔ | ✔ | |
 | `DB_DSN` (own schema) | ✔ | ✔ | ✔ | ✔ |

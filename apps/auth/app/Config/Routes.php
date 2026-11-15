@@ -24,6 +24,8 @@ $routes->group('', ['filter' => 'sesi'], static function (RouteCollection $route
     $routes->get('ganti-password', 'ChangePassword::form');
     $routes->post('ganti-password', 'ChangePassword::submit');
     $routes->post('keluar', 'Logout::keluar');
+    $routes->post('sesi/perpanjang', 'Akun::perpanjang');
+    $routes->post('preferensi', 'Akun::preferensi');
 });
 
 // API internal (KONTRAK.md §5). Dari internet Caddy menjawab 404 untuk /internal/*.

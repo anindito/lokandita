@@ -21,7 +21,7 @@ use Lokandita\Auth\Locale;
 final class RequireSession implements FilterInterface
 {
     // Halaman yang tetap boleh dibuka selama kata sandi wajib diganti.
-    private const BOLEH_SAAT_WAJIB_GANTI = ['ganti-password', 'keluar'];
+    private const BOLEH_SAAT_WAJIB_GANTI = ['ganti-password', 'keluar', 'preferensi', 'sesi/perpanjang'];
 
     public function before(RequestInterface $request, $arguments = null)
     {

@@ -11,7 +11,7 @@
         </ul>
         <p class="petunjuk"><?= lang('Auth.mfa.cadanganPeringatan') ?></p>
         <div class="baris-tombol">
-            <a class="tombol" href="<?= esc($lanjut, 'attr') ?>"><?= lang('Auth.mfa.sudahDisimpan') ?></a>
+            <a class="tombol" href="<?= esc($lanjut) ?>"><?= lang('Auth.mfa.sudahDisimpan') ?></a>
         </div>
     </div>
 </div>

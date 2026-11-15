@@ -193,4 +193,51 @@ final class SessionTest extends AuthCase
         $this->assertRedirect($http->get('/login'), 'https://lokandita.com/');
         $this->assertRedirect($http->get('/login?next=' . rawurlencode('https://auth.lokandita.com/')), 'https://auth.lokandita.com/');
     }
+
+    public function testMenuAkunDiLokaAuthSamaDenganDiAplikasiLain(): void
+    {
+        $http = $this->login($this->user(['global_role' => 'dosen', 'nama' => 'Rina Wati']));
+        $isi  = $http->get('/')->body;
+        $this->assertSame(1, preg_match('/<details class="akun".*?<\/details>/s', $isi, $m));
+        $this->assertStringContainsString('>RW<', $m[0]);
+        $this->assertStringContainsString('https://auth.lokandita.com/ganti-password', $m[0]);
+        $terakhir = substr($m[0], (int) strrpos($m[0], '<form'));
+        $this->assertStringContainsString('action="/keluar"', $terakhir);
+        $this->assertMatchesRegularExpression('/class="akun-butir akun-keluar">Keluar</', $terakhir);
+    }
+
+    public function testTetapMasukDanPreferensiDiLokaAuth(): void
+    {
+        $user = $this->user(['global_role' => 'dosen']);
+        $http = $this->login($user);
+        $hash = hash('sha256', $http->cookies['lokandita_sid']);
+        $csrf = $http->get('/')->input('csrf');
+
+        $this->db->query("UPDATE sessions SET expires_at = UTC_TIMESTAMP() + INTERVAL 90 SECOND WHERE token_hash = '{$hash}'");
+        $r = $http->post('/sesi/perpanjang', ['csrf' => $csrf]);
+        $this->assertSame(200, $r->status);
+        $this->assertEqualsWithDelta(43200, $r->json()['sisa'], 10);
+        $this->assertSame(403, $http->post('/sesi/perpanjang')->status);
+
+        $this->assertRedirect($http->post('/preferensi', ['csrf' => $csrf, 'locale' => 'en', 'idle_logout' => '1', 'kembali' => '/']), '/');
+        $baris = $this->userRow($user['id']);
+        $this->assertSame('en', $baris['locale']);
+        $this->assertSame('1', (string) $baris['idle_logout']);
+        $this->assertStringContainsString('<html lang="en" dir="ltr">', $http->get('/')->body);
+        $this->assertRedirect($http->post('/preferensi', ['csrf' => $csrf, 'locale' => 'id', 'kembali' => 'https://evil.example/']), '/');
+
+        $mhs  = $this->user(['global_role' => 'mahasiswa']);
+        $h2   = $this->login($mhs);
+        $h2->post('/preferensi', ['csrf' => $h2->get('/')->input('csrf'), 'idle_logout' => '0', 'kembali' => '/']);
+        $this->assertSame('1', (string) $this->userRow($mhs['id'])['idle_logout'], 'mahasiswa tidak bisa mematikan keluar-otomatis');
+    }
+
+    public function testTokenCsrfTetapBerlakuSetelahDipakai(): void
+    {
+        // Halaman yang lama terbuka, atau tab kedua, tidak boleh tiba-tiba ditolak.
+        $http = $this->login($this->user(['global_role' => 'dosen']));
+        $csrf = $http->get('/')->input('csrf');
+        $this->assertSame(200, $http->post('/sesi/perpanjang', ['csrf' => $csrf])->status);
+        $this->assertSame(200, $http->post('/sesi/perpanjang', ['csrf' => $csrf])->status);
+    }
 }

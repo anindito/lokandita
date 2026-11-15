@@ -19,7 +19,7 @@ $galatUntuk = static function (string $kolom) use ($galat): string {
         <form method="post" action="/ganti-password">
             <?= csrf_field() ?>
             <?php if ($next !== null): ?>
-                <input type="hidden" name="next" value="<?= esc($next, 'attr') ?>">
+                <input type="hidden" name="next" value="<?= esc($next) ?>">
             <?php endif ?>
             <label for="password_lama"><?= lang('Auth.sandiLama') ?></label>
             <input type="password" id="password_lama" name="password_lama" class="ltr" autocomplete="current-password" required maxlength="200">

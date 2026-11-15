@@ -27,4 +27,9 @@ return [
     'kePortal'        => 'Kembali ke Portal',
     'tidakDitemukan'  => 'Halaman tidak ditemukan.',
     'formKedaluwarsa' => 'Formulir sudah kedaluwarsa. Muat ulang halaman, lalu coba lagi.',
+    'beranda'          => 'Beranda',
+    'halo'             => 'Halo, {0}',
+    'sementara'        => 'Anda sudah masuk ke {0}. Halaman ini masih sementara; isinya dibangun pada tahap berikutnya.',
+    'keluarGagalJudul' => 'Anda belum keluar',
+    'keluarGagal'      => 'Layanan masuk sedang tidak bisa dihubungi, sehingga sesi Anda belum diakhiri. Coba tekan Keluar sekali lagi. Jika ini komputer bersama, jangan tinggalkan sebelum berhasil keluar.',
 ];

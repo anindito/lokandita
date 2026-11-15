@@ -6,7 +6,7 @@ namespace Lokandita\Auth;
 
 /**
  * Nonce CSP untuk satu permintaan. Dipakai filter SecurityHeaders dan view:
- * <script nonce="<?= esc(\Lokandita\Auth\Nonce::value(), 'attr') ?>">.
+ * <script nonce="<?= esc(\Lokandita\Auth\Nonce::value()) ?>">.
  */
 final class Nonce
 {
