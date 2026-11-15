@@ -93,6 +93,25 @@ docker build --quiet \
 	-t "lokandita/$sasaran:$commit" \
 	-t "lokandita/$sasaran:aktif" \
 	.
+
+# Migrasi dijalankan dari image yang baru, sebelum kontainer diganti.
+# `spark migrate` keluar 0 walau gagal tersambung, jadi keluarannya diperiksa
+# dan tabel `migrations` harus benar-benar ada.
+if ls "apps/$sasaran/app/Database/Migrations/"*.php > /dev/null 2>&1; then
+	skema="$(sed -n 's#^DB_DSN=.*/##p' "apps/$sasaran/.env")"
+	keluaran="$(docker run --rm --network data --env-file "apps/$sasaran/.env" --entrypoint php \
+		"lokandita/$sasaran:$commit" spark migrate --all 2>&1)" || { echo "$keluaran" >&2; gagal "migrasi $sasaran gagal"; }
+	if grep -qi 'exception\|error' <<< "$keluaran"; then
+		echo "$keluaran" >&2
+		gagal "migrasi $sasaran melaporkan galat; kontainer lama tetap berjalan"
+	fi
+	ada="$(printf "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='%s' AND table_name='migrations';\n" "$skema" \
+		| docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N')"
+	[ "$ada" = "1" ] || gagal "migrasi $sasaran: tabel migrations tidak ada di skema $skema"
+	echo "migrasi $sasaran pada skema $skema: selesai"
+	if [ "$sasaran" = "auth" ]; then "$AKAR/infra/mysql-hak-reader.sh" identity; fi
+fi
+
 compose up -d --no-build --force-recreate --no-deps "$sasaran"
 
 if ! verifikasi_commit "$sasaran" "$commit"; then

@@ -44,6 +44,10 @@ env_tes() {
 		-e 's#^AUTH_INTERNAL_URL=.*#AUTH_INTERNAL_URL=http://auth-internal-tes:8080#' \
 		"apps/$1/.env" > "$tmp/$1.env"
 	chmod 600 "$tmp/$1.env"
+	# Tes skema LokaAuth juga masuk sebagai identity_reader, seperti aplikasi klien.
+	if [ "$1" = "auth" ]; then
+		sed -n -E 's#^IDENTITY_READER_DSN=(.*/identity)$#TES_READER_DSN=\1_test#p' apps/lokakode/.env >> "$tmp/$1.env"
+	fi
 	grep -q '^DB_DSN=.*_test$' "$tmp/$1.env" || gagal "env tes $1: DB_DSN tidak berakhiran _test"
 	grep -q '^REDIS_URL=.*/15$' "$tmp/$1.env" || gagal "env tes $1: REDIS_URL bukan DB 15"
 }

@@ -73,10 +73,17 @@ SELECT s.token_hash, s.expires_at, s.last_seen_at,
        u.id AS user_id, u.nomor_induk, u.nama, u.global_role,
        u.locale, u.idle_logout, u.paste_allowed, u.must_change_password
 FROM sessions s JOIN users u ON u.id = s.user_id
-WHERE s.revoked_at IS NULL AND s.expires_at > UTC_TIMESTAMP() AND u.status = 'active';
+WHERE s.revoked_at IS NULL AND s.expires_at > UTC_TIMESTAMP() AND u.status = 'active'
+  AND (u.idle_logout = 0 OR s.last_seen_at > UTC_TIMESTAMP() - INTERVAL 30 MINUTE);
 ```
 
+The last condition enforces idle logout on the server: a session of a user with `idle_logout = 1` that has not been touched for 30 minutes no longer exists for any client app, even when the browser was simply closed.
+
 MySQL user `identity_reader` has `SELECT` on `session_identity`, on `app_access`, and on a view `user_directory (id, nomor_induk, nama, global_role, status)`. Nothing else. It can never read `password_hash` or `mfa_secret_enc`, and has no write privilege.
+
+These three grants are given by `infra/mysql-hak-reader.sh` as MySQL root, after the LokaAuth migrations; `auth_app` cannot grant. `infra/deploy.sh auth` and `infra/tes.sh` both run it.
+
+Tables beyond the columns listed above carry a surrogate `id` where needed (`password_history`, `mfa_backup_codes`, `login_attempts`). The migration that creates the tables cannot be rolled back.
 
 ## 4. How a client app authenticates a request
 
@@ -286,7 +293,7 @@ MySQL schemas and users, created by `infra/mysql-init.sh` (idempotent, never tou
 | `auth_app` | all on `identity`, `identity_test` |
 | `lokakode_app` | all on `lokakode`, `lokakode_test` |
 | `portal_app` | all on `portal`, `portal_test` |
-| `identity_reader` | none until LokaAuth grants the views of §3 |
+| `identity_reader` | none from `mysql-init.sh`; `SELECT` on the three objects of §3 from `infra/mysql-hak-reader.sh` |
 
 Rules:
 
@@ -302,7 +309,7 @@ Values are written without quotes.
 
 ## 11. Deploy and verification
 
-- `infra/deploy.sh <app>` builds the image tagged with the current Git commit, starts it, and fails unless the running container reports that commit at `GET /healthz` (`{ "app": "...", "commit": "..." }`).
+- `infra/deploy.sh <app>` builds the image tagged with the current Git commit, runs the app's migrations from that image (and for `auth` the reader grants of §3), starts it, and fails unless the running container reports that commit at `GET /healthz` (`{ "app": "...", "commit": "..." }`).
 - `infra/deploy.sh infra` starts MySQL, Redis and Caddy, runs `infra/mysql-init.sh`, and reloads the Caddyfile.
 - `deploy.sh` refuses to run when the working tree has uncommitted or untracked changes, runs `infra/cek-env.sh` first, and warns when the commit is not on `origin`.
 - `/healthz` is served by every app container on port 8080 with `Cache-Control: no-store`. `deploy.sh` reads it from inside the container, so it works while the host is in maintenance.

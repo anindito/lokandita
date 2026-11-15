@@ -51,5 +51,6 @@ Owner's decisions for this stage (2026-11-15): lockout 1 / 5 / 15 / 60 minutes a
 Done:
 
 - Step 1 — `infra/tes.sh`: `infra/tes.sh auth` → 5 tests pass against `identity_test` and a real `auth-tes` container.
+- Step 2 — identity schema: migrations for the seven tables and two views, `infra/mysql-hak-reader.sh`; `infra/tes.sh auth` → 15 tests pass (view hides revoked, expired, inactive and idle sessions; `identity_reader` reads three objects and writes nothing). Exists only in `identity_test` so far.
 
-Not done: steps 2–9. Nothing of stage 5 is deployed.
+Not done: steps 3–9. Nothing of stage 5 is deployed.
