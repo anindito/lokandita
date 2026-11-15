@@ -57,6 +57,7 @@ final class MatriksAksesTest extends KodeCase
             'GET tahun-ajaran/baru'            => ['/tahun-ajaran/baru', $admin],
             'POST tahun-ajaran/baru'           => ['/tahun-ajaran/baru', $admin],
             'POST tahun-ajaran/baru/jalankan'  => ['/tahun-ajaran/baru/jalankan', $admin],
+            'GET audit'                      => ['/audit', $admin],
             'GET mata-kuliah/baru'           => ['/mata-kuliah/baru', $admin],
             'POST mata-kuliah'               => ['/mata-kuliah', $admin],
             'GET mata-kuliah/{n}/ubah'       => ['/mata-kuliah/' . $d['matkulX'] . '/ubah', $admin],

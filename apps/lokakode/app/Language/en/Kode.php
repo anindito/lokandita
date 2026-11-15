@@ -191,6 +191,22 @@ return [
         'ubahIsian'   => 'Change the input',
     ],
 
+    'audit' => [
+        'penjelasan' => 'Every change to the academic structure in LokaKode. Logins and account changes are in the LokaAuth audit log.',
+        'aksi'       => 'Action (prefix)',
+        'aktor'      => 'Actor (ID number)',
+        'target'     => 'Target',
+        'dari'       => 'From date',
+        'sampai'     => 'To date',
+        'waktu'      => 'Time',
+        'rincian'    => 'Details',
+        'jumlah'     => '{0} entries',
+        'halaman'    => 'Pages',
+        'sebelumnya' => 'Previous',
+        'berikutnya' => 'Next',
+        'halamanKe'  => 'Page {0} of {1}',
+    ],
+
     'pesan' => [
         'tahunBaru'        => 'New academic year created and activated; {0} classes copied. The previous year is archived.',
         'dipindah'         => '{0} students moved. All their data moved with them.',

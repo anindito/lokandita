@@ -144,7 +144,7 @@ Failures are **never silent**. Missing or wrong token → `401 {"error":"invalid
 | `POST /internal/users/lookup` | `{ "nomor_induk": ["…"] }` | `{ "found": [{id, nomor_induk, nama, global_role}], "missing": ["…"] }` |
 | `POST /internal/password-reset` | `{ "requested_by": "<uuid>", "user_id": "<uuid>" }` | `{ "temp_password": "…" }`; sets `must_change_password`, revokes the user's sessions |
 
-Authorisation of *who may reset whom* is decided by the calling app before it calls; LokaAuth records `requested_by` and the calling app in the audit log. As a second barrier, `/internal/password-reset` only resets accounts whose `global_role` is `mahasiswa`; any other target gets `403 {"error":"target_not_allowed"}`. Other accounts are reset by a superadmin inside LokaAuth.
+LokaKode calls `/internal/password-reset` for a student who is `AKTIF` in a class the requester may see (superadmin, the pengampu of the course, a pengajar of that class). Authorisation of *who may reset whom* is decided by the calling app before it calls; LokaAuth records `requested_by` and the calling app in the audit log. As a second barrier, `/internal/password-reset` only resets accounts whose `global_role` is `mahasiswa`; any other target gets `403 {"error":"target_not_allowed"}`. Other accounts are reset by a superadmin inside LokaAuth.
 
 Details that callers rely on:
 
@@ -200,6 +200,12 @@ For `VALIDATE` the result holds `{ ok, reasons[] }` where a reason is `{ code, m
 The worker connects to MySQL and Redis on `127.0.0.1` (published to loopback only) with its own MySQL user limited to the tables it needs.
 
 Judge containers carry the label `lokandita.judge=true`.
+
+### LokaKode tables next to `judge_jobs`
+
+The `lokakode` schema is owned and migrated only by LokaKode. Since stage 6 it holds the academic structure (`SPEC.md` §5): `academic_years`, `courses`, `classes`, `class_teachers`, `enrollments`, `enrollment_moves`, and LokaKode's own append-only `audit_log`. The judge worker has no right on any of these; it gets rights only on the tables named in this section.
+
+Every `user_id`, `owner_id`, `actor_id` and similar column in these tables is `users.id` of §3. An enrollment is one row per student per course per academic year; a class move changes `class_id` on that row, so anything that later points at an enrollment follows the student.
 
 ## 7. Problem import format
 

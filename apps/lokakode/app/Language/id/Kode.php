@@ -191,6 +191,22 @@ return [
         'ubahIsian'   => 'Ubah isian',
     ],
 
+    'audit' => [
+        'penjelasan' => 'Setiap perubahan struktur akademik di LokaKode. Login dan perubahan akun dicatat di log audit LokaAuth.',
+        'aksi'       => 'Aksi (awalan)',
+        'aktor'      => 'Pelaku (nomor induk)',
+        'target'     => 'Sasaran',
+        'dari'       => 'Dari tanggal',
+        'sampai'     => 'Sampai tanggal',
+        'waktu'      => 'Waktu',
+        'rincian'    => 'Rincian',
+        'jumlah'     => '{0} catatan',
+        'halaman'    => 'Halaman',
+        'sebelumnya' => 'Sebelumnya',
+        'berikutnya' => 'Berikutnya',
+        'halamanKe'  => 'Halaman {0} dari {1}',
+    ],
+
     'pesan' => [
         'tahunBaru'        => 'Tahun ajaran baru dibuat dan diaktifkan; {0} kelas disalin. Tahun ajaran sebelumnya diarsipkan.',
         'dipindah'         => '{0} mahasiswa dipindahkan. Seluruh data mereka ikut pindah.',

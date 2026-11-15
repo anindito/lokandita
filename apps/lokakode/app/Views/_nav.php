@@ -7,6 +7,7 @@
     <a href="/mata-kuliah"><?= lang('Kode.nav.matkul') ?></a>
     <?php if ($akses->superadmin()): ?>
         <a href="/tahun-ajaran"><?= lang('Kode.nav.tahun') ?></a>
+        <a href="/audit"><?= lang('Kode.nav.audit') ?></a>
     <?php endif ?>
 </nav>
 <?php endif ?>

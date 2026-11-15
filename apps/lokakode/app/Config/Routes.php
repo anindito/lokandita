@@ -58,6 +58,7 @@ $routes->group('', ['filter' => 'masuk:superadmin'], static function (RouteColle
     $routes->get('tahun-ajaran/(:num)', 'TahunAjaran::sunting/$1');
     $routes->post('tahun-ajaran/(:num)', 'TahunAjaran::perbarui/$1');
     $routes->post('tahun-ajaran/(:num)/aktifkan', 'TahunAjaran::aktifkan/$1');
+    $routes->get('audit', 'AuditLog::index');
     $routes->get('mata-kuliah/baru', 'MataKuliah::baru');
     $routes->post('mata-kuliah', 'MataKuliah::simpan');
     $routes->get('mata-kuliah/(:num)/ubah', 'MataKuliah::sunting/$1');
