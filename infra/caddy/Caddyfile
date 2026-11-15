@@ -3,7 +3,6 @@
 # Setiap host berada dalam mode pemeliharaan sampai berkas
 # infra/caddy/bendera/<app>.buka ada (lihat infra/pemeliharaan.sh).
 # /internal/* selalu dijawab 404 dari internet (KONTRAK.md §5).
-
 {
 	email {$ACME_EMAIL}
 	acme_ca {$ACME_CA}
