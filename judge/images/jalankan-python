@@ -1,0 +1,6 @@
+#!/bin/sh
+# Menjalankan /src/main.py. Matplotlib butuh direktori konfigurasi yang bisa
+# ditulisi; cache font yang sudah dibuat saat image dibangun disalin ke /box
+# supaya tidak dibuat ulang (beberapa detik) pada setiap tes.
+cp -r /opt/mpl /box/.mpl 2>/dev/null
+exec python3 /src/main.py

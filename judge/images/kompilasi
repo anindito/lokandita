@@ -1,0 +1,16 @@
+#!/bin/sh
+# Mengompilasi /src/main.<c|cpp> di dalam kontainer judge.
+#   stdout  = berkas program hasil kompilasi (biner), hanya bila berhasil
+#   stderr  = log kompiler, apa adanya
+#   keluar  = kode keluar kompiler
+# Bendera tambahan per pertemuan datang lewat argumen. Kontainer tidak punya
+# direktori host yang bisa ditulisi; worker mengambil biner dari stdout.
+set -u
+bahasa="$1"
+shift
+case "$bahasa" in
+	c) gcc -O2 -std=c17 "$@" -o /box/prog /src/main.c -lm || exit $? ;;
+	cpp) g++ -O2 -std=c++17 "$@" -o /box/prog /src/main.cpp || exit $? ;;
+	*) echo "kompilasi: bahasa tidak dikenal: $bahasa" >&2; exit 2 ;;
+esac
+exec cat /box/prog
