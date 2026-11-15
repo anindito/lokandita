@@ -1,6 +1,6 @@
 # Progress
 
-Current stage: **5 — LokaAuth and the shared package** — **in progress**, plan approved by the owner 2026-11-15. See "Stage 5" at the end of this file for what is done; anything not listed there is not done.
+Current stage: **5 — LokaAuth and the shared package** — **built and deployed, waiting for the owner's gate** (no tag `tahap-5` yet). Plan approved by the owner 2026-11-15. See "Stage 5" at the end of this file for what is done; anything not listed there is not done.
 
 Stage 4 — Skeleton and infrastructure — finished 2026-11-15, tag `tahap-4`.
 
@@ -62,4 +62,31 @@ Open for the owner:
 
 - **Tailwind is not used.** Downloading the Tailwind binary was refused by this session's permission system; the pages use hand-written CSS instead. Decide: allow the download, or accept plain CSS and change `SPEC.md` §2.
 
-Not done: step 9 (close). The session-expiry banner and idle logout in the browser are JavaScript and have **not** been exercised by any test; only their server side is tested. Nothing of stage 5 is deployed.
+- Step 9 — close, 2026-11-15 (commands and output shown in the session):
+  - `infra/tes.sh auth` → 94 tests, 808 assertions; `infra/tes.sh lokakode` → 19 tests; `infra/tes.sh portal` → 19 tests. All pass.
+  - `infra/deploy.sh auth`, `lokakode`, `portal`: each verified at `/healthz`. The LokaAuth migrations ran on the real `identity` schema (7 tables, 2 views, 0 users) and `identity_reader` got its three grants.
+  - `infra/smoke.sh` → 16 passed, 0 failed, 1 not active (check 6, judge, stage 7). Checks 3, 4 and 5 ran for the first time and passed.
+  - Real request from the Caddy container to the deployed LokaAuth: `GET /login` → 200 with the login form, CSP with nonce, CSRF cookie `Secure; HttpOnly`; `GET /admin/pengguna` without a session → 302 to `/login`.
+  - `infra/backup.sh` and `infra/uji-restore.sh` → passed; the 10 `identity` objects were restored and compared.
+
+Not verified, or weaker than it looks:
+
+- **No page of stage 5 has been seen in a browser.** All three hosts are still in maintenance. Layout, the Arabic (right-to-left) pages, the QR code for TOTP and the downloads are tested only as HTTP responses.
+- **The session-expiry banner and idle logout in the browser are JavaScript and are not exercised by any test**; only their server side is tested.
+- **No superadmin exists in production.** Login on the real `identity` schema has never happened; every login test ran on `identity_test`.
+- The restore test now covers real tables, but they hold no user rows yet. Rerun `infra/uji-restore.sh` after the first accounts exist.
+- A request that reaches the app container directly from its own loopback (not through Caddy) gets a 500 on `/login`, because the app refuses to send a `Secure` cookie over plain HTTP. Not reachable from outside; the error page is just not friendly.
+- Two admin tests read the CSRF and import tokens from the wrong response; found and fixed in step 7 (see `DECISIONS.md`). One of them had passed for the wrong reason.
+- `infra/tes-infra.sh` was not re-run in this stage.
+
+Owner's gate for stage 5 (`SPEC.md` §18):
+
+1. Create the first superadmin in your own terminal (the temporary password is printed once, there):
+   `docker exec -it auth php spark akun:superadmin`
+2. Open the host: `infra/pemeliharaan.sh auth off` — the login page becomes public. The agent will not run this without being asked.
+3. In a browser at `https://auth.lokandita.com`: log in, change the password, enrol TOTP, keep the 8 backup codes.
+4. Create one dosen and one mahasiswa at `/admin/pengguna/baru`; log in as each in a private window (forced password change).
+5. Press **Keluar**; then try to reuse the old session (back button or reload): it must land on the login page.
+6. Run `infra/smoke.sh`. Check 1 now expects `auth` to answer 2xx/3xx instead of 503.
+
+After the gate: tag `tahap-5`, record the result here.
