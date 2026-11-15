@@ -1,5 +1,37 @@
 # Progress
 
-Current stage: **4 — Skeleton and infrastructure** (not started).
+Current stage: **4 — Skeleton and infrastructure** — built and verified by the agent on 2026-11-15; **waiting for the owner's manual gate**. Tag `tahap-4` is created after the owner confirms.
 
 Server prepared 2026-11-15: Ubuntu 24.04.5, kernel 6.8, 4 vCPU, 8 GB RAM, 4 GB swap, Docker 29.9, Compose 5.7, Python 3.12, Claude Code 2.1.
+
+## Stage 4 — 2026-11-15
+
+Built:
+
+- `apps/auth`, `apps/lokakode`, `apps/portal`: CodeIgniter 4.7.6 on PHP 8.3, each with only `GET /healthz`, locales `id`/`en`/`ar`, UTC.
+- `packages/lokandita-auth`: startup env check and the `/healthz` controller.
+- `infra/compose.yml`: `caddy`, `mysql` 8.4, `redis` 7, `auth`, `lokakode`, `portal` on networks `edge`, `internal`, `data`.
+- Caddy with production Let's Encrypt certificates for `lokandita.com`, `www`, `auth`, `lokakode`; every host in maintenance (503 page); `/internal/*` → 404.
+- MySQL schemas `identity`, `lokakode`, `portal` and their `_test` twins, one user per app. No tables yet.
+- Scripts in `infra/`: `buat-env.sh`, `cek-env.sh`, `mysql-init.sh`, `deploy.sh`, `pemeliharaan.sh`, `smoke.sh`, `backup.sh`, `uji-restore.sh`, `tes-infra.sh`.
+- Daily backup at 02:00 WIB in the crontab of user `deploy`; `docs/RESTORE.md`.
+
+Verified by the agent (commands and output shown in the session):
+
+- `infra/tes-infra.sh`: 55 passed, 0 failed.
+- `infra/smoke.sh`: checks 0–2 passed (11 assertions), certificate validated by curl.
+- `infra/backup.sh` and `infra/uji-restore.sh` passed.
+
+Not verified, or weaker than it looks:
+
+- **Smoke checks 3, 4, 5 and 6 are not active** (`BELUM AKTIF`). The code for 3–5 is written but has never run; check 6 is not written. They prove nothing until stages 5 and 7.
+- The restore test compared three **empty** schemas. It proves the mechanism, not that real data survives; rerun it after stage 5.
+- How the maintenance page looks in a browser, and access from a network outside this server, were not checked by the agent.
+- Backups are unencrypted and on the same disk as the database (owner's decision for now).
+
+Owner's gate for stage 4:
+
+1. Open `https://lokandita.com`, `https://www.lokandita.com`, `https://auth.lokandita.com`, `https://lokakode.lokandita.com` in a browser: valid certificate, maintenance page (`www` redirects to the apex).
+2. Run `infra/smoke.sh`.
+
+Next: stage 5 — LokaAuth and the shared package. Not started.

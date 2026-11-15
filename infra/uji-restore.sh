@@ -21,10 +21,12 @@ bersih() { docker rm -f "$NAMA" > /dev/null 2>&1 || true; }
 trap bersih EXIT
 bersih
 
+# Server sementara saat inisialisasi image tidak mendengarkan TCP, jadi
+# menunggu lewat TCP berarti menunggu server yang sebenarnya.
 # Tanpa jaringan dan tanpa port: kontainer ini hanya bisa dicapai lewat docker exec.
 docker run -d --name "$NAMA" --network none -e MYSQL_ROOT_PASSWORD="$(openssl rand -hex 16)" "$IMAGE" > /dev/null
 for _ in $(seq 1 60); do
-	docker exec "$NAMA" sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -uroot -e "SELECT 1"' > /dev/null 2>&1 && break
+	docker exec "$NAMA" sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" mysql -uroot -h 127.0.0.1 --protocol=tcp -e "SELECT 1"' > /dev/null 2>&1 && break
 	sleep 2
 done
 

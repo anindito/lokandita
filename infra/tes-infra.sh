@@ -147,7 +147,8 @@ else
 	tidak "cek-env tidak menangkap kunci yang hilang (keluar $kode)"
 fi
 chmod 644 "$tmp/komponen/.env"
-if infra/cek-env.sh "$tmp/komponen" 2>&1 | grep -q 'bermode 644'; then ok "cek-env menangkap mode berkas 644"; else tidak "cek-env tidak menangkap mode berkas 644"; fi
+keluaran="$(infra/cek-env.sh "$tmp/komponen" 2>&1 || true)"
+if grep -q 'bermode 644' <<< "$keluaran"; then ok "cek-env menangkap mode berkas 644"; else tidak "cek-env tidak menangkap mode berkas 644"; fi
 bocor="$(git ls-files | grep -E '(^|/)\.env$' || true)"
 sama "tidak ada .env di Git" "${bocor:-tidak ada}" "tidak ada"
 

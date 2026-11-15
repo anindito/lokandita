@@ -225,6 +225,16 @@ Both must match. `config_key` is computed by the server from the generated confi
 - Caddy reaches apps by container name on `edge`. Apps reach LokaAuth **only** by `auth-internal` on `internal`.
 - MySQL `3306` and Redis `6379` are published on `127.0.0.1` only, for the worker and for CLI use.
 - LokaAuth must not decide trust from the caller's IP or subnet.
+- The `internal` network is created with `internal: true`: it has no route out of the host.
+- Compose project name is `lokandita`; the file is `infra/compose.yml`. App images are `lokandita/<app>:<commit>`, and the one in use also carries the tag `aktif`.
+
+### Edge (Caddy)
+
+- Public hosts are derived from `DOMAIN`: `DOMAIN` → `portal`, `www.DOMAIN` → 301 to `DOMAIN`, `auth.DOMAIN` → `auth`, `lokakode.DOMAIN` → `lokakode`.
+- `/internal` and `/internal/*` are answered `404` by Caddy on all four hosts before anything else, whether the host is open or in maintenance.
+- A host is in **maintenance** unless the file `infra/caddy/bendera/<app>.buka` exists (`infra/pemeliharaan.sh <app> on|off`, `status`). The flag is server state and is git-ignored. A fresh checkout is therefore fully in maintenance.
+- Maintenance answers every path with `503`, `Retry-After: 3600` and the static page in `infra/caddy/situs/`; its assets live under `/_pemeliharaan/`.
+- Caddy sets `Strict-Transport-Security` on every response. All other security headers are set by Caddy only on the maintenance page; on an open host they are the app's job (`SPEC.md` §16).
 
 ## 10. Environment variables
 
@@ -251,6 +261,41 @@ Each app validates its required variables at start and exits naming the missing 
 | `SEB_ENCRYPTION_KEY`, `SEB_ENFORCEMENT` | | ✔ | | |
 | `JUDGE_CONCURRENCY` | | | | ✔ |
 
+`infra/.env` (Caddy, MySQL, Redis, backup):
+
+| Variable | Used for |
+|---|---|
+| `DOMAIN` | Public host names (§9) |
+| `CONTACT_EMAIL` | Shown on the maintenance page |
+| `ACME_EMAIL`, `ACME_CA` | Let's Encrypt account address and directory URL |
+| `MYSQL_ROOT_PASSWORD` | MySQL root; used only by `infra/` scripts through `docker exec` |
+| `DB_PASSWORD_AUTH`, `DB_PASSWORD_LOKAKODE`, `DB_PASSWORD_PORTAL`, `DB_PASSWORD_IDENTITY_READER` | Passwords of the MySQL users below; each must equal the password inside the matching DSN |
+| `REDIS_PASSWORD` | Redis `requirepass`; must equal the password inside every `REDIS_URL` |
+| `BACKUP_DIR`, `BACKUP_RETENTION_DAYS` | `infra/backup.sh` |
+
+Formats:
+
+- `DB_DSN`, `IDENTITY_READER_DSN`: `MySQLi://<user>:<password>@mysql:3306/<schema>`.
+- `REDIS_URL`: `redis://:<password>@redis:6379/<db>`. Redis DB `0` = lokakode (and the judge queue, §6), `1` = auth, `2` = portal.
+- Secrets are lowercase hex (`openssl rand -hex 32`), so they are safe inside a URL without escaping.
+
+MySQL schemas and users, created by `infra/mysql-init.sh` (idempotent, never touches tables):
+
+| User | Rights |
+|---|---|
+| `auth_app` | all on `identity`, `identity_test` |
+| `lokakode_app` | all on `lokakode`, `lokakode_test` |
+| `portal_app` | all on `portal`, `portal_test` |
+| `identity_reader` | none until LokaAuth grants the views of §3 |
+
+Rules:
+
+- **`.env.example` is the list of required variables.** The container entrypoint reads the app's `.env.example` and refuses to start, naming the variable, when any key in it is missing or empty in the environment. Adding a key to `.env.example` therefore adds it to startup validation.
+- The `.env` file reaches the container through `env_file` in Compose; it is never copied into an image.
+- In `.env.example`, `{{NAME}}` marks a secret. `infra/buat-env.sh` creates all `.env` files once on a new server and refuses to run if any exists. `infra/cek-env.sh` also fails on an empty value, a leftover `{{…}}`, a quoted value, or a file mode other than 600.
+- `LOKANDITA_APP` and `LOKANDITA_COMMIT` are baked into the image by `infra/deploy.sh`. They are not `.env` variables.
+- `judge/.env` is defined in stage 7.
+
 `INSTANCE_SECRET` must never change once students have instances. It and `SEB_ENCRYPTION_KEY` are included in every backup.
 
 Values are written without quotes.
@@ -258,6 +303,9 @@ Values are written without quotes.
 ## 11. Deploy and verification
 
 - `infra/deploy.sh <app>` builds the image tagged with the current Git commit, starts it, and fails unless the running container reports that commit at `GET /healthz` (`{ "app": "...", "commit": "..." }`).
+- `infra/deploy.sh infra` starts MySQL, Redis and Caddy, runs `infra/mysql-init.sh`, and reloads the Caddyfile.
+- `deploy.sh` refuses to run when the working tree has uncommitted or untracked changes, runs `infra/cek-env.sh` first, and warns when the commit is not on `origin`.
+- `/healthz` is served by every app container on port 8080 with `Cache-Control: no-store`. `deploy.sh` reads it from inside the container, so it works while the host is in maintenance.
 - `infra/smoke.sh` checks, with real requests:
   1. each public host answers over HTTPS;
   2. `/internal/anything` returns 404 from the internet on every host;
@@ -265,4 +313,8 @@ Values are written without quotes.
   4. the same call with a wrong token returns 401;
   5. `identity_reader` can select from `session_identity` and cannot select from `users`;
   6. the judge worker is running and a trivial `RUN` job completes.
+- `smoke.sh` additionally checks (as check 0) that every app container reports the current `HEAD` at `/healthz`.
+- In check 1 a host in maintenance must answer `503`, an open host `2xx`/`3xx`, and `www` a `301` to the apex; the certificate must validate.
+- Checks 3–5 become active in stage 5 and check 6 in stage 7, by a switch at the top of `smoke.sh`. Until then each prints `BELUM AKTIF`, is counted separately, and is not reported as passed.
+- `infra/tes-infra.sh` tests §9, §10 and the deploy verification against the running containers.
 - A stage is not finished until `smoke.sh` passes after deploy.

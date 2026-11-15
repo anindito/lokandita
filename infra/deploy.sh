@@ -99,4 +99,7 @@ if ! verifikasi_commit "$sasaran" "$commit"; then
 	docker logs --tail 30 "$sasaran" >&2 || true
 	gagal "deploy $sasaran: kontainer tidak menjalankan commit $commit"
 fi
+# Image lama aplikasi ini tidak dipakai lagi; kembali ke versi lama = checkout lalu deploy.
+docker images --format '{{.Repository}}:{{.Tag}}' "lokandita/$sasaran" \
+	| grep -v -e ":$commit\$" -e ':aktif$' | xargs -r docker rmi > /dev/null || true
 echo "deploy $sasaran: SELESAI"
