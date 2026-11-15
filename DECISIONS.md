@@ -2,6 +2,9 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-16 — Class capacity only warns in the enrollment preview and never blocks — `SPEC.md` calls it optional and a lecturer must be able to seat one more student; to make it a hard limit is a one-line change the owner can ask for.
+- 2026-11-16 — Enrolling a student who withdrew earlier re-activates the same enrollment row (in the class now chosen, with a row in `enrollment_moves` when the class differs); a student already `LULUS` in that course and year is refused and must have the graduation cancelled first — one row per student per course per year, as the schema demands.
+- 2026-11-16 — Enrollment is two requests without server-side state: the preview only classifies, the second request carries the nomor induk again and the server classifies them again before saving — what the browser sends back is not trusted, and nothing has to be stored between the steps. Input: free text or `.csv` (first column, comma/semicolon/tab, optional header `nomor_induk`), at most 2000 numbers and 1 MB.
 - 2026-11-16 — Deleting a class needs a ticked "Saya yakin" box and is refused with 409 while any enrollment (any status) or class-move record points at it; an archived class stays readable — the CSP forbids an inline confirm dialog, and a checkbox works without JavaScript.
 - 2026-11-16 — For a dosen, everything in an archived academic year is read-only (403 with an explanation); the superadmin can still correct it. A pengampu's new class always goes into the active year.
 - 2026-11-16 — Changing a class has three answers: 404 when the class is outside what the user may see, 403 when they see it but do not manage it (a pengajar who is not the pengampu), 403 with a reason when the year is archived.

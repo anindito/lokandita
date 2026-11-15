@@ -92,6 +92,10 @@ return [
     ],
 
     'mhs' => [
+        'pilih'          => 'Pilih',
+        'tindakanPetunjuk' => 'Centang mahasiswa pada daftar di atas, lalu pilih tindakan.',
+        'tandaiMundur'   => 'Tandai mengundurkan diri',
+        'mundurPetunjuk' => 'Mahasiswa yang mengundurkan diri tidak lagi dihitung, tetapi datanya tetap tersimpan. Untuk mengaktifkannya lagi, daftarkan ulang nomor induknya.',
         'nomorInduk'    => 'Nomor induk',
         'nama'          => 'Nama',
         'status'        => 'Status',
@@ -115,7 +119,38 @@ return [
         'info'   => 'Latihan soal akan tersedia di sini setelah pertemuan dibuka oleh dosen.',
     ],
 
+    'daftar' => [
+        'judul'         => 'Daftarkan mahasiswa',
+        'nomor'         => 'Nomor induk mahasiswa',
+        'nomorPetunjuk' => 'Satu nomor induk per baris. Untuk satu mahasiswa, cukup isi satu baris.',
+        'berkas'        => 'Atau unggah berkas CSV',
+        'berkasPetunjuk' => 'Berkas .csv dengan nomor induk di kolom pertama. Baris judul "nomor_induk" boleh ada.',
+        'periksa'       => 'Periksa dulu',
+        'pratinjau'     => 'Pratinjau pendaftaran',
+        'belumDisimpan' => 'Belum ada yang disimpan. Periksa daftar di bawah, lalu tekan tombol daftarkan.',
+        'jalankan'      => 'Daftarkan {0} mahasiswa',
+        'tidakAdaYangBisa' => 'Tidak ada mahasiswa yang bisa didaftarkan dari isian ini.',
+        'kembali'       => 'Kembali ke kelas',
+        'melebihi'      => 'Perhatian: kelas ini akan berisi {0} mahasiswa aktif, melebihi kapasitasnya ({1}). Pendaftaran tetap bisa dilanjutkan.',
+        'keLokaAuth'    => 'Akun dibuat oleh superadmin di LokaAuth',
+        'dariKelas'     => 'kelas {0}',
+        'golongan'      => [
+            'siap'           => 'Akan didaftarkan',
+            'aktifkanLagi'   => 'Pernah mengundurkan diri — akan diaktifkan lagi di kelas ini',
+            'sudah'          => 'Sudah terdaftar di kelas ini',
+            'kelasLain'      => 'Sudah terdaftar di kelas lain mata kuliah ini — gunakan Pindah kelas',
+            'lulus'          => 'Sudah dinyatakan lulus di mata kuliah ini',
+            'statusLain'     => 'Pendaftarannya berstatus lain — hubungi superadmin',
+            'bukanMahasiswa' => 'Bukan akun mahasiswa — tidak didaftarkan',
+            'tidakAda'       => 'Tidak ditemukan di LokaAuth — LokaKode tidak membuat akun',
+            'tidakSah'       => 'Bentuk nomor induk tidak dikenali',
+        ],
+    ],
+
     'pesan' => [
+        'didaftarkan'      => '{0} mahasiswa didaftarkan ke kelas ini.',
+        'mundur'           => '{0} mahasiswa ditandai mengundurkan diri.',
+        'tidakAdaPilihan'  => 'Tidak ada yang diubah. Pilih dulu mahasiswa yang sesuai pada daftar.',
         'kelasDibuat'      => 'Kelas dibuat.',
         'kelasDihapus'     => 'Kelas dihapus.',
         'kelasDiarsipkan'  => 'Kelas diarsipkan.',
@@ -129,6 +164,10 @@ return [
     ],
 
     'galat' => [
+        'kelasArsip'         => 'Kelas ini sudah diarsipkan dan tidak menerima mahasiswa baru. Buka kembali kelasnya lebih dulu.',
+        'berkasCsv'          => 'Berkas harus berformat .csv dan tidak lebih dari 1 MB.',
+        'nomorKosong'        => 'Isi paling sedikit satu nomor induk, atau unggah berkas CSV.',
+        'terlaluBanyak'      => 'Paling banyak 2000 nomor induk dalam satu kali pendaftaran.',
         'tahunArsip'         => 'Tahun ajaran ini sudah diarsipkan; datanya hanya bisa dibaca. Hubungi superadmin bila perlu perubahan.',
         'kelasNama'          => 'Nama kelas wajib diisi, paling banyak 60 karakter.',
         'kelasNamaDipakai'   => 'Sudah ada kelas dengan nama ini di mata kuliah dan tahun ajaran yang sama.',

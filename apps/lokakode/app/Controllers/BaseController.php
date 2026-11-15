@@ -60,8 +60,10 @@ abstract class BaseController extends Controller
     protected function pesanDariQuery(array $peta): array
     {
         $k = (string) $this->request->getGet('pesan');
+        // ?n=<angka> mengisi {0} pada pesan yang menyebut jumlah.
+        $n = max(0, (int) $this->request->getGet('n'));
 
-        return isset($peta[$k]) ? [['jenis' => $peta[$k][0], 'teks' => lang($peta[$k][1])]] : [];
+        return isset($peta[$k]) ? [['jenis' => $peta[$k][0], 'teks' => lang($peta[$k][1], [$n])]] : [];
     }
 
     /**

@@ -68,6 +68,10 @@ final class MatriksAksesTest extends KodeCase
             'POST kelas/{n}/hapus'          => ['/kelas/' . $d['kelasXA'] . '/hapus', $kelolaXA],
             'POST kelas/{n}/pengajar'       => ['/kelas/' . $d['kelasXA'] . '/pengajar', $kelolaXA],
             'POST kelas/{n}/pengajar/hapus' => ['/kelas/' . $d['kelasXA'] . '/pengajar/hapus', $kelolaXA],
+            // Pendaftaran di kelas XA: sama dengan mengubah kelas.
+            'POST kelas/{n}/daftar'          => ['/kelas/' . $d['kelasXA'] . '/daftar', $kelolaXA],
+            'POST kelas/{n}/daftar/jalankan' => ['/kelas/' . $d['kelasXA'] . '/daftar/jalankan', $kelolaXA],
+            'POST kelas/{n}/mundur'          => ['/kelas/' . $d['kelasXA'] . '/mundur', $kelolaXA],
             // Kelas baru di mata kuliah X: kedua pengajar melihat mata kuliahnya, tetapi bukan pengelola.
             'POST mata-kuliah/{n}/kelas'    => ['/mata-kuliah/' . $d['matkulX'] . '/kelas', ['pengajarB' => 403] + $kelolaXA],
 
@@ -131,6 +135,7 @@ final class MatriksAksesTest extends KodeCase
     public function testPenolakanTidakMengubahData(): void
     {
         $d      = $this->dunia();
+        $calon  = $this->user('mahasiswa', 'Calon Mahasiswa');
         $potret = fn () => [
             $this->db->query('SELECT * FROM classes ORDER BY id')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT class_id, user_id FROM class_teachers ORDER BY class_id, user_id')->fetch_all(MYSQLI_ASSOC),
@@ -148,6 +153,9 @@ final class MatriksAksesTest extends KodeCase
             'POST kelas/{n}/pengajar'       => ['nomor_induk' => $d['pengajarB']['nomor_induk']],
             'POST kelas/{n}/pengajar/hapus' => ['user_id' => $d['pengajarA']['id']],
             'POST mata-kuliah/{n}/kelas'    => ['name' => 'DIBAJAK'],
+            'POST kelas/{n}/daftar'          => ['nomor' => $calon['nomor_induk']],
+            'POST kelas/{n}/daftar/jalankan' => ['nomor' => [$calon['nomor_induk']]],
+            'POST kelas/{n}/mundur'          => ['ids' => [$d['daftarA']]],
             'POST mata-kuliah/{n}'          => ['code' => 'DIBAJAK', 'name' => 'Dibajak', 'pengampu' => $d['pengajarB']['nomor_induk']],
             'POST mata-kuliah'              => ['code' => 'BARU100', 'name' => 'Baru', 'pengampu' => $d['pengajarB']['nomor_induk']],
             'POST tahun-ajaran'             => ['label' => 'Dibajak', 'starts_on' => '2027-02-01', 'ends_on' => '2027-07-31'],

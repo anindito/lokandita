@@ -25,6 +25,14 @@ final class Kelas extends BaseController
         'pengajar-ditambah' => ['sukses', 'Kode.pesan.pengajarDitambah'],
         'pengajar-dicabut' => ['sukses', 'Kode.pesan.pengajarDicabut'],
         'pengajar-sudah'   => ['galat', 'Kode.pesan.pengajarSudah'],
+        // Pendaftaran (Controllers\Pendaftaran). {0} = ?n=<jumlah>.
+        'didaftarkan'       => ['sukses', 'Kode.pesan.didaftarkan'],
+        'mundur'            => ['sukses', 'Kode.pesan.mundur'],
+        'tidak-ada-pilihan' => ['galat', 'Kode.pesan.tidakAdaPilihan'],
+        'kelasArsip'        => ['galat', 'Kode.galat.kelasArsip'],
+        'berkasCsv'         => ['galat', 'Kode.galat.berkasCsv'],
+        'nomorKosong'       => ['galat', 'Kode.galat.nomorKosong'],
+        'terlaluBanyak'     => ['galat', 'Kode.galat.terlaluBanyak'],
     ];
 
     public function lihat(int $id): ResponseInterface

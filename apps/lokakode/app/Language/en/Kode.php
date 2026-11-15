@@ -92,6 +92,10 @@ return [
     ],
 
     'mhs' => [
+        'pilih'          => 'Select',
+        'tindakanPetunjuk' => 'Tick students in the list above, then choose an action.',
+        'tandaiMundur'   => 'Mark as withdrawn',
+        'mundurPetunjuk' => 'A withdrawn student is no longer counted, but their data is kept. To make them active again, enroll their ID number again.',
         'nomorInduk'     => 'ID number',
         'nama'           => 'Name',
         'status'         => 'Status',
@@ -115,7 +119,38 @@ return [
         'info'   => 'Practice problems will appear here once your lecturer opens a meeting.',
     ],
 
+    'daftar' => [
+        'judul'         => 'Enroll students',
+        'nomor'         => 'Student ID numbers',
+        'nomorPetunjuk' => 'One ID number per line. For a single student, one line is enough.',
+        'berkas'        => 'Or upload a CSV file',
+        'berkasPetunjuk' => 'A .csv file with the ID number in the first column. A header row "nomor_induk" is allowed.',
+        'periksa'       => 'Check first',
+        'pratinjau'     => 'Enrollment preview',
+        'belumDisimpan' => 'Nothing has been saved yet. Check the lists below, then press the enroll button.',
+        'jalankan'      => 'Enroll {0} students',
+        'tidakAdaYangBisa' => 'No student from this input can be enrolled.',
+        'kembali'       => 'Back to the class',
+        'melebihi'      => 'Note: this class will hold {0} active students, above its capacity ({1}). You can still continue.',
+        'keLokaAuth'    => 'Accounts are created by the superadmin in LokaAuth',
+        'dariKelas'     => 'class {0}',
+        'golongan'      => [
+            'siap'           => 'Will be enrolled',
+            'aktifkanLagi'   => 'Withdrew earlier — will be made active again in this class',
+            'sudah'          => 'Already enrolled in this class',
+            'kelasLain'      => 'Already enrolled in another class of this course — use Move class',
+            'lulus'          => 'Already graduated from this course',
+            'statusLain'     => 'The enrollment has another status — contact the superadmin',
+            'bukanMahasiswa' => 'Not a student account — not enrolled',
+            'tidakAda'       => 'Not found in LokaAuth — LokaKode does not create accounts',
+            'tidakSah'       => 'ID number format not recognised',
+        ],
+    ],
+
     'pesan' => [
+        'didaftarkan'      => '{0} students enrolled in this class.',
+        'mundur'           => '{0} students marked as withdrawn.',
+        'tidakAdaPilihan'  => 'Nothing was changed. Select matching students in the list first.',
         'kelasDibuat'      => 'Class created.',
         'kelasDihapus'     => 'Class deleted.',
         'kelasDiarsipkan'  => 'Class archived.',
@@ -129,6 +164,10 @@ return [
     ],
 
     'galat' => [
+        'kelasArsip'         => 'This class is archived and accepts no new students. Reopen the class first.',
+        'berkasCsv'          => 'The file must be a .csv of at most 1 MB.',
+        'nomorKosong'        => 'Enter at least one ID number, or upload a CSV file.',
+        'terlaluBanyak'      => 'At most 2000 ID numbers per enrollment.',
         'tahunArsip'         => 'This academic year is archived; its data is read-only. Contact the superadmin if a change is needed.',
         'kelasNama'          => 'The class name is required, at most 60 characters.',
         'kelasNamaDipakai'   => 'A class with this name already exists in the same course and academic year.',
