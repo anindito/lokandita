@@ -1,49 +1,89 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controllers;
 
+use App\Libraries\Akademik;
+use App\Policy\Akses;
 use CodeIgniter\Controller;
-use CodeIgniter\HTTP\CLIRequest;
-use CodeIgniter\HTTP\IncomingRequest;
-use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Psr\Log\LoggerInterface;
+use Lokandita\Auth\Current;
+use Lokandita\Auth\Log;
 
 /**
- * BaseController provides a convenient place for loading components
- * and performing functions that are needed by all your controllers.
- *
- * Extend this class in any new controllers:
- * ```
- *     class Home extends BaseController
- * ```
- *
- * For security, be sure to declare any new methods as protected or private.
+ * Dasar semua halaman LokaKode. Setiap rute di sini berada di belakang filter
+ * `masuk` (KONTRAK.md §4), jadi identitas selalu ada.
  */
 abstract class BaseController extends Controller
 {
-    /**
-     * Be sure to declare properties for any property fetch you initialized.
-     * The creation of dynamic property is deprecated in PHP 8.2.
-     */
+    protected $helpers = ['form'];
 
-    // protected $session;
+    private ?Akses $akses = null;
 
-    /**
-     * @param CLIRequest|IncomingRequest $request
-     *
-     * @return void
-     */
-    public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
+    protected function akses(): Akses
     {
-        // Load here all helpers you want to be available in your controllers that extend BaseController.
-        // Caution: Do not put the this below the parent::initController() call below.
-        // $this->helpers = ['form', 'url'];
+        if ($this->akses === null) {
+            $identitas = Current::identity();
+            if ($identitas === null) {
+                throw new \LogicException('Rute ini tidak dipasangi filter masuk.');
+            }
+            $this->akses = new Akses($identitas);
+        }
 
-        // Caution: Do not edit this line.
-        parent::initController($request, $response, $logger);
+        return $this->akses;
+    }
 
-        // Preload any models, libraries, etc, here.
-        // $this->session = service('session');
+    protected function akademik(): Akademik
+    {
+        return new Akademik($this->akses());
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    protected function halaman(string $view, array $data = [], int $status = 200): ResponseInterface
+    {
+        $data['akses'] = $this->akses();
+        $data['pesan'] ??= [];
+
+        return $this->response->setStatusCode($status)->setBody(view($view, $data));
+    }
+
+    /**
+     * Jawaban untuk baris yang tidak ada ATAU di luar hak pengguna. Keduanya
+     * sengaja tidak dibedakan, supaya nomor di URL tidak bisa dipakai menebak
+     * kelas atau mata kuliah mana yang ada.
+     */
+    protected function tidakDitemukan(string $apa): ResponseInterface
+    {
+        Log::event('access.denied', [
+            'user'   => $this->akses()->identitas()->userId,
+            'reason' => 'outside_scope_or_missing',
+            'what'   => $apa,
+            'path'   => $this->request->getUri()->getPath(),
+        ]);
+
+        return $this->response->setStatusCode(404)->setBody(view('Lokandita\Auth\Views\pesan', [
+            'judul' => lang('Lokandita.tidakDitemukan'),
+            'teks'  => lang('Kode.tidakDitemukan'),
+        ]));
+    }
+
+    /**
+     * Peran ini tidak pernah boleh melakukan tindakan ini.
+     */
+    protected function terlarang(): ResponseInterface
+    {
+        Log::event('access.denied', [
+            'user'   => $this->akses()->identitas()->userId,
+            'reason' => 'role',
+            'path'   => $this->request->getUri()->getPath(),
+        ]);
+
+        return $this->response->setStatusCode(403)->setBody(view('Lokandita\Auth\Views\pesan', [
+            'judul' => lang('Lokandita.tidakBerhak'),
+            'teks'  => lang('Lokandita.tidakBerhak'),
+        ]));
     }
 }

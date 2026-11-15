@@ -2,6 +2,11 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-16 — The shared test for the re-sent session cookie accepts `Max-Age` within 2 seconds of 43200 — the value is computed when the response is sent, so a page that takes longer to build crossed a second boundary and failed the exact match.
+- 2026-11-16 — `tests/Policy/MatriksAksesTest.php` reads the registered routes and fails when a route is missing from its authorisation matrix; each route is then requested by six actors (superadmin, two pengampu, two pengajar, a mahasiswa) — a new endpoint cannot ship without an authorisation and cross-class test.
+- 2026-11-16 — A class or course outside the user's scope answers 404 with the same page as one that does not exist; a role that may never use a page answers 403 — the number in the URL cannot be used to find out which classes exist.
+- 2026-11-16 — The policy layer (`App\Policy\Akses`) returns SQL conditions that `App\Libraries\Akademik` puts into every query; there is no function that loads a class, course or enrollment by id alone — a forgotten check then returns no row instead of someone else's data.
+- 2026-11-16 — LokaKode reads names from `user_directory` on every request and keeps no copy; the pengampu and students are looked up there rather than through `/internal/users/lookup` — one source of truth and no HTTP call that can fail while rendering a list.
 - 2026-11-16 — LokaKode's `audit_log` has no trigger against UPDATE/DELETE; it is append-only because no code path changes it, as in LokaAuth — creating triggers as `lokakode_app` needs SUPER while binary logging is on.
 - 2026-11-16 — An enrollment carries `course_id` and `academic_year_id` next to `class_id`, tied to the class by a composite foreign key — MySQL itself then refuses a second enrollment in the same course and year, and a class move into another course, even if the code is wrong.
 - 2026-11-16 — "Exactly one active academic year" is a generated column `satu_aktif` (1 when active, otherwise NULL) with a unique key — MySQL has no partial unique index; the database refuses a second active year.

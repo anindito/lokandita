@@ -217,7 +217,9 @@ final class ClientAppTest extends TestCase
         $this->assertLessThan(10, (int) $baca()['lalu'], 'lebih dari 5 menit: aplikasi memanggil touch di LokaAuth');
         $this->assertEqualsWithDelta(43200, (int) $baca()['sisa'], 10);
         $cookie = (string) $r->setCookieLine('lokandita_sid');
-        $this->assertMatchesRegularExpression('/max-age=43200/i', $cookie, 'cookie yang sama dikirim ulang dengan umur baru');
+        // Max-Age dihitung saat jawaban dikirim, jadi bisa satu-dua detik di bawah 43200.
+        $this->assertSame(1, preg_match('/max-age=(\d+)/i', $cookie, $umur), 'cookie yang sama dikirim ulang dengan umur baru');
+        $this->assertEqualsWithDelta(43200, (int) $umur[1], 2);
         $this->assertMatchesRegularExpression('/domain=\.lokandita\.com/i', $cookie);
         $this->assertMatchesRegularExpression('/httponly/i', $cookie);
         $this->assertStringContainsString($klien->cookies['lokandita_sid'], $cookie);

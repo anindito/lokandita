@@ -119,7 +119,9 @@ Every app, LokaAuth included, answers these three routes; in client apps they ar
 
 The CSRF token is not regenerated after use and lives 12 hours, so a page that stays open, a second tab, and the background `/sesi/perpanjang` call do not invalidate each other.
 
-`GET /` and `GET /beranda` in LokaKode and Portal are temporary pages of stage 5 (`Lokandita\Auth\Routes::sementara()`), replaced in stages 6 and 11.
+`GET /` and `GET /beranda` in the Portal are temporary pages of stage 5 (`Lokandita\Auth\Routes::sementara()`), replaced in stage 11. LokaKode has its own `/beranda` since stage 6; its `GET /` needs no session and only redirects to `/beranda` until the public landing of stage 11.
+
+Client apps read names and nomor induk from `user_directory`, and app access from `app_access`, through `Lokandita\Auth\UserDirectory` (same `identity_reader` connection as the session check, `Lokandita\Auth\ReaderDb`). They do not copy this data into their own schema; a `user_id` stored by a client app is `users.id`.
 
 ## 5. Internal API (LokaAuth)
 
