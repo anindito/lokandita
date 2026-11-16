@@ -48,6 +48,12 @@ $routes->group('', ['filter' => 'masuk:superadmin,dosen'], static function (Rout
     $routes->post('kelas/(:num)/batal-lulus', 'Pendaftaran::batalLulus/$1');
     // Reset kata sandi mahasiswa: siapa pun yang boleh melihat kelas itu (termasuk pengajarnya).
     $routes->post('kelas/(:num)/reset-sandi', 'Pendaftaran::resetSandi/$1');
+    // Pertemuan dan konsep (SPEC.md §6 minimal, §9): superadmin dan pengampu; pengajar 403.
+    $routes->get('mata-kuliah/(:num)/pertemuan', 'Pertemuan::index/$1');
+    $routes->post('mata-kuliah/(:num)/pertemuan', 'Pertemuan::simpan/$1');
+    $routes->post('mata-kuliah/(:num)/konsep-dasar', 'Pertemuan::konsepDasar/$1');
+    $routes->get('pertemuan/(:num)', 'Pertemuan::lihat/$1');
+    $routes->post('pertemuan/(:num)', 'Pertemuan::perbarui/$1');
 });
 
 // Superadmin saja (SPEC.md §3): tahun ajaran dan mata kuliah.

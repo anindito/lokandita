@@ -2,6 +2,9 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-17 — Meetings are never deleted, only switched off ("used for practice"), and number and language are locked once a meeting has problems — problems were validated against that language and that place in the concept order.
+- 2026-11-17 — A meeting is visible to whoever sees its course but its page answers 403 to a pengajar who is not the pengampu (404 outside the course) — the same three-way answer as changing a class in stage 6.
+- 2026-11-17 — Stage 8 texts live in their own language file `Soal.php` (`id`, `en`, `ar`) — `Kode.php` already has 264 lines.
 - 2026-11-17 — The judge worker writes `problem_instances` itself and a `GENERATE` result carries no test — a student who creates a job can read its result through `/api/executions/{id}`, so tests must never pass through `judge_jobs`.
 - 2026-11-17 — A problem belongs to one meeting (`problems.meeting_id`, slug unique there); `meeting_problems` holds the one approved version in use and is created at the first approval — `KONTRAK.md` §7 imports one file per meeting and identifies a problem by slug within it.
 - 2026-11-17 — Translations, `params`, detected concepts and required concepts of a version are JSON columns of `problem_versions` — they are always read and written together with the version and never queried by field.

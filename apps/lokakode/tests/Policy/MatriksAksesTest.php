@@ -87,6 +87,14 @@ final class MatriksAksesTest extends KodeCase
             // Kelas baru di mata kuliah X: kedua pengajar melihat mata kuliahnya, tetapi bukan pengelola.
             'POST mata-kuliah/{n}/kelas'    => ['/mata-kuliah/' . $d['matkulX'] . '/kelas', ['pengajarB' => 403] + $kelolaXA],
 
+            // Pertemuan dan konsep mata kuliah X: superadmin dan pengampu X. Kedua pengajar
+            // melihat mata kuliahnya tetapi bukan pengelola (403); pengampu Y tidak melihatnya (404).
+            'GET mata-kuliah/{n}/pertemuan'     => ['/mata-kuliah/' . $d['matkulX'] . '/pertemuan', ['pengajarB' => 403] + $kelolaXA],
+            'POST mata-kuliah/{n}/pertemuan'    => ['/mata-kuliah/' . $d['matkulX'] . '/pertemuan', ['pengajarB' => 403] + $kelolaXA],
+            'POST mata-kuliah/{n}/konsep-dasar' => ['/mata-kuliah/' . $d['matkulX'] . '/konsep-dasar', ['pengajarB' => 403] + $kelolaXA],
+            'GET pertemuan/{n}'                 => ['/pertemuan/' . $d['pertemuanX1'], ['pengajarB' => 403] + $kelolaXA],
+            'POST pertemuan/{n}'                => ['/pertemuan/' . $d['pertemuanX1'], ['pengajarB' => 403] + $kelolaXA],
+
             // Gerbang tahap 6: pengajar B tidak bisa membuka kelas XA milik pengajar A.
             'GET kelas/{n}' => ['/kelas/' . $d['kelasXA'], ['pengampuY' => 404, 'pengajarB' => 404] + $staf],
         ];
@@ -154,6 +162,9 @@ final class MatriksAksesTest extends KodeCase
             $this->db->query('SELECT id, class_id, status FROM enrollments ORDER BY id')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT id, code, name, owner_id FROM courses ORDER BY id')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT id, label, status FROM academic_years ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT id, course_id, number, title, language, enabled FROM meetings ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT * FROM meeting_concepts ORDER BY meeting_id, concept_code')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT * FROM course_base_concepts ORDER BY course_id, concept_code')->fetch_all(MYSQLI_ASSOC),
         ];
         $awal = $potret();
 
@@ -174,6 +185,9 @@ final class MatriksAksesTest extends KodeCase
             'POST kelas/{n}/reset-sandi'     => ['user_id' => $d['mhsA']['id'], 'yakin' => '1'],
             'POST mata-kuliah/{n}'          => ['code' => 'DIBAJAK', 'name' => 'Dibajak', 'pengampu' => $d['pengajarB']['nomor_induk']],
             'POST mata-kuliah'              => ['code' => 'BARU100', 'name' => 'Baru', 'pengampu' => $d['pengajarB']['nomor_induk']],
+            'POST mata-kuliah/{n}/pertemuan'    => ['number' => '9', 'title' => 'Dibajak', 'language' => 'cpp'],
+            'POST mata-kuliah/{n}/konsep-dasar' => ['konsep' => ['POINTER', 'STRING']],
+            'POST pertemuan/{n}'                => ['number' => '1', 'title' => 'Dibajak', 'language' => 'cpp', 'enabled' => '1', 'konsep' => ['POINTER']],
             'POST tahun-ajaran'             => ['label' => 'Dibajak', 'starts_on' => '2027-02-01', 'ends_on' => '2027-07-31'],
             'POST tahun-ajaran/{n}'         => ['label' => 'Dibajak', 'starts_on' => '2027-02-01', 'ends_on' => '2027-07-31'],
             'POST tahun-ajaran/baru'          => ['label' => 'Dibajak', 'starts_on' => '2027-02-01', 'ends_on' => '2027-07-31'],

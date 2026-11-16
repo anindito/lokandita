@@ -7,6 +7,9 @@
     <?php if ($akses->superadmin()): ?>
         · <a href="/mata-kuliah/<?= (int) $matkul['id'] ?>/ubah"><?= lang('Kode.matkul.ubah') ?></a>
     <?php endif ?>
+    <?php if ((int) $matkul['boleh_kelola'] === 1): ?>
+        · <a href="/mata-kuliah/<?= (int) $matkul['id'] ?>/pertemuan"><?= lang('Soal.pertemuan.kelola') ?></a>
+    <?php endif ?>
 </p>
 
 <?php if ($tahun === null): ?>

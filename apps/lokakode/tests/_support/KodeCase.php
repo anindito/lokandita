@@ -125,6 +125,25 @@ abstract class KodeCase extends TestCase
     }
 
     /**
+     * Pertemuan dengan konsep tambahannya.
+     *
+     * @param list<string> $konsep
+     */
+    protected function pertemuan(int $matkul, int $nomor, string $bahasa = 'cpp', array $konsep = [], string $judul = 'Pertemuan uji'): int
+    {
+        Fixtures::insert($this->db, 'meetings', [
+            'course_id' => $matkul, 'number' => $nomor, 'title' => $judul, 'language' => $bahasa, 'enabled' => 1,
+            'created_at' => gmdate('Y-m-d H:i:s'), 'updated_at' => gmdate('Y-m-d H:i:s'),
+        ]);
+        $id = (int) $this->db->insert_id;
+        foreach ($konsep as $kode) {
+            Fixtures::insert($this->db, 'meeting_concepts', ['meeting_id' => $id, 'concept_code' => $kode]);
+        }
+
+        return $id;
+    }
+
+    /**
      * Baris judge_jobs yang sudah selesai, milik $pembuat (null = pekerjaan sistem). Tidak diantrekan.
      *
      * @param array<string, mixed>|null $pembuat
@@ -188,6 +207,10 @@ abstract class KodeCase extends TestCase
         $d['daftarB'] = $this->daftar($d['mhsB'], $d['kelasXB']);
         $d['daftarY'] = $this->daftar($d['mhsY'], $d['kelasYA']);
         $d['jobA']    = $this->job($d['mhsA']);
+        // Pertemuan 1 dan 2 mata kuliah X (C++), pertemuan 1 mata kuliah Y (Python).
+        $d['pertemuanX1'] = $this->pertemuan($d['matkulX'], 1, 'cpp', ['IO_DASAR', 'VARIABEL_TIPE', 'ARITMETIKA']);
+        $d['pertemuanX2'] = $this->pertemuan($d['matkulX'], 2, 'cpp', ['KONVERSI_TIPE']);
+        $d['pertemuanY1'] = $this->pertemuan($d['matkulY'], 1, 'python', ['IO_DASAR', 'VARIABEL_TIPE', 'ARITMETIKA']);
 
         return $d;
     }
