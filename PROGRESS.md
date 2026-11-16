@@ -1,6 +1,6 @@
 # Progress
 
-Next stage: **7 — Judge worker** — not started.
+Current stage: **7 — Judge worker** — built and deployed 2026-11-16, **waiting for the owner's gate**; see "Stage 7" at the end of this file. No tag `tahap-7` yet.
 
 Stage 6 — LokaKode academic core and policy layer — finished 2026-11-16, tag `tahap-6`; see "Gate result" at the end of this file.
 
@@ -204,3 +204,55 @@ Carried into the next stages:
 - Smoke check 6 becomes active in stage 7.
 - The "Owed by later stages" list above.
 
+
+## Stage 7 — 2026-11-16
+
+Plan approved by the owner 2026-11-16 (7 steps): 1 contract and harness · 2 images and seccomp · 3 sandbox and hostile-program tests · 4 worker · 5 web side · 6 service and deploy · 7 close. Steps 4–6 share two commits because the first session was cut off by the usage limit.
+
+Owner's decisions for this stage (2026-11-16): the worker is a systemd *user* service of `deploy` with linger (enabled by the owner); `RUN` works end to end and the other job kinds answer `FAILED` / `unsupported_kind` until stages 8–9; a time limit is CPU time measured inside the container, with a wall-clock limit of 2 × limit + 1 s; auth and portal were redeployed only to report the current commit.
+
+Built (`SPEC.md` §10, `KONTRAK.md` §6):
+
+- `judge_jobs` in the `lokakode` schema; MySQL user `judge_worker` with `SELECT, UPDATE` on that table only; `judge/.env`.
+- Images `judge-c`, `judge-cpp` (GCC 13), `judge-python` (3.12, NumPy 2.5.5, Matplotlib 3.11.2), base images pinned by digest; seccomp profile generated from Docker's default; `pelari`, the supervisor inside each container.
+- Sandbox (`judge/lokandita_judge/kotak.py`): one new container per program with every limit of the §10 table; verdicts OK/AC, WA, CE, RE, TLE, MLE, OLE; four comparison modes; fails closed.
+- Worker: normal queue before low, conditional claim, progress, two retries then `judge_unavailable`, recovery after a crash and of rows that never reached Redis, reaper by label, heartbeat with the running commit.
+- LokaKode: `App\Libraries\Antrean`, `GET /api/executions/{id}` (own jobs only), `php spark judge:coba`.
+- `infra/tes.sh judge`, `infra/deploy.sh judge`, smoke check 6, `judge/uji-terima.sh`.
+- `KONTRAK.md` §6, §10, §12 updated; choices in `DECISIONS.md`.
+
+Verified by the agent (commands and output shown in the session), at commit `e23423e`:
+
+- `infra/tes.sh judge` → 137 passed. Real hostile programs in real containers; nothing skipped (a skipped test fails the run).
+- `infra/tes.sh lokakode` → 93 tests, 1023 assertions, all pass, with a real test worker on the host. The authorisation matrix covers the new route: a job of mahasiswa A answers 404 to another mahasiswa, the pengajar, the pengampu and the superadmin.
+- `judge/uji-terima.sh` → 10 of 10 items LULUS. 200 simultaneous `RUN` jobs took 109–133 s at `JUDGE_CONCURRENCY=4`.
+- `infra/deploy.sh lokakode` and `infra/deploy.sh judge` → verified by `/healthz` and by the worker's heartbeat. The LokaKode migration created `judge_jobs` in the real `lokakode` schema.
+- `infra/smoke.sh` check 6 → five lines LULUS: service active, heartbeat at HEAD, linger on, a real `RUN` through the deployed LokaKode returned the right output (about 1.8 s), no judge container left.
+- After this entry was committed all four components were deployed again so that every one reports `HEAD`; the outputs of that deploy, of `infra/smoke.sh`, `infra/backup.sh`, `infra/uji-restore.sh` and `infra/tes-infra.sh` are in the session and will be recorded with the gate result.
+
+Not verified, or weaker than it looks:
+
+- **Only `RUN` with custom input does anything.** `SUBMIT`, `GENERATE`, `VALIDATE`, `ANALYZE` and `RUN` with an `instance_id` answer `FAILED` / `unsupported_kind`. The engine that judges a list of tests (`mesin.nilai_tes`) is tested directly but nothing calls it yet. No scoring, no concept analysis.
+- **No student can run code yet**: there is no page and no endpoint that creates a job; the only producer is `spark judge:coba`. `GET /api/executions/{id}` without a session redirects to the login page; the browser code of stage 9 must handle that.
+- **The worker has not been through a reboot.** Linger is on, but that it starts by itself after a restart of the server has not been tested.
+- **One unexplained slow run**: once, in a full test run, a compile that normally dies at the memory limit in 3 s was instead stopped by the 10 s watchdog. Four repeats by hand behaved normally. The test accepts both outcomes (`DECISIONS.md`).
+- Throughput: every test of a submission will be its own container (about 0.55 s overhead each). A submission with 12 hidden tests is therefore about 8 s of work; 200 of them queued at once would take roughly 6–7 minutes at concurrency 4. This is an estimate, not a measurement; only `RUN` was measured.
+- Isolation is Docker with runc, as `SPEC.md` says: limits, seccomp, no capabilities, no network. It is not a virtual machine; a kernel or runc vulnerability is outside what these tests can show.
+- The worker runs as `deploy`, which is in the `docker` group and is therefore root-equivalent on this host.
+- A compile of `#include <bits/stdc++.h>` peaked at 170 MB of the 256 MB limit; heavy template code may hit the limit and be reported as a compile error with reason `memory`.
+- `infra/tes.sh auth` and `infra/tes.sh portal` were not run in this stage (the shared package did not change).
+- Each `infra/smoke.sh` run leaves one small system `RUN` row in the real `judge_jobs`. There is no clean-up of old rows yet; decide retention in stage 9.
+
+Owed by later stages:
+
+- Stage 8: `VALIDATE`, `GENERATE`, `ANALYZE` (tree-sitter, `ast`); the grant script must then name every further table the worker touches.
+- Stage 9: `SUBMIT` and `RUN` on sample tests; the endpoints that create jobs, with rate limits; compiler flags per meeting; retention of `judge_jobs`; plus the items stage 6 left for stage 9.
+
+Owner's gate for stage 7 (`SPEC.md` §18: all acceptance tests pass on this host):
+
+1. `judge/uji-terima.sh` — about 3 minutes; loads the CPU for about 2 of them; uses the test schema only. Expect ten lines `LULUS` and `uji terima: LULUS — 10 dari 10 butir`.
+2. `infra/smoke.sh` — expect `21 lulus, 0 gagal, 0 belum aktif`.
+3. Optional: `systemctl --user status lokandita-judge` and `journalctl --user -u lokandita-judge -n 20`.
+4. Optional, at a quiet moment: reboot the server, wait two minutes, run `infra/smoke.sh` again — this is the only way to prove the worker comes back by itself.
+
+After the gate: tag `tahap-7`, record the result here.
