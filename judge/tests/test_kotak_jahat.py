@@ -284,10 +284,17 @@ def test_kompilasi_yang_menghabiskan_memori_terkurung():
               "template<class T> struct A<0,T>{enum{v=1};};\nint main(){return A<40,int>::v;}\n")
     d = kotak.siapkan_dir_job()
     try:
+        mulai = time.time()
         k = kotak.kompilasi("cpp", sumber, d)
+        lama = time.time() - mulai
     finally:
         kotak.buang_dir_job(d)
-    assert not k.ok and k.alasan == "memori_habis"
+    # Biasanya batas memori yang kena (sekitar 3 detik). Sekali teramati kompiler
+    # melambat di dekat batas memori dan pengawas 10 detik yang lebih dulu kena.
+    # Keduanya berarti terkurung; yang tidak boleh terjadi adalah kompilasi berhasil
+    # atau berjalan lebih lama daripada pengawas.
+    assert not k.ok and k.alasan in ("memori_habis", "waktu_habis"), k
+    assert lama < 14, lama
 
 
 def test_kompilasi_tidak_bisa_menyertakan_berkas_host_atau_perangkat():

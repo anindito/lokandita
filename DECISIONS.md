@@ -2,6 +2,8 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-16 — `judge/uji-terima.sh` is the owner's gate for stage 7: it runs the acceptance tests of `SPEC.md` §10 through `infra/tes.sh judge` (real hostile programs, test schema) and prints one line per item — the gate is the same code as the automated tests, so the two cannot disagree.
+- 2026-11-16 — The test for a compile that exhausts memory accepts `memory` or `timeout` as the reason: normally the memory limit stops it in about 3 s, but once in a full run the compiler slowed down near the limit and the 10 s watchdog fired first; the cause of that one slow run was not found. Either way the compile is stopped.
 - 2026-11-16 — `GET /api/executions/{id}` answers the same 404 to everybody but the creator, superadmin included, and never returns the payload — `KONTRAK.md` §6 says a user reads only their own jobs; staff will read submissions through their own pages in stage 9, with the policy layer.
 - 2026-11-16 — `infra/tes.sh lokakode` starts a real judge worker on the host (schema `lokakode_test`, Redis DB 15) for the duration of the tests — the LokaKode tests send real jobs through MySQL and Redis and read the result over HTTP; if Docker or the judge images are missing the run fails.
 - 2026-11-16 — LokaKode has its own small Redis connection inside `App\Libraries\Antrean` instead of sharing LokaAuth's `RedisConn` — fifteen lines, and moving it into the shared package would mean changing and redeploying LokaAuth for no behaviour change.

@@ -50,7 +50,8 @@ final class EksekusiTest extends KodeCase
         $data = $this->tunggu($http, $id);
         $this->assertSame('DONE', $data['status']);
         $this->assertSame('RUN', $data['kind']);
-        $this->assertSame(['state' => 'done', 'current' => 1, 'total' => 1], $data['progress']);
+        // assertEquals: MySQL menyimpan kunci JSON dalam urutannya sendiri.
+        $this->assertEquals(['state' => 'done', 'current' => 1, 'total' => 1], $data['progress']);
         $this->assertSame('OK', $data['result']['verdict']);
         $this->assertSame("42\n", $data['result']['stdout']);
         $this->assertSame(['id', 'kind', 'status', 'progress', 'result'], array_keys($data));
@@ -106,9 +107,13 @@ final class EksekusiTest extends KodeCase
         $this->assertStringNotContainsString('hasil', $r->body);
 
         $http = $this->sebagai($mhs);
-        foreach (['abc', '1', "{$job}x", strtoupper($job), "'%20OR%201=1--"] as $aneh) {
+        foreach (['abc', '1', "{$job}x", strtoupper($job)] as $aneh) {
             $this->assertSame(404, $http->get('/api/executions/' . $aneh)->status, $aneh);
         }
+        // Tanda kutip di URL sudah ditolak CodeIgniter (400) sebelum sampai ke rute.
+        $r = $http->get("/api/executions/'%20OR%201=1--");
+        $this->assertContains($r->status, [400, 404]);
+        $this->assertStringNotContainsString('hasil', $r->body);
     }
 
     public function testKunciUnikMenghasilkanSatuPekerjaan(): void

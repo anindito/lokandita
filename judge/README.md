@@ -10,3 +10,5 @@ Worker penilai (Python 3.12) — `SPEC.md` §10, `KONTRAK.md` §6.
 - `seccomp/` — `judge.json` dibuat oleh `buat-profil.py` dari profil bawaan Docker; jangan disunting dengan tangan.
 - `lokandita_judge/kotak.py` — kotak pasir: semua bendera Docker ada di `bendera_kontainer`. `mesin.py` — RUN dan penilaian per tes. `banding.py` — mode perbandingan keluaran.
 - `var/` — direktori kerja per job (tidak masuk Git), dikaitkan hanya-baca ke kontainer.
+- `lokandita_judge/worker.py` — worker; dijalankan sebagai layanan systemd pengguna `lokandita-judge.service`, di-deploy dengan `infra/deploy.sh judge`.
+- `uji-terima.sh` — uji terima `SPEC.md` §10, satu baris per butir (gerbang tahap 7).
