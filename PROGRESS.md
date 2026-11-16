@@ -1,6 +1,8 @@
 # Progress
 
-Current stage: **7 — Judge worker** — built and deployed 2026-11-16, **waiting for the owner's gate**; see "Stage 7" at the end of this file. No tag `tahap-7` yet.
+Next stage: **8 — Problems, concepts, importer** — not started.
+
+Stage 7 — Judge worker — finished 2026-11-17, tag `tahap-7`; see "Gate result" at the end of this file.
 
 Stage 6 — LokaKode academic core and policy layer — finished 2026-11-16, tag `tahap-6`; see "Gate result" at the end of this file.
 
@@ -256,3 +258,31 @@ Owner's gate for stage 7 (`SPEC.md` §18: all acceptance tests pass on this host
 4. Optional, at a quiet moment: reboot the server, wait two minutes, run `infra/smoke.sh` again — this is the only way to prove the worker comes back by itself.
 
 After the gate: tag `tahap-7`, record the result here.
+
+Results of the closing deploy of 2026-11-16, at commit `14b1836` (output shown in the session):
+
+- `infra/deploy.sh auth`, `lokakode`, `portal`, `judge` → each verified (`/healthz`, worker heartbeat). Auth and portal were redeployed with the owner's approval, only so that they report the current commit.
+- `infra/smoke.sh` → 21 passed, 0 failed, 0 not active. Check 6 is active for the first time.
+- `infra/backup.sh` → passed, now with 5 `.env` files (`judge/.env` included). `infra/uji-restore.sh` → passed, 20 schemas/tables restored and equal, `judge_jobs` among them.
+- **`infra/tes-infra.sh` → 53 passed, 1 failed.** The failing line is "auth dibuka: host lain tetap pemeliharaan": the test expects `lokakode.lokandita.com` to answer 503, but that host has been open by the owner's choice since the stage 6 gate. The test's assumption is out of date; the edge behaves as configured. **Not fixed in this stage.** The test left the open/closed state of the hosts as it was.
+
+Gate result, 2026-11-17:
+
+- **The owner's message closing the stage contained the four result lines as an unfilled template** (no values for `uji-terima.sh`, containers left, the smoke line, or the reboot). Nothing below is the owner's report; it is what the server shows and what the agent ran itself.
+- What the server shows (counts and times only):
+  - The server was rebooted at 2026-11-17 00:36 WIB and now runs kernel 6.8.0-149 (it was 6.8.0-147). All six containers came back healthy.
+  - **The worker came back by itself**: `lokandita-judge.service` became active 18 seconds after boot with 0 restarts and logged `mulai` at commit `14b1836`. This closes "the worker has not been through a reboot" above.
+  - `lokakode_test.judge_jobs` held 200 `DONE` rows created 00:32–00:34 WIB, four minutes before the reboot and long after the agent's last run: the 200-job acceptance test was run by someone other than the agent and every job finished. The earlier items of that run leave no trace in the database, so their result is not known to the agent.
+- Run by the agent after the reboot (output shown in the session):
+  - `infra/smoke.sh` → `21 lulus, 0 gagal, 0 belum aktif`; the real `RUN` through LokaKode returned the right output in about 1.5 s.
+  - `judge/uji-terima.sh` → `uji terima: LULUS — 10 dari 10 butir`; 200 jobs in 98 s; 0 judge containers left afterwards. **The gate of `SPEC.md` §18 passes on this host.**
+- The tagged commit differs from the deployed `14b1836` only in this file. **It has not been redeployed**, so `infra/smoke.sh` check 0 and the worker heartbeat line fail until `infra/deploy.sh` is run for the four components; nothing that runs has changed.
+
+**Stage 7 finished 2026-11-17, tag `tahap-7`.**
+
+Carried into the next stages:
+
+- Redeploy the four components at the tagged commit when convenient, or let the first deploy of stage 8 do it.
+- `infra/tes-infra.sh` section I assumes every host but auth is in maintenance; make it follow the real state of the hosts.
+- The items under "Not verified, or weaker than it looks" and "Owed by later stages" of stage 7 still hold, except the reboot.
+- `auth.lokandita.com` and `lokakode.lokandita.com` are open; the Portal is in maintenance.
