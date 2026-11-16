@@ -32,7 +32,7 @@ from concurrent.futures import ThreadPoolExecutor
 import pymysql
 import redis
 
-from . import citra, konfig, kotak, mesin, sambungan
+from . import citra, konfig, kotak, mesin, sambungan, soal
 
 ANTREAN = {"normal": "lokandita:judge:normal", "low": "lokandita:judge:low"}
 KUNCI_DENYUT = "lokandita:judge:worker"
@@ -143,12 +143,6 @@ class Worker:
         if not isinstance(payload, dict):
             return "FAILED", {"error": "invalid_payload", "message": "payload harus obyek JSON"}
 
-        if kind != "RUN":
-            # SUBMIT, GENERATE, VALIDATE, ANALYZE membutuhkan tabel tahap 8–9.
-            return "FAILED", {"error": "unsupported_kind", "message": f"{kind} belum didukung worker ini"}
-        if payload.get("instance_id") is not None:
-            return "FAILED", {"error": "unsupported_kind", "message": "RUN dengan instance_id belum didukung worker ini"}
-
         def maju(keadaan: str, sekarang: int, total: int) -> None:
             try:
                 self.db.ubah("UPDATE judge_jobs SET progress = %s WHERE id = %s AND status = 'RUNNING'",
@@ -156,13 +150,58 @@ class Worker:
             except pymysql.err.MySQLError as e:
                 catat("kemajuan_tidak_tertulis", job=id_, galat=type(e).__name__)
 
-        stdin = payload.get("stdin")
-        if stdin is not None and not isinstance(stdin, str):
-            return "FAILED", {"error": "invalid_payload", "message": "stdin harus teks"}
         try:
-            return "DONE", mesin.jalankan_sekali(payload.get("language"), payload.get("source"), stdin or "", maju)
+            if kind == "RUN":
+                if payload.get("instance_id") is not None:
+                    return "FAILED", {"error": "unsupported_kind", "message": "RUN dengan instance_id belum didukung worker ini"}
+                stdin = payload.get("stdin")
+                if stdin is not None and not isinstance(stdin, str):
+                    return "FAILED", {"error": "invalid_payload", "message": "stdin harus teks"}
+                return "DONE", mesin.jalankan_sekali(payload.get("language"), payload.get("source"), stdin or "", maju)
+            if kind == "VALIDATE":
+                return "DONE", soal.validasi(payload, maju)
+            if kind == "GENERATE":
+                return self.bangkit(payload)
+            if kind == "ANALYZE":
+                return "DONE", soal.periksa(payload)
         except mesin.MasukanSalah as e:
             return "FAILED", {"error": "invalid_payload", "message": str(e)}
+        except kotak.AnalisisGagal as e:
+            return "FAILED", {"error": "analysis_failed", "message": str(e)}
+        # SUBMIT membutuhkan tabel kiriman tahap 9.
+        return "FAILED", {"error": "unsupported_kind", "message": f"{kind} belum didukung worker ini"}
+
+    def bangkit(self, payload: dict) -> tuple[str, dict]:
+        """GENERATE: instans satu mahasiswa untuk satu soal pertemuan (SPEC.md §8.2).
+
+        Tes ditulis langsung ke problem_instances; hasil pekerjaan tidak memuatnya,
+        karena hasil itu bisa dibaca pembuat pekerjaannya. Idempoten: instans yang
+        sudah ada tidak pernah dibuat ulang."""
+        versi_id, mp_id, user, seed = (payload.get(k) for k in ("problem_version_id", "meeting_problem_id", "user_id", "seed"))
+        if not all(isinstance(x, int) and not isinstance(x, bool) for x in (versi_id, mp_id, seed)) \
+                or not isinstance(user, str) or not POLA_ID.fullmatch(user):
+            return "FAILED", {"error": "invalid_payload", "message": "GENERATE butuh problem_version_id, meeting_problem_id, seed (bilangan) dan user_id (UUID)"}
+        if self.db.baca("SELECT id FROM problem_instances WHERE user_id = %s AND meeting_problem_id = %s", (user, mp_id)):
+            return "DONE", {"ok": True, "existed": True}
+        versi = self.db.baca(
+            "SELECT language, generator, reference_solution, samples_count, hidden_count, time_limit_ms, status"
+            " FROM problem_versions WHERE id = %s", (versi_id,))
+        if not versi:
+            return "FAILED", {"error": "invalid_payload", "message": "problem_version_id tidak ada"}
+        if versi[0]["status"] != "APPROVED":
+            return "FAILED", {"error": "invalid_payload", "message": "versi soal belum disetujui"}
+        try:
+            tes = soal.bangkit(versi[0], seed)
+        except soal.BangkitGagal as e:
+            catat("bangkit_gagal", versi=versi_id, alasan=e.alasan)
+            return "FAILED", {"error": "generation_failed", "reason": e.alasan}
+        # INSERT IGNORE: bila dua pekerjaan untuk instans yang sama berpacu, yang pertama menang.
+        self.db.ubah(
+            "INSERT IGNORE INTO problem_instances (user_id, meeting_problem_id, problem_version_id, seed, tests, created_at)"
+            " VALUES (%s, %s, %s, %s, %s, UTC_TIMESTAMP())",
+            (user, mp_id, versi_id, seed, json.dumps(tes, ensure_ascii=False)),
+        )
+        return "DONE", {"ok": True, "existed": False, "tests": len(tes)}
 
     def simpan(self, id_: str, status: str, hasil: dict) -> None:
         for percobaan in range(1, 6):

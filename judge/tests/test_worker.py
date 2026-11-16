@@ -100,10 +100,10 @@ def test_id_di_redis_tanpa_baris_diabaikan(mulai_worker, kirim, tunggu, r):
     assert w.proses.poll() is None
 
 
-@pytest.mark.parametrize("kind", ["SUBMIT", "GENERATE", "VALIDATE", "ANALYZE"])
-def test_jenis_lain_dijawab_failed_unsupported_kind_bukan_diam(mulai_worker, kirim, tunggu, kind):
+def test_submit_dijawab_failed_unsupported_kind_bukan_diam(mulai_worker, kirim, tunggu):
+    """SUBMIT datang bersama tabel kiriman di tahap 9; sampai itu jawabannya jelas, bukan diam."""
     mulai_worker()
-    b = tunggu(kirim(HALO, kind=kind))
+    b = tunggu(kirim(HALO, kind="SUBMIT"))
     assert b["status"] == "FAILED" and b["result"]["error"] == "unsupported_kind" and b["attempts"] == 1
 
 

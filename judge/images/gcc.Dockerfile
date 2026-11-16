@@ -14,17 +14,18 @@ RUN test "$BAHASA" = c -o "$BAHASA" = cpp \
  && rm -rf /var/lib/apt/lists/* \
  && gcc --version | head -n 1 | grep -q ' 13\.'
 
-# pelari dikompilasi statis di sini supaya sama persis di ketiga image.
+# pelari dan kelompok dikompilasi statis di sini supaya sama persis di semua image.
 FROM dasar AS pelari
-COPY pelari.c /tmp/pelari.c
-RUN gcc -O2 -Wall -Wextra -Werror -static -o /pelari /tmp/pelari.c
+COPY pelari.c kelompok.c /tmp/
+RUN gcc -O2 -Wall -Wextra -Werror -static -o /pelari /tmp/pelari.c \
+ && gcc -O2 -Wall -Wextra -Werror -static -o /kelompok /tmp/kelompok.c
 
 FROM dasar
-COPY --from=pelari /pelari /usr/local/bin/pelari
+COPY --from=pelari /pelari /kelompok /usr/local/bin/
 COPY kompilasi /usr/local/bin/kompilasi
 # /box dan /src adalah titik kait: tmpfs dan direktori job (hanya-baca).
 # Daftar akun image tidak perlu terbaca oleh program yang dinilai (SPEC.md §10).
-RUN mkdir /box /src && chmod 0755 /usr/local/bin/pelari /usr/local/bin/kompilasi \
+RUN mkdir /box /src && chmod 0755 /usr/local/bin/pelari /usr/local/bin/kelompok /usr/local/bin/kompilasi \
  && chmod 0600 /etc/passwd /etc/group
 ENV LANG=C.UTF-8 HOME=/box TMPDIR=/box
 WORKDIR /box

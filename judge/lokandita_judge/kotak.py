@@ -327,6 +327,110 @@ def jalankan(bahasa: str, dir_job: Path, stdin: bytes, cpu_ms: int | None = None
     return hasil
 
 
+# ---- kelompok: banyak kali jalan di satu kontainer (generator dan solusi referensi) ----
+
+BATAS_MASUKAN_TES = 256 * 1024      # satu masukan tes hasil generator
+BATAS_CPU_GENERATOR_MS = 2000       # satu kali jalan generator
+BATAS_KELOMPOK = 64 * 1024 * 1024   # seluruh keluaran satu kontainer kelompok
+BERKAS_GENERATOR = "gen.py"
+
+
+@dataclass
+class HasilKelompok:
+    """Satu kali jalan di dalam kontainer kelompok. status: OK, RE, TLE, MLE, OLE."""
+
+    nomor: int
+    status: str
+    stdout: bytes
+    stderr: bytes
+    cpu_ms: int
+    kode_keluar: int
+    sinyal: int
+
+
+class KelompokTerlaluBesar(Exception):
+    """Seluruh keluaran satu kontainer kelompok melewati BATAS_KELOMPOK."""
+
+
+def _kelompok(image: str, mode: str, n: int, cpu_ms: int, batas: int, henti: bool, seed: list[int],
+              program: list[str], dir_job: Path, memori_mb: int) -> list[HasilKelompok]:
+    kali = n * (len(seed) if mode == "gen" else 1)
+    wall_ms = int(batas_wall_s(cpu_ms) * 1000)
+    wall_total_s = kali * wall_ms / 1000 + 5
+    perintah = ["pelari", str(kali * cpu_ms + 5000), str(int(wall_total_s * 1000)),
+                "kelompok", mode, str(n), str(cpu_ms), str(wall_ms), str(batas), "1" if henti else "0",
+                ",".join(str(s) for s in seed) if mode == "gen" else "-", "--", *program]
+    mentah = _jalankan_kontainer(image, perintah, dir_job, b"", wall_total_s,
+                                 batas_stdout=BATAS_KELOMPOK, batas_stderr=BATAS_KELUARAN, memori_mb=memori_mb)
+    if mentah["lewat_stdout"]:
+        raise KelompokTerlaluBesar()
+    lap = mentah["laporan"]
+    oom = mentah["oom_docker"] or bool(lap and lap["oom"] > 0)
+
+    hasil: list[HasilKelompok] = []
+    data, posisi = mentah["stdout"], 0
+    while posisi < len(data):
+        akhir = data.find(b"\n", posisi)
+        kepala = data[posisi:akhir].split() if akhir >= 0 else []
+        if len(kepala) != 9 or kepala[0] != b"K":
+            raise GalatInfrastruktur("bingkai kelompok rusak")
+        nomor, kode, sinyal, cpu, _wall, bendera, nk, ng = (int(x) for x in kepala[1:])
+        keluar = data[akhir + 1:akhir + 1 + nk]
+        galat = data[akhir + 1 + nk:akhir + 1 + nk + ng]
+        posisi = akhir + 1 + nk + ng
+        if posisi > len(data):
+            raise GalatInfrastruktur("bingkai kelompok terpotong")
+        if bendera & 2:
+            status = "OLE"
+        elif bendera & 1 or cpu > cpu_ms or sinyal == SIGXCPU:
+            status = "TLE"
+        elif sinyal == SIGKILL and oom:
+            status = "MLE"
+        elif kode != 0 or sinyal != 0:
+            status = "RE"
+        else:
+            status = "OK"
+        hasil.append(HasilKelompok(nomor, status, keluar, galat, cpu, kode, sinyal))
+
+    gagal = any(h.status != "OK" for h in hasil)
+    if len(hasil) < kali and not (henti and gagal):
+        # Kontainer berhenti sebelum semua kali jalan selesai: batas memori atau waktu total.
+        if oom:
+            hasil.append(HasilKelompok(len(hasil), "MLE", b"", b"", 0, -1, SIGKILL))
+        elif mentah["waktu_habis"] or (lap and lap["wall"]):
+            hasil.append(HasilKelompok(len(hasil), "TLE", b"", b"", 0, -1, SIGKILL))
+        else:
+            _galat_bila_docker_gagal(mentah)
+            raise GalatInfrastruktur(f"kelompok berhenti setelah {len(hasil)} dari {kali} kali jalan")
+    return hasil
+
+
+def jalankan_generator(sumber: str, seed: list[int], n: int, dir_job: Path, henti: bool = True) -> list[HasilKelompok]:
+    """Generator (Python) untuk tiap seed dan INDEX 0..n-1, semuanya di satu kontainer
+    judge-python. Urutan hasil: seed pertama INDEX 0..n-1, lalu seed kedua, dan seterusnya."""
+    berkas = dir_job / BERKAS_GENERATOR
+    berkas.write_text(sumber, encoding="utf-8")
+    os.chmod(berkas, 0o644)
+    return _kelompok(citra.nama("python"), "gen", n, BATAS_CPU_GENERATOR_MS, BATAS_MASUKAN_TES, henti, seed,
+                     ["python3", f"/src/{BERKAS_GENERATOR}"], dir_job, MEMORI_MB)
+
+
+def jalankan_kelompok(bahasa: str, dir_job: Path, masukan: list[bytes], cpu_ms: int | None = None,
+                      memori_mb: int = MEMORI_MB, henti: bool = True) -> list[HasilKelompok]:
+    """Program hasil `kompilasi` dijalankan sekali untuk tiap masukan, semuanya di satu
+    kontainer. Hanya untuk solusi referensi (kode dosen); kode mahasiswa memakai `jalankan`."""
+    dir_masukan = dir_job / "in"
+    shutil.rmtree(dir_masukan, ignore_errors=True)
+    dir_masukan.mkdir(mode=0o755)
+    os.chmod(dir_masukan, 0o755)
+    for i, isi in enumerate(masukan):
+        (dir_masukan / str(i)).write_bytes(isi)
+        os.chmod(dir_masukan / str(i), 0o644)
+    program = ["jalankan-python"] if bahasa == "python" else ["/src/prog"]
+    return _kelompok(citra.nama(bahasa), "uji", len(masukan), cpu_ms or BATAS_CPU_MS[bahasa], BATAS_KELUARAN, henti, [],
+                     program, dir_job, memori_mb)
+
+
 class AnalisisGagal(Exception):
     """Kode sumber tidak bisa dianalisis (tidak terurai, terlalu besar, waktu habis).
     Bukan galat infrastruktur: mengulang tidak akan mengubah hasilnya."""

@@ -185,9 +185,9 @@ Details both sides rely on:
 - `GET /api/executions/{id}` answers `{ "id", "kind", "status", "progress", "result" }` with `Cache-Control: no-store`, never the payload. A job of another user, a system job, an unknown id and a malformed id all get the same `404 {"error":"execution_not_found"}`; this holds for dosen and superadmin too.
 - The claim also increments `attempts` and sets `started_at`. An id in Redis that has no `QUEUED` row (unknown, already claimed, pushed twice) is dropped without effect, so a job is never run twice at the same time.
 - Infrastructure failure (Docker cannot run the container, or an error inside the worker): the row goes back to `QUEUED` and is re-queued by the scan; at the third failed attempt it becomes `FAILED` with `result.error = "judge_unavailable"`. A verdict (`CE`, `TLE`, …) is never an infrastructure failure and is never retried.
-- A kind the worker cannot do yet answers `FAILED` with `result.error = "unsupported_kind"` — in stage 7 that is every kind except `RUN`, and `RUN` with an `instance_id`.
+- A kind the worker cannot do yet answers `FAILED` with `result.error = "unsupported_kind"` — since stage 8 that is `SUBMIT`, and `RUN` with an `instance_id`; both arrive in stage 9.
 - Worker start: rows left `RUNNING` by a previous worker go back to `QUEUED` (or to `FAILED` / `judge_unavailable` when `attempts` is already above 2) and are pushed to Redis at once. While running, the scan does the same for a row that has been `RUNNING` for more than 15 minutes and is not being worked on.
-- There is exactly one worker per schema. It refuses to start — exit code 69, one log line `tidak_mulai` with the reason — when Docker, a required kernel feature (cgroup v2, memory, swap, pids and CPU limits, seccomp), the seccomp profile or a judge image with the current tag is missing. Exit code 78 means a missing environment variable.
+- There is exactly one worker per schema. It refuses to start — exit code 69, one log line `tidak_mulai` with the reason — when Docker, a required kernel feature (cgroup v2, memory, swap, pids and CPU limits, seccomp), the seccomp profile or a judge image with the current tag is missing. The judge images are `judge-c`, `judge-cpp`, `judge-python` and `judge-analisis` (concept analysis; it parses source and never runs it). Their tag is a hash over `judge/images/`, computed once when the worker starts. Exit code 78 means a missing environment variable.
 - **Heartbeat**: Redis key `lokandita:judge:worker` (same DB as the queues), a JSON object `{ commit, pid, mulai, waktu, konkurensi, image, skema }`, written every 5 s with a lifetime of 15 s and deleted on a clean stop. `commit` is the Git commit of the working tree at worker start. A missing key means no worker is running. `infra/deploy.sh judge` and `infra/smoke.sh` read it; LokaKode reads it through `Antrean::denyut()`.
 - `php spark judge:coba [--bahasa c|cpp|python]` in the `lokakode` container sends one real `RUN` as a system job through `Antrean::kirim()`, waits for the result and exits 0 only when the heartbeat exists and the output is right.
 
@@ -199,7 +199,7 @@ Details both sides rely on:
 |---|---|
 | `RUN` | `{ language, source, stdin? , instance_id? }` |
 | `SUBMIT` | `{ language, source, instance_id, submission_id }` |
-| `GENERATE` | `{ problem_version_id, user_id, meeting_problem_id, seed }` |
+| `GENERATE` | `{ problem_version_id, user_id, meeting_problem_id, seed }` — the two ids and `seed` are integers, `user_id` a UUID |
 | `VALIDATE` | `{ language, generator, reference_solution, samples_count, hidden_count, time_limit_ms, allowed_concepts[], comparison_mode }` |
 | `ANALYZE` | `{ language, source, required_concepts[] }` |
 
@@ -213,7 +213,33 @@ Time: `duration_ms` is CPU time of the program, measured inside the container; s
 
 For `SUBMIT` the result holds per-test `{ index, verdict, duration_ms }`, `compile_log`, `passed`, `total`, and the list of concepts found. It never holds test input or expected output.
 
-For `VALIDATE` the result holds `{ ok, reasons[] }` where a reason is `{ code, message, line?, column? }`, plus `required_concepts[]` detected in the reference solution.
+For `VALIDATE` the result holds `{ ok, reasons[], warnings[], concepts[], tests, max_cpu_ms }`. `concepts` are the codes detected in the reference solution; `ok` is true exactly when `reasons` is empty. A problem that is refused is a result (`DONE`, `ok: false`), not a failure of the job. A reason or warning is `{ code, where, message, line?, column?, concept?, construct?, verdict?, seed?, index? }`:
+
+| `code` | `where` | Meaning |
+|---|---|---|
+| `reference_compile_error` | `reference_solution` | does not compile; `line`, `column` and the compiler's message |
+| `concept_not_allowed` | `reference_solution` | uses `concept` outside `allowed_concepts`; `construct`, `line`, `column` |
+| `analysis_failed` | `reference_solution` | the source could not be analysed |
+| `generator_failed` | `generator` | exit code, signal or time limit at `seed` / `index`; `verdict`, `line` when Python names one |
+| `generator_output_too_large` | `generator` | one test input above 256 KB, or all of them above 64 MB |
+| `generator_output_not_utf8` | `generator` | a test input is not UTF-8 |
+| `generator_not_deterministic` | `generator` | the same `seed` and `index` gave different output |
+| `reference_failed` | `reference_solution` | `verdict` `RE`, `TLE`, `MLE` or `OLE` at `seed` / `index` |
+| warning `generator_ignores_seed` | `generator` | all seeds gave the same inputs |
+| warning `reference_empty_output` | `reference_solution` | a test has empty expected output |
+| warning `reference_slow` | `reference_solution` | the slowest test used more than half of the time limit |
+
+`line` and `column` count from 1 inside the named source. `message` is technical detail (a compiler line, the last line of stderr); the sentence shown to the user comes from the web app's language files, by `code`.
+
+What `VALIDATE` does: compiles the reference solution; analyses it against `allowed_concepts`; runs the generator for 20 random seeds and every `INDEX` 0 … `samples_count + hidden_count − 1`; runs it twice more for the first 3 of those seeds and compares (same `SEED` and `INDEX` three times); runs the reference solution over all tests of the 20 seeds with `time_limit_ms` as the CPU limit. Everything that can be checked is checked, so one import reports all reasons at once. Payload limits: `samples_count` 2–3, `hidden_count` 10–50, `time_limit_ms` 100–10000, sources at most 256 KB.
+
+For `GENERATE` the result holds `{ ok: true, existed, tests? }` and **never a test**: the worker writes the row in `problem_instances` itself, because a job's result can be read by whoever created the job. An instance that already exists is left untouched (`existed: true`), whatever the seed. A version that is not `APPROVED` gives `invalid_payload`. A generator or reference solution that fails for this seed gives `FAILED` with `result.error = "generation_failed"` and `result.reason = { code, where, verdict?, index? }`, without any program output.
+
+For `ANALYZE` the result holds `{ concepts[], missing[] }`: every concept code found in `source`, and those of `required_concepts` that were not. Source that cannot be parsed gives `FAILED` with `result.error = "analysis_failed"`.
+
+Seed (`SPEC.md` §8.2): the web app computes `HMAC_SHA256(INSTANCE_SECRET, user_id + "|" + problem_version_id)`, takes the first 8 bytes as a big-endian integer and clears the top bit, so `seed` is an integer 0 … 2^63 − 1. The generator receives it in the environment variable `SEED` as decimal text.
+
+Generator and reference solution are the lecturer's code. All their runs for one job happen in **one** container (`SPEC.md` §8.2) under the same limits as any judge container; `/box` is emptied and every left-over process killed between two runs, and each run has its own CPU, wall-clock and output limit. Student code is never run this way: it keeps one new container per test.
 
 The worker connects to MySQL and Redis on `127.0.0.1` (published to loopback only). Its MySQL user is `judge_worker`, whose rights are exactly these three, given by `infra/mysql-hak-judge.sh` as MySQL root after the LokaKode migrations (`infra/deploy.sh lokakode`, `infra/deploy.sh judge` and `infra/tes.sh judge` all run it):
 
