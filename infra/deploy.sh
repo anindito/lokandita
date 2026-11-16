@@ -120,6 +120,8 @@ if [ "$sasaran" = "judge" ]; then
 	fi
 	echo "verifikasi judge: denyut -> $denyut"
 	echo "verifikasi judge: LULUS, worker (pid $pid) menjalankan commit $commit"
+	# Worker baru sudah berjalan dengan image bertag sekarang; yang lama boleh dibuang.
+	(cd "$AKAR/judge" && python3 -m lokandita_judge.citra bersih) || true
 	if ! linger_aktif; then
 		echo "PERINGATAN: linger belum aktif untuk $(id -un). Worker akan MATI saat tidak ada sesi login" >&2
 		echo "            dan tidak menyala setelah reboot. Pemilik: sudo loginctl enable-linger $(id -un)" >&2

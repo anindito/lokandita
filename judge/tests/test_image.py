@@ -25,19 +25,37 @@ def di_image(bahasa: str, *perintah: str) -> str:
     return hasil.stdout.strip()
 
 
-@pytest.mark.parametrize("bahasa", ["c", "cpp", "python"])
+@pytest.mark.parametrize("bahasa", ["c", "cpp", "python", "analisis"])
 def test_image_ada_dengan_tag_sekarang(bahasa):
     assert citra.ada(bahasa), f"{citra.nama(bahasa)} belum dibangun; jalankan judge/bangun-image.sh"
 
 
 def test_tag_berubah_bila_isi_images_berubah(tmp_path, monkeypatch):
+    import shutil
+
     lama = citra.tag()
-    for berkas in citra.DIR_IMAGES.iterdir():
-        (tmp_path / berkas.name).write_bytes(berkas.read_bytes())
+    salinan = tmp_path / "images"
+    shutil.copytree(citra.DIR_IMAGES, salinan, ignore=shutil.ignore_patterns("__pycache__"))
+    monkeypatch.setattr(citra, "DIR_IMAGES", salinan)
+
+    def tag_baru() -> str:
+        monkeypatch.setattr(citra, "_TAG", None)  # tag dihitung sekali per proses
+        return citra.tag()
+
+    assert tag_baru() == lama
+    (salinan / "pelari.c").write_text("// diubah\n")
+    diubah = tag_baru()
+    assert diubah != lama
+    # Kode analisis ada di subdirektori dan ikut menentukan tag.
+    (salinan / "analisis" / "py.py").write_text("# diubah\n")
+    assert tag_baru() not in (lama, diubah)
+
+
+def test_tag_tetap_selama_proses_berjalan(tmp_path, monkeypatch):
+    """Worker yang sedang berjalan tidak boleh berpindah image karena pohon kerja diedit."""
+    lama = citra.tag()
     monkeypatch.setattr(citra, "DIR_IMAGES", tmp_path)
     assert citra.tag() == lama
-    (tmp_path / "pelari.c").write_text("// diubah\n")
-    assert citra.tag() != lama
 
 
 @pytest.mark.parametrize("bahasa,kompiler", [("c", "gcc"), ("cpp", "gcc"), ("cpp", "g++")])
@@ -61,13 +79,20 @@ def test_python_dan_pustaka_dikunci():
     assert keluaran == f"(3, 12) {kunci['numpy']} {kunci['matplotlib']} Agg"
 
 
-def test_setiap_pustaka_python_dikunci_dengan_hash():
-    for baris in (citra.DIR_IMAGES / "requirements-python.txt").read_text().splitlines():
+@pytest.mark.parametrize("daftar", ["requirements-python.txt", "requirements-analisis.txt"])
+def test_setiap_pustaka_python_dikunci_dengan_hash(daftar):
+    for baris in (citra.DIR_IMAGES / daftar).read_text().splitlines():
         if baris and not baris.startswith("#"):
             assert "==" in baris and "--hash=sha256:" in baris, baris
 
 
-@pytest.mark.parametrize("bahasa", ["c", "cpp", "python"])
+def test_image_analisis_tidak_membawa_kompiler():
+    hasil = subprocess.run(["docker", "run", "--rm", "--network", "none", citra.nama("analisis"), "sh", "-c",
+                            "command -v gcc g++ cc"], capture_output=True, text=True, timeout=60)
+    assert hasil.returncode != 0 and hasil.stdout == ""
+
+
+@pytest.mark.parametrize("bahasa", ["c", "cpp", "python", "analisis"])
 def test_image_berjalan_bukan_sebagai_root(bahasa):
     assert di_image(bahasa, "id", "-u") == "65534"
     konfig = json.loads(subprocess.run(["docker", "image", "inspect", citra.nama(bahasa)],
@@ -76,7 +101,7 @@ def test_image_berjalan_bukan_sebagai_root(bahasa):
     assert konfig["Env"].count("HOME=/box") == 1
 
 
-@pytest.mark.parametrize("bahasa", ["c", "cpp", "python"])
+@pytest.mark.parametrize("bahasa", ["c", "cpp", "python", "analisis"])
 def test_tidak_ada_berkas_setuid_di_image(bahasa):
     # no-new-privileges sudah mematikan setuid; ini memastikan tidak ada yang bergantung padanya.
     ditemukan = di_image(bahasa, "sh", "-c", "find / -xdev -perm /6000 -type f 2>/dev/null | sort | tr '\\n' ' '")

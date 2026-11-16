@@ -327,6 +327,72 @@ def jalankan(bahasa: str, dir_job: Path, stdin: bytes, cpu_ms: int | None = None
     return hasil
 
 
+class AnalisisGagal(Exception):
+    """Kode sumber tidak bisa dianalisis (tidak terurai, terlalu besar, waktu habis).
+    Bukan galat infrastruktur: mengulang tidak akan mengubah hasilnya."""
+
+
+BATAS_ANALISIS_MS = 10_000
+
+
+def analisis_banyak(bahasa: str, berkas: dict[str, str]) -> dict[str, list[dict] | str]:
+    """Konsep yang dipakai tiap berkas sumber (SPEC.md §9), dianalisis di SATU kontainer
+    judge-analisis dengan batas yang sama seperti kontainer judge lain. Kode itu hanya
+    diurai, tidak dijalankan. Nilai tiap berkas: daftar {code, line, column, construct},
+    atau teks galat bila berkas itu tidak bisa diurai."""
+    if bahasa not in BERKAS_SUMBER:
+        raise AnalisisGagal("bahasa tidak dikenal")
+    for nama in berkas:
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,80}", nama):
+            raise AnalisisGagal(f"nama berkas tidak sah: {nama!r}")
+    d = siapkan_dir_job()
+    try:
+        for nama, sumber in berkas.items():
+            (d / nama).write_text(sumber, encoding="utf-8")
+            os.chmod(d / nama, 0o644)
+        wall_s = batas_wall_s(BATAS_ANALISIS_MS)
+        mentah = _jalankan_kontainer(
+            citra.nama(citra.ANALISIS),
+            ["pelari", str(BATAS_ANALISIS_MS), str(int(wall_s * 1000)), "python3", "-m", "analisis", bahasa,
+             *[f"/src/{nama}" for nama in berkas]],
+            d, b"", wall_s, batas_stdout=4 * BATAS_KELUARAN, batas_stderr=BATAS_KELUARAN, memori_mb=MEMORI_MB,
+        )
+    finally:
+        buang_dir_job(d)
+    lap = mentah["laporan"]
+    if mentah["oom_docker"] or (lap and lap["oom"] > 0):
+        raise AnalisisGagal("analisis kehabisan memori")
+    if mentah["waktu_habis"] or (lap and (lap["wall"] or lap["signal"] == SIGXCPU or lap["cpu_ms"] >= BATAS_ANALISIS_MS)):
+        raise AnalisisGagal("analisis melewati batas waktu")
+    if mentah["lewat_stdout"] or mentah["lewat_stderr"]:
+        raise AnalisisGagal("hasil analisis terlalu besar")
+    _galat_bila_docker_gagal(mentah)
+    if lap["exit"] != 0 or lap["signal"] != 0:
+        # Penganalisis sendiri yang gagal: kesalahan kita, bukan kesalahan kode yang dianalisis.
+        pesan = mentah["stderr"][-400:].decode("utf-8", "replace").strip()
+        raise GalatInfrastruktur(f"penganalisis berhenti (exit {lap['exit']}, sinyal {lap['signal']}): {pesan}")
+    hasil: dict[str, list[dict] | str] = {}
+    for baris in mentah["stdout"].decode("utf-8", "replace").splitlines():
+        try:
+            data = json.loads(baris)
+        except ValueError as e:
+            raise GalatInfrastruktur("keluaran penganalisis bukan JSON") from e
+        nama = str(data.get("file", "")).rsplit("/", 1)[-1]
+        hasil[nama] = data["error"] if data.get("error") else data.get("concepts", [])
+    if set(hasil) != set(berkas):
+        raise GalatInfrastruktur("penganalisis tidak melaporkan semua berkas")
+    return hasil
+
+
+def analisis(bahasa: str, sumber: str) -> list[dict]:
+    """Konsep yang dipakai satu sumber. Melempar AnalisisGagal bila tidak bisa diurai."""
+    nama = BERKAS_SUMBER.get(bahasa, "main.txt")
+    hasil = analisis_banyak(bahasa, {nama: sumber})[nama]
+    if isinstance(hasil, str):
+        raise AnalisisGagal(hasil)
+    return hasil
+
+
 def kontainer_judge() -> list[str]:
     """Nama semua kontainer judge instans ini yang masih ada (berjalan atau tidak)."""
     daftar = _docker("ps", "-a", "--filter", f"label={LABEL}", "--filter", f"label={LABEL_INSTANS}={INSTANS}",

@@ -1,0 +1,5 @@
+# Pustaka di dalam image judge-analisis (SPEC.md §9: parser sungguhan, bukan
+# pencocokan teks). Versi dan hash dikunci; hanya wheel biner.
+tree-sitter==0.26.1 --hash=sha256:7b14ac81a2afdcf75610f714f1d2eeaac40da93965c104cabb5c4c2b536a488a
+tree-sitter-c==0.24.2 --hash=sha256:5041ef67eb68ce6bc8bb0b1f8ef3a5585ce523dae0c7eec109ab0627dd75aede
+tree-sitter-cpp==0.23.4 --hash=sha256:773d2cafc08bbc0f998687fa33f42f378c1a371cdb582870c4d13abb06092706

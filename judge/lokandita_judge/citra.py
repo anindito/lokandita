@@ -1,13 +1,20 @@
 """Image Docker judge: nama, tag, dan pembangunannya (SPEC.md §10).
 
-Tag sebuah image adalah 12 digit pertama sha256 atas seluruh isi judge/images/.
-Mengubah Dockerfile, pelari.c atau daftar pustaka dengan sendirinya mengubah
-tag; worker hanya mau memakai image bertag itu, jadi image lama yang tidak
-cocok dengan kode tidak akan pernah terpakai diam-diam (gagal tertutup).
+Tag sebuah image adalah 12 digit pertama sha256 atas seluruh isi judge/images/
+(termasuk subdirektorinya). Mengubah Dockerfile, pelari.c, kode analisis atau
+daftar pustaka dengan sendirinya mengubah tag; worker hanya mau memakai image
+bertag itu, jadi image lama yang tidak cocok dengan kode tidak akan pernah
+terpakai diam-diam (gagal tertutup).
+
+Tag dihitung SEKALI per proses. Worker yang sedang berjalan karena itu tetap
+memakai image yang ada saat ia mulai, walau isi judge/images/ di pohon kerja
+berubah sesudahnya; image lama baru dibuang oleh `bersih`, yang dipanggil
+infra/deploy.sh judge setelah worker baru terbukti berjalan.
 
     python3 -m lokandita_judge.citra tag       mencetak tag sekarang
-    python3 -m lokandita_judge.citra bangun    membangun ketiga image
+    python3 -m lokandita_judge.citra bangun    membangun semua image
     python3 -m lokandita_judge.citra periksa   gagal bila ada image yang belum dibangun
+    python3 -m lokandita_judge.citra bersih    membuang image judge bertag lain
 """
 
 from __future__ import annotations
@@ -19,20 +26,27 @@ from pathlib import Path
 
 DIR_IMAGES = Path(__file__).resolve().parent.parent / "images"
 
-# bahasa -> (nama image, Dockerfile, build-arg)
+# kunci -> (nama image, Dockerfile, build-arg). Tiga bahasa, dan image analisis
+# konsep (SPEC.md §9), yang hanya mengurai kode dan tidak pernah menjalankannya.
+ANALISIS = "analisis"
 BAHASA = {
     "c": ("lokandita/judge-c", "gcc.Dockerfile", ["--build-arg", "BAHASA=c"]),
     "cpp": ("lokandita/judge-cpp", "gcc.Dockerfile", ["--build-arg", "BAHASA=cpp"]),
     "python": ("lokandita/judge-python", "python.Dockerfile", []),
+    ANALISIS: ("lokandita/judge-analisis", "analisis.Dockerfile", []),
 }
+
+_TAG: str | None = None
 
 
 def tag() -> str:
-    h = hashlib.sha256()
-    for berkas in sorted(DIR_IMAGES.iterdir()):
-        if berkas.is_file():
-            h.update(berkas.name.encode() + b"\0" + berkas.read_bytes() + b"\0")
-    return h.hexdigest()[:12]
+    global _TAG
+    if _TAG is None:
+        h = hashlib.sha256()
+        for berkas in sorted(p for p in DIR_IMAGES.rglob("*") if p.is_file() and "__pycache__" not in p.parts):
+            h.update(str(berkas.relative_to(DIR_IMAGES)).encode() + b"\0" + berkas.read_bytes() + b"\0")
+        _TAG = h.hexdigest()[:12]
+    return _TAG
 
 
 def nama(bahasa: str) -> str:
@@ -51,7 +65,11 @@ def bangun() -> None:
              "--label", "lokandita.judge.image=true", "-t", nama(bahasa), str(DIR_IMAGES)],
             check=True,
         )
-    # Image judge dengan tag lama tidak dipakai lagi.
+
+
+def bersih() -> list[str]:
+    """Membuang image judge yang tagnya bukan tag sekarang. Hanya dipanggil saat
+    deploy, setelah worker baru berjalan: worker lama memakai image lama sampai ia diganti."""
     daftar = subprocess.run(
         ["docker", "images", "--filter", "label=lokandita.judge.image=true", "--format", "{{.Repository}}:{{.Tag}}"],
         capture_output=True, text=True, check=True,
@@ -59,6 +77,7 @@ def bangun() -> None:
     lama = [d for d in daftar if not d.endswith(":" + tag()) and not d.endswith(":<none>")]
     if lama:
         subprocess.run(["docker", "rmi", *lama], capture_output=True)
+    return lama
 
 
 def main() -> int:
@@ -69,12 +88,15 @@ def main() -> int:
         bangun()
         subprocess.run(["docker", "images", "--filter", "label=lokandita.judge.image=true",
                         "--format", "  {{.Repository}}:{{.Tag}}  {{.Size}}"], check=True)
+    elif perintah == "bersih":
+        for nama_lama in bersih():
+            print(f"dibuang: {nama_lama}")
     elif perintah == "periksa":
         kurang = [nama(b) for b in BAHASA if not ada(b)]
         if kurang:
             print("image judge belum dibangun: " + ", ".join(kurang) + " — jalankan judge/bangun-image.sh", file=sys.stderr)
             return 1
-        print(f"ketiga image judge ada, tag {tag()}")
+        print(f"semua image judge ada ({len(BAHASA)}), tag {tag()}")
     else:
         print(__doc__, file=sys.stderr)
         return 2
