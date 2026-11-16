@@ -2,6 +2,7 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-17 — `infra/tes-infra.sh` section I no longer assumes the other hosts are in maintenance: each of `lokakode` and `portal` must answer by its own flag (503 closed, 200 open) and must answer the same before and after auth is opened. The test never closes a host that is open, so on a server where auth is open the "closed again" assertion does not run — that is the whole difference between the 54 and 55 counted in stages 5–7 (now 57 and 58).
 - 2026-11-16 — `judge/uji-terima.sh` is the owner's gate for stage 7: it runs the acceptance tests of `SPEC.md` §10 through `infra/tes.sh judge` (real hostile programs, test schema) and prints one line per item — the gate is the same code as the automated tests, so the two cannot disagree.
 - 2026-11-16 — The test for a compile that exhausts memory accepts `memory` or `timeout` as the reason: normally the memory limit stops it in about 3 s, but once in a full run the compiler slowed down near the limit and the 10 s watchdog fired first; the cause of that one slow run was not found. Either way the compile is stopped.
 - 2026-11-16 — `GET /api/executions/{id}` answers the same 404 to everybody but the creator, superadmin included, and never returns the payload — `KONTRAK.md` §6 says a user reads only their own jobs; staff will read submissions through their own pages in stage 9, with the policy layer.

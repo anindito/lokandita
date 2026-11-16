@@ -155,15 +155,29 @@ sama "tidak ada .env di Git" "${bocor:-tidak ada}" "tidak ada"
 echo "I. saklar pemeliharaan dan tepi (§5)"
 h="$(host_aplikasi auth)"
 kode() { curl -sS -o /dev/null --max-time 15 -w '%{http_code}' "$1" 2>&1 || true; }
+# Host lain mengikuti benderanya sendiri: yang ditutup menjawab 503, yang
+# dibuka menjawab /healthz dengan 200. Membuka auth tidak boleh mengubahnya.
+# Tes ini tidak pernah menutup host yang sedang dibuka pemilik.
+harapan_host() { if sudah_buka "$1"; then echo 200; else echo 503; fi; }
+keadaan_host() { if sudah_buka "$1"; then echo dibuka; else echo pemeliharaan; fi; }
+declare -A sebelum
+for a in lokakode portal; do sebelum[$a]="$(kode "https://$(host_aplikasi "$a")/healthz")"; done
 infra/pemeliharaan.sh auth off > /dev/null
 sleep 1
 sama "auth dibuka: https://$h/healthz" "$(curl -sS --max-time 15 "https://$h/healthz" 2>&1 | jq -r .app 2>&1 || true)" "auth"
 sama "auth dibuka: /internal/x tetap 404 dari internet" "$(kode "https://$h/internal/x")" "404"
-sama "auth dibuka: host lain tetap pemeliharaan" "$(kode "https://$(host_aplikasi lokakode)/healthz")" "503"
+for a in lokakode portal; do
+	sesudah="$(kode "https://$(host_aplikasi "$a")/healthz")"
+	sama "auth dibuka: $a ($(keadaan_host "$a")) menjawab sesuai benderanya" "$sesudah" "$(harapan_host "$a")"
+	sama "auth dibuka: jawaban $a tidak berubah" "$sesudah" "${sebelum[$a]}"
+done
 if [ "$buka_awal" = "0" ]; then
 	infra/pemeliharaan.sh auth on > /dev/null
 	sleep 1
 	sama "auth ditutup lagi: https://$h/healthz" "$(kode "https://$h/healthz")" "503"
+	echo "  (auth semula pemeliharaan: saklar buka-tutup diuji, 1 pernyataan lebih banyak)"
+else
+	echo "  (auth semula dibuka: tidak ditutup, jadi penutupan kembali TIDAK diuji — 1 pernyataan lebih sedikit)"
 fi
 
 echo
