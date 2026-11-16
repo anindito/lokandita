@@ -1,6 +1,6 @@
 # Progress
 
-Current stage: **8 — Problems, concepts, importer** — in progress; see "Stage 8" at the end of this file. Anything not listed there as done is not done.
+Current stage: **8 — Problems, concepts, importer** — built and deployed 2026-11-17, **waiting for the owner's gate**; see "Stage 8" at the end of this file. Not tagged yet.
 
 Stage 7 — Judge worker — finished 2026-11-17, tag `tahap-7`; see "Gate result" at the end of this file.
 
@@ -292,7 +292,7 @@ Added 2026-11-17, after the tag:
 - The owner confirmed that his own acceptance run matched the agent's (10 of 10). His message ended with a colon and no details after it, so no figures of his run are recorded here.
 - With the owner's approval the four components were redeployed at the commit that holds this note (one commit after `tahap-7`, differing only in this file); the deploy and `infra/smoke.sh` output are in the session.
 
-## Stage 8 — in progress
+## Stage 8 — 2026-11-17
 
 Plan approved by the owner 2026-11-17 (8 steps, one commit each): 0 `tes-infra.sh` follows the real state of the hosts · 1 contract and schema · 2 concept catalogue and minimal meeting pages · 3 concept analyser · 4 worker: batch mode, `VALIDATE`, `GENERATE`, `ANALYZE` · 5 importer and CLI · 6 web: upload, problem bank, review · 7 close.
 
@@ -312,3 +312,48 @@ Done:
 - Step 6 — web: `/impor` (upload and history, superadmin only; pengampu and pengajar 403 on page and endpoint), `/impor/{id}` (progress and per-problem report; reloads itself by the HTTP `Refresh` header, no JavaScript), `/soal/{id}` (statement as Markdown with `{{param}}` filled and raw HTML shown as text; fallback and machine-translation badges; reference solution and generator; approve, reject with a reason, clear the machine badge), `/soal/{id}/ubah` (edit as a new validated version). PHP's upload limit raised to 9 MB in the app image.
 - Steps 5 and 6 share one commit: the pages, the CLI and their tests were finished together. `infra/tes.sh lokakode` → **133 tests, 1577 assertions, all pass**, against real MySQL, Redis, a real `auth-tes`, a real judge worker and real judge containers; plus 3 seed tests added afterwards (run with the schema and matrix tests: 16 tests, 593 assertions). Covered: the gate case through `spark soal:impor` (a file with `cout << x << " " << y` on doubles is accepted; a problem using `if` is rejected with "baris 6, kolom 5" and the JSON line); idempotence and new versions; export → import; whole-file refusals with their messages; a 3 MB upload over HTTP; approve / reject / new version; edit as a validated version; the authorisation matrix for all 9 new routes, with refused requests changing nothing.
 - The owner's sample files `docs/contoh-soal/ddp101-pertemuan-2.json` (3 problems) and `…-salah.json` (1 good, 1 using `if` at line 7) were validated by the real judge with the concepts of DDP101 meeting 2: `infra/tes.sh judge tests/test_soal.py -k contoh` → 2 passed.
+
+Verified by the agent at commit `c76fa9f` (commands and output shown in the session):
+
+- `infra/tes.sh auth` → 95 tests, 822 assertions; `infra/tes.sh portal` → 19 tests, 105 assertions (the shared stylesheet and the app Dockerfile changed); `infra/tes.sh lokakode` → 136 tests, 1571 assertions; `infra/tes.sh judge` → 238 passed in 14 min 32 s, nothing skipped. All pass.
+- `judge/uji-terima.sh` → `uji terima: LULUS — 10 dari 10 butir`; 200 jobs in 106 s. The sandbox gained a batch mode in this stage; the stage 7 acceptance items still hold.
+- `infra/deploy.sh lokakode`, `judge`, `auth`, `portal` → each verified (`/healthz`, worker heartbeat at `c76fa9f`, image tag `35289448f54f`). The migration ran on the real `lokakode` schema: 19 tables now, 45 concepts, 0 meetings, 0 problems. `judge_worker` has exactly the three grants of `KONTRAK.md` §6 on `lokakode`.
+- `infra/smoke.sh` → **22 passed, 0 failed, 0 not active**. Check 7 is new: one real `VALIDATE` through the deployed LokaKode and the production worker answered `ok` with 240 tests in 15.1 s.
+- Real requests without a session: `https://lokakode.lokandita.com/impor`, `/pertemuan/1`, `/soal/1`, `/soal/1/ubah`, `/mata-kuliah/1/pertemuan`, `/impor/<uuid>` → 302 to the LokaAuth login with the right `next`; `POST /soal/1/setujui` and `POST /impor` without CSRF → 403. In the deployed container: `php spark soal:ekspor DDP101 2` → "pertemuan 2 tidak ada", exit 1 (read-only; proves the command and its database access); `upload_max_filesize` is 9M.
+- `infra/backup.sh` and `infra/uji-restore.sh` → passed, 30 schemas/tables restored and equal, the new tables among them. `infra/tes-infra.sh` → 57 passed, 0 failed.
+
+Not verified, or weaker than it looks:
+
+- **The gate has not been done on the deployed system.** Production has no meeting and no problem. A real import needs meetings created by the pengampu or superadmin, and `--oleh` would have written the owner's account into the audit log for something the agent did, so the agent did not import anything in production. The gate case is proven by tests against real containers and by the real judge validating the two sample files; the owner's gate below is the real check.
+- **No page of stage 8 has been seen in a browser**: the meeting page with its many checkboxes, the upload, the report page that reloads itself (the `Refresh` header is tested only as a header), the Markdown statement, the Arabic (right-to-left) pages, the edit form.
+- **Concept detection is a set of syntactic rules, not a compiler.** 39 corpus programs cover every catalogue concept once or twice; real problems will contain constructs the corpus does not. A wrong "found" refuses an import, visibly and with a line number; a wrong "not found" lets a concept through silently. The OOP concepts that are about design (`ENCAPSULATION`, `KOMPOSISI_AGREGASI`, `INTERFACE`) are the weakest. `docs/DETEKSI-KONSEP.md` is waiting for the owner's review.
+- **Nothing uses `GENERATE`, `ANALYZE` or the seed yet.** They work and are tested, but no page creates an instance, no submission is analysed and `CONCEPT_NOT_MET` is applied nowhere. `SUBMIT` still answers `unsupported_kind`. No student can do anything new.
+- Validation time (13.8 s and 15.1 s) was measured on tiny problems. A reference solution that needs most of its time limit on each of 240 tests will take minutes; the 30-problem estimate above is not a measurement.
+- The limits of 8 MB and 200 problems per file are enforced in code but were not tested at that size; the largest upload tested is 3 MB (two problems padded with spaces).
+- An import whose report page is closed stays "sedang divalidasi" until somebody opens it again (by design, see `DECISIONS.md`). What happens to an import when the worker dies in the middle was not tested end to end; the jobs themselves are recovered as in stage 7.
+- Changing the concepts of a meeting does not re-check the problems already stored for it.
+- `SPEC.md` §10 says the memory limit can be set per problem; the import format has no such field and none was added. Every problem runs with 256 MB.
+- The Arabic texts of this stage were written by the agent and not reviewed by an Arabic reader.
+- Each `infra/smoke.sh` run now leaves two system rows in the real `judge_jobs` (one `RUN`, one `VALIDATE`). Retention is still to be decided in stage 9.
+- Between step 3 and the deploy the old production worker looked up judge images by a tag computed from the edited working tree. The images were rebuilt at once each time and no endpoint creates jobs, so nothing failed; the cause is fixed in the deployed worker.
+
+Owed by later stages:
+
+- Stage 9: the rest of `SPEC.md` §6 on top of the minimal `meetings` table (target, composition, class windows, publishing, starter template, compiler flags); creating instances (`Benih` + `GENERATE`) when a student opens a problem and pre-generation when a window opens; `SUBMIT`, `RUN` on sample tests, `CONCEPT_NOT_MET` through `ANALYZE`; showing statements to students with the fallback badge; calibration (`SPEC.md` §8.4); whether a pengajar may see the problem bank (owner's decision in stage 8: not yet); Monaco in the edit form; retention of `judge_jobs` and `imports`; memory limit per problem if wanted.
+- Stage 12: the 16 meetings of each course with their concepts from `docs/PETA-KONSEP.md`, and PBO301's base concepts — the tables and pages exist.
+- Stage 13: producing the problems through this importer.
+
+Owner's gate for stage 8 (`SPEC.md` §18: a sample file imports; a deliberately wrong problem is rejected with a line number; `cout << x << " " << y` with doubles is accepted):
+
+1. In a browser at `https://lokakode.lokandita.com` as superadmin: *Mata kuliah* → `DDP101` → **Pertemuan dan bank soal**. Add meeting **1** (any title, C++); on its page tick `IO_DASAR`, `VARIABEL_TIPE`, `ARITMETIKA` and save. Go back, add meeting **2** (C++); on its page the three concepts are ticked and locked; tick `KONVERSI_TIPE` and save. Do **not** tick `STRING` or `PERCABANGAN`: the gate depends on them not being allowed yet.
+2. Menu **Impor soal** → choose `docs/contoh-soal/ddp101-pertemuan-2.json` (from the repository; `git pull` on your computer, or download it from VS Code) → *Unggah*. The page reloads itself for about half a minute. Expect: **Selesai: 3 diterima, 0 ditolak**.
+   Or on the server: `docker exec -i lokakode php spark soal:impor --oleh <nomor induk Anda> < docs/contoh-soal/ddp101-pertemuan-2.json`
+3. Upload `docs/contoh-soal/ddp101-pertemuan-2-salah.json`. Expect: **0 diterima, 1 ditolak, 1 tidak berubah**, and for `sisi-terpanjang`: *solusi referensi, baris 7, kolom 5, baris JSON 51: Solusi referensi memakai konsep PERCABANGAN, yang belum diizinkan di pertemuan ini: «if».*
+4. Open meeting 2 → *Bank soal* → **Tukar Dua Bilangan Pecahan**. The reference solution contains `cout << y << " " << x << endl;` with `double x, y`, and "Konsep di solusi referensi" lists input/output and variables only — no string concept. Press **Setujui soal ini**.
+5. Optional: log in as the first dosen (the pengampu) — the same pages work, *Impor soal* answers "tidak berhak"; as the second dosen `/pertemuan/<id>` answers "tidak berhak"; try *Ubah soal* on one problem; as superadmin `/audit` lists `soal.impor` and `soal.disetujui`.
+6. Run `infra/smoke.sh` — expect `22 lulus, 0 gagal, 0 belum aktif`.
+7. Read `docs/DETEKSI-KONSEP.md` when convenient and say which rules should change.
+
+The meetings and problems created in the gate are real production rows. Meetings cannot be deleted, only switched off; DDP101 needs meetings 1 and 2 anyway.
+
+After the gate: tag `tahap-8`, record the result here.
