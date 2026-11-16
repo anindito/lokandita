@@ -215,7 +215,15 @@ For `SUBMIT` the result holds per-test `{ index, verdict, duration_ms }`, `compi
 
 For `VALIDATE` the result holds `{ ok, reasons[] }` where a reason is `{ code, message, line?, column? }`, plus `required_concepts[]` detected in the reference solution.
 
-The worker connects to MySQL and Redis on `127.0.0.1` (published to loopback only). Its MySQL user is `judge_worker`, which has `SELECT` and `UPDATE` on `judge_jobs` and nothing else: it cannot insert or delete jobs, and cannot read any other table or schema. The grant is given by `infra/mysql-hak-judge.sh` as MySQL root, after the LokaKode migrations; `infra/deploy.sh lokakode` and `infra/tes.sh judge` both run it. A later stage that needs the worker to touch another table adds it to that script and to this section.
+The worker connects to MySQL and Redis on `127.0.0.1` (published to loopback only). Its MySQL user is `judge_worker`, whose rights are exactly these three, given by `infra/mysql-hak-judge.sh` as MySQL root after the LokaKode migrations (`infra/deploy.sh lokakode`, `infra/deploy.sh judge` and `infra/tes.sh judge` all run it):
+
+| Table | Rights | Why |
+|---|---|---|
+| `judge_jobs` | `SELECT`, `UPDATE` | claim a job, write progress and result; it cannot insert or delete jobs |
+| `problem_versions` | `SELECT` | generator and reference solution for `GENERATE` |
+| `problem_instances` | `SELECT`, `INSERT` | store an instance; it cannot change or delete one |
+
+It cannot read any other table or schema. A later stage that needs the worker to touch another table adds it to that script and to this section.
 
 `created_by` is `users.id` of §3, or `NULL` for a job made by the system itself (the smoke check); such a job can be read by no user.
 
@@ -224,6 +232,29 @@ Judge containers carry the label `lokandita.judge=true`, plus `lokandita.judge.i
 ### LokaKode tables next to `judge_jobs`
 
 The `lokakode` schema is owned and migrated only by LokaKode. Since stage 6 it holds the academic structure (`SPEC.md` §5): `academic_years`, `courses`, `classes`, `class_teachers`, `enrollments`, `enrollment_moves`, and LokaKode's own append-only `audit_log`. The judge worker has no right on any of these; it gets rights only on the tables named in this section.
+
+Since stage 8 it also holds concepts, meetings and the problem bank (`SPEC.md` §8, §9):
+
+```
+concepts             (code PK, grup, name, name_en, name_ar, languages SET('c','cpp','python'), urutan)
+meetings             (id, course_id, number 1–16, title, language, enabled)            UNIQUE(course_id, number)
+meeting_concepts     (meeting_id, concept_code)       concepts ADDED at that meeting
+course_base_concepts (course_id, concept_code)        concepts known before meeting 1
+problems             (id, meeting_id, slug)                                            UNIQUE(meeting_id, slug)
+problem_versions     (id, problem_id, version, status, language, difficulty, comparison_mode, time_limit_ms,
+                      samples_count 2–3, hidden_count 10–50, params JSON, translations JSON, generator,
+                      reference_solution, concepts JSON, required_in_submission JSON, content_hash,
+                      import_id, created_by, created_at, reviewed_by, reviewed_at, review_note)
+meeting_problems     (id, meeting_id, problem_id UNIQUE, problem_version_id)   the APPROVED version in use
+problem_instances    (id, user_id, meeting_problem_id, problem_version_id, seed BIGINT UNSIGNED,
+                      tests LONGTEXT, created_at)                              UNIQUE(user_id, meeting_problem_id)
+imports, import_items                                                          one row per file, one per problem
+```
+
+- The concepts allowed at a meeting are the course's base concepts plus the concepts of every meeting of that course with a number up to and including its own.
+- `meetings` holds only what the importer needs. Target, composition, class windows and publishing (`SPEC.md` §6) arrive in stage 9.
+- `problem_versions.status` is `PENDING_REVIEW`, `APPROVED` or `REJECTED`. `meeting_problems` gets its row at the first approval and then always points at the last approved version.
+- `problem_instances.tests` is a JSON array of `{ "in": "<stdin>", "out": "<expected stdout>" }`, the samples first. It is written only by the judge worker and never leaves the server (`SPEC.md` §10).
 
 Every `user_id`, `owner_id`, `actor_id` and similar column in these tables is `users.id` of §3. An enrollment is one row per student per course per academic year; a class move changes `class_id` on that row, so anything that later points at an enrollment follows the student.
 

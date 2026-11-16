@@ -1,6 +1,6 @@
 # Progress
 
-Next stage: **8 — Problems, concepts, importer** — not started.
+Current stage: **8 — Problems, concepts, importer** — in progress; see "Stage 8" at the end of this file. Anything not listed there as done is not done.
 
 Stage 7 — Judge worker — finished 2026-11-17, tag `tahap-7`; see "Gate result" at the end of this file.
 
@@ -291,3 +291,16 @@ Added 2026-11-17, after the tag:
 
 - The owner confirmed that his own acceptance run matched the agent's (10 of 10). His message ended with a colon and no details after it, so no figures of his run are recorded here.
 - With the owner's approval the four components were redeployed at the commit that holds this note (one commit after `tahap-7`, differing only in this file); the deploy and `infra/smoke.sh` output are in the session.
+
+## Stage 8 — in progress
+
+Plan approved by the owner 2026-11-17 (8 steps, one commit each): 0 `tes-infra.sh` follows the real state of the hosts · 1 contract and schema · 2 concept catalogue and minimal meeting pages · 3 concept analyser · 4 worker: batch mode, `VALIDATE`, `GENERATE`, `ANALYZE` · 5 importer and CLI · 6 web: upload, problem bank, review · 7 close.
+
+Owner's decisions for this stage (2026-11-17): `{{param}}` in a statement is filled from an optional `params` object of the problem, the same for every student; statements are Markdown rendered on the server with raw HTML disabled; a translation may carry `"machine": true`, shown as a badge the pengampu can clear; a pengajar who is not the pengampu has no access to the problem bank in this stage; a minimal `meetings` table (number, title, language, concepts, enabled) is built now and the rest of `SPEC.md` §6 stays in stage 9; the sample files target `DDP101`, the one course in production.
+
+Not in this stage: target, composition, publishing and class windows; student pages; `SUBMIT`; applying `CONCEPT_NOT_MET` to a score; whatever triggers pre-generation; calibration (`SPEC.md` §8.4); seeding the three courses; real problem production.
+
+Done:
+
+- Step 0 — `infra/tes-infra.sh` section I no longer assumes `lokakode` is in maintenance. `infra/tes-infra.sh` → 57 passed, 0 failed (auth was open, so the "closed again" assertion did not run; with auth closed the count is 58). This also explains the 54/55 difference left open in stages 5–7.
+- Step 1 — schema: `concepts` (45 rows loaded from `app/Data/konsep.json`), `meetings`, `meeting_concepts`, `course_base_concepts`, `problems`, `problem_versions`, `meeting_problems`, `problem_instances`, `imports`, `import_items`; `judge_worker` gains `SELECT` on `problem_versions` and `SELECT, INSERT` on `problem_instances`. `infra/tes.sh lokakode` → 100 tests, 1054 assertions; `infra/tes.sh judge tests/test_kontrak_db.py` → 32 passed. Exists only in `lokakode_test`; not deployed.

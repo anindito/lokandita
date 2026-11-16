@@ -25,7 +25,7 @@ abstract class KodeCase extends TestCase
         $this->db  = TestSchema::connect((string) getenv('DB_DSN'));
         $this->idn = TestSchema::connect((string) getenv('TES_IDENTITY_DSN'));
         // Urutan mengikuti kunci asing. Hanya skema *_test (dijaga TestSchema).
-        foreach (['judge_jobs', 'audit_log', 'enrollment_moves', 'enrollments', 'class_teachers', 'classes', 'courses', 'academic_years'] as $tabel) {
+        foreach (['judge_jobs', 'audit_log', 'problem_instances', 'meeting_problems', 'import_items', 'imports', 'problem_versions', 'problems', 'meeting_concepts', 'course_base_concepts', 'meetings', 'enrollment_moves', 'enrollments', 'class_teachers', 'classes', 'courses', 'academic_years'] as $tabel) {
             $this->db->query("DELETE FROM {$tabel}");
         }
     }

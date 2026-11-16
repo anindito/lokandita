@@ -65,16 +65,44 @@ def test_worker_tidak_boleh_menyisipkan_atau_menghapus_job(db_worker, buat_job):
 
 @pytest.mark.parametrize(
     "tabel",
-    ["academic_years", "courses", "classes", "class_teachers", "enrollments", "enrollment_moves", "audit_log", "migrations"],
+    ["academic_years", "courses", "classes", "class_teachers", "enrollments", "enrollment_moves", "audit_log", "migrations",
+     "concepts", "meetings", "meeting_concepts", "course_base_concepts", "problems", "meeting_problems", "imports", "import_items"],
 )
 def test_worker_tidak_bisa_membaca_tabel_lain_lokakode(db_worker, tabel):
     assert galat_mysql(db_worker, f"SELECT COUNT(*) FROM {tabel}") == DITOLAK_TABEL
 
 
-def test_worker_hanya_melihat_judge_jobs(db_worker):
+def test_worker_hanya_melihat_tiga_tabel(db_worker):
     with db_worker.cursor() as cur:
         cur.execute("SHOW TABLES")
-        assert [list(b.values())[0] for b in cur.fetchall()] == ["judge_jobs"]
+        assert [list(b.values())[0] for b in cur.fetchall()] == ["judge_jobs", "problem_instances", "problem_versions"]
+
+
+def test_worker_hanya_membaca_versi_soal(db_worker):
+    with db_worker.cursor() as cur:
+        cur.execute("SELECT COUNT(*) AS n FROM problem_versions")
+        assert cur.fetchone()["n"] >= 0
+    assert galat_mysql(db_worker, "UPDATE problem_versions SET status = 'APPROVED'") == DITOLAK_TABEL
+    assert galat_mysql(db_worker, "DELETE FROM problem_versions") == DITOLAK_TABEL
+    assert galat_mysql(
+        db_worker,
+        "INSERT INTO problem_versions (problem_id, version, language, difficulty, time_limit_ms, samples_count,"
+        " hidden_count, params, translations, generator, reference_solution, concepts, required_in_submission,"
+        " content_hash, created_by, created_at) VALUES (1, 1, 'cpp', 'MUDAH', 2000, 2, 10, '{}', '{}', '', '', '[]',"
+        " '[]', '', 'x', UTC_TIMESTAMP())",
+    ) == DITOLAK_TABEL
+
+
+def test_worker_menyisipkan_instans_tetapi_tidak_mengubah_atau_menghapusnya(db_worker):
+    with db_worker.cursor() as cur:
+        cur.execute("SELECT COUNT(*) AS n FROM problem_instances")
+        assert cur.fetchone()["n"] >= 0
+    # Hak sisip ada: penolakannya datang dari kunci asing (1452), bukan dari hak akses (1142).
+    sisip = ("INSERT INTO problem_instances (user_id, meeting_problem_id, problem_version_id, seed, tests, created_at)"
+             " VALUES ('uji', 999999999, 999999999, 1, '[]', UTC_TIMESTAMP())")
+    assert galat_mysql(db_worker, sisip) == 1452
+    assert galat_mysql(db_worker, "UPDATE problem_instances SET tests = '[]'") == DITOLAK_TABEL
+    assert galat_mysql(db_worker, "DELETE FROM problem_instances") == DITOLAK_TABEL
 
 
 @pytest.mark.parametrize("skema", ["identity_test", "identity", "portal_test"])

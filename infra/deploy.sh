@@ -89,9 +89,10 @@ fi
 
 if [ "$sasaran" = "judge" ]; then
 	echo "== deploy judge @ $commit"
-	ada="$(printf "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='lokakode' AND table_name='judge_jobs';\n" \
+	# Tabel yang disentuh worker (KONTRAK.md §6) dibuat oleh migrasi LokaKode.
+	ada="$(printf "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='lokakode' AND table_name IN ('judge_jobs','problem_versions','problem_instances');\n" \
 		| docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N')"
-	[ "$ada" = "1" ] || gagal "tabel lokakode.judge_jobs belum ada; jalankan infra/deploy.sh lokakode lebih dulu"
+	[ "$ada" = "3" ] || gagal "tabel judge_jobs, problem_versions atau problem_instances belum ada di lokakode; jalankan infra/deploy.sh lokakode lebih dulu"
 	"$AKAR/infra/mysql-hak-judge.sh" lokakode
 	"$AKAR/judge/siapkan-venv.sh"
 	if (cd "$AKAR/judge" && python3 -m lokandita_judge.citra periksa) 2> /dev/null; then :; else "$AKAR/judge/bangun-image.sh"; fi
