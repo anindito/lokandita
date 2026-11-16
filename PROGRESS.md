@@ -286,3 +286,8 @@ Carried into the next stages:
 - `infra/tes-infra.sh` section I assumes every host but auth is in maintenance; make it follow the real state of the hosts.
 - The items under "Not verified, or weaker than it looks" and "Owed by later stages" of stage 7 still hold, except the reboot.
 - `auth.lokandita.com` and `lokakode.lokandita.com` are open; the Portal is in maintenance.
+
+Added 2026-11-17, after the tag:
+
+- The owner confirmed that his own acceptance run matched the agent's (10 of 10). His message ended with a colon and no details after it, so no figures of his run are recorded here.
+- With the owner's approval the four components were redeployed at the commit that holds this note (one commit after `tahap-7`, differing only in this file); the deploy and `infra/smoke.sh` output are in the session.
