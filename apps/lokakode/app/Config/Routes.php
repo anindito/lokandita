@@ -21,6 +21,8 @@ $routes->get('/', 'Beranda::akar');
 // Semua pengguna yang masuk.
 $routes->group('', ['filter' => 'masuk'], static function (RouteCollection $routes): void {
     $routes->get('beranda', 'Beranda::index');
+    // Hasil dan kemajuan pekerjaan judge milik pengguna itu sendiri (KONTRAK.md §6).
+    $routes->get('api/executions/(:segment)', 'Eksekusi::lihat/$1');
 });
 
 // Staf (superadmin dan dosen). Peran global diperiksa filter; lingkupnya

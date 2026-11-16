@@ -26,10 +26,20 @@ from . import citra
 DOCKER = "docker"
 AKAR_JUDGE = Path(__file__).resolve().parent.parent
 PROFIL_SECCOMP = AKAR_JUDGE / "seccomp" / "judge.json"
-DIR_JOB = AKAR_JUDGE / "var" / "job"
 
 LABEL = "lokandita.judge=true"
 LABEL_BERAKHIR = "lokandita.judge.berakhir"
+LABEL_INSTANS = "lokandita.judge.instans"
+
+# Satu worker per skema basis data. Nama skema menjadi nama instans, sehingga
+# worker produksi dan worker tes di server yang sama tidak saling menyentuh
+# kontainer dan direktori kerja. Diatur sekali saat mulai (worker, conftest).
+INSTANS = "lepas"
+
+
+def dir_job() -> Path:
+    return AKAR_JUDGE / "var" / "job" / INSTANS
+
 
 MEMORI_MB = 256
 BATAS_KELUARAN = 1024 * 1024  # stdout dan stderr, masing-masing
@@ -97,6 +107,7 @@ def bendera_kontainer(nama: str, dir_job: Path, tanda: str, memori_mb: int, umur
         "--ipc", "none",
         "--log-driver", "none",
         "--label", LABEL,
+        "--label", f"{LABEL_INSTANS}={INSTANS}",
         "--label", f"{LABEL_BERAKHIR}={int(time.time() + umur_s)}",
         "--env", f"PELARI_TANDA={tanda}",
         "--volume", f"{dir_job}:/src:ro",
@@ -150,7 +161,7 @@ def _jalankan_kontainer(
     """Satu kontainer: dibuat, dijalankan, dibuang. Mengembalikan data mentah."""
     nama = "judge-" + secrets.token_hex(8)
     tanda = secrets.token_hex(16)
-    argumen = [DOCKER, "run", "-i", *bendera_kontainer(nama, dir_job, tanda, memori_mb, wall_s + 60), image, *perintah]
+    argumen = [DOCKER, "run", "-i", *bendera_kontainer(nama, dir_job, tanda, memori_mb, wall_s + KELONGGARAN_MULAI_S + 15), image, *perintah]
     try:
         proses = subprocess.Popen(argumen, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except OSError as e:
@@ -232,8 +243,8 @@ def _jalankan_kontainer(
 
 
 def siapkan_dir_job() -> Path:
-    DIR_JOB.mkdir(parents=True, exist_ok=True)
-    d = DIR_JOB / secrets.token_hex(8)
+    dir_job().mkdir(parents=True, exist_ok=True)
+    d = dir_job() / secrets.token_hex(8)
     d.mkdir(mode=0o755)
     os.chmod(d, 0o755)
     return d
@@ -317,11 +328,42 @@ def jalankan(bahasa: str, dir_job: Path, stdin: bytes, cpu_ms: int | None = None
 
 
 def kontainer_judge() -> list[str]:
-    """Nama semua kontainer berlabel judge yang masih ada (berjalan atau tidak)."""
-    daftar = _docker("ps", "-a", "--filter", f"label={LABEL}", "--format", "{{.Names}}")
+    """Nama semua kontainer judge instans ini yang masih ada (berjalan atau tidak)."""
+    daftar = _docker("ps", "-a", "--filter", f"label={LABEL}", "--filter", f"label={LABEL_INSTANS}={INSTANS}",
+                     "--format", "{{.Names}}")
     if daftar.returncode != 0:
         raise GalatInfrastruktur("docker ps gagal: " + daftar.stderr.strip())
     return daftar.stdout.split()
+
+
+def bersihkan_instans() -> int:
+    """Saat worker mulai: kontainer dan direktori kerja instans ini pasti peninggalan
+    worker sebelumnya (hanya ada satu worker per instans), jadi semuanya dibuang."""
+    nama = kontainer_judge()
+    for n in nama:
+        _buang(n)
+    shutil.rmtree(dir_job(), ignore_errors=True)
+    return len(nama)
+
+
+def sapu(sekarang: float | None = None) -> list[str]:
+    """Reaper: membuang kontainer berlabel judge yang masa hidupnya sudah lewat.
+
+    Hanya kontainer dengan label `lokandita.judge=true` DAN label masa berakhir
+    yang sudah lewat yang disentuh; kontainer lain tidak pernah.
+    """
+    sekarang = time.time() if sekarang is None else sekarang
+    daftar = _docker("ps", "-a", "--filter", f"label={LABEL}",
+                     "--format", '{{.Names}}\t{{.Label "' + LABEL_BERAKHIR + '"}}')
+    if daftar.returncode != 0:
+        raise GalatInfrastruktur("docker ps gagal: " + daftar.stderr.strip())
+    dibuang = []
+    for baris in daftar.stdout.splitlines():
+        nama, _, akhir = baris.partition("\t")
+        if akhir.isdigit() and int(akhir) < sekarang:
+            _buang(nama)
+            dibuang.append(nama)
+    return dibuang
 
 
 def periksa_host() -> None:

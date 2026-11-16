@@ -47,3 +47,17 @@ host_aplikasi() {
 sudah_buka() {
 	[ -e "$AKAR/infra/caddy/bendera/$1.buka" ]
 }
+
+# ---- judge worker (layanan systemd pengguna, KONTRAK.md §6) ----
+LAYANAN_JUDGE=lokandita-judge.service
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+
+# Denyut worker dari Redis DB 0 (JSON), atau kosong bila worker tidak berjalan.
+denyut_judge() {
+	docker exec redis redis-cli -n 0 get lokandita:judge:worker 2> /dev/null || true
+}
+
+# Benar bila layanan pengguna tetap hidup tanpa ada yang login.
+linger_aktif() {
+	[ "$(loginctl show-user "$(id -un)" -p Linger --value 2> /dev/null)" = "yes" ]
+}

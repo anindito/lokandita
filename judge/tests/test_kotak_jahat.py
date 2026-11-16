@@ -456,7 +456,7 @@ def test_host_ini_memenuhi_syarat():
 
 
 def test_bendera_kontainer_memuat_semua_batas():
-    b = kotak.bendera_kontainer("n", kotak.DIR_JOB / "x", "t" * 32, 256, 10)
+    b = kotak.bendera_kontainer("n", kotak.dir_job() / "x", "t" * 32, 256, 10)
     teks = " ".join(b)
     for wajib in ["--network none", "--read-only", "--memory 256m", "--memory-swap 256m", "--cpus 1",
                   "--pids-limit 64", "--cap-drop ALL", "no-new-privileges", "seccomp=", "--user 65534:65534",

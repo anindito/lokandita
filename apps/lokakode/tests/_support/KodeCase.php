@@ -25,7 +25,7 @@ abstract class KodeCase extends TestCase
         $this->db  = TestSchema::connect((string) getenv('DB_DSN'));
         $this->idn = TestSchema::connect((string) getenv('TES_IDENTITY_DSN'));
         // Urutan mengikuti kunci asing. Hanya skema *_test (dijaga TestSchema).
-        foreach (['audit_log', 'enrollment_moves', 'enrollments', 'class_teachers', 'classes', 'courses', 'academic_years'] as $tabel) {
+        foreach (['judge_jobs', 'audit_log', 'enrollment_moves', 'enrollments', 'class_teachers', 'classes', 'courses', 'academic_years'] as $tabel) {
             $this->db->query("DELETE FROM {$tabel}");
         }
     }
@@ -125,6 +125,25 @@ abstract class KodeCase extends TestCase
     }
 
     /**
+     * Baris judge_jobs yang sudah selesai, milik $pembuat (null = pekerjaan sistem). Tidak diantrekan.
+     *
+     * @param array<string, mixed>|null $pembuat
+     */
+    protected function job(?array $pembuat, string $status = 'DONE'): string
+    {
+        $id = Fixtures::uuid();
+        Fixtures::insert($this->db, 'judge_jobs', [
+            'id' => $id, 'kind' => 'RUN', 'priority' => 'normal', 'status' => $status,
+            'payload' => '{"language":"c","source":"SUMBER-RAHASIA","stdin":"MASUKAN-RAHASIA"}',
+            'progress' => '{"state":"done","current":1,"total":1}',
+            'result' => '{"verdict":"OK","stdout":"hasil\\n"}',
+            'created_by' => $pembuat['id'] ?? null, 'created_at' => gmdate('Y-m-d H:i:s'),
+        ]);
+
+        return $id;
+    }
+
+    /**
      * @return array<string, mixed>|null
      */
     protected function row(string $sql): ?array
@@ -168,6 +187,7 @@ abstract class KodeCase extends TestCase
         $d['daftarA'] = $this->daftar($d['mhsA'], $d['kelasXA']);
         $d['daftarB'] = $this->daftar($d['mhsB'], $d['kelasXB']);
         $d['daftarY'] = $this->daftar($d['mhsY'], $d['kelasYA']);
+        $d['jobA']    = $this->job($d['mhsA']);
 
         return $d;
     }

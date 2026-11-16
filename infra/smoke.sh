@@ -6,7 +6,7 @@
 # Sampai saat itu keduanya dicetak sebagai "BELUM AKTIF" — bukan lulus.
 # Mengaktifkan: ubah angka di bawah menjadi 1 pada tahap yang bersangkutan.
 CEK_AUTH_AKTIF=1   # tahap 5: cek 3, 4, 5 — aktif sejak tahap 5
-CEK_JUDGE_AKTIF=0  # tahap 7: cek 6
+CEK_JUDGE_AKTIF=1  # tahap 7: cek 6 — aktif sejak tahap 7
 
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
@@ -103,7 +103,33 @@ fi
 
 echo "6. judge worker berjalan dan satu job RUN sederhana selesai"
 if [ "$CEK_JUDGE_AKTIF" = "1" ]; then
-	tidak "cek 6 belum ditulis; tulis bersama judge worker di tahap 7"
+	status="$(systemctl --user is-active "$LAYANAN_JUDGE" 2>&1 || true)"
+	if [ "$status" = "active" ]; then ok "layanan $LAYANAN_JUDGE: active"; else tidak "layanan $LAYANAN_JUDGE: $status (seharusnya active)"; fi
+
+	denyut="$(denyut_judge)"
+	if [ -n "$denyut" ] && [ "$(jq -r '.commit' <<< "$denyut" 2>/dev/null)" = "$head" ]; then
+		ok "denyut worker -> $denyut"
+	else
+		tidak "worker seharusnya commit $head, denyut di Redis: ${denyut:-<tidak ada>}"
+	fi
+
+	if linger_aktif; then
+		ok "linger aktif: worker tetap hidup tanpa sesi login dan menyala setelah reboot"
+	else
+		tidak "linger belum aktif: worker mati saat tidak ada sesi login. Pemilik: sudo loginctl enable-linger $(id -un)"
+	fi
+
+	# Pekerjaan RUN sungguhan lewat jalur web: baris judge_jobs, Redis, worker, kontainer.
+	keluaran="$(docker exec lokakode php spark judge:coba 2>&1)" && kode_coba=0 || kode_coba=$?
+	ringkas="$(grep -E '^(\{"job"|judge:coba )' <<< "$keluaran" | tr '\n' ' ')"
+	if [ "$kode_coba" = "0" ] && grep -q 'judge:coba LULUS' <<< "$keluaran"; then
+		ok "RUN lewat lokakode -> $ringkas"
+	else
+		tidak "RUN lewat lokakode gagal (kode $kode_coba): ${ringkas:-$(tail -n 3 <<< "$keluaran" | tr '\n' ' ')}"
+	fi
+
+	sisa="$(docker ps -a --filter label=lokandita.judge=true --filter label=lokandita.judge.instans=lokakode --format '{{.Names}}' | wc -l)"
+	if [ "$sisa" = "0" ]; then ok "tidak ada kontainer judge yang tertinggal"; else tidak "$sisa kontainer judge tertinggal"; fi
 else
 	belum "menunggu judge worker (tahap 7)"
 fi

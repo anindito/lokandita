@@ -4,6 +4,8 @@
 #   infra/deploy.sh infra                    MySQL, Redis, Caddy, skema dan pengguna
 #   infra/deploy.sh <auth|lokakode|portal>   build image dari commit sekarang, jalankan,
 #                                            lalu GAGAL kecuali /healthz melaporkan commit itu
+#   infra/deploy.sh judge                    venv, image judge, layanan systemd pengguna;
+#                                            GAGAL kecuali denyut worker melaporkan commit itu
 #   infra/deploy.sh --verifikasi <app> <commit>   hanya pemeriksaan /healthz
 #
 # Menolak berjalan bila ada perubahan yang belum di-commit: yang berjalan di
@@ -56,7 +58,7 @@ if [ "${1:-}" = "--verifikasi" ]; then
 fi
 
 sasaran="${1:-}"
-case "$sasaran" in infra | auth | lokakode | portal) ;; *) gagal "pemakaian: $0 <infra|auth|lokakode|portal>" ;; esac
+case "$sasaran" in infra | auth | lokakode | portal | judge) ;; *) gagal "pemakaian: $0 <infra|auth|lokakode|portal|judge>" ;; esac
 
 kotor="$(git status --porcelain)"
 if [ -n "$kotor" ]; then
@@ -82,6 +84,46 @@ if [ "$sasaran" = "infra" ]; then
 	docker exec caddy caddy reload --config /srv/caddy/Caddyfile --adapter caddyfile 2>&1 | tail -n 1
 	docker ps --filter name='^(caddy|mysql|redis)$' --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
 	echo "deploy infra: SELESAI"
+	exit 0
+fi
+
+if [ "$sasaran" = "judge" ]; then
+	echo "== deploy judge @ $commit"
+	ada="$(printf "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='lokakode' AND table_name='judge_jobs';\n" \
+		| docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N')"
+	[ "$ada" = "1" ] || gagal "tabel lokakode.judge_jobs belum ada; jalankan infra/deploy.sh lokakode lebih dulu"
+	"$AKAR/infra/mysql-hak-judge.sh" lokakode
+	"$AKAR/judge/siapkan-venv.sh"
+	if (cd "$AKAR/judge" && python3 -m lokandita_judge.citra periksa) 2> /dev/null; then :; else "$AKAR/judge/bangun-image.sh"; fi
+
+	mkdir -p "$HOME/.config/systemd/user"
+	ln -sfn "$AKAR/judge/$LAYANAN_JUDGE" "$HOME/.config/systemd/user/$LAYANAN_JUDGE"
+	systemctl --user daemon-reload
+	systemctl --user enable "$LAYANAN_JUDGE" > /dev/null 2>&1
+	systemctl --user restart "$LAYANAN_JUDGE"
+
+	# Bukti: denyut di Redis harus berasal dari proses layanan ini dan menyebut commit ini.
+	lulus=0
+	for ((i = 1; i <= 30; i++)); do
+		pid="$(systemctl --user show "$LAYANAN_JUDGE" -p MainPID --value)"
+		denyut="$(denyut_judge)"
+		if [ -n "$denyut" ] && [ "$(jq -r '.pid' <<< "$denyut")" = "$pid" ] && [ "$(jq -r '.commit' <<< "$denyut")" = "$commit" ]; then
+			lulus=1
+			break
+		fi
+		sleep 1
+	done
+	if [ "$lulus" != "1" ]; then
+		journalctl --user -u "$LAYANAN_JUDGE" -n 20 --no-pager >&2 || true
+		gagal "deploy judge: worker tidak berdenyut dengan commit $commit (denyut terakhir: ${denyut:-tidak ada})"
+	fi
+	echo "verifikasi judge: denyut -> $denyut"
+	echo "verifikasi judge: LULUS, worker (pid $pid) menjalankan commit $commit"
+	if ! linger_aktif; then
+		echo "PERINGATAN: linger belum aktif untuk $(id -un). Worker akan MATI saat tidak ada sesi login" >&2
+		echo "            dan tidak menyala setelah reboot. Pemilik: sudo loginctl enable-linger $(id -un)" >&2
+	fi
+	echo "deploy judge: SELESAI"
 	exit 0
 fi
 

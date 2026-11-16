@@ -12,6 +12,8 @@
 #   3. menjalankan LokaAuth kedua bernama auth-tes (alias auth-internal-tes di
 #      jaringan internal) yang memakai identity_test dan Redis DB 15;
 #   4. menjalankan PHPUnit; kontainer tes dibuang sesudahnya.
+# Untuk lokakode, judge worker tes juga dijalankan di host (lokakode_test, Redis
+# DB 15), karena tes LokaKode mengirim pekerjaan sungguhan kepadanya.
 #
 # Hanya skema berakhiran _test yang disentuh; skrip menolak nama lain.
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
@@ -22,7 +24,12 @@ case "$app" in auth | lokakode | portal | judge) ;; *) gagal "pemakaian: $0 <aut
 shift
 
 tmp="$(mktemp -d)"
+pid_worker=""
 bersih() {
+	if [ -n "$pid_worker" ]; then
+		kill "$pid_worker" 2> /dev/null || true
+		wait "$pid_worker" 2> /dev/null || true
+	fi
 	docker rm -f auth-tes "$app-tes" tes-jalan > /dev/null 2>&1 || true
 	rm -rf "${tmp:?}"
 }
@@ -113,6 +120,48 @@ layani() {
 	gagal "$2 tidak menjawab /healthz"
 }
 
+# env_judge_tes — judge/.env dengan skema dan Redis diganti ke versi tes.
+env_judge_tes() {
+	sed -E -e 's#^(DB_DSN=.*/[a-z]+)$#\1_test#' -e 's#^(REDIS_URL=.*/)[0-9]+$#\115#' judge/.env > "$tmp/judge.env"
+	# Tes judge juga berperan sebagai web (yang menyisipkan baris): lokakode_app, lewat 127.0.0.1.
+	sed -n -E 's#^DB_DSN=(.*)@mysql:3306/(lokakode_test)$#TES_APP_DSN=\1@127.0.0.1:3306/\2#p' "$tmp/lokakode.env" >> "$tmp/judge.env"
+	chmod 600 "$tmp/judge.env"
+	grep -q '^DB_DSN=.*_test$' "$tmp/judge.env" || gagal "env tes judge: DB_DSN tidak berakhiran _test"
+	grep -q '^REDIS_URL=.*/15$' "$tmp/judge.env" || gagal "env tes judge: REDIS_URL bukan DB 15"
+	grep -q '^TES_APP_DSN=.*_test$' "$tmp/judge.env" || gagal "env tes judge: TES_APP_DSN tidak terbentuk"
+}
+
+# worker_tes — judge worker sungguhan di host, pada lokakode_test dan Redis DB 15.
+# Bila Docker atau image judge tidak ada, worker menolak mulai dan tes GAGAL.
+worker_tes() {
+	"$AKAR/infra/mysql-hak-judge.sh" lokakode_test
+	"$AKAR/judge/siapkan-venv.sh"
+	env_judge_tes
+	(
+		set -a
+		# shellcheck disable=SC1091
+		. "$tmp/judge.env"
+		set +a
+		cd judge && exec .venv/bin/python -m lokandita_judge.worker
+	) > "$tmp/worker.log" 2>&1 &
+	pid_worker=$!
+	local i
+	for ((i = 1; i <= 60; i++)); do
+		if ! kill -0 "$pid_worker" 2> /dev/null; then
+			cat "$tmp/worker.log" >&2
+			pid_worker=""
+			gagal "judge worker tes tidak mau mulai"
+		fi
+		if docker exec redis redis-cli -n 15 get lokandita:judge:worker 2> /dev/null | grep -q "\"pid\": $pid_worker,"; then
+			echo "judge worker tes berjalan (pid $pid_worker, lokakode_test, Redis DB 15)"
+			return 0
+		fi
+		sleep 0.5
+	done
+	cat "$tmp/worker.log" >&2
+	gagal "judge worker tes tidak berdenyut dalam 30 detik"
+}
+
 # Judge: tabelnya milik LokaKode, jadi skema lokakode_test dibuat oleh migrasi
 # LokaKode; setelah itu pytest berjalan di host sebagai judge_worker.
 if [ "$app" = "judge" ]; then
@@ -126,13 +175,7 @@ if [ "$app" = "judge" ]; then
 	docker exec redis redis-cli -n 15 flushdb > /dev/null
 	"$AKAR/judge/siapkan-venv.sh" tes
 
-	sed -E -e 's#^(DB_DSN=.*/[a-z]+)$#\1_test#' -e 's#^(REDIS_URL=.*/)[0-9]+$#\115#' judge/.env > "$tmp/judge.env"
-	# Tes juga berperan sebagai web (yang menyisipkan baris): lokakode_app, lewat 127.0.0.1.
-	sed -n -E 's#^DB_DSN=(.*)@mysql:3306/(lokakode_test)$#TES_APP_DSN=\1@127.0.0.1:3306/\2#p' "$tmp/lokakode.env" >> "$tmp/judge.env"
-	chmod 600 "$tmp/judge.env"
-	grep -q '^DB_DSN=.*_test$' "$tmp/judge.env" || gagal "env tes judge: DB_DSN tidak berakhiran _test"
-	grep -q '^REDIS_URL=.*/15$' "$tmp/judge.env" || gagal "env tes judge: REDIS_URL bukan DB 15"
-	grep -q '^TES_APP_DSN=.*_test$' "$tmp/judge.env" || gagal "env tes judge: TES_APP_DSN tidak terbentuk"
+	env_judge_tes
 
 	echo "== pytest judge"
 	kode=0
@@ -172,6 +215,7 @@ if [ "$app" != "auth" ]; then
 		migrasi "$app" "$skema_app"
 	fi
 	layani "$app" "$app-tes"
+	if [ "$app" = "lokakode" ]; then worker_tes; fi
 fi
 
 echo "== phpunit $app"

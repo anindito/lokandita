@@ -45,6 +45,8 @@ final class MatriksAksesTest extends KodeCase
 
         return [
             'GET beranda' => ['/beranda', $semua],
+            // Pekerjaan judge milik mhsA: hanya pembuatnya; superadmin dan dosen pun 404 (KONTRAK.md §6).
+            'GET api/executions/([^/]+)' => ['/api/executions/' . $d['jobA'], ['mhsA' => 'ok'] + array_fill_keys(self::PELAKU, 404)],
 
             'GET mata-kuliah' => ['/mata-kuliah', $staf],
             // Pengajar A dan B mengajar kelas di mata kuliah X, jadi boleh melihat mata kuliahnya.

@@ -179,6 +179,18 @@ lokakode.judge_jobs
 - `attempts` > 2 on infrastructure failure → `FAILED` with `result.error = "judge_unavailable"`.
 - Web reads `judge_jobs` to answer `GET /api/executions/{id}` (polled every second by the browser). A user can read only jobs they created.
 
+Details both sides rely on:
+
+- Web side is `App\Libraries\Antrean::kirim()` in LokaKode. It refuses to run inside an open transaction, because the row must be committed before the id reaches Redis. If the `LPUSH` fails the row stays `QUEUED` and the worker's scan picks it up; the failure is logged as `judge.lpush_failed`. With an `idempotency_key` that already exists it returns the existing job's id and queues nothing.
+- `GET /api/executions/{id}` answers `{ "id", "kind", "status", "progress", "result" }` with `Cache-Control: no-store`, never the payload. A job of another user, a system job, an unknown id and a malformed id all get the same `404 {"error":"execution_not_found"}`; this holds for dosen and superadmin too.
+- The claim also increments `attempts` and sets `started_at`. An id in Redis that has no `QUEUED` row (unknown, already claimed, pushed twice) is dropped without effect, so a job is never run twice at the same time.
+- Infrastructure failure (Docker cannot run the container, or an error inside the worker): the row goes back to `QUEUED` and is re-queued by the scan; at the third failed attempt it becomes `FAILED` with `result.error = "judge_unavailable"`. A verdict (`CE`, `TLE`, …) is never an infrastructure failure and is never retried.
+- A kind the worker cannot do yet answers `FAILED` with `result.error = "unsupported_kind"` — in stage 7 that is every kind except `RUN`, and `RUN` with an `instance_id`.
+- Worker start: rows left `RUNNING` by a previous worker go back to `QUEUED` (or to `FAILED` / `judge_unavailable` when `attempts` is already above 2) and are pushed to Redis at once. While running, the scan does the same for a row that has been `RUNNING` for more than 15 minutes and is not being worked on.
+- There is exactly one worker per schema. It refuses to start — exit code 69, one log line `tidak_mulai` with the reason — when Docker, a required kernel feature (cgroup v2, memory, swap, pids and CPU limits, seccomp), the seccomp profile or a judge image with the current tag is missing. Exit code 78 means a missing environment variable.
+- **Heartbeat**: Redis key `lokandita:judge:worker` (same DB as the queues), a JSON object `{ commit, pid, mulai, waktu, konkurensi, image, skema }`, written every 5 s with a lifetime of 15 s and deleted on a clean stop. `commit` is the Git commit of the working tree at worker start. A missing key means no worker is running. `infra/deploy.sh judge` and `infra/smoke.sh` read it; LokaKode reads it through `Antrean::denyut()`.
+- `php spark judge:coba [--bahasa c|cpp|python]` in the `lokakode` container sends one real `RUN` as a system job through `Antrean::kirim()`, waits for the result and exits 0 only when the heartbeat exists and the output is right.
+
 `progress`: `{ "state": "queued|compiling|running|done", "current": n, "total": m }`
 
 `payload` by kind:
@@ -207,7 +219,7 @@ The worker connects to MySQL and Redis on `127.0.0.1` (published to loopback onl
 
 `created_by` is `users.id` of §3, or `NULL` for a job made by the system itself (the smoke check); such a job can be read by no user.
 
-Judge containers carry the label `lokandita.judge=true`.
+Judge containers carry the label `lokandita.judge=true`, plus `lokandita.judge.instans=<schema name>` (which worker made it) and `lokandita.judge.berakhir=<unix time>` (after which the reaper may remove it). The reaper removes only containers that have the first label and an expiry in the past. A starting worker removes all containers of its own instance.
 
 ### LokaKode tables next to `judge_jobs`
 

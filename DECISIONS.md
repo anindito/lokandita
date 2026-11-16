@@ -2,6 +2,14 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-16 — `GET /api/executions/{id}` answers the same 404 to everybody but the creator, superadmin included, and never returns the payload — `KONTRAK.md` §6 says a user reads only their own jobs; staff will read submissions through their own pages in stage 9, with the policy layer.
+- 2026-11-16 — `infra/tes.sh lokakode` starts a real judge worker on the host (schema `lokakode_test`, Redis DB 15) for the duration of the tests — the LokaKode tests send real jobs through MySQL and Redis and read the result over HTTP; if Docker or the judge images are missing the run fails.
+- 2026-11-16 — LokaKode has its own small Redis connection inside `App\Libraries\Antrean` instead of sharing LokaAuth's `RedisConn` — fifteen lines, and moving it into the shared package would mean changing and redeploying LokaAuth for no behaviour change.
+- 2026-11-16 — Judge containers and job directories carry the worker's instance name (its schema): the production worker and the test worker on this server never see or remove each other's containers — tests can run while students are being judged.
+- 2026-11-16 — The worker takes a slot before it pops from Redis, so ids stay in Redis until a thread is free — `normal` is then always served before `low`, also when the worker is busy.
+- 2026-11-16 — An unexpected error inside the worker while judging is treated like an infrastructure failure (retried twice, then `judge_unavailable`), with the traceback in the log — a bug of ours must not become a verdict against the student, and must not kill the worker.
+- 2026-11-16 — The worker's log is one JSON line per event with job id, kind, verdict and duration; it never contains source code, input, program output or a secret — tested.
+- 2026-11-16 — `JUDGE_CONCURRENCY=4` on this 4-vCPU server: 200 queued `RUN` jobs (each one compile container and one run container) finished in 109 s in the test, about 0.55 s per job; other values were not measured.
 - 2026-11-16 — `/etc/passwd` and `/etc/group` inside the judge images are mode 600 — the acceptance test of `SPEC.md` §10 demands that a judged program cannot read `/etc/passwd`; it is the image's own file (the host's is not visible at all), and nothing in GCC, NumPy or Matplotlib needs it.
 - 2026-11-16 — Judge containers also run with `--ipc none` (no `/dev/shm`) and `--log-driver none` — a flood of output must not be written to Docker's log on the host disk before the 1 MB limit stops it.
 - 2026-11-16 — The wall-clock limit (2 × CPU limit + 1 s; compile: 10 s) is enforced twice: by `pelari` inside the container, counted from the moment the program starts, and by the worker from outside 4 s later (allowance for starting a container) — the first is exact, the second does not depend on anything inside the container. The CPU limit is the kernel's `RLIMIT_CPU`.

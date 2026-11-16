@@ -1,0 +1,32 @@
+# Judge worker Lokandita — layanan systemd milik pengguna `deploy`
+# (keputusan pemilik, tahap 7): bisa dinyalakan ulang tanpa sudo.
+#
+# Dipasang oleh infra/deploy.sh judge sebagai tautan di
+# ~/.config/systemd/user/. Supaya hidup tanpa ada yang login dan setelah
+# server dinyalakan ulang, pemilik menjalankan SEKALI:
+#     sudo loginctl enable-linger deploy
+#
+# Status dan log:
+#     systemctl --user status lokandita-judge
+#     journalctl --user -u lokandita-judge -n 50
+[Unit]
+Description=Lokandita judge worker
+# Bila Docker, MySQL atau Redis belum siap, worker menolak mulai (keluar 69)
+# dan dicoba lagi tiap 5 detik, tanpa batas.
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+WorkingDirectory=/srv/lokandita/judge
+EnvironmentFile=/srv/lokandita/judge/.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/srv/lokandita/judge/.venv/bin/python -m lokandita_judge.worker
+Restart=always
+RestartSec=5
+# SIGTERM: worker menyelesaikan pekerjaan yang sedang berjalan, lalu berhenti.
+# Sesudah 45 detik semua proses layanan ini (termasuk klien docker) dimatikan.
+KillMode=control-group
+TimeoutStopSec=45
+
+[Install]
+WantedBy=default.target
