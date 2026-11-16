@@ -2,6 +2,17 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-17 — `soal:impor` reads the file from standard input when no file argument is given, not from `-` — CodeIgniter's CLI parser treats a bare `-` as an option, so the argument never arrived; found by the first end-to-end test.
+- 2026-11-17 — The CLI import needs `--oleh <nomor induk>` of an active superadmin — `SPEC.md` §8.3 wants every import audited with *who*, and the audit log has no "nobody"; `Audit::catat()` gained an explicit actor for work that finishes outside its actor's own request.
+- 2026-11-17 — An import is finished by whoever next looks at it (`Impor::majukan()` from the report page or the CLI loop), with a row lock per item so two requests cannot create two versions — no background process on the web side to deploy, watch and restart; an unfinished import harms nobody because a new version always awaits review.
+- 2026-11-17 — The report page reloads itself through the HTTP `Refresh` header instead of JavaScript — one line, nothing for the CSP, and the shared layout stays untouched; the page also has a "reload now" link.
+- 2026-11-17 — Editing a problem in the browser sends it through exactly the same check and `VALIDATE` as an import (an import of one problem with source `sunting`), even when only the text changed — one code path, and the allowed concepts of the meeting may have changed since the last version (about 15 s per edit).
+- 2026-11-17 — Unknown keys in an import file are refused, with a "did you mean" when a known key is within three edits — a misspelt `hidden_count` would otherwise silently fall back to a default.
+- 2026-11-17 — Clearing the machine-translation badge updates the stored version in place and is audited; it creates no new version — the content students see does not change, only the mark.
+- 2026-11-17 — Approval and rejection carry their status condition inside the `UPDATE` (`… AND status = 'PENDING_REVIEW'`) — two clicks or two reviewers at once review a version exactly once.
+- 2026-11-17 — Statements are rendered by league/commonmark 2.10 with `html_input = escape` and unsafe links removed; `{{param}}` is substituted before rendering — the file comes from an upload and is treated as untrusted input.
+- 2026-11-17 — Code fields of the edit form are plain `<textarea>`; Monaco arrives with the student interface in stage 9.
+- 2026-11-17 — PHP's `upload_max_filesize` is 9 MB and `post_max_size` 10 MB in the app image (all three apps) — the default 2 MB would have refused files `SPEC.md` §8.3 allows; tested with a 3 MB upload.
 - 2026-11-17 — A refused problem is a `VALIDATE` result (`DONE`, `ok: false`), not a failed job, and reasons carry a code and positions while the sentence comes from the web app's language files — a verdict is never retried, and all user-facing text stays in `id`/`en`/`ar`.
 - 2026-11-17 — `VALIDATE` checks everything it can in one job (compile, concepts, generator, determinism, reference run) instead of stopping at the first problem — the author of a file sees all reasons after one import.
 - 2026-11-17 — Determinism is checked by running the generator three times for the first 3 of the 20 seeds, in three separate containers — "same `SEED`/`INDEX` three times" as `SPEC.md` §8.3 says, without tripling the cost of all 20 seeds.

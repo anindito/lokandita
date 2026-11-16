@@ -95,6 +95,20 @@ final class MatriksAksesTest extends KodeCase
             'GET pertemuan/{n}'                 => ['/pertemuan/' . $d['pertemuanX1'], ['pengajarB' => 403] + $kelolaXA],
             'POST pertemuan/{n}'                => ['/pertemuan/' . $d['pertemuanX1'], ['pengajarB' => 403] + $kelolaXA],
 
+            // Bank soal mata kuliah X: sama dengan pertemuannya.
+            'GET soal/{n}'             => ['/soal/' . $d['soalX'], ['pengajarB' => 403] + $kelolaXA],
+            'POST soal/{n}/setujui'    => ['/soal/' . $d['soalX'] . '/setujui', ['pengajarB' => 403] + $kelolaXA],
+            'POST soal/{n}/tolak'      => ['/soal/' . $d['soalX'] . '/tolak', ['pengajarB' => 403] + $kelolaXA],
+            'POST soal/{n}/terjemahan' => ['/soal/' . $d['soalX'] . '/terjemahan', ['pengajarB' => 403] + $kelolaXA],
+            'GET soal/{n}/ubah'        => ['/soal/' . $d['soalX'] . '/ubah', ['pengajarB' => 403] + $kelolaXA],
+            'POST soal/{n}/ubah'       => ['/soal/' . $d['soalX'] . '/ubah', ['pengajarB' => 403] + $kelolaXA],
+            // Unggah soal: superadmin saja; pengampu dan pengajar 403 di halaman dan di titik akhirnya (SPEC.md §8.3).
+            'GET impor'  => ['/impor', $admin],
+            'POST impor' => ['/impor', $admin],
+            // Laporan sebuah unggahan: superadmin saja. Bagi dosen mana pun ia sama seperti tidak ada,
+            // juga bagi pengampu mata kuliah tujuannya (yang hanya melihat suntingannya sendiri).
+            'GET impor/([^/]+)' => ['/impor/' . $d['imporWeb'], ['superadmin' => 'ok', 'mhsA' => 403] + array_fill_keys(self::PELAKU, 404)],
+
             // Gerbang tahap 6: pengajar B tidak bisa membuka kelas XA milik pengajar A.
             'GET kelas/{n}' => ['/kelas/' . $d['kelasXA'], ['pengampuY' => 404, 'pengajarB' => 404] + $staf],
         ];
@@ -165,6 +179,10 @@ final class MatriksAksesTest extends KodeCase
             $this->db->query('SELECT id, course_id, number, title, language, enabled FROM meetings ORDER BY id')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT * FROM meeting_concepts ORDER BY meeting_id, concept_code')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT * FROM course_base_concepts ORDER BY course_id, concept_code')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT id, status, translations, review_note FROM problem_versions ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT * FROM meeting_problems ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT id FROM imports ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT id FROM judge_jobs ORDER BY id')->fetch_all(MYSQLI_ASSOC),
         ];
         $awal = $potret();
 
@@ -188,6 +206,11 @@ final class MatriksAksesTest extends KodeCase
             'POST mata-kuliah/{n}/pertemuan'    => ['number' => '9', 'title' => 'Dibajak', 'language' => 'cpp'],
             'POST mata-kuliah/{n}/konsep-dasar' => ['konsep' => ['POINTER', 'STRING']],
             'POST pertemuan/{n}'                => ['number' => '1', 'title' => 'Dibajak', 'language' => 'cpp', 'enabled' => '1', 'konsep' => ['POINTER']],
+            'POST soal/{n}/setujui'    => ['versi_id' => (string) $d['versiX']],
+            'POST soal/{n}/tolak'      => ['versi_id' => (string) $d['versiX'], 'catatan' => 'Dibajak'],
+            'POST soal/{n}/terjemahan' => ['versi_id' => (string) $d['versiX'], 'bahasa' => 'en'],
+            'POST soal/{n}/ubah'       => ['difficulty' => 'sulit', 'comparison_mode' => 'trimmed', 'time_limit_ms' => '2000', 'samples_count' => '2',
+                'hidden_count' => '10', 't_id_title' => 'Dibajak', 't_id_statement' => 'Dibajak', 'generator' => 'print(1)', 'reference_solution' => 'int main(){}'],
             'POST tahun-ajaran'             => ['label' => 'Dibajak', 'starts_on' => '2027-02-01', 'ends_on' => '2027-07-31'],
             'POST tahun-ajaran/{n}'         => ['label' => 'Dibajak', 'starts_on' => '2027-02-01', 'ends_on' => '2027-07-31'],
             'POST tahun-ajaran/baru'          => ['label' => 'Dibajak', 'starts_on' => '2027-02-01', 'ends_on' => '2027-07-31'],

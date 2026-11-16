@@ -6,7 +6,7 @@
 # Sampai saat itu keduanya dicetak sebagai "BELUM AKTIF" — bukan lulus.
 # Mengaktifkan: ubah angka di bawah menjadi 1 pada tahap yang bersangkutan.
 CEK_AUTH_AKTIF=1   # tahap 5: cek 3, 4, 5 — aktif sejak tahap 5
-CEK_JUDGE_AKTIF=1  # tahap 7: cek 6 — aktif sejak tahap 7
+CEK_JUDGE_AKTIF=1  # tahap 7: cek 6 — aktif sejak tahap 7; cek 7 (VALIDATE) sejak tahap 8
 
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
@@ -126,6 +126,22 @@ if [ "$CEK_JUDGE_AKTIF" = "1" ]; then
 		ok "RUN lewat lokakode -> $ringkas"
 	else
 		tidak "RUN lewat lokakode gagal (kode $kode_coba): ${ringkas:-$(tail -n 3 <<< "$keluaran" | tr '\n' ' ')}"
+	fi
+
+else
+	belum "menunggu judge worker (tahap 7)"
+fi
+
+echo "7. judge memvalidasi satu soal kecil (VALIDATE: generator, konsep, 240 tes)"
+if [ "$CEK_JUDGE_AKTIF" = "1" ]; then
+	# Soal bawaan, lewat jalur yang sama dengan impor: generator, analisis konsep,
+	# mode kelompok, solusi referensi. Tidak ada yang disimpan ke bank soal.
+	keluaran="$(docker exec lokakode php spark judge:coba --validasi 2>&1)" && kode_coba=0 || kode_coba=$?
+	ringkas="$(grep -E '^(\{"job"|judge:coba )' <<< "$keluaran" | tr '\n' ' ')"
+	if [ "$kode_coba" = "0" ] && grep -q 'judge:coba LULUS' <<< "$keluaran"; then
+		ok "VALIDATE lewat lokakode -> $ringkas"
+	else
+		tidak "VALIDATE lewat lokakode gagal (kode $kode_coba): ${ringkas:-$(tail -n 3 <<< "$keluaran" | tr '\n' ' ')}"
 	fi
 
 	sisa="$(docker ps -a --filter label=lokandita.judge=true --filter label=lokandita.judge.instans=lokakode --format '{{.Names}}' | wc -l)"

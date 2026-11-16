@@ -189,7 +189,7 @@ Details both sides rely on:
 - Worker start: rows left `RUNNING` by a previous worker go back to `QUEUED` (or to `FAILED` / `judge_unavailable` when `attempts` is already above 2) and are pushed to Redis at once. While running, the scan does the same for a row that has been `RUNNING` for more than 15 minutes and is not being worked on.
 - There is exactly one worker per schema. It refuses to start — exit code 69, one log line `tidak_mulai` with the reason — when Docker, a required kernel feature (cgroup v2, memory, swap, pids and CPU limits, seccomp), the seccomp profile or a judge image with the current tag is missing. The judge images are `judge-c`, `judge-cpp`, `judge-python` and `judge-analisis` (concept analysis; it parses source and never runs it). Their tag is a hash over `judge/images/`, computed once when the worker starts. Exit code 78 means a missing environment variable.
 - **Heartbeat**: Redis key `lokandita:judge:worker` (same DB as the queues), a JSON object `{ commit, pid, mulai, waktu, konkurensi, image, skema }`, written every 5 s with a lifetime of 15 s and deleted on a clean stop. `commit` is the Git commit of the working tree at worker start. A missing key means no worker is running. `infra/deploy.sh judge` and `infra/smoke.sh` read it; LokaKode reads it through `Antrean::denyut()`.
-- `php spark judge:coba [--bahasa c|cpp|python]` in the `lokakode` container sends one real `RUN` as a system job through `Antrean::kirim()`, waits for the result and exits 0 only when the heartbeat exists and the output is right.
+- `php spark judge:coba [--bahasa c|cpp|python]` in the `lokakode` container sends one real `RUN` as a system job through `Antrean::kirim()`, waits for the result and exits 0 only when the heartbeat exists and the output is right. With `--validasi` it sends one `VALIDATE` for a small built-in problem instead and exits 0 only when the answer is `ok` with 240 tests.
 
 `progress`: `{ "state": "queued|compiling|running|done", "current": n, "total": m }`
 
@@ -302,9 +302,10 @@ One JSON file per meeting.
       "samples_count": 3,
       "hidden_count": 12,
       "required_concepts_in_submission": [],
+      "params": { "batas": 1000 },
       "translations": {
-        "id": { "title": "", "statement": "", "input_format": "", "output_format": "", "constraints": "" },
-        "en": { }, "ar": { }
+        "id": { "title": "", "statement": "… sampai {{batas}} …", "input_format": "", "output_format": "", "constraints": "" },
+        "en": { "title": "", "statement": "", "machine": true }, "ar": { }
       },
       "generator": "…python source…",
       "reference_solution": "…source in the meeting language…"
@@ -321,12 +322,28 @@ One JSON file per meeting.
 | `slug` | `[a-z0-9-]{3,80}`, unique within the meeting |
 | `difficulty` | `mudah_sekali`, `mudah`, `mudah_sedang`, `sedang`, `sulit` |
 | `comparison_mode` | `exact`, `trimmed`, `token`, `float`; default `trimmed` |
-| `samples_count` | 2–3 |
-| `hidden_count` | ≥ 10 |
-| `translations.id` | Required; `en`, `ar` optional |
+| `time_limit_ms` | Integer 100–10000; default 2000 for `c` and `cpp`, 5000 for `python` |
+| `samples_count` | Integer 2–3 |
+| `hidden_count` | Integer 10–50 |
+| `required_concepts_in_submission` | Array of concept codes valid for the meeting's language; default `[]` |
+| `params` | Optional object, name `[a-z_][a-z0-9_]*` → text or number. `{{name}}` in any translated text is replaced by the value, the same for every student; a `{{name}}` without a value in `params` is refused |
+| `translations.id` | Required: `title` (at most 190 characters) and `statement` non-empty; `input_format`, `output_format`, `constraints` text, may be empty. Texts are Markdown; raw HTML is shown as text, never executed |
+| `translations.en`, `.ar` | Optional. `{}` or absent means not translated. `"machine": true` marks a machine translation (badge until the pengampu clears it) |
+| `reference_solution` | Source in the meeting's language, at most 256 KB |
 | `generator` | Python; reads env `SEED` (int) and `INDEX` (0 … samples+hidden−1); prints one input; deterministic |
 
 A file whose top level is a one-element array wrapping this object is accepted and unwrapped.
+
+Rules of an import (`SPEC.md` §8.3):
+
+- At most 8 MB and 200 problems per file. Unknown keys are refused, at the top level and inside a problem: a misspelt key must not be silently ignored.
+- A mistake above the problems (not JSON, wrong `course`, `meeting` or `language`, unknown key) refuses the whole file; nothing is validated or stored. A mistake inside one problem refuses that problem only.
+- Every problem that passes this check is sent to the judge as one `VALIDATE` job (§6) with the meeting's allowed concepts, and is stored only when the judge answers `ok`. It is stored as a new `problem_versions` row with status `PENDING_REVIEW`.
+- Idempotent by `slug` within the meeting: a problem whose content equals the latest stored version (any status) is reported "unchanged" and creates nothing; changed content creates the next version. The meeting keeps using its approved version until the new one is approved.
+- The report names, per problem: accepted, rejected or unchanged; for each reason the part (`generator`, reference solution, or the field), line and column inside that source, and the line of that key in the JSON file.
+- Ways in: `php spark soal:impor [file] --oleh <nomor induk of an active superadmin>` (without a file argument it reads the file from standard input; exit code 0 only when the file is accepted and no problem is rejected), the web upload at `POST /impor` (superadmin only, field `berkas`, `.json`), and the edit form of one problem (superadmin and the pengampu), which sends that one problem through the same check and validation. `php spark soal:ekspor <course> <meeting>` prints the latest version of every problem of a meeting in this format; importing that output changes nothing.
+- An import is finished by the request that next looks at it (`GET /impor/{id}`, or the CLI's own loop); there is no background process on the web side. Until then nothing reaches students, because a new version always awaits review.
+- Every import writes one row to LokaKode's `audit_log`: `soal.impor` (or `soal.impor.ditolak`, `soal.disunting`) with the actor, file name, source and the counts.
 
 ## 8. Safe Exam Browser verification
 
@@ -441,9 +458,10 @@ Values are written without quotes.
   4. the same call with a wrong token returns 401;
   5. `identity_reader` can select from `session_identity` and cannot select from `users`;
   6. the judge worker is running and a trivial `RUN` job completes.
+  7. the judge validates a small built-in problem: one `VALIDATE` job through LokaKode (`php spark judge:coba --validasi`) answers `ok` after 240 tests; nothing is stored in the problem bank.
 - `smoke.sh` additionally checks (as check 0) that every app container reports the current `HEAD` at `/healthz`.
 - In check 1 a host in maintenance must answer `503`, an open host `2xx`/`3xx`, and `www` a `301` to the apex; the certificate must validate.
-- Checks 3–5 become active in stage 5 and check 6 in stage 7, by a switch at the top of `smoke.sh`. Until then each prints `BELUM AKTIF`, is counted separately, and is not reported as passed.
+- Checks 3–5 become active in stage 5, check 6 in stage 7 and check 7 in stage 8, by a switch at the top of `smoke.sh`. Until then each prints `BELUM AKTIF`, is counted separately, and is not reported as passed.
 - `infra/tes-infra.sh` tests §9, §10 and the deploy verification against the running containers.
 - A stage is not finished until `smoke.sh` passes after deploy.
 

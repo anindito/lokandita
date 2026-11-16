@@ -1,0 +1,54 @@
+{
+  "course": "DDP101",
+  "meeting": 2,
+  "language": "cpp",
+  "problems": [
+    {
+      "slug": "luas-keliling-persegi-panjang",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "params": {
+        "batas": 1000
+      },
+      "translations": {
+        "id": {
+          "title": "Luas dan Keliling Persegi Panjang",
+          "statement": "Sebuah persegi panjang punya panjang dan lebar berupa bilangan bulat, masing-masing paling besar {{batas}}.\n\nCetak luasnya, lalu kelilingnya.",
+          "input_format": "Satu baris berisi panjang dan lebar.",
+          "output_format": "Baris pertama: luas. Baris kedua: keliling.",
+          "constraints": "1 ≤ panjang, lebar ≤ {{batas}}"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\nprint(r.randint(1, 1000), r.randint(1, 1000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int panjang, lebar;\n    cin >> panjang >> lebar;\n    cout << panjang * lebar << endl;\n    cout << 2 * (panjang + lebar) << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "sisi-terpanjang",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Sisi Terpanjang",
+          "statement": "Diberikan panjang dan lebar sebuah persegi panjang. Cetak sisi yang lebih panjang.",
+          "input_format": "Satu baris berisi panjang dan lebar.",
+          "output_format": "Satu bilangan: sisi yang lebih panjang.",
+          "constraints": "1 ≤ panjang, lebar ≤ 1000"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\nprint(r.randint(1, 1000), r.randint(1, 1000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int panjang, lebar;\n    cin >> panjang >> lebar;\n    if (panjang > lebar) {\n        cout << panjang << endl;\n    } else {\n        cout << lebar << endl;\n    }\n    return 0;\n}\n"
+    }
+  ]
+}

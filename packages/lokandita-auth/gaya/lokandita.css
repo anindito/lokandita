@@ -158,6 +158,28 @@
   .qr { display: block; margin: 1rem auto; background: #fff; padding: .5rem; border-radius: .5rem; max-width: 14rem; }
   .qr svg { display: block; width: 100%; height: auto; }
 
+  /* Bank soal LokaKode (SPEC.md §8, §11): kode sumber selalu kiri-ke-kanan. */
+  .kode-sumber { direction: ltr; unicode-bidi: isolate; text-align: left; overflow-x: auto; max-height: 28rem; padding: .75rem 1rem; margin: .5rem 0 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85rem; line-height: 1.45; tab-size: 4; white-space: pre;
+    background: var(--latar); border: 1px solid var(--garis); border-radius: .5rem; }
+  textarea.kode-isian { direction: ltr; text-align: left; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85rem; tab-size: 4; white-space: pre; overflow-x: auto; }
+  .pernyataan p { margin: .5rem 0; }
+  .pernyataan ul, .pernyataan ol { margin: .5rem 0; padding-inline-start: 1.5rem; list-style: revert; }
+  .pernyataan code, .pernyataan pre { direction: ltr; unicode-bidi: isolate; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .pernyataan pre { overflow-x: auto; padding: .5rem .75rem; background: var(--latar); border: 1px solid var(--garis); border-radius: .5rem; }
+  /* Lima tingkat kesulitan: lima warna yang berbeda, bukan satu gradasi (SPEC.md §11). */
+  .tingkat-mudah_sekali { border-color: #1b7a4b; color: #1b7a4b; }
+  .tingkat-mudah { border-color: #1769aa; color: #1769aa; }
+  .tingkat-mudah_sedang { border-color: #6a3fb5; color: #6a3fb5; }
+  .tingkat-sedang { border-color: #b26a00; color: #b26a00; }
+  .tingkat-sulit { border-color: var(--bahaya); color: var(--bahaya); }
+  .status-approved, .keadaan-diterima { border-color: var(--hijau); color: var(--hijau); }
+  .status-rejected, .keadaan-ditolak { border-color: var(--bahaya); color: var(--bahaya); }
+  .status-pending_review, .keadaan-menunggu { border-color: var(--emas); color: var(--emas); }
+  .daftar-alasan { margin: .35rem 0 0; padding-inline-start: 1.25rem; list-style: disc; font-size: .9rem; }
+  .daftar-alasan .letak { color: var(--teks-redup); }
+  .dua-kolom { display: grid; gap: 0 1rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }
+
   /* Peringatan sesi hampir habis. */
   .sesi-peringatan { position: fixed; inset-inline: 0; bottom: 0; z-index: 45; display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; justify-content: center; padding: .75rem 1rem; background: var(--emas); color: #151a33; font-weight: 600; }
   .sesi-peringatan[hidden] { display: none; }

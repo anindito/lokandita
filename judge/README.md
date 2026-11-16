@@ -6,7 +6,9 @@ Worker penilai (Python 3.12) — `SPEC.md` §10, `KONTRAK.md` §6.
 - `tests/` — pytest terhadap MySQL, Redis dan Docker sungguhan. Jalankan hanya dengan `infra/tes.sh judge`.
 - `siapkan-venv.sh` — membuat `judge/.venv` dari `requirements.txt` (versi dan hash dikunci).
 - `.env.example` — variabel wajib (`KONTRAK.md` §10).
-- `images/` — Dockerfile `judge-c`, `judge-cpp`, `judge-python`, dan `pelari.c` (pengawas di dalam kontainer). Bangun dengan `judge/bangun-image.sh`.
+- `images/` — Dockerfile `judge-c`, `judge-cpp`, `judge-python`, `judge-analisis`; `pelari.c` (pengawas di dalam kontainer) dan `kelompok.c` (banyak kali jalan di satu kontainer, hanya untuk generator dan solusi referensi). Bangun dengan `judge/bangun-image.sh`.
+- `images/analisis/` — penganalisis konsep (`SPEC.md` §9): tree-sitter untuk C/C++, `ast` untuk Python. Aturannya untuk pembaca manusia: `docs/DETEKSI-KONSEP.md`. Contoh yang diuji: `tests/korpus/`.
+- `lokandita_judge/soal.py` — VALIDATE (validasi soal sebelum disimpan), GENERATE (instans per mahasiswa), ANALYZE (konsep sebuah sumber).
 - `seccomp/` — `judge.json` dibuat oleh `buat-profil.py` dari profil bawaan Docker; jangan disunting dengan tangan.
 - `lokandita_judge/kotak.py` — kotak pasir: semua bendera Docker ada di `bendera_kontainer`. `mesin.py` — RUN dan penilaian per tes. `banding.py` — mode perbandingan keluaran.
 - `var/` — direktori kerja per job (tidak masuk Git), dikaitkan hanya-baca ke kontainer.

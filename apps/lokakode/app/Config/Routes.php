@@ -54,6 +54,15 @@ $routes->group('', ['filter' => 'masuk:superadmin,dosen'], static function (Rout
     $routes->post('mata-kuliah/(:num)/konsep-dasar', 'Pertemuan::konsepDasar/$1');
     $routes->get('pertemuan/(:num)', 'Pertemuan::lihat/$1');
     $routes->post('pertemuan/(:num)', 'Pertemuan::perbarui/$1');
+    // Bank soal (SPEC.md §8.1): superadmin dan pengampu; pengajar 403.
+    $routes->get('soal/(:num)', 'Soal::lihat/$1');
+    $routes->post('soal/(:num)/setujui', 'Soal::setujui/$1');
+    $routes->post('soal/(:num)/tolak', 'Soal::tolak/$1');
+    $routes->post('soal/(:num)/terjemahan', 'Soal::terjemahan/$1');
+    $routes->get('soal/(:num)/ubah', 'Soal::sunting/$1');
+    $routes->post('soal/(:num)/ubah', 'Soal::simpan/$1');
+    // Laporan satu impor: superadmin; pengampu hanya untuk suntingan di mata kuliahnya.
+    $routes->get('impor/(:segment)', 'ImporSoal::lihat/$1');
 });
 
 // Superadmin saja (SPEC.md §3): tahun ajaran dan mata kuliah.
@@ -67,6 +76,9 @@ $routes->group('', ['filter' => 'masuk:superadmin'], static function (RouteColle
     $routes->post('tahun-ajaran/(:num)', 'TahunAjaran::perbarui/$1');
     $routes->post('tahun-ajaran/(:num)/aktifkan', 'TahunAjaran::aktifkan/$1');
     $routes->get('audit', 'AuditLog::index');
+    // Unggah soal JSON: superadmin saja (SPEC.md §3, §8.3).
+    $routes->get('impor', 'ImporSoal::index');
+    $routes->post('impor', 'ImporSoal::unggah');
     $routes->get('mata-kuliah/baru', 'MataKuliah::baru');
     $routes->post('mata-kuliah', 'MataKuliah::simpan');
     $routes->get('mata-kuliah/(:num)/ubah', 'MataKuliah::sunting/$1');

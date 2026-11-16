@@ -144,6 +144,60 @@ abstract class KodeCase extends TestCase
     }
 
     /**
+     * Satu versi soal, disisipkan langsung (tanpa judge).
+     *
+     * @param array<string, mixed> $over
+     */
+    protected function versiBaris(int $soal, int $nomor, string $status = 'PENDING_REVIEW', array $over = []): int
+    {
+        Fixtures::insert($this->db, 'problem_versions', $over + [
+            'problem_id' => $soal, 'version' => $nomor, 'status' => $status, 'language' => 'cpp', 'difficulty' => 'MUDAH',
+            'comparison_mode' => 'trimmed', 'time_limit_ms' => 2000, 'samples_count' => 2, 'hidden_count' => 10,
+            'params' => '{"n": 100}',
+            'translations' => json_encode([
+                'id' => ['title' => 'Jumlah Dua Bilangan', 'statement' => 'Diberikan **dua** bilangan sampai {{n}}. <script>alert(1)</script>',
+                    'input_format' => 'Satu baris.', 'output_format' => 'Satu bilangan.', 'constraints' => ''],
+                'en' => ['title' => 'Sum of Two Numbers', 'statement' => 'Given two numbers.', 'input_format' => '', 'output_format' => '', 'constraints' => '', 'machine' => true],
+            ], JSON_UNESCAPED_UNICODE),
+            'generator' => "import os\nprint(os.environ['SEED'], os.environ['INDEX'])\n",
+            'reference_solution' => "#include <iostream>\nint main(){long a,b;std::cin>>a>>b;std::cout<<a+b<<'\\n';}\n",
+            'concepts' => '["IO_DASAR","VARIABEL_TIPE","ARITMETIKA"]', 'required_in_submission' => '[]',
+            'content_hash' => str_repeat('0', 64), 'created_by' => 'uji', 'created_at' => gmdate('Y-m-d H:i:s'),
+        ]);
+
+        return (int) $this->db->insert_id;
+    }
+
+    /**
+     * Satu soal dengan versi pertamanya.
+     *
+     * @return array{soal: int, versi: int}
+     */
+    protected function soalBaris(int $pertemuan, string $slug, string $status = 'PENDING_REVIEW'): array
+    {
+        Fixtures::insert($this->db, 'problems', ['meeting_id' => $pertemuan, 'slug' => $slug, 'created_at' => gmdate('Y-m-d H:i:s')]);
+        $soal = (int) $this->db->insert_id;
+
+        return ['soal' => $soal, 'versi' => $this->versiBaris($soal, 1, $status)];
+    }
+
+    /**
+     * Satu baris impor yang sudah selesai, tanpa butir.
+     *
+     * @param array<string, mixed> $pelaku
+     */
+    protected function imporBaris(string $sumber, array $pelaku, int $matkul, int $pertemuan): string
+    {
+        $id = Fixtures::uuid();
+        Fixtures::insert($this->db, 'imports', [
+            'id' => $id, 'source' => $sumber, 'file_name' => 'RAHASIA-IMPOR.json', 'actor_id' => $pelaku['id'], 'course_id' => $matkul,
+            'meeting_id' => $pertemuan, 'status' => 'SELESAI', 'created_at' => gmdate('Y-m-d H:i:s'), 'finished_at' => gmdate('Y-m-d H:i:s'),
+        ]);
+
+        return $id;
+    }
+
+    /**
      * Baris judge_jobs yang sudah selesai, milik $pembuat (null = pekerjaan sistem). Tidak diantrekan.
      *
      * @param array<string, mixed>|null $pembuat
@@ -211,6 +265,10 @@ abstract class KodeCase extends TestCase
         $d['pertemuanX1'] = $this->pertemuan($d['matkulX'], 1, 'cpp', ['IO_DASAR', 'VARIABEL_TIPE', 'ARITMETIKA']);
         $d['pertemuanX2'] = $this->pertemuan($d['matkulX'], 2, 'cpp', ['KONVERSI_TIPE']);
         $d['pertemuanY1'] = $this->pertemuan($d['matkulY'], 1, 'python', ['IO_DASAR', 'VARIABEL_TIPE', 'ARITMETIKA']);
+        // Satu soal menunggu tinjauan di pertemuan 1 mata kuliah X, dan dua impor yang sudah selesai.
+        ['soal' => $d['soalX'], 'versi' => $d['versiX']] = $this->soalBaris($d['pertemuanX1'], 'jumlah-dua');
+        $d['imporWeb']     = $this->imporBaris('web', $d['superadmin'], $d['matkulX'], $d['pertemuanX1']);
+        $d['imporSunting'] = $this->imporBaris('sunting', $d['pengampuX'], $d['matkulX'], $d['pertemuanX1']);
 
         return $d;
     }

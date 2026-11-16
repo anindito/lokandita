@@ -137,7 +137,7 @@ final class Antrean
         return preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/', $id) === 1;
     }
 
-    private static function uuid(): string
+    public static function uuid(): string
     {
         $b    = random_bytes(16);
         $b[6] = chr((ord($b[6]) & 0x0F) | 0x40);

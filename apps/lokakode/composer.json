@@ -15,6 +15,7 @@
     "require": {
         "php": "^8.3",
         "codeigniter4/framework": "^4.7",
+        "league/commonmark": "^2",
         "lokandita/auth": "*"
     },
     "require-dev": {

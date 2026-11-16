@@ -30,6 +30,7 @@ RUN mkdir /keluar \
  && ! grep -q -e '@apply' -e '@source' -e '@import' /keluar/lokandita.css
 
 FROM php:8.3.36-apache
+# upload_max_filesize: unggahan soal JSON sampai 8 MB (SPEC.md §8.3); bawaan PHP hanya 2 MB.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends libicu-dev libzip-dev libpng-dev \
  && docker-php-ext-install -j"$(nproc)" intl mysqli pdo_mysql opcache zip gd \
@@ -37,7 +38,7 @@ RUN apt-get update \
  && docker-php-ext-enable redis \
  && rm -rf /var/lib/apt/lists/* /tmp/pear \
  && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
- && printf 'expose_php = Off\ndate.timezone = UTC\n' > "$PHP_INI_DIR/conf.d/lokandita.ini"
+ && printf 'expose_php = Off\ndate.timezone = UTC\nupload_max_filesize = 9M\npost_max_size = 10M\n' > "$PHP_INI_DIR/conf.d/lokandita.ini"
 
 COPY infra/docker/apache-app.conf /etc/apache2/sites-available/000-default.conf
 RUN sed -i 's/^Listen 80$/Listen 8080/' /etc/apache2/ports.conf \

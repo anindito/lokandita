@@ -14,8 +14,13 @@ use CodeIgniter\CLI\CLI;
  * memeriksa keluarannya. Dipakai infra/smoke.sh (cek 6, KONTRAK.md §11).
  *
  *   docker exec lokakode php spark judge:coba
+ *   docker exec lokakode php spark judge:coba --validasi
  *
  * Keluar 0 hanya bila worker berdenyut dan program menghasilkan keluaran yang benar.
+ *
+ * Dengan --validasi yang dikirim adalah satu pekerjaan VALIDATE untuk sebuah
+ * soal kecil bawaan (cek smoke 7): generator, analisis konsep, mode kelompok
+ * dan solusi referensi berjalan sungguhan. Tidak ada yang disimpan ke bank soal.
  */
 final class JudgeCoba extends BaseCommand
 {
@@ -31,11 +36,12 @@ final class JudgeCoba extends BaseCommand
 
     protected $description = 'Menjalankan satu program kecil lewat judge worker dan memeriksa hasilnya.';
 
-    protected $usage = 'judge:coba [--bahasa c|cpp|python] [--tunggu <detik>]';
+    protected $usage = 'judge:coba [--bahasa c|cpp|python] [--validasi] [--tunggu <detik>]';
 
     protected $options = [
         '--bahasa' => 'Bahasa program uji (bawaan: c).',
-        '--tunggu' => 'Berapa detik menunggu hasil (bawaan: 60).',
+        '--validasi' => 'Kirim pekerjaan VALIDATE untuk soal kecil bawaan, bukan RUN.',
+        '--tunggu' => 'Berapa detik menunggu hasil (bawaan: 60; dengan --validasi 180).',
     ];
 
     public function run(array $params)
@@ -55,6 +61,10 @@ final class JudgeCoba extends BaseCommand
             return EXIT_ERROR;
         }
         CLI::write('worker: commit ' . ($denyut['commit'] ?? '?') . ', konkurensi ' . ($denyut['konkurensi'] ?? '?') . ', image ' . ($denyut['image'] ?? '?'));
+
+        if (CLI::getOption('validasi') !== null) {
+            return $this->validasi($bahasa, max(1, (int) (CLI::getOption('tunggu') ?? 180)));
+        }
 
         $n     = random_int(1000, 999999);
         $mulai = microtime(true);
@@ -86,6 +96,47 @@ final class JudgeCoba extends BaseCommand
             return EXIT_SUCCESS;
         }
         CLI::write('judge:coba GAGAL: ' . (in_array($baris['status'] ?? '', ['DONE', 'FAILED'], true) ? 'hasil tidak seperti yang diharapkan' : "tidak selesai dalam {$tunggu} detik"));
+
+        return EXIT_ERROR;
+    }
+
+    /**
+     * Satu soal kecil lewat VALIDATE: masukannya sebuah bilangan, keluarannya dua kalinya.
+     */
+    private function validasi(string $bahasa, int $tunggu): int
+    {
+        $mulai = microtime(true);
+        $id    = Antrean::kirim('VALIDATE', [
+            'language' => $bahasa,
+            'generator' => "import os, random\nprint(random.Random(int(os.environ['SEED']) * 100 + int(os.environ['INDEX'])).randint(1, 10**6))\n",
+            'reference_solution' => self::PROGRAM[$bahasa],
+            'samples_count' => 2, 'hidden_count' => 10, 'time_limit_ms' => $bahasa === 'python' ? 5000 : 2000,
+            'allowed_concepts' => ['IO_DASAR', 'VARIABEL_TIPE', 'ARITMETIKA', 'PERCABANGAN', 'KONVERSI_TIPE'],
+            'comparison_mode' => 'trimmed',
+        ], null);
+        CLI::write("pekerjaan {$id} dikirim (VALIDATE, {$bahasa})");
+
+        $baris = null;
+        while (microtime(true) - $mulai < $tunggu) {
+            $baris = Antrean::sistem($id);
+            if ($baris !== null && in_array($baris['status'], ['DONE', 'FAILED'], true)) {
+                break;
+            }
+            usleep(250_000);
+        }
+        $lama  = (int) round((microtime(true) - $mulai) * 1000);
+        $hasil = $baris['result'] ?? [];
+        CLI::write((string) json_encode([
+            'job' => $id, 'status' => $baris['status'] ?? null, 'ok' => $hasil['ok'] ?? ($hasil['error'] ?? null),
+            'tests' => $hasil['tests'] ?? null, 'reasons' => array_column($hasil['reasons'] ?? [], 'code'), 'ms' => $lama,
+        ], JSON_UNESCAPED_SLASHES));
+
+        if (($baris['status'] ?? '') === 'DONE' && ($hasil['ok'] ?? false) === true && ($hasil['tests'] ?? 0) === 240) {
+            CLI::write("judge:coba LULUS: soal divalidasi dengan 240 tes dalam {$lama} ms");
+
+            return EXIT_SUCCESS;
+        }
+        CLI::write('judge:coba GAGAL: ' . (in_array($baris['status'] ?? '', ['DONE', 'FAILED'], true) ? 'soal bawaan tidak lolos validasi' : "tidak selesai dalam {$tunggu} detik"));
 
         return EXIT_ERROR;
     }

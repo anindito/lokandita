@@ -178,3 +178,41 @@ def test_periksa_menyebut_konsep_yang_dipakai_dan_yang_kurang():
     hasil = soal.periksa({"language": "python", "source": sumber, "required_concepts": ["CLASS_OBJECT", "INHERITANCE"]})
     assert "CLASS_OBJECT" in hasil["concepts"] and hasil["missing"] == ["INHERITANCE"]
     assert soal.periksa({"language": "python", "source": sumber})["missing"] == []
+
+
+# ---- berkas contoh untuk gerbang pemilik (docs/contoh-soal) ----
+
+CONTOH = __import__("pathlib").Path(__file__).parents[2] / "docs" / "contoh-soal"
+# DDP101 pertemuan 2 menurut docs/PETA-KONSEP.md: konsep pertemuan 1 dan 2.
+DDP101_PERTEMUAN_2 = ["IO_DASAR", "ARITMETIKA", "VARIABEL_TIPE", "KONVERSI_TIPE"]
+
+
+def _validasi_contoh(nama: str) -> dict[str, dict]:
+    import json
+
+    berkas = json.loads((CONTOH / nama).read_text(encoding="utf-8"))
+    assert (berkas["course"], berkas["meeting"], berkas["language"]) == ("DDP101", 2, "cpp")
+    return {s["slug"]: soal.validasi({
+        "language": berkas["language"], "generator": s["generator"], "reference_solution": s["reference_solution"],
+        "samples_count": s["samples_count"], "hidden_count": s["hidden_count"], "time_limit_ms": s["time_limit_ms"],
+        "allowed_concepts": DDP101_PERTEMUAN_2, "comparison_mode": s["comparison_mode"],
+    }) for s in berkas["problems"]}
+
+
+def test_berkas_contoh_gerbang_seluruhnya_lolos_validasi():
+    hasil = _validasi_contoh("ddp101-pertemuan-2.json")
+    assert set(hasil) == {"tukar-dua-pecahan", "rata-rata-tiga-nilai", "luas-keliling-persegi-panjang"}
+    for slug, h in hasil.items():
+        assert h["ok"] is True and h["warnings"] == [], f"{slug}: {h['reasons']} {h['warnings']}"
+    # Gerbang: cout << y << " " << x dengan double, di pertemuan yang belum mengizinkan STRING.
+    assert sorted(hasil["tukar-dua-pecahan"]["concepts"]) == ["IO_DASAR", "VARIABEL_TIPE"]
+    assert "KONVERSI_TIPE" in hasil["rata-rata-tiga-nilai"]["concepts"]
+
+
+def test_berkas_contoh_yang_sengaja_salah_ditolak_dengan_nomor_baris():
+    hasil = _validasi_contoh("ddp101-pertemuan-2-salah.json")
+    assert hasil["luas-keliling-persegi-panjang"]["ok"] is True
+    salah = hasil["sisi-terpanjang"]
+    assert salah["ok"] is False and len(salah["reasons"]) == 1
+    a = salah["reasons"][0]
+    assert (a["code"], a["concept"], a["construct"], a["line"], a["column"]) == ("concept_not_allowed", "PERCABANGAN", "if", 7, 5)
