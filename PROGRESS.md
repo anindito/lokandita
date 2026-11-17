@@ -465,3 +465,18 @@ Owner's check for 9a (not the §18 gate; that comes after 9b). Everything is at 
 11. Say how the pages look, and anything that reads badly in Indonesian.
 
 The meeting published and the submissions made in this check are real production rows, like those of the earlier gates. After the check: tag `tahap-9a`, record the result here.
+
+### Problems for DDP101 meeting 2 — 2026-11-17 (owner's request during the 9a session; this is stage 13 work done early for one meeting)
+
+- 29 problems written by the agent: 6 very easy, 7 easy, 6 easy-medium, 6 medium, 4 hard, using only the concepts allowed at meeting 2 (no `if`, no loops, no strings, no output formatting). Source: `docs/soal/buat-ddp101-pertemuan-2.py` → `docs/soal/ddp101-pertemuan-2.json`.
+- Checked before import (output in the session): `soal.validasi` in judge containers → 29 of 29 accepted, 240 tests each, no warning, only allowed concepts; reference output against an independent Python calculation → 29 of 29 equal on 36 generated tests each.
+- Imported into production by `spark soal:impor` under the owner's superadmin account (owner's decision) → `29 diterima, 0 ditolak, 0 tidak berubah`.
+- Approved by the new `spark soal:setujui DDP101 2` under the same account (owner's decision) → `29 disetujui, 3 dilewati` (the three already approved). `infra/tes.sh lokakode --filter 'SetujuiCli|BankSoal|Matriks'` → 19 tests, 1,039 assertions pass.
+- What the server shows now for meeting 2: approved 8 / 8 / 6 / 6 / 4 against the minimum 8 / 8 / 6 / 6 / 4; 232 points available against 120 needed (2 × target 60), above 3 × target; 0 problems awaiting review; **not published** — publishing is the owner's step. Audit: `soal.impor` 1, `soal.disetujui` 29 with `lewat: cli`.
+- Weaker than it looks:
+  - **Nobody has read these 29 statements except the agent that wrote them.** The owner chose approval without review. Wording, difficulty labels and whether each problem suits week 2 are the agent's judgement; the "hard" ones are hard only relative to having no branching.
+  - Difficulty is a guess until students attempt them; calibration (`SPEC.md` §8.4) arrives in 9b.
+  - Statements are Indonesian only; English and Arabic are empty.
+  - Student code is never restricted, so a student who already knows `if` can solve the "without branching" problems with it. No problem requires a concept in the submission.
+  - Five problems expect a fractional number printed with `cout`'s default precision and are compared with tolerance 1e-6; inputs were chosen so answers have at most six significant digits. A student who prints with another precision is still accepted within that tolerance.
+  - The full `infra/tes.sh lokakode` suite was not re-run after adding `soal:setujui`; only the three test classes above.
