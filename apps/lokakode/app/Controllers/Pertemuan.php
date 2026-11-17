@@ -8,6 +8,7 @@ use App\Libraries\Audit;
 use App\Libraries\BankSoal;
 use App\Libraries\Instans;
 use App\Libraries\Latihan;
+use App\Libraries\Penilaian;
 use App\Libraries\Kurikulum;
 use App\Libraries\Waktu;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -281,6 +282,11 @@ final class Pertemuan extends BaseController
             'sesudah' => ['starter_template' => $baru['starter_template'] !== null] + $baru,
         ], (int) $p['course_id']);
         $db->transComplete();
+
+        // Nilai pertemuan bergantung pada target: semua mahasiswa dihitung ulang.
+        if ((int) $baru['target_points'] !== (int) $p['target_points']) {
+            Penilaian::hitungUlangPertemuan($id);
+        }
 
         return redirect()->to('/pertemuan/' . $id . '?pesan=disimpan');
     }
