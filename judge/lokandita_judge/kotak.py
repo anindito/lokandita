@@ -122,10 +122,19 @@ def _docker(*argumen: str, waktu: float = 30) -> subprocess.CompletedProcess:
 
 
 def _buang(nama: str) -> None:
-    try:
-        subprocess.run([DOCKER, "rm", "-f", nama], capture_output=True, timeout=60)
-    except (OSError, subprocess.TimeoutExpired):
-        pass  # reaper akan membuangnya lewat label
+    """Membuang kontainer dan baru kembali setelah ia benar-benar tidak ada.
+
+    Dua `docker rm -f` untuk kontainer yang sama bisa bertumpuk (pengawas waktu
+    dan pembersihan akhir); yang kedua langsung dijawab "removal ... is already
+    in progress". Tanpa menunggu, pemanggil kembali selagi kontainernya masih ada."""
+    for _ in range(50):  # paling lama sekitar 10 detik
+        try:
+            hasil = subprocess.run([DOCKER, "rm", "-f", nama], capture_output=True, text=True, timeout=60)
+        except (OSError, subprocess.TimeoutExpired):
+            return  # reaper akan membuangnya lewat label
+        if hasil.returncode == 0 or "No such container" in hasil.stderr:
+            return
+        time.sleep(0.2)
 
 
 class _Penampung:

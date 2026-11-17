@@ -216,3 +216,20 @@ def test_berkas_contoh_yang_sengaja_salah_ditolak_dengan_nomor_baris():
     assert salah["ok"] is False and len(salah["reasons"]) == 1
     a = salah["reasons"][0]
     assert (a["code"], a["concept"], a["construct"], a["line"], a["column"]) == ("concept_not_allowed", "PERCABANGAN", "if", 7, 5)
+
+
+def test_bangkit_kompilasi_yang_kehabisan_waktu_adalah_galat_infrastruktur_bukan_soal_rusak(monkeypatch):
+    """Ditemukan saat mengukur pra-pembangkitan 1.200 instans (tahap 9a): di bawah beban, satu
+    kompilasi solusi referensi yang sah melewati 10 detik dan pekerjaannya gagal untuk selamanya."""
+    from lokandita_judge import kotak
+
+    asli = kotak.kompilasi
+    for alasan in ("waktu_habis", "memori_habis"):
+        monkeypatch.setattr(kotak, "kompilasi", lambda *a, _alasan=alasan, **k: kotak.HasilKompilasi(False, "", _alasan))
+        with pytest.raises(kotak.GalatInfrastruktur):
+            soal.bangkit(versi(), 7)
+    # Solusi referensi yang memang tidak terkompilasi tetap soal yang rusak, tidak diulang.
+    monkeypatch.setattr(kotak, "kompilasi", asli)
+    with pytest.raises(soal.BangkitGagal) as info:
+        soal.bangkit(versi(reference_solution="int main( {"), 7)
+    assert info.value.alasan == {"code": "reference_compile_error", "where": "reference_solution"}

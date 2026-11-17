@@ -233,6 +233,12 @@ def bangkit(versi: dict, seed: int) -> list[dict]:
             raise BangkitGagal(alasan[0])
         k = kotak.kompilasi(bahasa, versi["reference_solution"], dir_job)
         if not k.ok:
+            # Versi ini sudah DISETUJUI, jadi solusi referensinya pernah terkompilasi saat
+            # validasi. Kompilasi yang kehabisan waktu atau memori sekarang berarti server
+            # sedang penuh (terjadi 1 dari 1.200 kali saat pra-pembangkitan satu kelas):
+            # itu galat infrastruktur yang diulang worker, bukan soal yang rusak.
+            if k.alasan in ("waktu_habis", "memori_habis"):
+                raise kotak.GalatInfrastruktur(f"kompilasi solusi referensi {k.alasan} saat membangkitkan instans")
             raise BangkitGagal({"code": "reference_compile_error", "where": "reference_solution"})
         hasil = kotak.jalankan_kelompok(bahasa, dir_job, masukan, cpu_ms=int(versi["time_limit_ms"]))
         for h in hasil:

@@ -289,7 +289,11 @@ def test_penyapu_membuang_kontainer_judge_kedaluwarsa_dan_tidak_menyentuh_yang_l
         subprocess.run(["docker", "create", "--name", nama, "--network", "none", *argumen, citra.nama("c"), "sleep", "60"],
                        capture_output=True, check=True)
 
-    lewat, nanti = int(time.time()) - 5, int(time.time()) + 3600
+    # Worker produksi di server ini juga menyapu tiap 30 detik, menurut label saja. Supaya ia tidak
+    # mendahului tes ini, kontainer "kedaluwarsa" baru berakhir 5 menit lagi dan penyapu tes
+    # dijalankan seolah-olah sekarang 10 menit lagi.
+    kelak = time.time() + 600
+    lewat, nanti = int(time.time()) + 300, int(time.time()) + 3600
     akhiran = uuid.uuid4().hex[:8]
     n = {k: f"judge-uji-{k}-{akhiran}" for k in ["kedaluwarsa", "masih-hidup", "tanpa-label", "label-lain"]}
     instans = f"lokandita.judge.instans={kotak.INSTANS}"
@@ -300,7 +304,7 @@ def test_penyapu_membuang_kontainer_judge_kedaluwarsa_dan_tidak_menyentuh_yang_l
         buat(n["label-lain"], "lokandita.judge=false", f"lokandita.judge.berakhir={lewat}")
         sebelum = subprocess.run(["docker", "ps", "-aq"], capture_output=True, text=True).stdout.split()
 
-        dibuang = kotak.sapu()
+        dibuang = kotak.sapu(kelak)
 
         assert n["kedaluwarsa"] in dibuang
         assert not {n["masih-hidup"], n["tanpa-label"], n["label-lain"]} & set(dibuang)
