@@ -1,0 +1,1159 @@
+{
+  "course": "DDP101",
+  "meeting": 3,
+  "language": "cpp",
+  "problems": [
+    {
+      "slug": "sapa-nama",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Sapa Nama",
+          "statement": "Baca sebuah nama (satu kata), lalu sapa pemiliknya.\n\nUntuk masukan `Budi`, keluarannya persis `Halo, Budi!`\n\nTeks disimpan di variabel bertipe `string`.",
+          "input_format": "Satu kata: sebuah nama.",
+          "output_format": "Satu baris: `Halo, ` diikuti nama itu dan tanda seru.",
+          "constraints": "Nama terdiri dari huruf saja, paling panjang 20 huruf."
+        },
+        "en": {
+          "title": "Greet by Name",
+          "statement": "Read a name (one word), then greet its owner.\n\nFor the input `Budi` the output is exactly `Halo, Budi!`\n\nText is stored in a variable of type `string`.",
+          "input_format": "One word: a name.",
+          "output_format": "One line: `Halo, ` followed by the name and an exclamation mark.",
+          "constraints": "The name has letters only, at most 20 letters.",
+          "machine": true
+        },
+        "ar": {
+          "title": "التحية بالاسم",
+          "statement": "اقرأ اسمًا (كلمة واحدة) ثم حيِّ صاحبه.\n\nعند المدخل `Budi` يكون المخرج بالضبط `Halo, Budi!`\n\nيُخزَّن النص في متغير من النوع `string`.",
+          "input_format": "كلمة واحدة: اسم.",
+          "output_format": "سطر واحد: `Halo, ` يليه الاسم ثم علامة تعجب.",
+          "constraints": "الاسم حروف لاتينية فقط، 20 حرفًا على الأكثر.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nNAMA = ['Andi', 'Budi', 'Citra', 'Dewi', 'Eko', 'Fajar', 'Gita', 'Hadi', 'Indah', 'Joko', 'Kartika', 'Lina', 'Made', 'Nanda', 'Putri', 'Rudi', 'Sari', 'Tono', 'Wulan', 'Yoga']\nprint(r.choice(NAMA))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string nama;\n    cin >> nama;\n    cout << \"Halo, \" << nama << \"!\" << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "dua-desimal",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Dua Angka di Belakang Koma",
+          "statement": "Baca sebuah bilangan pecahan, lalu cetak dengan **tepat dua angka** di belakang koma.\n\nContoh: `3.1416` dicetak `3.14`, dan `2.0000` dicetak `2.00`.\n\nPetunjuk: `fixed` dan `setprecision` dari `<iomanip>`.",
+          "input_format": "Satu bilangan pecahan dengan empat angka di belakang koma.",
+          "output_format": "Bilangan itu dengan dua angka di belakang koma.",
+          "constraints": "0 ≤ x < 1000"
+        },
+        "en": {
+          "title": "Two Decimal Places",
+          "statement": "Read a real number, then print it with **exactly two digits** after the decimal point.\n\nExample: `3.1416` is printed as `3.14`, and `2.0000` as `2.00`.\n\nHint: `fixed` and `setprecision` from `<iomanip>`.",
+          "input_format": "One real number with four digits after the decimal point.",
+          "output_format": "The number with two digits after the decimal point.",
+          "constraints": "0 ≤ x < 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "رقمان بعد الفاصلة",
+          "statement": "اقرأ عددًا عشريًا ثم اطبعه **برقمين بالضبط** بعد الفاصلة العشرية.\n\nمثال: `3.1416` يُطبع `3.14` و `2.0000` يُطبع `2.00`.\n\nتلميح: `fixed` و `setprecision` من `<iomanip>`.",
+          "input_format": "عدد عشري واحد بأربعة أرقام بعد الفاصلة.",
+          "output_format": "العدد برقمين بعد الفاصلة.",
+          "constraints": "0 ≤ x < 1000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nk = r.randint(0, 9999900)\nif k // 10 % 10 == 5:\n    k += 10\nif i == 2:\n    k = 31416\nif i == 3:\n    k = 20000\nprint(f\"{k / 10000:.4f}\")\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nint main() {\n    double x;\n    cin >> x;\n    cout << fixed << setprecision(2) << x << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "panjang-kata",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Panjang Kata",
+          "statement": "Baca sebuah kata, lalu cetak berapa huruf panjangnya.\n\nUntuk `program` jawabannya 7.",
+          "input_format": "Satu kata dari huruf kecil.",
+          "output_format": "Satu bilangan: banyak huruf kata itu.",
+          "constraints": "Panjang kata 1 sampai 20 huruf."
+        },
+        "en": {
+          "title": "Length of a Word",
+          "statement": "Read a word, then print how many letters long it is.\n\nFor `program` the answer is 7.",
+          "input_format": "One word of lowercase letters.",
+          "output_format": "One number: the number of letters in the word.",
+          "constraints": "The word is 1 to 20 letters long.",
+          "machine": true
+        },
+        "ar": {
+          "title": "طول الكلمة",
+          "statement": "اقرأ كلمة ثم اطبع عدد حروفها.\n\nللكلمة `program` الجواب 7.",
+          "input_format": "كلمة واحدة من حروف لاتينية صغيرة.",
+          "output_format": "عدد واحد: عدد حروف الكلمة.",
+          "constraints": "طول الكلمة من 1 إلى 20 حرفًا.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ndef acak(a, b):\n    return ''.join(r.choice('abcdefghijklmnopqrstuvwxyz') for _ in range(r.randint(a, b)))\nprint(acak(1, 20))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string kata;\n    cin >> kata;\n    cout << kata.size() << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "huruf-pertama",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Huruf Pertama",
+          "statement": "Baca sebuah kata, lalu cetak huruf pertamanya.\n\nHuruf-huruf sebuah `string` bisa diambil dengan nomor urutnya, mulai dari 0.",
+          "input_format": "Satu kata dari huruf kecil.",
+          "output_format": "Satu huruf.",
+          "constraints": "Panjang kata 1 sampai 15 huruf."
+        },
+        "en": {
+          "title": "First Letter",
+          "statement": "Read a word, then print its first letter.\n\nThe letters of a `string` can be taken by their position, counting from 0.",
+          "input_format": "One word of lowercase letters.",
+          "output_format": "One letter.",
+          "constraints": "The word is 1 to 15 letters long.",
+          "machine": true
+        },
+        "ar": {
+          "title": "الحرف الأول",
+          "statement": "اقرأ كلمة ثم اطبع حرفها الأول.\n\nيمكن أخذ حروف `string` برقم موضعها، والعدّ يبدأ من 0.",
+          "input_format": "كلمة واحدة من حروف لاتينية صغيرة.",
+          "output_format": "حرف واحد.",
+          "constraints": "طول الكلمة من 1 إلى 15 حرفًا.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ndef acak(a, b):\n    return ''.join(r.choice('abcdefghijklmnopqrstuvwxyz') for _ in range(r.randint(a, b)))\nprint(acak(1, 15))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string kata;\n    cin >> kata;\n    cout << kata[0] << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "sambung-dua-kata",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Sambung Dua Kata",
+          "statement": "Baca dua kata, lalu cetak keduanya disambung dengan tanda hubung.\n\nUntuk `buku tugas` keluarannya `buku-tugas`.\n\nDua `string` bisa disambung dengan `+`.",
+          "input_format": "Satu baris berisi dua kata dipisah satu spasi.",
+          "output_format": "Kata pertama, tanda hubung, kata kedua, tanpa spasi.",
+          "constraints": "Tiap kata paling panjang 10 huruf."
+        },
+        "en": {
+          "title": "Join Two Words",
+          "statement": "Read two words, then print them joined by a hyphen.\n\nFor `buku tugas` the output is `buku-tugas`.\n\nTwo `string` values can be joined with `+`.",
+          "input_format": "One line with two words separated by one space.",
+          "output_format": "The first word, a hyphen, the second word, without spaces.",
+          "constraints": "Each word is at most 10 letters long.",
+          "machine": true
+        },
+        "ar": {
+          "title": "وصل كلمتين",
+          "statement": "اقرأ كلمتين ثم اطبعهما موصولتين بشرطة.\n\nعند `buku tugas` يكون المخرج `buku-tugas`.\n\nيمكن وصل قيمتين من النوع `string` بالعامل `+`.",
+          "input_format": "سطر واحد فيه كلمتان تفصل بينهما مسافة واحدة.",
+          "output_format": "الكلمة الأولى ثم شرطة ثم الكلمة الثانية، بلا مسافات.",
+          "constraints": "كل كلمة 10 حروف على الأكثر.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nKATA = ['belajar', 'program', 'komputer', 'kampus', 'buku', 'meja', 'layar', 'kode', 'data', 'angka', 'huruf', 'kelas', 'tugas', 'ujian', 'pagi', 'malam', 'cepat', 'rapi', 'benar', 'coba']\nprint(r.choice(KATA), r.choice(KATA))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string a, b;\n    cin >> a >> b;\n    cout << a + \"-\" + b << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "rata-kanan",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Rata Kanan",
+          "statement": "Baca sebuah bilangan bulat, lalu cetak **rata kanan dalam lebar 5 karakter**: bila digitnya kurang dari lima, kekurangannya diisi spasi di sebelah kiri.\n\nContoh: `42` dicetak sebagai tiga spasi diikuti `42`.\n\nPetunjuk: `setw` dari `<iomanip>`.",
+          "input_format": "Satu bilangan bulat n.",
+          "output_format": "Bilangan itu, rata kanan dalam lebar 5.",
+          "constraints": "0 ≤ n ≤ 99999"
+        },
+        "en": {
+          "title": "Right-Aligned",
+          "statement": "Read an integer, then print it **right-aligned in a width of 5 characters**: if it has fewer than five digits, the gap is filled with spaces on the left.\n\nExample: `42` is printed as three spaces followed by `42`.\n\nHint: `setw` from `<iomanip>`.",
+          "input_format": "One integer n.",
+          "output_format": "The number, right-aligned in a width of 5.",
+          "constraints": "0 ≤ n ≤ 99999",
+          "machine": true
+        },
+        "ar": {
+          "title": "محاذاة إلى اليمين",
+          "statement": "اقرأ عددًا صحيحًا ثم اطبعه **محاذًى إلى اليمين في عرض 5 محارف**: إذا كانت أرقامه أقل من خمسة فيُملأ النقص بمسافات من اليسار.\n\nمثال: `42` يُطبع ثلاث مسافات يليها `42`.\n\nتلميح: `setw` من `<iomanip>`.",
+          "input_format": "عدد صحيح واحد n.",
+          "output_format": "العدد محاذًى إلى اليمين في عرض 5.",
+          "constraints": "0 ≤ n ≤ 99999",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 7, 3: 99999, 4: 0}.get(i, r.randint(0, 10 ** r.randint(1, 5) - 1)))\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    cout << setw(5) << n << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "selamat-datang",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Selamat Datang",
+          "statement": "Baca **nama lengkap** seseorang (bisa lebih dari satu kata), lalu cetak ucapan selamat datang.\n\nUntuk `Dewi Lestari` keluarannya `Selamat datang, Dewi Lestari!`\n\n`cin >> nama` berhenti di spasi pertama. Untuk membaca satu baris penuh pakai `getline(cin, nama)`.",
+          "input_format": "Satu baris: nama lengkap.",
+          "output_format": "Satu baris: `Selamat datang, ` diikuti nama lengkap dan tanda seru.",
+          "constraints": "Nama paling panjang 40 karakter."
+        },
+        "en": {
+          "title": "Welcome",
+          "statement": "Read someone's **full name** (it can be more than one word), then print a welcome.\n\nFor `Dewi Lestari` the output is `Selamat datang, Dewi Lestari!`\n\n`cin >> nama` stops at the first space. To read a whole line use `getline(cin, nama)`.",
+          "input_format": "One line: the full name.",
+          "output_format": "One line: `Selamat datang, ` followed by the full name and an exclamation mark.",
+          "constraints": "The name is at most 40 characters long.",
+          "machine": true
+        },
+        "ar": {
+          "title": "أهلًا وسهلًا",
+          "statement": "اقرأ **الاسم الكامل** لشخص (قد يكون أكثر من كلمة) ثم اطبع عبارة ترحيب.\n\nعند `Dewi Lestari` يكون المخرج `Selamat datang, Dewi Lestari!`\n\n`cin >> nama` يتوقف عند أول مسافة. لقراءة سطر كامل استخدم `getline(cin, nama)`.",
+          "input_format": "سطر واحد: الاسم الكامل.",
+          "output_format": "سطر واحد: `Selamat datang, ` يليه الاسم الكامل ثم علامة تعجب.",
+          "constraints": "الاسم 40 محرفًا على الأكثر.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nNAMA = ['Andi', 'Budi', 'Citra', 'Dewi', 'Eko', 'Fajar', 'Gita', 'Hadi', 'Indah', 'Joko', 'Kartika', 'Lina', 'Made', 'Nanda', 'Putri', 'Rudi', 'Sari', 'Tono', 'Wulan', 'Yoga']\nMARGA = ['Saputra', 'Wijaya', 'Lestari', 'Pratama', 'Hidayat', 'Utami', 'Santoso', 'Nugroho', 'Rahayu', 'Siregar', 'Halim', 'Kusuma']\nprint(r.choice(NAMA), r.choice(MARGA))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string nama;\n    getline(cin, nama);\n    cout << \"Selamat datang, \" << nama << \"!\" << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "dua-kali",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Dua Kali",
+          "statement": "Baca satu baris teks (bisa berisi spasi), lalu cetak baris itu dua kali, masing-masing di baris sendiri.",
+          "input_format": "Satu baris teks.",
+          "output_format": "Dua baris, keduanya sama dengan baris masukan.",
+          "constraints": "Baris paling panjang 60 karakter."
+        },
+        "en": {
+          "title": "Twice",
+          "statement": "Read one line of text (it may contain spaces), then print that line twice, each on its own line.",
+          "input_format": "One line of text.",
+          "output_format": "Two lines, both equal to the input line.",
+          "constraints": "The line is at most 60 characters long.",
+          "machine": true
+        },
+        "ar": {
+          "title": "مرتين",
+          "statement": "اقرأ سطرًا واحدًا من النص (قد يحتوي على مسافات) ثم اطبعه مرتين، كل مرة في سطر.",
+          "input_format": "سطر واحد من النص.",
+          "output_format": "سطران، كلاهما يساوي سطر المدخل.",
+          "constraints": "السطر 60 محرفًا على الأكثر.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nKATA = ['belajar', 'program', 'komputer', 'kampus', 'buku', 'meja', 'layar', 'kode', 'data', 'angka', 'huruf', 'kelas', 'tugas', 'ujian', 'pagi', 'malam', 'cepat', 'rapi', 'benar', 'coba']\ndef kalimat(a, b):\n    return ' '.join(r.choice(KATA) for _ in range(r.randint(a, b)))\nprint(kalimat(2, 5))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string baris;\n    getline(cin, baris);\n    cout << baris << endl;\n    cout << baris << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "total-rupiah",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Total dalam Rupiah",
+          "statement": "Sebuah barang berharga **h** rupiah (bilangan pecahan dengan dua angka di belakang koma). Seorang pembeli mengambil **n** barang.\n\nCetak totalnya dengan awalan `Rp ` dan tepat dua angka di belakang koma.\n\nContoh: `1250.50 4` menghasilkan `Rp 5002.00`.",
+          "input_format": "Satu baris berisi h dan n.",
+          "output_format": "Satu baris: `Rp `, lalu total dengan dua angka di belakang koma.",
+          "constraints": "1 ≤ h < 10000; 1 ≤ n ≤ 20"
+        },
+        "en": {
+          "title": "Total in Rupiah",
+          "statement": "An item costs **h** rupiah (a real number with two digits after the decimal point). A customer takes **n** of them.\n\nPrint the total with the prefix `Rp ` and exactly two digits after the decimal point.\n\nExample: `1250.50 4` gives `Rp 5002.00`.",
+          "input_format": "One line with h and n.",
+          "output_format": "One line: `Rp `, then the total with two digits after the decimal point.",
+          "constraints": "1 ≤ h < 10000; 1 ≤ n ≤ 20",
+          "machine": true
+        },
+        "ar": {
+          "title": "الإجمالي بالروبية",
+          "statement": "سلعة سعرها **h** روبية (عدد عشري برقمين بعد الفاصلة). أخذ مشترٍ **n** قطعة منها.\n\nاطبع الإجمالي مسبوقًا بـ `Rp ` وبرقمين بالضبط بعد الفاصلة.\n\nمثال: `1250.50 4` يعطي `Rp 5002.00`.",
+          "input_format": "سطر واحد فيه h و n.",
+          "output_format": "سطر واحد: `Rp ` ثم الإجمالي برقمين بعد الفاصلة.",
+          "constraints": "1 ≤ h < 10000؛ 1 ≤ n ≤ 20",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(f\"{r.randint(100, 999999) / 100:.2f}\", r.randint(1, 20))\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nint main() {\n    double harga;\n    int banyak;\n    cin >> harga >> banyak;\n    cout << \"Rp \" << fixed << setprecision(2) << harga * banyak << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "huruf-terakhir",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Huruf Terakhir",
+          "statement": "Baca sebuah kata, lalu cetak huruf terakhirnya.\n\nHuruf pertama bernomor 0, jadi huruf terakhir bernomor panjang kata dikurangi satu.",
+          "input_format": "Satu kata dari huruf kecil.",
+          "output_format": "Satu huruf.",
+          "constraints": "Panjang kata 1 sampai 15 huruf."
+        },
+        "en": {
+          "title": "Last Letter",
+          "statement": "Read a word, then print its last letter.\n\nThe first letter has position 0, so the last letter has position length minus one.",
+          "input_format": "One word of lowercase letters.",
+          "output_format": "One letter.",
+          "constraints": "The word is 1 to 15 letters long.",
+          "machine": true
+        },
+        "ar": {
+          "title": "الحرف الأخير",
+          "statement": "اقرأ كلمة ثم اطبع حرفها الأخير.\n\nموضع الحرف الأول 0، فموضع الحرف الأخير هو طول الكلمة ناقص واحد.",
+          "input_format": "كلمة واحدة من حروف لاتينية صغيرة.",
+          "output_format": "حرف واحد.",
+          "constraints": "طول الكلمة من 1 إلى 15 حرفًا.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ndef acak(a, b):\n    return ''.join(r.choice('abcdefghijklmnopqrstuvwxyz') for _ in range(r.randint(a, b)))\nprint(acak(1, 15))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string kata;\n    cin >> kata;\n    cout << kata[kata.size() - 1] << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "inisial",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Inisial",
+          "statement": "Baca nama depan dan nama belakang seseorang, lalu cetak inisialnya: huruf pertama tiap nama, masing-masing diikuti titik.\n\nUntuk `Dewi Lestari` keluarannya `D.L.`",
+          "input_format": "Satu baris berisi nama depan dan nama belakang.",
+          "output_format": "Inisial dengan titik, tanpa spasi.",
+          "constraints": "Tiap nama diawali huruf besar dan paling panjang 20 huruf."
+        },
+        "en": {
+          "title": "Initials",
+          "statement": "Read a person's first name and last name, then print the initials: the first letter of each name, each followed by a full stop.\n\nFor `Dewi Lestari` the output is `D.L.`",
+          "input_format": "One line with the first name and the last name.",
+          "output_format": "The initials with full stops, without spaces.",
+          "constraints": "Each name starts with a capital letter and is at most 20 letters long.",
+          "machine": true
+        },
+        "ar": {
+          "title": "الأحرف الأولى",
+          "statement": "اقرأ الاسم الأول واسم العائلة لشخص ثم اطبع الأحرف الأولى: أول حرف من كل اسم متبوعًا بنقطة.\n\nعند `Dewi Lestari` يكون المخرج `D.L.`",
+          "input_format": "سطر واحد فيه الاسم الأول واسم العائلة.",
+          "output_format": "الأحرف الأولى مع النقاط، بلا مسافات.",
+          "constraints": "كل اسم يبدأ بحرف كبير وطوله 20 حرفًا على الأكثر.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nNAMA = ['Andi', 'Budi', 'Citra', 'Dewi', 'Eko', 'Fajar', 'Gita', 'Hadi', 'Indah', 'Joko', 'Kartika', 'Lina', 'Made', 'Nanda', 'Putri', 'Rudi', 'Sari', 'Tono', 'Wulan', 'Yoga']\nMARGA = ['Saputra', 'Wijaya', 'Lestari', 'Pratama', 'Hidayat', 'Utami', 'Santoso', 'Nugroho', 'Rahayu', 'Siregar', 'Halim', 'Kusuma']\nprint(r.choice(NAMA), r.choice(MARGA))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string depan, belakang;\n    cin >> depan >> belakang;\n    cout << depan[0] << \".\" << belakang[0] << \".\" << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "tiga-digit",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Tiga Digit",
+          "statement": "Nomor urut peserta selalu ditulis tiga digit: `7` ditulis `007`, `42` ditulis `042`, `315` tetap `315`.\n\nBaca nomor urut, lalu cetak dalam bentuk tiga digit.\n\nPetunjuk: `setfill` dan `setw`.",
+          "input_format": "Satu bilangan bulat n.",
+          "output_format": "Bilangan itu dalam tiga digit, dengan nol di depan bila perlu.",
+          "constraints": "0 ≤ n ≤ 999"
+        },
+        "en": {
+          "title": "Three Digits",
+          "statement": "A participant number is always written with three digits: `7` is written `007`, `42` is written `042`, `315` stays `315`.\n\nRead the number, then print it in three-digit form.\n\nHint: `setfill` and `setw`.",
+          "input_format": "One integer n.",
+          "output_format": "The number in three digits, with leading zeros where needed.",
+          "constraints": "0 ≤ n ≤ 999",
+          "machine": true
+        },
+        "ar": {
+          "title": "ثلاثة أرقام",
+          "statement": "يُكتب رقم المشارك دائمًا بثلاثة أرقام: `7` يُكتب `007` و `42` يُكتب `042` و `315` يبقى `315`.\n\nاقرأ الرقم ثم اطبعه بصيغة الأرقام الثلاثة.\n\nتلميح: `setfill` و `setw`.",
+          "input_format": "عدد صحيح واحد n.",
+          "output_format": "العدد بثلاثة أرقام، مع أصفار في البداية عند الحاجة.",
+          "constraints": "0 ≤ n ≤ 999",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 7, 3: 0, 4: 999, 5: 42}.get(i, r.randint(0, 999)))\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    cout << setfill('0') << setw(3) << n << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "jam-digital",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Jam Digital",
+          "statement": "Jam digital menampilkan waktu sebagai `JJ:MM`, selalu dua digit untuk jam dan dua digit untuk menit.\n\nBaca jam dan menit, lalu cetak seperti jam digital. `7 5` menjadi `07:05`.\n\nIngat: `setw` hanya berlaku untuk satu keluaran berikutnya.",
+          "input_format": "Satu baris berisi jam dan menit.",
+          "output_format": "Waktu dalam bentuk `JJ:MM`.",
+          "constraints": "0 ≤ jam ≤ 23; 0 ≤ menit ≤ 59"
+        },
+        "en": {
+          "title": "Digital Clock",
+          "statement": "A digital clock shows the time as `HH:MM`, always two digits for the hour and two for the minute.\n\nRead the hour and the minute, then print them like a digital clock. `7 5` becomes `07:05`.\n\nRemember: `setw` applies only to the next output.",
+          "input_format": "One line with the hour and the minute.",
+          "output_format": "The time in the form `HH:MM`.",
+          "constraints": "0 ≤ hour ≤ 23; 0 ≤ minute ≤ 59",
+          "machine": true
+        },
+        "ar": {
+          "title": "ساعة رقمية",
+          "statement": "تعرض الساعة الرقمية الوقت بالصيغة `HH:MM`، دائمًا برقمين للساعة ورقمين للدقيقة.\n\nاقرأ الساعة والدقيقة ثم اطبعهما كساعة رقمية. `7 5` يصبح `07:05`.\n\nتذكّر: `setw` يؤثر في المخرج التالي فقط.",
+          "input_format": "سطر واحد فيه الساعة والدقيقة.",
+          "output_format": "الوقت بالصيغة `HH:MM`.",
+          "constraints": "0 ≤ الساعة ≤ 23؛ 0 ≤ الدقيقة ≤ 59",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nj, m = r.randint(0, 23), r.randint(0, 59)\nif i == 2:\n    j, m = 7, 5\nif i == 3:\n    j, m = 0, 0\nprint(j, m)\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nint main() {\n    int jam, menit;\n    cin >> jam >> menit;\n    cout << setfill('0') << setw(2) << jam << \":\" << setw(2) << menit << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "persen-satu-desimal",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Persen Satu Desimal",
+          "statement": "Seorang mahasiswa menjawab benar **b** dari **t** soal. Cetak persentasenya dengan **satu angka** di belakang koma, langsung diikuti tanda `%`.\n\nContoh: 2 benar dari 3 soal dicetak `66.7%`.",
+          "input_format": "Satu baris berisi b dan t.",
+          "output_format": "Persentase dengan satu angka di belakang koma dan tanda `%`.",
+          "constraints": "0 ≤ b ≤ t; t salah satu dari 3, 7, 9, 11, 13."
+        },
+        "en": {
+          "title": "Percent with One Decimal",
+          "statement": "A student answered **b** of **t** questions correctly. Print the percentage with **one digit** after the decimal point, immediately followed by `%`.\n\nExample: 2 correct out of 3 is printed as `66.7%`.",
+          "input_format": "One line with b and t.",
+          "output_format": "The percentage with one digit after the decimal point and the `%` sign.",
+          "constraints": "0 ≤ b ≤ t; t is one of 3, 7, 9, 11, 13.",
+          "machine": true
+        },
+        "ar": {
+          "title": "نسبة مئوية برقم عشري واحد",
+          "statement": "أجاب طالب إجابة صحيحة عن **b** من **t** سؤالًا. اطبع النسبة المئوية **برقم واحد** بعد الفاصلة، تليها مباشرة العلامة `%`.\n\nمثال: إجابتان صحيحتان من 3 تُطبع `66.7%`.",
+          "input_format": "سطر واحد فيه b و t.",
+          "output_format": "النسبة المئوية برقم واحد بعد الفاصلة مع العلامة `%`.",
+          "constraints": "0 ≤ b ≤ t؛ t أحد الأعداد 3، 7، 9، 11، 13.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nt = r.choice([3, 7, 9, 11, 13])\nb = {2: 0, 3: t}.get(i, r.randint(0, t))\nprint(b, t)\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nint main() {\n    int benar, total;\n    cin >> benar >> total;\n    cout << fixed << setprecision(1) << 100.0 * benar / total << \"%\" << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "tiga-huruf-pertama",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Tiga Huruf Pertama",
+          "statement": "Baca sebuah kata, lalu cetak tiga huruf pertamanya.\n\nUntuk `komputer` keluarannya `kom`.\n\nPetunjuk: `substr(mulai, panjang)` mengambil sebagian dari sebuah `string`.",
+          "input_format": "Satu kata dari huruf kecil.",
+          "output_format": "Tiga huruf.",
+          "constraints": "Panjang kata 3 sampai 15 huruf."
+        },
+        "en": {
+          "title": "First Three Letters",
+          "statement": "Read a word, then print its first three letters.\n\nFor `komputer` the output is `kom`.\n\nHint: `substr(start, length)` takes a part of a `string`.",
+          "input_format": "One word of lowercase letters.",
+          "output_format": "Three letters.",
+          "constraints": "The word is 3 to 15 letters long.",
+          "machine": true
+        },
+        "ar": {
+          "title": "أول ثلاثة أحرف",
+          "statement": "اقرأ كلمة ثم اطبع أول ثلاثة أحرف منها.\n\nللكلمة `komputer` يكون المخرج `kom`.\n\nتلميح: `substr(البداية, الطول)` يأخذ جزءًا من `string`.",
+          "input_format": "كلمة واحدة من حروف لاتينية صغيرة.",
+          "output_format": "ثلاثة أحرف.",
+          "constraints": "طول الكلمة من 3 إلى 15 حرفًا.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ndef acak(a, b):\n    return ''.join(r.choice('abcdefghijklmnopqrstuvwxyz') for _ in range(r.randint(a, b)))\nprint(acak(3, 15))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string kata;\n    cin >> kata;\n    cout << kata.substr(0, 3) << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "panjang-kalimat",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Panjang Kalimat",
+          "statement": "Baca satu baris kalimat, lalu cetak banyak karakternya. Spasi ikut dihitung.\n\nUntuk `buku tugas` jawabannya 10.",
+          "input_format": "Satu baris kalimat dari huruf kecil dan spasi.",
+          "output_format": "Satu bilangan: banyak karakter di baris itu.",
+          "constraints": "Kalimat paling panjang 60 karakter, tanpa spasi di awal atau akhir."
+        },
+        "en": {
+          "title": "Length of a Sentence",
+          "statement": "Read one line holding a sentence, then print how many characters it has. Spaces count.\n\nFor `buku tugas` the answer is 10.",
+          "input_format": "One line with a sentence of lowercase letters and spaces.",
+          "output_format": "One number: the number of characters in the line.",
+          "constraints": "The sentence is at most 60 characters long, with no space at the start or end.",
+          "machine": true
+        },
+        "ar": {
+          "title": "طول الجملة",
+          "statement": "اقرأ سطرًا فيه جملة ثم اطبع عدد محارفها. المسافات تُحسب.\n\nللجملة `buku tugas` الجواب 10.",
+          "input_format": "سطر واحد فيه جملة من حروف لاتينية صغيرة ومسافات.",
+          "output_format": "عدد واحد: عدد المحارف في السطر.",
+          "constraints": "الجملة 60 محرفًا على الأكثر، بلا مسافة في أولها أو آخرها.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nKATA = ['belajar', 'program', 'komputer', 'kampus', 'buku', 'meja', 'layar', 'kode', 'data', 'angka', 'huruf', 'kelas', 'tugas', 'ujian', 'pagi', 'malam', 'cepat', 'rapi', 'benar', 'coba']\ndef kalimat(a, b):\n    return ' '.join(r.choice(KATA) for _ in range(r.randint(a, b)))\nprint(kalimat(1, 6))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string kalimat;\n    getline(cin, kalimat);\n    cout << kalimat.size() << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "baris-tabel",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Baris Tabel",
+          "statement": "Sebuah daftar nilai dicetak sebagai tabel. Tiap barisnya: **nama rata kiri dalam lebar 10**, langsung diikuti **nilai rata kanan dalam lebar 5**.\n\nUntuk `Budi 87` keluarannya `Budi` diikuti enam spasi, lalu tiga spasi dan `87` — seluruhnya 15 karakter.\n\nPetunjuk: `left`, `right`, dan `setw`.",
+          "input_format": "Satu baris berisi nama (satu kata) dan nilai.",
+          "output_format": "Satu baris tabel selebar 15 karakter.",
+          "constraints": "Nama paling panjang 10 huruf; 0 ≤ nilai ≤ 100"
+        },
+        "en": {
+          "title": "Table Row",
+          "statement": "A list of marks is printed as a table. Each row is the **name left-aligned in a width of 10**, immediately followed by the **mark right-aligned in a width of 5**.\n\nFor `Budi 87` the output is `Budi` followed by six spaces, then three spaces and `87` — 15 characters in all.\n\nHint: `left`, `right` and `setw`.",
+          "input_format": "One line with the name (one word) and the mark.",
+          "output_format": "One table row 15 characters wide.",
+          "constraints": "The name is at most 10 letters long; 0 ≤ mark ≤ 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "صف في جدول",
+          "statement": "تُطبع قائمة درجات على شكل جدول. كل صف: **الاسم محاذًى إلى اليسار في عرض 10** تليه مباشرة **الدرجة محاذاةً إلى اليمين في عرض 5**.\n\nعند `Budi 87` يكون المخرج `Budi` تليه ست مسافات ثم ثلاث مسافات و `87` — أي 15 محرفًا.\n\nتلميح: `left` و `right` و `setw`.",
+          "input_format": "سطر واحد فيه الاسم (كلمة واحدة) والدرجة.",
+          "output_format": "صف جدول عرضه 15 محرفًا.",
+          "constraints": "الاسم 10 حروف على الأكثر؛ 0 ≤ الدرجة ≤ 100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nNAMA = ['Andi', 'Budi', 'Citra', 'Dewi', 'Eko', 'Fajar', 'Gita', 'Hadi', 'Indah', 'Joko', 'Kartika', 'Lina', 'Made', 'Nanda', 'Putri', 'Rudi', 'Sari', 'Tono', 'Wulan', 'Yoga']\nprint(r.choice(NAMA), {2: 100, 3: 0, 4: 7}.get(i, r.randint(0, 100)))\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\n#include <string>\nusing namespace std;\n\nint main() {\n    string nama;\n    int nilai;\n    cin >> nama >> nilai;\n    cout << left << setw(10) << nama << right << setw(5) << nilai << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "tanggal",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Tanggal",
+          "statement": "Baca hari, bulan, dan tahun, lalu cetak tanggalnya dalam bentuk `HH/BB/TTTT`: hari dan bulan selalu dua digit.\n\nUntuk `5 8 2026` keluarannya `05/08/2026`.",
+          "input_format": "Satu baris berisi tiga bilangan bulat: hari, bulan, tahun.",
+          "output_format": "Tanggal dalam bentuk `HH/BB/TTTT`.",
+          "constraints": "1 ≤ hari ≤ 28; 1 ≤ bulan ≤ 12; 1900 ≤ tahun ≤ 2100"
+        },
+        "en": {
+          "title": "Date",
+          "statement": "Read the day, month and year, then print the date in the form `DD/MM/YYYY`: the day and the month always have two digits.\n\nFor `5 8 2026` the output is `05/08/2026`.",
+          "input_format": "One line with three integers: day, month, year.",
+          "output_format": "The date in the form `DD/MM/YYYY`.",
+          "constraints": "1 ≤ day ≤ 28; 1 ≤ month ≤ 12; 1900 ≤ year ≤ 2100",
+          "machine": true
+        },
+        "ar": {
+          "title": "التاريخ",
+          "statement": "اقرأ اليوم والشهر والسنة ثم اطبع التاريخ بالصيغة `DD/MM/YYYY`: اليوم والشهر دائمًا برقمين.\n\nعند `5 8 2026` يكون المخرج `05/08/2026`.",
+          "input_format": "سطر واحد فيه ثلاثة أعداد صحيحة: اليوم، الشهر، السنة.",
+          "output_format": "التاريخ بالصيغة `DD/MM/YYYY`.",
+          "constraints": "1 ≤ اليوم ≤ 28؛ 1 ≤ الشهر ≤ 12؛ 1900 ≤ السنة ≤ 2100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nh, b, t = r.randint(1, 28), r.randint(1, 12), r.randint(1900, 2100)\nif i == 2:\n    h, b, t = 5, 8, 2026\nif i == 3:\n    h, b = 17, 11\nprint(h, b, t)\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nint main() {\n    int hari, bulan, tahun;\n    cin >> hari >> bulan >> tahun;\n    cout << setfill('0') << setw(2) << hari << \"/\" << setw(2) << bulan << \"/\" << tahun << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "suhu-dua-satuan",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Suhu dalam Dua Satuan",
+          "statement": "Baca suhu dalam Celsius (bilangan pecahan), lalu cetak suhu itu dan padanannya dalam Fahrenheit, keduanya dengan dua angka di belakang koma.\n\nFahrenheit = Celsius × 9 / 5 + 32. Untuk `36.50` keluarannya `36.50 C = 97.70 F`.",
+          "input_format": "Satu bilangan pecahan: suhu dalam Celsius, dengan dua angka di belakang koma.",
+          "output_format": "Satu baris berbentuk `<celsius> C = <fahrenheit> F`.",
+          "constraints": "−50 ≤ suhu ≤ 150"
+        },
+        "en": {
+          "title": "Temperature in Two Units",
+          "statement": "Read a temperature in Celsius (a real number), then print it and its equivalent in Fahrenheit, both with two digits after the decimal point.\n\nFahrenheit = Celsius × 9 / 5 + 32. For `36.50` the output is `36.50 C = 97.70 F`.",
+          "input_format": "One real number: the temperature in Celsius, with two digits after the decimal point.",
+          "output_format": "One line of the form `<celsius> C = <fahrenheit> F`.",
+          "constraints": "−50 ≤ temperature ≤ 150",
+          "machine": true
+        },
+        "ar": {
+          "title": "الحرارة بوحدتين",
+          "statement": "اقرأ درجة حرارة بالمئوي (عدد عشري) ثم اطبعها مع ما يقابلها بالفهرنهايت، كلتاهما برقمين بعد الفاصلة.\n\nالفهرنهايت = المئوي × 9 / 5 + 32. عند `36.50` يكون المخرج `36.50 C = 97.70 F`.",
+          "input_format": "عدد عشري واحد: الحرارة بالمئوي، برقمين بعد الفاصلة.",
+          "output_format": "سطر واحد بالصيغة `<celsius> C = <fahrenheit> F`.",
+          "constraints": "−50 ≤ الحرارة ≤ 150",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nk = {2: 3650, 3: 0, 4: -4000}.get(i, r.randint(-5000, 15000))\nprint(f\"{k / 100:.2f}\")\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nint main() {\n    double c;\n    cin >> c;\n    double f = c * 9 / 5 + 32;\n    cout << fixed << setprecision(2) << c << \" C = \" << f << \" F\" << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "huruf-tengah",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Huruf Tengah",
+          "statement": "Baca sebuah kata yang banyak hurufnya ganjil, lalu cetak huruf yang tepat berada di tengahnya.\n\nUntuk `layar` (5 huruf) jawabannya `y`.",
+          "input_format": "Satu kata dari huruf kecil.",
+          "output_format": "Satu huruf.",
+          "constraints": "Panjang kata ganjil, 1 sampai 15 huruf."
+        },
+        "en": {
+          "title": "Middle Letter",
+          "statement": "Read a word with an odd number of letters, then print the letter exactly in the middle.\n\nFor `layar` (5 letters) the answer is `y`.",
+          "input_format": "One word of lowercase letters.",
+          "output_format": "One letter.",
+          "constraints": "The length of the word is odd, 1 to 15 letters.",
+          "machine": true
+        },
+        "ar": {
+          "title": "الحرف الأوسط",
+          "statement": "اقرأ كلمة عدد حروفها فردي ثم اطبع الحرف الواقع في وسطها تمامًا.\n\nللكلمة `layar` (5 حروف) الجواب `y`.",
+          "input_format": "كلمة واحدة من حروف لاتينية صغيرة.",
+          "output_format": "حرف واحد.",
+          "constraints": "طول الكلمة فردي، من 1 إلى 15 حرفًا.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = {2: 1, 3: 15}.get(i, r.randint(0, 7) * 2 + 1)\nprint(''.join(r.choice('abcdefghijklmnopqrstuvwxyz') for _ in range(n)))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string kata;\n    cin >> kata;\n    cout << kata[kata.size() / 2] << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "alamat-surel",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Alamat Surel",
+          "statement": "Sebuah kampus membuat alamat surel mahasiswa dari nama depan, nama belakang, dan nama domain: `depan.belakang@domain`.\n\nBaca ketiganya, cetak alamat surelnya, lalu di baris berikutnya cetak panjang alamat itu.\n\nUntuk `dewi lestari kampus.ac.id`: `dewi.lestari@kampus.ac.id` dan `25`.",
+          "input_format": "Satu baris berisi tiga kata: nama depan, nama belakang, domain.",
+          "output_format": "Baris pertama: alamat surel. Baris kedua: banyak karakternya.",
+          "constraints": "Tiap kata paling panjang 20 karakter, tanpa spasi."
+        },
+        "en": {
+          "title": "Email Address",
+          "statement": "A campus builds student email addresses from the first name, the last name and the domain name: `first.last@domain`.\n\nRead the three, print the email address, then on the next line print the length of that address.\n\nFor `dewi lestari kampus.ac.id`: `dewi.lestari@kampus.ac.id` and `25`.",
+          "input_format": "One line with three words: first name, last name, domain.",
+          "output_format": "First line: the email address. Second line: its number of characters.",
+          "constraints": "Each word is at most 20 characters long, without spaces.",
+          "machine": true
+        },
+        "ar": {
+          "title": "عنوان البريد الإلكتروني",
+          "statement": "تُنشئ جامعة عناوين بريد الطلاب من الاسم الأول واسم العائلة واسم النطاق: `first.last@domain`.\n\nاقرأ الثلاثة واطبع عنوان البريد، ثم اطبع في السطر التالي طول ذلك العنوان.\n\nعند `dewi lestari kampus.ac.id`: `dewi.lestari@kampus.ac.id` و `25`.",
+          "input_format": "سطر واحد فيه ثلاث كلمات: الاسم الأول، اسم العائلة، النطاق.",
+          "output_format": "السطر الأول: عنوان البريد. السطر الثاني: عدد محارفه.",
+          "constraints": "كل كلمة 20 محرفًا على الأكثر، بلا مسافات.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ndepan = ['andi', 'budi', 'citra', 'dewi', 'eko', 'gita', 'hadi', 'lina', 'rudi', 'sari']\nbelakang = ['saputra', 'wijaya', 'lestari', 'pratama', 'utami', 'halim']\ndomain = ['kampus.ac.id', 'lokandita.com', 'surat.id', 'contoh.org']\nprint(r.choice(depan), r.choice(belakang), r.choice(domain))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string depan, belakang, domain;\n    cin >> depan >> belakang >> domain;\n    string alamat = depan + \".\" + belakang + \"@\" + domain;\n    cout << alamat << endl;\n    cout << alamat.size() << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "rata-rata-dua-desimal",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Rata-Rata Dua Desimal",
+          "statement": "Tiga nilai ujian berupa bilangan bulat. Cetak rata-ratanya dengan tepat dua angka di belakang koma.\n\nUntuk `80 75 91` keluarannya `82.00`; untuk `70 80 85` keluarannya `78.33`.",
+          "input_format": "Satu baris berisi tiga bilangan bulat.",
+          "output_format": "Rata-rata dengan dua angka di belakang koma.",
+          "constraints": "0 ≤ setiap nilai ≤ 100"
+        },
+        "en": {
+          "title": "Average with Two Decimals",
+          "statement": "Three exam marks are integers. Print their average with exactly two digits after the decimal point.\n\nFor `80 75 91` the output is `82.00`; for `70 80 85` it is `78.33`.",
+          "input_format": "One line with three integers.",
+          "output_format": "The average with two digits after the decimal point.",
+          "constraints": "0 ≤ each mark ≤ 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "المتوسط برقمين عشريين",
+          "statement": "ثلاث درجات امتحان أعداد صحيحة. اطبع متوسطها برقمين بالضبط بعد الفاصلة.\n\nعند `80 75 91` يكون المخرج `82.00`، وعند `70 80 85` يكون `78.33`.",
+          "input_format": "سطر واحد فيه ثلاثة أعداد صحيحة.",
+          "output_format": "المتوسط برقمين بعد الفاصلة.",
+          "constraints": "0 ≤ كل درجة ≤ 100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(0, 100), r.randint(0, 100), r.randint(0, 100))\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nint main() {\n    int a, b, c;\n    cin >> a >> b >> c;\n    double rata = (double) (a + b + c) / 3;\n    cout << fixed << setprecision(2) << rata << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "struk-belanja",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Struk Belanja",
+          "statement": "Kasir mencetak struk dua baris untuk satu jenis barang.\n\n- Baris pertama: **nama barang rata kiri dalam lebar 12**, lalu **banyaknya rata kanan dalam lebar 3**.\n- Baris kedua: kata `Total` **rata kiri dalam lebar 12**, lalu **harga × banyak rata kanan dalam lebar 10**.\n\nBaca nama barang, harga satuan, dan banyaknya.",
+          "input_format": "Satu baris berisi nama barang (satu kata), harga satuan, dan banyaknya.",
+          "output_format": "Dua baris seperti dijelaskan di atas.",
+          "constraints": "Nama barang paling panjang 12 huruf; 500 ≤ harga ≤ 100000; 1 ≤ banyak ≤ 99"
+        },
+        "en": {
+          "title": "Shopping Receipt",
+          "statement": "A cashier prints a two-line receipt for one kind of item.\n\n- First line: the **item name left-aligned in a width of 12**, then the **quantity right-aligned in a width of 3**.\n- Second line: the word `Total` **left-aligned in a width of 12**, then **price × quantity right-aligned in a width of 10**.\n\nRead the item name, the unit price and the quantity.",
+          "input_format": "One line with the item name (one word), the unit price and the quantity.",
+          "output_format": "Two lines as described above.",
+          "constraints": "The item name is at most 12 letters long; 500 ≤ price ≤ 100000; 1 ≤ quantity ≤ 99",
+          "machine": true
+        },
+        "ar": {
+          "title": "إيصال الشراء",
+          "statement": "يطبع أمين الصندوق إيصالًا من سطرين لنوع واحد من السلع.\n\n- السطر الأول: **اسم السلعة محاذًى إلى اليسار في عرض 12** ثم **الكمية محاذاةً إلى اليمين في عرض 3**.\n- السطر الثاني: الكلمة `Total` **محاذاةً إلى اليسار في عرض 12** ثم **السعر × الكمية محاذًى إلى اليمين في عرض 10**.\n\nاقرأ اسم السلعة وسعر الوحدة والكمية.",
+          "input_format": "سطر واحد فيه اسم السلعة (كلمة واحدة) وسعر الوحدة والكمية.",
+          "output_format": "سطران كما وُصف أعلاه.",
+          "constraints": "اسم السلعة 12 حرفًا على الأكثر؛ 500 ≤ السعر ≤ 100000؛ 1 ≤ الكمية ≤ 99",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nbarang = ['Pensil', 'Buku', 'Penghapus', 'Penggaris', 'Spidol', 'Map', 'Kertas', 'Tinta']\nprint(r.choice(barang), r.randint(1, 200) * 500, {2: 1, 3: 99}.get(i, r.randint(1, 99)))\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\n#include <string>\nusing namespace std;\n\nint main() {\n    string barang;\n    int harga, banyak;\n    cin >> barang >> harga >> banyak;\n    cout << left << setw(12) << barang << right << setw(3) << banyak << endl;\n    cout << left << setw(12) << \"Total\" << right << setw(10) << harga * banyak << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "sensor-kata",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Sensor Kata",
+          "statement": "Sebuah kata sandi ditampilkan tersamar: hanya huruf pertama dan huruf terakhirnya yang terlihat, dan di antaranya selalu tertulis tiga bintang, berapa pun panjang katanya.\n\nUntuk `komputer` keluarannya `k***r`.",
+          "input_format": "Satu kata dari huruf kecil.",
+          "output_format": "Huruf pertama, tiga bintang, huruf terakhir.",
+          "constraints": "Panjang kata 3 sampai 15 huruf."
+        },
+        "en": {
+          "title": "Masked Word",
+          "statement": "A password is shown masked: only its first and last letters are visible, and between them there are always three asterisks, whatever the length of the word.\n\nFor `komputer` the output is `k***r`.",
+          "input_format": "One word of lowercase letters.",
+          "output_format": "The first letter, three asterisks, the last letter.",
+          "constraints": "The word is 3 to 15 letters long.",
+          "machine": true
+        },
+        "ar": {
+          "title": "كلمة محجوبة",
+          "statement": "تُعرض كلمة مرور محجوبة: لا يظهر منها إلا حرفها الأول وحرفها الأخير، وبينهما دائمًا ثلاث نجمات مهما كان طول الكلمة.\n\nللكلمة `komputer` يكون المخرج `k***r`.",
+          "input_format": "كلمة واحدة من حروف لاتينية صغيرة.",
+          "output_format": "الحرف الأول ثم ثلاث نجمات ثم الحرف الأخير.",
+          "constraints": "طول الكلمة من 3 إلى 15 حرفًا.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ndef acak(a, b):\n    return ''.join(r.choice('abcdefghijklmnopqrstuvwxyz') for _ in range(r.randint(a, b)))\nprint(acak(3, 15))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string kata;\n    cin >> kata;\n    cout << kata[0] << \"***\" << kata[kata.size() - 1] << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "stopwatch",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Stopwatch",
+          "statement": "Sebuah stopwatch sudah berjalan **d** detik. Cetak tampilannya dalam bentuk `JJ:MM:DD` — jam, menit, dan detik, masing-masing dua digit.\n\nUntuk `3725` keluarannya `01:02:05`.",
+          "input_format": "Satu bilangan bulat d.",
+          "output_format": "Waktu dalam bentuk `JJ:MM:DD`.",
+          "constraints": "0 ≤ d < 360000"
+        },
+        "en": {
+          "title": "Stopwatch",
+          "statement": "A stopwatch has been running for **d** seconds. Print its display in the form `HH:MM:SS` — hours, minutes and seconds, two digits each.\n\nFor `3725` the output is `01:02:05`.",
+          "input_format": "One integer d.",
+          "output_format": "The time in the form `HH:MM:SS`.",
+          "constraints": "0 ≤ d < 360000",
+          "machine": true
+        },
+        "ar": {
+          "title": "ساعة الإيقاف",
+          "statement": "ساعة إيقاف تعمل منذ **d** ثانية. اطبع ما تعرضه بالصيغة `HH:MM:SS` — الساعات والدقائق والثواني، كلٌّ برقمين.\n\nعند `3725` يكون المخرج `01:02:05`.",
+          "input_format": "عدد صحيح واحد d.",
+          "output_format": "الوقت بالصيغة `HH:MM:SS`.",
+          "constraints": "0 ≤ d < 360000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 3725, 3: 0, 4: 359999, 5: 59}.get(i, r.randint(0, 359999)))\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nint main() {\n    int d;\n    cin >> d;\n    cout << setfill('0') << setw(2) << d / 3600 << \":\" << setw(2) << d % 3600 / 60 << \":\" << setw(2) << d % 60 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "nama-belakang-dulu",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Nama Belakang Dulu",
+          "statement": "Dalam daftar pustaka, nama penulis ditulis dengan nama belakang lebih dulu, diikuti koma, spasi, inisial nama depan, dan titik.\n\nUntuk `Dewi Lestari` keluarannya `Lestari, D.`",
+          "input_format": "Satu baris berisi nama depan dan nama belakang.",
+          "output_format": "Nama dalam bentuk daftar pustaka.",
+          "constraints": "Tiap nama diawali huruf besar dan paling panjang 20 huruf."
+        },
+        "en": {
+          "title": "Last Name First",
+          "statement": "In a bibliography an author is written with the last name first, followed by a comma, a space, the initial of the first name and a full stop.\n\nFor `Dewi Lestari` the output is `Lestari, D.`",
+          "input_format": "One line with the first name and the last name.",
+          "output_format": "The name in bibliography form.",
+          "constraints": "Each name starts with a capital letter and is at most 20 letters long.",
+          "machine": true
+        },
+        "ar": {
+          "title": "اسم العائلة أولًا",
+          "statement": "في قائمة المراجع يُكتب اسم المؤلف باسم العائلة أولًا، تليه فاصلة ثم مسافة ثم الحرف الأول من الاسم الأول ثم نقطة.\n\nعند `Dewi Lestari` يكون المخرج `Lestari, D.`",
+          "input_format": "سطر واحد فيه الاسم الأول واسم العائلة.",
+          "output_format": "الاسم بصيغة قائمة المراجع.",
+          "constraints": "كل اسم يبدأ بحرف كبير وطوله 20 حرفًا على الأكثر.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nNAMA = ['Andi', 'Budi', 'Citra', 'Dewi', 'Eko', 'Fajar', 'Gita', 'Hadi', 'Indah', 'Joko', 'Kartika', 'Lina', 'Made', 'Nanda', 'Putri', 'Rudi', 'Sari', 'Tono', 'Wulan', 'Yoga']\nMARGA = ['Saputra', 'Wijaya', 'Lestari', 'Pratama', 'Hidayat', 'Utami', 'Santoso', 'Nugroho', 'Rahayu', 'Siregar', 'Halim', 'Kusuma']\nprint(r.choice(NAMA), r.choice(MARGA))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string depan, belakang;\n    cin >> depan >> belakang;\n    cout << belakang << \", \" << depan[0] << \".\" << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "ipk",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "IPK",
+          "statement": "Indeks prestasi adalah jumlah angka mutu dibagi jumlah SKS. Keduanya bilangan bulat, tetapi hasilnya bilangan pecahan.\n\nBaca jumlah angka mutu dan jumlah SKS, lalu cetak `IPK: ` diikuti indeks prestasi dengan dua angka di belakang koma.\n\nUntuk `69 20` keluarannya `IPK: 3.45`.",
+          "input_format": "Satu baris berisi jumlah angka mutu dan jumlah SKS.",
+          "output_format": "Satu baris: `IPK: ` lalu nilainya dengan dua angka di belakang koma.",
+          "constraints": "18 ≤ SKS ≤ 23; 0 ≤ angka mutu ≤ 4 × SKS"
+        },
+        "en": {
+          "title": "Grade Point Average",
+          "statement": "A grade point average is the total grade points divided by the total credits. Both are integers, but the result is a real number.\n\nRead the total grade points and the total credits, then print `IPK: ` followed by the average with two digits after the decimal point.\n\nFor `69 20` the output is `IPK: 3.45`.",
+          "input_format": "One line with the total grade points and the total credits.",
+          "output_format": "One line: `IPK: ` then the value with two digits after the decimal point.",
+          "constraints": "18 ≤ credits ≤ 23; 0 ≤ grade points ≤ 4 × credits",
+          "machine": true
+        },
+        "ar": {
+          "title": "المعدل التراكمي",
+          "statement": "المعدل التراكمي هو مجموع نقاط التقدير مقسومًا على مجموع الساعات المعتمدة. كلاهما عدد صحيح لكن الناتج عدد عشري.\n\nاقرأ مجموع النقاط ومجموع الساعات ثم اطبع `IPK: ` يليه المعدل برقمين بعد الفاصلة.\n\nعند `69 20` يكون المخرج `IPK: 3.45`.",
+          "input_format": "سطر واحد فيه مجموع النقاط ومجموع الساعات المعتمدة.",
+          "output_format": "سطر واحد: `IPK: ` ثم القيمة برقمين بعد الفاصلة.",
+          "constraints": "18 ≤ الساعات ≤ 23؛ 0 ≤ النقاط ≤ 4 × الساعات",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ns = r.choice([18, 19, 20, 21, 22, 23])\nprint({2: 4 * s, 3: 0}.get(i, r.randint(0, 4 * s)), s)\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nint main() {\n    int mutu, sks;\n    cin >> mutu >> sks;\n    cout << \"IPK: \" << fixed << setprecision(2) << (double) mutu / sks << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "potong-kalimat",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Potong Kalimat",
+          "statement": "Sebuah judul berita terlalu panjang untuk layar ponsel. Tampilkan hanya **n karakter pertamanya**, langsung diikuti tiga titik.\n\nUntuk kalimat `belajar program komputer` dan n = 7 keluarannya `belajar...`",
+          "input_format": "Baris pertama: kalimat. Baris kedua: bilangan bulat n.",
+          "output_format": "n karakter pertama kalimat itu, diikuti `...`",
+          "constraints": "Kalimat paling panjang 80 karakter; 1 ≤ n ≤ panjang kalimat"
+        },
+        "en": {
+          "title": "Cut the Sentence",
+          "statement": "A news headline is too long for a phone screen. Show only its **first n characters**, immediately followed by three dots.\n\nFor the sentence `belajar program komputer` and n = 7 the output is `belajar...`",
+          "input_format": "First line: the sentence. Second line: an integer n.",
+          "output_format": "The first n characters of the sentence, followed by `...`",
+          "constraints": "The sentence is at most 80 characters long; 1 ≤ n ≤ the length of the sentence",
+          "machine": true
+        },
+        "ar": {
+          "title": "اقتطاع الجملة",
+          "statement": "عنوان خبر أطول من أن تعرضه شاشة الهاتف. اعرض **أول n محرفًا** منه فقط، تليها مباشرة ثلاث نقاط.\n\nللجملة `belajar program komputer` و n = 7 يكون المخرج `belajar...`",
+          "input_format": "السطر الأول: الجملة. السطر الثاني: عدد صحيح n.",
+          "output_format": "أول n محرفًا من الجملة تليها `...`",
+          "constraints": "الجملة 80 محرفًا على الأكثر؛ 1 ≤ n ≤ طول الجملة",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nKATA = ['belajar', 'program', 'komputer', 'kampus', 'buku', 'meja', 'layar', 'kode', 'data', 'angka', 'huruf', 'kelas', 'tugas', 'ujian', 'pagi', 'malam', 'cepat', 'rapi', 'benar', 'coba']\ndef kalimat(a, b):\n    return ' '.join(r.choice(KATA) for _ in range(r.randint(a, b)))\nk = kalimat(3, 8)\nprint(k)\nprint({2: 1, 3: len(k)}.get(i, r.randint(1, len(k))))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string kalimat;\n    int n;\n    getline(cin, kalimat);\n    cin >> n;\n    cout << kalimat.substr(0, n) << \"...\" << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "kartu-mahasiswa",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Kartu Mahasiswa",
+          "statement": "Data seorang mahasiswa diberikan dalam tiga baris: **umur**, lalu **nama lengkap** (bisa lebih dari satu kata), lalu **tinggi badan** dalam sentimeter.\n\nCetak kartunya persis seperti ini (untuk masukan `19`, `Dewi Lestari`, `158.5`):\n\n```\nNama   : Dewi Lestari\nUmur   : 19 tahun\nTinggi : 158.5 cm\n```\n\nTinggi dicetak dengan satu angka di belakang koma.\n\nHati-hati: sesudah `cin >> umur`, sisa baris pertama (tanda ganti baris) masih tertinggal, dan `getline` berikutnya akan membacanya sebagai baris kosong. `cin.ignore()` membuang satu karakter yang tertinggal itu.",
+          "input_format": "Tiga baris: umur (bilangan bulat), nama lengkap, tinggi (satu angka di belakang koma).",
+          "output_format": "Tiga baris seperti contoh.",
+          "constraints": "17 ≤ umur ≤ 30; 140 ≤ tinggi < 200; nama paling panjang 40 karakter"
+        },
+        "en": {
+          "title": "Student Card",
+          "statement": "A student's data comes in three lines: the **age**, then the **full name** (it can be more than one word), then the **height** in centimetres.\n\nPrint the card exactly like this (for the input `19`, `Dewi Lestari`, `158.5`):\n\n```\nNama   : Dewi Lestari\nUmur   : 19 tahun\nTinggi : 158.5 cm\n```\n\nThe height is printed with one digit after the decimal point.\n\nCareful: after `cin >> umur`, the rest of the first line (the line break) is still waiting, and the next `getline` would read it as an empty line. `cin.ignore()` throws away that one waiting character.",
+          "input_format": "Three lines: the age (an integer), the full name, the height (one digit after the decimal point).",
+          "output_format": "Three lines as in the example.",
+          "constraints": "17 ≤ age ≤ 30; 140 ≤ height < 200; the name is at most 40 characters long",
+          "machine": true
+        },
+        "ar": {
+          "title": "بطاقة الطالب",
+          "statement": "تُعطى بيانات طالب في ثلاثة أسطر: **العمر** ثم **الاسم الكامل** (قد يكون أكثر من كلمة) ثم **الطول** بالسنتيمتر.\n\nاطبع البطاقة هكذا بالضبط (للمدخل `19` و `Dewi Lestari` و `158.5`):\n\n```\nNama   : Dewi Lestari\nUmur   : 19 tahun\nTinggi : 158.5 cm\n```\n\nيُطبع الطول برقم واحد بعد الفاصلة.\n\nانتبه: بعد `cin >> umur` يبقى ما تبقّى من السطر الأول (علامة نهاية السطر) في الانتظار، وسيقرؤه `getline` التالي كسطر فارغ. `cin.ignore()` يتخلص من ذلك المحرف المنتظر.",
+          "input_format": "ثلاثة أسطر: العمر (عدد صحيح)، الاسم الكامل، الطول (برقم واحد بعد الفاصلة).",
+          "output_format": "ثلاثة أسطر كما في المثال.",
+          "constraints": "17 ≤ العمر ≤ 30؛ 140 ≤ الطول < 200؛ الاسم 40 محرفًا على الأكثر",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nNAMA = ['Andi', 'Budi', 'Citra', 'Dewi', 'Eko', 'Fajar', 'Gita', 'Hadi', 'Indah', 'Joko', 'Kartika', 'Lina', 'Made', 'Nanda', 'Putri', 'Rudi', 'Sari', 'Tono', 'Wulan', 'Yoga']\nMARGA = ['Saputra', 'Wijaya', 'Lestari', 'Pratama', 'Hidayat', 'Utami', 'Santoso', 'Nugroho', 'Rahayu', 'Siregar', 'Halim', 'Kusuma']\nprint(r.randint(17, 30))\nprint(r.choice(NAMA), r.choice(MARGA))\nprint(f\"{r.randint(1400, 1950) / 10:.1f}\")\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\n#include <string>\nusing namespace std;\n\nint main() {\n    int umur;\n    string nama;\n    double tinggi;\n    cin >> umur;\n    cin.ignore();\n    getline(cin, nama);\n    cin >> tinggi;\n    cout << \"Nama   : \" << nama << endl;\n    cout << \"Umur   : \" << umur << \" tahun\" << endl;\n    cout << \"Tinggi : \" << fixed << setprecision(1) << tinggi << \" cm\" << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "nomor-antrean",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Nomor Antrean",
+          "statement": "Mesin antrean sebuah bank mencetak nomor berbentuk huruf loket, tanda hubung, dan nomor urut tiga digit: `A-007`.\n\nBaca huruf loket dan nomor urut yang sedang dilayani. Cetak nomor antrean itu, lalu di baris berikutnya nomor antrean sesudahnya.\n\nUntuk `A 7` keluarannya `A-007` dan `A-008`; untuk `C 99` keluarannya `C-099` dan `C-100`.",
+          "input_format": "Satu baris berisi satu huruf besar dan nomor urut.",
+          "output_format": "Dua baris: nomor antrean sekarang, lalu nomor antrean berikutnya.",
+          "constraints": "Huruf A–H; 0 ≤ nomor urut ≤ 998"
+        },
+        "en": {
+          "title": "Queue Number",
+          "statement": "A bank's queue machine prints numbers made of a counter letter, a hyphen and a three-digit sequence number: `A-007`.\n\nRead the counter letter and the sequence number now being served. Print that queue number, then on the next line the queue number after it.\n\nFor `A 7` the output is `A-007` and `A-008`; for `C 99` it is `C-099` and `C-100`.",
+          "input_format": "One line with one uppercase letter and the sequence number.",
+          "output_format": "Two lines: the current queue number, then the next one.",
+          "constraints": "A letter A–H; 0 ≤ sequence number ≤ 998",
+          "machine": true
+        },
+        "ar": {
+          "title": "رقم الدور",
+          "statement": "تطبع آلة الدور في مصرف أرقامًا مكوّنة من حرف الشبّاك ثم شرطة ثم رقم تسلسلي من ثلاثة أرقام: `A-007`.\n\nاقرأ حرف الشبّاك والرقم التسلسلي الجاري خدمته. اطبع رقم الدور ذلك، ثم في السطر التالي رقم الدور الذي يليه.\n\nعند `A 7` يكون المخرج `A-007` و `A-008`، وعند `C 99` يكون `C-099` و `C-100`.",
+          "input_format": "سطر واحد فيه حرف لاتيني كبير والرقم التسلسلي.",
+          "output_format": "سطران: رقم الدور الحالي ثم الذي يليه.",
+          "constraints": "حرف من A–H؛ 0 ≤ الرقم التسلسلي ≤ 998",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.choice('ABCDEFGH'), {2: 7, 3: 99, 4: 998, 5: 0}.get(i, r.randint(0, 998)))\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nint main() {\n    char loket;\n    int nomor;\n    cin >> loket >> nomor;\n    cout << setfill('0');\n    cout << loket << \"-\" << setw(3) << nomor << endl;\n    cout << loket << \"-\" << setw(3) << nomor + 1 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "kode-buku",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Kode Buku",
+          "statement": "Perpustakaan memberi setiap buku kode yang terdiri dari tiga bagian yang dipisah tanda hubung:\n\n1. tiga huruf pertama judulnya;\n2. dua digit terakhir tahun terbitnya;\n3. nomor urut buku, selalu empat digit.\n\nUntuk `Pemrograman 2026 42` kodenya `Pem-26-0042`. Untuk `Fisika 2005 7` kodenya `Fis-05-0007`.",
+          "input_format": "Satu baris berisi judul (satu kata), tahun terbit, dan nomor urut.",
+          "output_format": "Kode buku.",
+          "constraints": "Judul 3 sampai 20 huruf; 1990 ≤ tahun ≤ 2029; 1 ≤ nomor urut ≤ 9999"
+        },
+        "en": {
+          "title": "Book Code",
+          "statement": "A library gives every book a code made of three parts separated by hyphens:\n\n1. the first three letters of its title;\n2. the last two digits of its year of publication;\n3. the sequence number of the book, always four digits.\n\nFor `Pemrograman 2026 42` the code is `Pem-26-0042`. For `Fisika 2005 7` the code is `Fis-05-0007`.",
+          "input_format": "One line with the title (one word), the year of publication and the sequence number.",
+          "output_format": "The book code.",
+          "constraints": "The title is 3 to 20 letters long; 1990 ≤ year ≤ 2029; 1 ≤ sequence number ≤ 9999",
+          "machine": true
+        },
+        "ar": {
+          "title": "رمز الكتاب",
+          "statement": "تعطي مكتبة كل كتاب رمزًا من ثلاثة أجزاء تفصل بينها شرطات:\n\n1. أول ثلاثة أحرف من عنوانه؛\n2. آخر رقمين من سنة نشره؛\n3. الرقم التسلسلي للكتاب، دائمًا بأربعة أرقام.\n\nعند `Pemrograman 2026 42` يكون الرمز `Pem-26-0042`. وعند `Fisika 2005 7` يكون `Fis-05-0007`.",
+          "input_format": "سطر واحد فيه العنوان (كلمة واحدة) وسنة النشر والرقم التسلسلي.",
+          "output_format": "رمز الكتاب.",
+          "constraints": "العنوان من 3 إلى 20 حرفًا؛ 1990 ≤ السنة ≤ 2029؛ 1 ≤ الرقم التسلسلي ≤ 9999",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\njudul = ['Pemrograman', 'Algoritma', 'Kalkulus', 'Statistika', 'Jaringan', 'Basisdata', 'Fisika', 'Logika', 'Grafika', 'Robotika']\nt, n = r.randint(1990, 2029), r.randint(1, 9999)\nif i == 2:\n    t, n = 2026, 42\nif i == 3:\n    t, n = 2005, 7\nif i == 4:\n    t = 2000\nprint(r.choice(judul), t, n)\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\n#include <string>\nusing namespace std;\n\nint main() {\n    string judul;\n    int tahun, nomor;\n    cin >> judul >> tahun >> nomor;\n    cout << judul.substr(0, 3) << \"-\" << setfill('0') << setw(2) << tahun % 100 << \"-\" << setw(4) << nomor << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "kuitansi",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Kuitansi",
+          "statement": "Sebuah toko mencetak kuitansi tiga baris. Tiap baris berisi **keterangan rata kiri dalam lebar 10**, lalu **jumlah uang rata kanan dalam lebar 12 dengan dua angka di belakang koma**.\n\nKeterangannya berturut-turut `Subtotal` (harga × banyak), `Pajak` (subtotal × persen pajak / 100), dan `Total` (subtotal ditambah pajak).\n\nUntuk harga 12500, banyak 3, dan pajak 11 persen:\n\n```\nSubtotal      37500.00\nPajak          4125.00\nTotal         41625.00\n```",
+          "input_format": "Satu baris berisi harga satuan, banyak barang, dan persen pajak.",
+          "output_format": "Tiga baris seperti contoh.",
+          "constraints": "250 ≤ harga ≤ 100000; 1 ≤ banyak ≤ 50; pajak 10, 11, atau 12 persen"
+        },
+        "en": {
+          "title": "Receipt",
+          "statement": "A shop prints a three-line receipt. Each line holds a **label left-aligned in a width of 10**, then an **amount right-aligned in a width of 12 with two digits after the decimal point**.\n\nThe labels are, in order, `Subtotal` (price × quantity), `Pajak` (subtotal × tax percent / 100) and `Total` (subtotal plus tax).\n\nFor price 12500, quantity 3 and 11 percent tax:\n\n```\nSubtotal      37500.00\nPajak          4125.00\nTotal         41625.00\n```",
+          "input_format": "One line with the unit price, the quantity and the tax percentage.",
+          "output_format": "Three lines as in the example.",
+          "constraints": "250 ≤ price ≤ 100000; 1 ≤ quantity ≤ 50; the tax is 10, 11 or 12 percent",
+          "machine": true
+        },
+        "ar": {
+          "title": "إيصال",
+          "statement": "يطبع متجر إيصالًا من ثلاثة أسطر. في كل سطر **بيان محاذًى إلى اليسار في عرض 10** ثم **مبلغ محاذًى إلى اليمين في عرض 12 برقمين بعد الفاصلة**.\n\nالبيانات على الترتيب: `Subtotal` (السعر × الكمية) و `Pajak` (المجموع الفرعي × نسبة الضريبة / 100) و `Total` (المجموع الفرعي مع الضريبة).\n\nللسعر 12500 والكمية 3 والضريبة 11 بالمئة:\n\n```\nSubtotal      37500.00\nPajak          4125.00\nTotal         41625.00\n```",
+          "input_format": "سطر واحد فيه سعر الوحدة والكمية ونسبة الضريبة.",
+          "output_format": "ثلاثة أسطر كما في المثال.",
+          "constraints": "250 ≤ السعر ≤ 100000؛ 1 ≤ الكمية ≤ 50؛ الضريبة 10 أو 11 أو 12 بالمئة",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nh, n, p = r.randint(1, 400) * 250, r.randint(1, 50), r.choice([10, 11, 12])\nif i == 2:\n    h, n, p = 12500, 3, 11\nprint(h, n, p)\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nint main() {\n    double harga;\n    int banyak, pajak;\n    cin >> harga >> banyak >> pajak;\n    double subtotal = harga * banyak;\n    double nilaiPajak = subtotal * pajak / 100;\n    cout << fixed << setprecision(2);\n    cout << left << setw(10) << \"Subtotal\" << right << setw(12) << subtotal << endl;\n    cout << left << setw(10) << \"Pajak\" << right << setw(12) << nilaiPajak << endl;\n    cout << left << setw(10) << \"Total\" << right << setw(12) << subtotal + nilaiPajak << endl;\n    return 0;\n}\n"
+    }
+  ]
+}

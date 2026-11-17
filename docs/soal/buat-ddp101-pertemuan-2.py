@@ -7,7 +7,8 @@ memakai if, ?:, &&, ||, perulangan, string, atau pengaturan format keluaran.
 
 Tiga soal pertemuan ini sudah ada di bank (docs/contoh-soal/ddp101-pertemuan-2.json):
 dua MUDAH_SEKALI dan satu MUDAH. Berkas ini menambah 6 + 7 + 6 + 6 + 4 = 29 soal,
-sehingga komposisi minimum bawaan 8 / 8 / 6 / 6 / 4 terpenuhi.
+sehingga komposisi minimum bawaan 8 / 8 / 6 / 6 / 4 terpenuhi, dan memuat ketiga soal
+lama itu juga. Teks Inggris dan Arab semua 32 soal ada di terjemahan_p2.py.
 
     python3 docs/soal/buat-ddp101-pertemuan-2.py
 """
@@ -268,6 +269,20 @@ soal("kode-tiga-huruf", "sulit", "Kode Tiga Huruf",
      "print({2: 28, 3: 0, 4: 17575, 5: 26, 6: 676}.get(i, r.randint(0, 17575)))\n",
      cpp("    int n;\n    cin >> n;\n    char pertama = (char) ('A' + n / 676);\n    char kedua = (char) ('A' + n / 26 % 26);\n    char ketiga = (char) ('A' + n % 26);\n    cout << pertama << kedua << ketiga << endl;"))
 
+# Tiga soal yang sudah ada di bank sejak gerbang tahap 8 ikut di berkas ini, supaya
+# terjemahannya bisa ditambahkan (isi yang sama, versi baru karena teksnya bertambah).
+for lama in json.loads(Path(__file__).parents[1].joinpath("contoh-soal", "ddp101-pertemuan-2.json").read_text(encoding="utf-8"))["problems"]:
+    SOAL.append(lama)
+
+from terjemahan_p2 import TERJEMAHAN  # noqa: E402
+
+KUNCI = ("title", "statement", "input_format", "output_format", "constraints")
+for s in SOAL:
+    for bahasa in ("en", "ar"):
+        # Teks Inggris dan Arab ditulis agen penyusun: ditandai terjemahan mesin sampai diperiksa pengampu.
+        s["translations"][bahasa] = dict(zip(KUNCI, TERJEMAHAN[s["slug"]][bahasa]), machine=True)
+assert set(TERJEMAHAN) == {s["slug"] for s in SOAL}
+
 berkas = {"course": "DDP101", "meeting": 2, "language": "cpp", "problems": SOAL}
 tujuan = Path(__file__).with_name("ddp101-pertemuan-2.json")
 tujuan.write_text(json.dumps(berkas, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -276,3 +291,4 @@ for s in SOAL:
     hitung[s["difficulty"]] = hitung.get(s["difficulty"], 0) + 1
 print(f"{tujuan.name}: {len(SOAL)} soal", hitung, f"{tujuan.stat().st_size} byte")
 assert len({s['slug'] for s in SOAL}) == len(SOAL)
+assert hitung == {"mudah_sekali": 8, "mudah": 8, "mudah_sedang": 6, "sedang": 6, "sulit": 4}, hitung

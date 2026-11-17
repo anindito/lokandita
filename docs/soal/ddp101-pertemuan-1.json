@@ -1,0 +1,1159 @@
+{
+  "course": "DDP101",
+  "meeting": 1,
+  "language": "cpp",
+  "problems": [
+    {
+      "slug": "cetak-bilangan",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Cetak Bilangan",
+          "statement": "Baca sebuah bilangan bulat, lalu cetak bilangan itu kembali.\n\nIni program pertama yang membaca masukan: `cin >> n;` membaca, `cout << n;` mencetak.",
+          "input_format": "Satu bilangan bulat n.",
+          "output_format": "Bilangan n.",
+          "constraints": "1 ≤ n ≤ 1000000"
+        },
+        "en": {
+          "title": "Print the Number",
+          "statement": "Read an integer, then print it back.\n\nThis is the first program that reads input: `cin >> n;` reads, `cout << n;` prints.",
+          "input_format": "One integer n.",
+          "output_format": "The number n.",
+          "constraints": "1 ≤ n ≤ 1000000",
+          "machine": true
+        },
+        "ar": {
+          "title": "اطبع العدد",
+          "statement": "اقرأ عددًا صحيحًا ثم اطبعه كما هو.\n\nهذا أول برنامج يقرأ مدخلات: `cin >> n;` للقراءة و `cout << n;` للطباعة.",
+          "input_format": "عدد صحيح واحد n.",
+          "output_format": "العدد n.",
+          "constraints": "1 ≤ n ≤ 1000000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 1000000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    cout << n << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "bilangan-berikutnya",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Bilangan Berikutnya",
+          "statement": "Baca sebuah bilangan bulat **n**, lalu cetak bilangan sesudahnya, yaitu **n + 1**.",
+          "input_format": "Satu bilangan bulat n.",
+          "output_format": "Satu bilangan: n + 1.",
+          "constraints": "0 ≤ n ≤ 1000000"
+        },
+        "en": {
+          "title": "The Next Number",
+          "statement": "Read an integer **n**, then print the number after it, **n + 1**.",
+          "input_format": "One integer n.",
+          "output_format": "One number: n + 1.",
+          "constraints": "0 ≤ n ≤ 1000000",
+          "machine": true
+        },
+        "ar": {
+          "title": "العدد التالي",
+          "statement": "اقرأ عددًا صحيحًا **n** ثم اطبع العدد الذي يليه، أي **n + 1**.",
+          "input_format": "عدد صحيح واحد n.",
+          "output_format": "عدد واحد: n + 1.",
+          "constraints": "0 ≤ n ≤ 1000000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(0, 1000000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    cout << n + 1 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "dua-kali-lipat",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Dua Kali Lipat",
+          "statement": "Baca sebuah bilangan bulat **n**, lalu cetak dua kali lipatnya.",
+          "input_format": "Satu bilangan bulat n.",
+          "output_format": "Satu bilangan: 2 × n.",
+          "constraints": "1 ≤ n ≤ 1000000"
+        },
+        "en": {
+          "title": "Double It",
+          "statement": "Read an integer **n**, then print twice its value.",
+          "input_format": "One integer n.",
+          "output_format": "One number: 2 × n.",
+          "constraints": "1 ≤ n ≤ 1000000",
+          "machine": true
+        },
+        "ar": {
+          "title": "الضعف",
+          "statement": "اقرأ عددًا صحيحًا **n** ثم اطبع ضعفه.",
+          "input_format": "عدد صحيح واحد n.",
+          "output_format": "عدد واحد: 2 × n.",
+          "constraints": "1 ≤ n ≤ 1000000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 1000000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    cout << n * 2 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "jumlah-dua-bilangan",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Jumlah Dua Bilangan",
+          "statement": "Baca dua bilangan bulat, lalu cetak jumlahnya.",
+          "input_format": "Satu baris berisi dua bilangan bulat a dan b.",
+          "output_format": "Satu bilangan: a + b.",
+          "constraints": "1 ≤ a, b ≤ 1000"
+        },
+        "en": {
+          "title": "Sum of Two Numbers",
+          "statement": "Read two integers, then print their sum.",
+          "input_format": "One line with two integers a and b.",
+          "output_format": "One number: a + b.",
+          "constraints": "1 ≤ a, b ≤ 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "مجموع عددين",
+          "statement": "اقرأ عددين صحيحين ثم اطبع مجموعهما.",
+          "input_format": "سطر واحد فيه عددان صحيحان a و b.",
+          "output_format": "عدد واحد: a + b.",
+          "constraints": "1 ≤ a, b ≤ 1000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 1000), r.randint(1, 1000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    cout << a + b << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "jumlah-tiga-bilangan",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Jumlah Tiga Bilangan",
+          "statement": "Baca tiga bilangan bulat, lalu cetak jumlah ketiganya.",
+          "input_format": "Satu baris berisi tiga bilangan bulat.",
+          "output_format": "Satu bilangan: jumlah ketiganya.",
+          "constraints": "1 ≤ setiap bilangan ≤ 1000"
+        },
+        "en": {
+          "title": "Sum of Three Numbers",
+          "statement": "Read three integers, then print the sum of all three.",
+          "input_format": "One line with three integers.",
+          "output_format": "One number: their sum.",
+          "constraints": "1 ≤ each number ≤ 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "مجموع ثلاثة أعداد",
+          "statement": "اقرأ ثلاثة أعداد صحيحة ثم اطبع مجموعها.",
+          "input_format": "سطر واحد فيه ثلاثة أعداد صحيحة.",
+          "output_format": "عدد واحد: مجموعها.",
+          "constraints": "1 ≤ كل عدد ≤ 1000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 1000), r.randint(1, 1000), r.randint(1, 1000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b, c;\n    cin >> a >> b >> c;\n    cout << a + b + c << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "keliling-persegi",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Keliling Persegi",
+          "statement": "Sebuah persegi punya panjang sisi **s**. Cetak kelilingnya.",
+          "input_format": "Satu bilangan bulat s.",
+          "output_format": "Satu bilangan: keliling persegi.",
+          "constraints": "1 ≤ s ≤ 10000"
+        },
+        "en": {
+          "title": "Perimeter of a Square",
+          "statement": "A square has side length **s**. Print its perimeter.",
+          "input_format": "One integer s.",
+          "output_format": "One number: the perimeter of the square.",
+          "constraints": "1 ≤ s ≤ 10000",
+          "machine": true
+        },
+        "ar": {
+          "title": "محيط المربع",
+          "statement": "مربع طول ضلعه **s**. اطبع محيطه.",
+          "input_format": "عدد صحيح واحد s.",
+          "output_format": "عدد واحد: محيط المربع.",
+          "constraints": "1 ≤ s ≤ 10000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 10000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int sisi;\n    cin >> sisi;\n    cout << 4 * sisi << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "luas-persegi",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Luas Persegi",
+          "statement": "Sebuah persegi punya panjang sisi **s**. Cetak luasnya.",
+          "input_format": "Satu bilangan bulat s.",
+          "output_format": "Satu bilangan: luas persegi.",
+          "constraints": "1 ≤ s ≤ 10000"
+        },
+        "en": {
+          "title": "Area of a Square",
+          "statement": "A square has side length **s**. Print its area.",
+          "input_format": "One integer s.",
+          "output_format": "One number: the area of the square.",
+          "constraints": "1 ≤ s ≤ 10000",
+          "machine": true
+        },
+        "ar": {
+          "title": "مساحة المربع",
+          "statement": "مربع طول ضلعه **s**. اطبع مساحته.",
+          "input_format": "عدد صحيح واحد s.",
+          "output_format": "عدد واحد: مساحة المربع.",
+          "constraints": "1 ≤ s ≤ 10000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 10000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int sisi;\n    cin >> sisi;\n    cout << sisi * sisi << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "urutan-terbalik",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Urutan Terbalik",
+          "statement": "Baca tiga bilangan bulat, lalu cetak ketiganya dengan urutan terbalik: yang terakhir dibaca dicetak lebih dulu.",
+          "input_format": "Satu baris berisi tiga bilangan bulat a, b, c.",
+          "output_format": "Satu baris: c, b, a, dipisah spasi.",
+          "constraints": "1 ≤ a, b, c ≤ 1000"
+        },
+        "en": {
+          "title": "Reverse Order",
+          "statement": "Read three integers, then print them in reverse order: the last one read is printed first.",
+          "input_format": "One line with three integers a, b, c.",
+          "output_format": "One line: c, b, a, separated by spaces.",
+          "constraints": "1 ≤ a, b, c ≤ 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "ترتيب معكوس",
+          "statement": "اقرأ ثلاثة أعداد صحيحة ثم اطبعها بترتيب معكوس: آخر عدد قُرئ يُطبع أولًا.",
+          "input_format": "سطر واحد فيه ثلاثة أعداد صحيحة a و b و c.",
+          "output_format": "سطر واحد: c ثم b ثم a، تفصل بينها مسافات.",
+          "constraints": "1 ≤ a, b, c ≤ 1000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 1000), r.randint(1, 1000), r.randint(1, 1000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b, c;\n    cin >> a >> b >> c;\n    cout << c << \" \" << b << \" \" << a << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "umur",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Umur",
+          "statement": "Seseorang lahir pada tahun **l**. Berapa umurnya pada tahun **t**? (Anggap ia sudah berulang tahun pada tahun itu.)",
+          "input_format": "Satu baris berisi tahun lahir l dan tahun t.",
+          "output_format": "Satu bilangan: umur pada tahun t.",
+          "constraints": "1950 ≤ l ≤ t ≤ 2030"
+        },
+        "en": {
+          "title": "Age",
+          "statement": "A person was born in year **l**. How old are they in year **t**? (Assume the birthday has already passed that year.)",
+          "input_format": "One line with the birth year l and the year t.",
+          "output_format": "One number: the age in year t.",
+          "constraints": "1950 ≤ l ≤ t ≤ 2030",
+          "machine": true
+        },
+        "ar": {
+          "title": "العمر",
+          "statement": "وُلد شخص في السنة **l**. كم عمره في السنة **t**؟ (افترض أن عيد ميلاده قد مرّ في تلك السنة.)",
+          "input_format": "سطر واحد فيه سنة الميلاد l والسنة t.",
+          "output_format": "عدد واحد: العمر في السنة t.",
+          "constraints": "1950 ≤ l ≤ t ≤ 2030",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nlahir = r.randint(1950, 2010)\nprint(lahir, r.randint(lahir, 2030))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int lahir, sekarang;\n    cin >> lahir >> sekarang;\n    cout << sekarang - lahir << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "sisa-uang-saku",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Sisa Uang Saku",
+          "statement": "Seorang siswa punya uang **u** rupiah. Ia membeli **n** buku tulis yang masing-masing berharga **h** rupiah. Cetak sisa uangnya.",
+          "input_format": "Satu baris berisi tiga bilangan bulat: u, h, n.",
+          "output_format": "Satu bilangan: sisa uang.",
+          "constraints": "Uangnya selalu cukup. 500 ≤ h ≤ 10000, 1 ≤ n ≤ 10."
+        },
+        "en": {
+          "title": "Pocket Money Left",
+          "statement": "A pupil has **u** rupiah. They buy **n** notebooks that cost **h** rupiah each. Print the money left.",
+          "input_format": "One line with three integers: u, h, n.",
+          "output_format": "One number: the money left.",
+          "constraints": "The money is always enough. 500 ≤ h ≤ 10000, 1 ≤ n ≤ 10.",
+          "machine": true
+        },
+        "ar": {
+          "title": "المصروف المتبقي",
+          "statement": "مع تلميذ **u** روبية. اشترى **n** دفاتر سعر كل واحد منها **h** روبية. اطبع ما تبقى معه.",
+          "input_format": "سطر واحد فيه ثلاثة أعداد صحيحة: u و h و n.",
+          "output_format": "عدد واحد: المبلغ المتبقي.",
+          "constraints": "المبلغ يكفي دائمًا. 500 ≤ h ≤ 10000، 1 ≤ n ≤ 10.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nh, n = r.randint(1, 20) * 500, r.randint(1, 10)\nprint(h * n + r.randint(0, 100) * 500, h, n)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int uang, harga, banyak;\n    cin >> uang >> harga >> banyak;\n    cout << uang - harga * banyak << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "rata-rata-dua-pecahan",
+      "difficulty": "mudah",
+      "comparison_mode": "float",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Rata-Rata Dua Bilangan Pecahan",
+          "statement": "Baca dua bilangan pecahan, lalu cetak rata-ratanya.\n\nBilangan pecahan disimpan di variabel bertipe `double`.",
+          "input_format": "Satu baris berisi dua bilangan pecahan.",
+          "output_format": "Satu bilangan: rata-rata keduanya.",
+          "constraints": "0 ≤ kedua bilangan ≤ 1000"
+        },
+        "en": {
+          "title": "Average of Two Real Numbers",
+          "statement": "Read two real numbers, then print their average.\n\nReal numbers are stored in variables of type `double`.",
+          "input_format": "One line with two real numbers.",
+          "output_format": "One number: their average.",
+          "constraints": "0 ≤ both numbers ≤ 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "متوسط عددين عشريين",
+          "statement": "اقرأ عددين عشريين ثم اطبع متوسطهما.\n\nتُخزَّن الأعداد العشرية في متغيرات من النوع `double`.",
+          "input_format": "سطر واحد فيه عددان عشريان.",
+          "output_format": "عدد واحد: متوسطهما.",
+          "constraints": "0 ≤ العددان ≤ 1000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(0, 2000) / 2, r.randint(0, 2000) / 2)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    double x, y;\n    cin >> x >> y;\n    cout << (x + y) / 2 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "jam-menit-ke-detik",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Jam dan Menit ke Detik",
+          "statement": "Sebuah film berdurasi **j** jam **m** menit. Berapa detik lamanya?",
+          "input_format": "Satu baris berisi j dan m.",
+          "output_format": "Satu bilangan: lama film dalam detik.",
+          "constraints": "0 ≤ j ≤ 23, 0 ≤ m ≤ 59"
+        },
+        "en": {
+          "title": "Hours and Minutes to Seconds",
+          "statement": "A film lasts **j** hours and **m** minutes. How many seconds is that?",
+          "input_format": "One line with j and m.",
+          "output_format": "One number: the length of the film in seconds.",
+          "constraints": "0 ≤ j ≤ 23, 0 ≤ m ≤ 59",
+          "machine": true
+        },
+        "ar": {
+          "title": "من الساعات والدقائق إلى الثواني",
+          "statement": "مدة فيلم **j** ساعة و **m** دقيقة. كم ثانية تساوي؟",
+          "input_format": "سطر واحد فيه j و m.",
+          "output_format": "عدد واحد: مدة الفيلم بالثواني.",
+          "constraints": "0 ≤ j ≤ 23، 0 ≤ m ≤ 59",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(0, 23), r.randint(0, 59))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int jam, menit;\n    cin >> jam >> menit;\n    cout << jam * 3600 + menit * 60 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "volume-balok",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Volume Balok",
+          "statement": "Sebuah balok punya panjang **p**, lebar **l**, dan tinggi **t**. Cetak volumenya.",
+          "input_format": "Satu baris berisi p, l, t.",
+          "output_format": "Satu bilangan: volume balok.",
+          "constraints": "1 ≤ p, l, t ≤ 100"
+        },
+        "en": {
+          "title": "Volume of a Box",
+          "statement": "A box has length **p**, width **l** and height **t**. Print its volume.",
+          "input_format": "One line with p, l, t.",
+          "output_format": "One number: the volume of the box.",
+          "constraints": "1 ≤ p, l, t ≤ 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "حجم متوازي المستطيلات",
+          "statement": "متوازي مستطيلات طوله **p** وعرضه **l** وارتفاعه **t**. اطبع حجمه.",
+          "input_format": "سطر واحد فيه p و l و t.",
+          "output_format": "عدد واحد: الحجم.",
+          "constraints": "1 ≤ p, l, t ≤ 100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 100), r.randint(1, 100), r.randint(1, 100))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int p, l, t;\n    cin >> p >> l >> t;\n    cout << p * l * t << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "kalkulator-mini",
+      "difficulty": "mudah",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Kalkulator Mini",
+          "statement": "Baca dua bilangan bulat **a** dan **b**. Cetak jumlahnya, selisihnya (**a − b**), dan hasil kalinya, masing-masing di baris sendiri.",
+          "input_format": "Satu baris berisi a dan b.",
+          "output_format": "Tiga baris: a + b, a − b, a × b.",
+          "constraints": "1 ≤ a, b ≤ 1000"
+        },
+        "en": {
+          "title": "Mini Calculator",
+          "statement": "Read two integers **a** and **b**. Print their sum, their difference (**a − b**) and their product, each on its own line.",
+          "input_format": "One line with a and b.",
+          "output_format": "Three lines: a + b, a − b, a × b.",
+          "constraints": "1 ≤ a, b ≤ 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "آلة حاسبة صغيرة",
+          "statement": "اقرأ عددين صحيحين **a** و **b**. اطبع مجموعهما ثم الفرق (**a − b**) ثم حاصل ضربهما، كلٌّ في سطر.",
+          "input_format": "سطر واحد فيه a و b.",
+          "output_format": "ثلاثة أسطر: a + b ثم a − b ثم a × b.",
+          "constraints": "1 ≤ a, b ≤ 1000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 1000), r.randint(1, 1000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    cout << a + b << endl;\n    cout << a - b << endl;\n    cout << a * b << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "jarak-tempuh",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Jarak Tempuh",
+          "statement": "Sebuah mobil melaju dengan kecepatan tetap **v** kilometer per jam selama **t** jam. Berapa kilometer jarak yang ditempuhnya?",
+          "input_format": "Satu baris berisi v dan t.",
+          "output_format": "Satu bilangan: jarak dalam kilometer.",
+          "constraints": "1 ≤ v ≤ 120, 1 ≤ t ≤ 24"
+        },
+        "en": {
+          "title": "Distance Travelled",
+          "statement": "A car drives at a constant speed of **v** kilometres per hour for **t** hours. How many kilometres does it travel?",
+          "input_format": "One line with v and t.",
+          "output_format": "One number: the distance in kilometres.",
+          "constraints": "1 ≤ v ≤ 120, 1 ≤ t ≤ 24",
+          "machine": true
+        },
+        "ar": {
+          "title": "المسافة المقطوعة",
+          "statement": "تسير سيارة بسرعة ثابتة **v** كيلومترًا في الساعة لمدة **t** ساعة. كم كيلومترًا تقطع؟",
+          "input_format": "سطر واحد فيه v و t.",
+          "output_format": "عدد واحد: المسافة بالكيلومترات.",
+          "constraints": "1 ≤ v ≤ 120، 1 ≤ t ≤ 24",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 120), r.randint(1, 24))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int kecepatan, waktu;\n    cin >> kecepatan >> waktu;\n    cout << kecepatan * waktu << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "upah-mingguan",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Upah Mingguan",
+          "statement": "Seorang pekerja dibayar **u** rupiah per jam. Ia bekerja **j** jam sehari selama **h** hari dalam seminggu. Cetak upahnya minggu itu.",
+          "input_format": "Satu baris berisi u, j, h.",
+          "output_format": "Satu bilangan: upah seminggu.",
+          "constraints": "10000 ≤ u ≤ 100000, 1 ≤ j ≤ 12, 1 ≤ h ≤ 7"
+        },
+        "en": {
+          "title": "Weekly Pay",
+          "statement": "A worker is paid **u** rupiah per hour. They work **j** hours a day for **h** days in a week. Print the pay for that week.",
+          "input_format": "One line with u, j, h.",
+          "output_format": "One number: the pay for the week.",
+          "constraints": "10000 ≤ u ≤ 100000, 1 ≤ j ≤ 12, 1 ≤ h ≤ 7",
+          "machine": true
+        },
+        "ar": {
+          "title": "الأجر الأسبوعي",
+          "statement": "يتقاضى عامل **u** روبية عن كل ساعة. يعمل **j** ساعات في اليوم لمدة **h** أيام في الأسبوع. اطبع أجره في ذلك الأسبوع.",
+          "input_format": "سطر واحد فيه u و j و h.",
+          "output_format": "عدد واحد: أجر الأسبوع.",
+          "constraints": "10000 ≤ u ≤ 100000، 1 ≤ j ≤ 12، 1 ≤ h ≤ 7",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(10, 100) * 1000, r.randint(1, 12), r.randint(1, 7))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int upah, jam, hari;\n    cin >> upah >> jam >> hari;\n    cout << upah * jam * hari << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "kembalian",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Kembalian",
+          "statement": "Seorang pembeli mengambil tiga barang dengan harga **a**, **b**, dan **c** rupiah, lalu membayar dengan uang **u** rupiah. Cetak kembaliannya.",
+          "input_format": "Satu baris berisi empat bilangan bulat: u, a, b, c.",
+          "output_format": "Satu bilangan: kembalian.",
+          "constraints": "Uang yang dibayarkan selalu cukup. 500 ≤ a, b, c ≤ 30000."
+        },
+        "en": {
+          "title": "Change",
+          "statement": "A customer takes three items priced **a**, **b** and **c** rupiah, then pays with **u** rupiah. Print the change.",
+          "input_format": "One line with four integers: u, a, b, c.",
+          "output_format": "One number: the change.",
+          "constraints": "The amount paid is always enough. 500 ≤ a, b, c ≤ 30000.",
+          "machine": true
+        },
+        "ar": {
+          "title": "الباقي",
+          "statement": "أخذ مشترٍ ثلاث سلع أسعارها **a** و **b** و **c** روبية، ثم دفع **u** روبية. اطبع الباقي.",
+          "input_format": "سطر واحد فيه أربعة أعداد صحيحة: u و a و b و c.",
+          "output_format": "عدد واحد: الباقي.",
+          "constraints": "المبلغ المدفوع يكفي دائمًا. 500 ≤ a, b, c ≤ 30000.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\na, b, c = (r.randint(1, 60) * 500 for _ in range(3))\nprint(a + b + c + r.randint(0, 40) * 500, a, b, c)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int bayar, a, b, c;\n    cin >> bayar >> a >> b >> c;\n    cout << bayar - (a + b + c) << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "ganjil-dan-genap-ke-n",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Bilangan Ganjil dan Genap ke-n",
+          "statement": "Bilangan ganjil positif berurutan: 1, 3, 5, 7, … Bilangan genap positif berurutan: 2, 4, 6, 8, …\n\nDiberikan **n**, cetak bilangan ganjil ke-n, lalu bilangan genap ke-n.\n\nContoh: untuk n = 4 jawabannya 7 dan 8.",
+          "input_format": "Satu bilangan bulat n.",
+          "output_format": "Baris pertama: bilangan ganjil ke-n. Baris kedua: bilangan genap ke-n.",
+          "constraints": "1 ≤ n ≤ 100000"
+        },
+        "en": {
+          "title": "The n-th Odd and Even Number",
+          "statement": "The positive odd numbers in order are 1, 3, 5, 7, … The positive even numbers in order are 2, 4, 6, 8, …\n\nGiven **n**, print the n-th odd number, then the n-th even number.\n\nExample: for n = 4 the answers are 7 and 8.",
+          "input_format": "One integer n.",
+          "output_format": "First line: the n-th odd number. Second line: the n-th even number.",
+          "constraints": "1 ≤ n ≤ 100000",
+          "machine": true
+        },
+        "ar": {
+          "title": "العدد الفردي والزوجي رقم n",
+          "statement": "الأعداد الفردية الموجبة بالترتيب: 1، 3، 5، 7، … والأعداد الزوجية الموجبة بالترتيب: 2، 4، 6، 8، …\n\nإذا أُعطيت **n** فاطبع العدد الفردي رقم n ثم العدد الزوجي رقم n.\n\nمثال: عند n = 4 الجوابان 7 و 8.",
+          "input_format": "عدد صحيح واحد n.",
+          "output_format": "السطر الأول: العدد الفردي رقم n. السطر الثاني: العدد الزوجي رقم n.",
+          "constraints": "1 ≤ n ≤ 100000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 1, 3: 100000}.get(i, r.randint(1, 100000)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    cout << 2 * n - 1 << endl;\n    cout << 2 * n << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "jumlah-satu-sampai-n",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Jumlah 1 sampai n",
+          "statement": "Cetak jumlah **1 + 2 + 3 + … + n**.\n\nPerulangan belum dipelajari, tetapi ada rumusnya: jumlah itu sama dengan **n × (n + 1) / 2**. Untuk n = 100 hasilnya 5050.",
+          "input_format": "Satu bilangan bulat n.",
+          "output_format": "Satu bilangan: 1 + 2 + … + n.",
+          "constraints": "1 ≤ n ≤ 10000"
+        },
+        "en": {
+          "title": "Sum of 1 to n",
+          "statement": "Print the sum **1 + 2 + 3 + … + n**.\n\nLoops have not been taught yet, but there is a formula: the sum equals **n × (n + 1) / 2**. For n = 100 the result is 5050.",
+          "input_format": "One integer n.",
+          "output_format": "One number: 1 + 2 + … + n.",
+          "constraints": "1 ≤ n ≤ 10000",
+          "machine": true
+        },
+        "ar": {
+          "title": "مجموع الأعداد من 1 إلى n",
+          "statement": "اطبع المجموع **1 + 2 + 3 + … + n**.\n\nلم ندرس الحلقات بعد، لكن توجد صيغة: المجموع يساوي **n × (n + 1) / 2**. عند n = 100 الناتج 5050.",
+          "input_format": "عدد صحيح واحد n.",
+          "output_format": "عدد واحد: 1 + 2 + … + n.",
+          "constraints": "1 ≤ n ≤ 10000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 1, 3: 10000, 4: 100}.get(i, r.randint(1, 10000)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    cout << n * (n + 1) / 2 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "luas-trapesium",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "float",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Luas Trapesium",
+          "statement": "Sebuah trapesium punya dua sisi sejajar sepanjang **a** dan **b**, dan tinggi **t**. Luasnya **(a + b) × t / 2**.\n\nCetak luasnya. Hasilnya bisa berupa bilangan pecahan: untuk a = 3, b = 4, t = 5 luasnya 17.5.\n\nPetunjuk: membagi dengan `2.0` (bukan `2`) membuat hasilnya bilangan pecahan.",
+          "input_format": "Satu baris berisi a, b, t.",
+          "output_format": "Satu bilangan: luas trapesium.",
+          "constraints": "1 ≤ a, b ≤ 300, 1 ≤ t ≤ 100"
+        },
+        "en": {
+          "title": "Area of a Trapezoid",
+          "statement": "A trapezoid has two parallel sides of length **a** and **b**, and height **t**. Its area is **(a + b) × t / 2**.\n\nPrint the area. It can be a fraction: for a = 3, b = 4, t = 5 the area is 17.5.\n\nHint: dividing by `2.0` (not `2`) makes the result a real number.",
+          "input_format": "One line with a, b, t.",
+          "output_format": "One number: the area of the trapezoid.",
+          "constraints": "1 ≤ a, b ≤ 300, 1 ≤ t ≤ 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "مساحة شبه المنحرف",
+          "statement": "شبه منحرف طولا ضلعيه المتوازيين **a** و **b** وارتفاعه **t**. مساحته **(a + b) × t / 2**.\n\nاطبع المساحة. قد تكون عددًا عشريًا: عند a = 3 و b = 4 و t = 5 المساحة 17.5.\n\nتلميح: القسمة على `2.0` (لا على `2`) تجعل الناتج عددًا عشريًا.",
+          "input_format": "سطر واحد فيه a و b و t.",
+          "output_format": "عدد واحد: مساحة شبه المنحرف.",
+          "constraints": "1 ≤ a, b ≤ 300، 1 ≤ t ≤ 100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 300), r.randint(1, 300), r.randint(1, 100))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b, t;\n    cin >> a >> b >> t;\n    double luas = (a + b) * t / 2.0;\n    cout << luas << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "harga-setelah-diskon",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Harga Setelah Diskon",
+          "statement": "Sebuah barang berharga **h** rupiah dan sedang didiskon **d** persen. Cetak harga yang harus dibayar.\n\nContoh: barang 80000 rupiah dengan diskon 25 persen menjadi 60000 rupiah.",
+          "input_format": "Satu baris berisi h dan d.",
+          "output_format": "Satu bilangan: harga setelah diskon.",
+          "constraints": "100 ≤ h ≤ 500000 dan h kelipatan 100; 0 ≤ d ≤ 100"
+        },
+        "en": {
+          "title": "Price After Discount",
+          "statement": "An item costs **h** rupiah and is discounted by **d** percent. Print the price to pay.\n\nExample: an item of 80000 rupiah with a 25 percent discount costs 60000 rupiah.",
+          "input_format": "One line with h and d.",
+          "output_format": "One number: the price after the discount.",
+          "constraints": "100 ≤ h ≤ 500000 and h is a multiple of 100; 0 ≤ d ≤ 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "السعر بعد الخصم",
+          "statement": "سلعة سعرها **h** روبية وعليها خصم **d** بالمئة. اطبع السعر الواجب دفعه.\n\nمثال: سلعة بسعر 80000 روبية وخصم 25 بالمئة تصبح 60000 روبية.",
+          "input_format": "سطر واحد فيه h و d.",
+          "output_format": "عدد واحد: السعر بعد الخصم.",
+          "constraints": "100 ≤ h ≤ 500000 و h من مضاعفات 100؛ 0 ≤ d ≤ 100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 5000) * 100, {2: 0, 3: 100}.get(i, r.randint(0, 100)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int harga, diskon;\n    cin >> harga >> diskon;\n    cout << harga - harga * diskon / 100 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "nilai-uang-logam",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Nilai Uang Logam",
+          "statement": "Di dalam celengan ada **a** keping uang logam 1000 rupiah, **b** keping 500 rupiah, **c** keping 200 rupiah, dan **d** keping 100 rupiah. Berapa rupiah isi celengan itu?",
+          "input_format": "Satu baris berisi empat bilangan bulat: a, b, c, d.",
+          "output_format": "Satu bilangan: jumlah uang dalam rupiah.",
+          "constraints": "0 ≤ a, b, c, d ≤ 100"
+        },
+        "en": {
+          "title": "Value of the Coins",
+          "statement": "A piggy bank holds **a** coins of 1000 rupiah, **b** coins of 500 rupiah, **c** coins of 200 rupiah and **d** coins of 100 rupiah. How many rupiah are in it?",
+          "input_format": "One line with four integers: a, b, c, d.",
+          "output_format": "One number: the amount in rupiah.",
+          "constraints": "0 ≤ a, b, c, d ≤ 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "قيمة العملات المعدنية",
+          "statement": "في حصّالة **a** قطعة من فئة 1000 روبية و **b** قطعة من فئة 500 و **c** قطعة من فئة 200 و **d** قطعة من فئة 100. كم روبية في الحصّالة؟",
+          "input_format": "سطر واحد فيه أربعة أعداد صحيحة: a و b و c و d.",
+          "output_format": "عدد واحد: المبلغ بالروبية.",
+          "constraints": "0 ≤ a, b, c, d ≤ 100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(0, 100), r.randint(0, 100), r.randint(0, 100), r.randint(0, 100))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int seribu, limaRatus, duaRatus, seratus;\n    cin >> seribu >> limaRatus >> duaRatus >> seratus;\n    cout << seribu * 1000 + limaRatus * 500 + duaRatus * 200 + seratus * 100 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "lingkaran",
+      "difficulty": "sedang",
+      "comparison_mode": "float",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Luas dan Keliling Lingkaran",
+          "statement": "Sebuah lingkaran punya jari-jari **r**. Dengan **π = 3.14**, cetak luasnya (**π × r × r**), lalu kelilingnya (**2 × π × r**).\n\nSimpan nilai π di sebuah variabel bertipe `double`.",
+          "input_format": "Satu bilangan bulat r.",
+          "output_format": "Baris pertama: luas lingkaran. Baris kedua: kelilingnya.",
+          "constraints": "1 ≤ r ≤ 30"
+        },
+        "en": {
+          "title": "Area and Circumference of a Circle",
+          "statement": "A circle has radius **r**. Using **π = 3.14**, print its area (**π × r × r**), then its circumference (**2 × π × r**).\n\nStore the value of π in a variable of type `double`.",
+          "input_format": "One integer r.",
+          "output_format": "First line: the area of the circle. Second line: its circumference.",
+          "constraints": "1 ≤ r ≤ 30",
+          "machine": true
+        },
+        "ar": {
+          "title": "مساحة الدائرة ومحيطها",
+          "statement": "دائرة نصف قطرها **r**. باستخدام **π = 3.14** اطبع مساحتها (**π × r × r**) ثم محيطها (**2 × π × r**).\n\nخزِّن قيمة π في متغير من النوع `double`.",
+          "input_format": "عدد صحيح واحد r.",
+          "output_format": "السطر الأول: مساحة الدائرة. السطر الثاني: محيطها.",
+          "constraints": "1 ≤ r ≤ 30",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 1, 3: 30, 4: 10}.get(i, r.randint(1, 30)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int r;\n    cin >> r;\n    double pi = 3.14;\n    cout << pi * r * r << endl;\n    cout << 2 * pi * r << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "rata-rata-lima-nilai",
+      "difficulty": "sedang",
+      "comparison_mode": "float",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Rata-Rata Lima Nilai",
+          "statement": "Lima nilai kuis berupa bilangan bulat. Cetak rata-ratanya sebagai bilangan pecahan.\n\nContoh: rata-rata dari 70, 80, 90, 85, 78 adalah 80.6.",
+          "input_format": "Satu baris berisi lima bilangan bulat.",
+          "output_format": "Satu bilangan: rata-rata kelimanya.",
+          "constraints": "0 ≤ setiap nilai ≤ 100"
+        },
+        "en": {
+          "title": "Average of Five Scores",
+          "statement": "Five quiz scores are integers. Print their average as a real number.\n\nExample: the average of 70, 80, 90, 85, 78 is 80.6.",
+          "input_format": "One line with five integers.",
+          "output_format": "One number: the average of the five.",
+          "constraints": "0 ≤ each score ≤ 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "متوسط خمس درجات",
+          "statement": "خمس درجات اختبار أعداد صحيحة. اطبع متوسطها كعدد عشري.\n\nمثال: متوسط 70 و 80 و 90 و 85 و 78 هو 80.6.",
+          "input_format": "سطر واحد فيه خمسة أعداد صحيحة.",
+          "output_format": "عدد واحد: متوسط الخمسة.",
+          "constraints": "0 ≤ كل درجة ≤ 100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(*(r.randint(0, 100) for _ in range(5)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b, c, d, e;\n    cin >> a >> b >> c >> d >> e;\n    double rata = (a + b + c + d + e) / 5.0;\n    cout << rata << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "km-m-cm",
+      "difficulty": "sedang",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Kilometer, Meter, Sentimeter",
+          "statement": "Sebuah jarak diukur **c** sentimeter. Tuliskan jarak itu dalam kilometer, meter, dan sentimeter.\n\nContoh: 123456 sentimeter adalah 1 kilometer 234 meter 56 sentimeter.\n\nPetunjuk: pada bilangan bulat, `/` memberi hasil bagi tanpa pecahan dan `%` memberi sisa pembagian.",
+          "input_format": "Satu bilangan bulat c.",
+          "output_format": "Satu baris berisi tiga bilangan dipisah spasi: kilometer, meter, sentimeter.",
+          "constraints": "0 ≤ c ≤ 10000000"
+        },
+        "en": {
+          "title": "Kilometres, Metres, Centimetres",
+          "statement": "A distance measures **c** centimetres. Write it in kilometres, metres and centimetres.\n\nExample: 123456 centimetres is 1 kilometre 234 metres 56 centimetres.\n\nHint: on integers, `/` gives the quotient without the fraction and `%` gives the remainder.",
+          "input_format": "One integer c.",
+          "output_format": "One line with three numbers separated by spaces: kilometres, metres, centimetres.",
+          "constraints": "0 ≤ c ≤ 10000000",
+          "machine": true
+        },
+        "ar": {
+          "title": "كيلومتر ومتر وسنتيمتر",
+          "statement": "مسافة طولها **c** سنتيمترًا. اكتبها بالكيلومترات والأمتار والسنتيمترات.\n\nمثال: 123456 سنتيمترًا هي 1 كيلومتر و 234 مترًا و 56 سنتيمترًا.\n\nتلميح: مع الأعداد الصحيحة يعطي `/` خارج القسمة بلا كسر ويعطي `%` باقي القسمة.",
+          "input_format": "عدد صحيح واحد c.",
+          "output_format": "سطر واحد فيه ثلاثة أعداد تفصل بينها مسافات: الكيلومترات ثم الأمتار ثم السنتيمترات.",
+          "constraints": "0 ≤ c ≤ 10000000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 0, 3: 123456, 4: 99, 5: 100000}.get(i, r.randint(0, 10**7)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int cm;\n    cin >> cm;\n    cout << cm / 100000 << \" \" << cm % 100000 / 100 << \" \" << cm % 100 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "bunga-tabungan",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Bunga Tabungan",
+          "statement": "Seseorang menabung **p** rupiah. Setiap tahun ia mendapat bunga **b** persen dari tabungan awalnya (bunga tidak ikut berbunga). Cetak jumlah tabungannya setelah **t** tahun.\n\nContoh: 1000000 rupiah dengan bunga 5 persen selama 3 tahun menjadi 1150000 rupiah.",
+          "input_format": "Satu baris berisi p, b, t.",
+          "output_format": "Satu bilangan: tabungan setelah t tahun.",
+          "constraints": "1000 ≤ p ≤ 1000000 dan p kelipatan 1000; 1 ≤ b ≤ 20; 1 ≤ t ≤ 10"
+        },
+        "en": {
+          "title": "Savings Interest",
+          "statement": "Someone saves **p** rupiah. Every year they receive **b** percent interest on the original amount (interest earns no interest). Print the savings after **t** years.\n\nExample: 1000000 rupiah at 5 percent for 3 years becomes 1150000 rupiah.",
+          "input_format": "One line with p, b, t.",
+          "output_format": "One number: the savings after t years.",
+          "constraints": "1000 ≤ p ≤ 1000000 and p is a multiple of 1000; 1 ≤ b ≤ 20; 1 ≤ t ≤ 10",
+          "machine": true
+        },
+        "ar": {
+          "title": "فائدة الادخار",
+          "statement": "ادّخر شخص **p** روبية. يحصل كل سنة على فائدة **b** بالمئة من المبلغ الأصلي (الفائدة لا تُحتسب عليها فائدة). اطبع مدّخراته بعد **t** سنة.\n\nمثال: 1000000 روبية بفائدة 5 بالمئة لمدة 3 سنوات تصبح 1150000 روبية.",
+          "input_format": "سطر واحد فيه p و b و t.",
+          "output_format": "عدد واحد: المدّخرات بعد t سنة.",
+          "constraints": "1000 ≤ p ≤ 1000000 و p من مضاعفات 1000؛ 1 ≤ b ≤ 20؛ 1 ≤ t ≤ 10",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 1000) * 1000, r.randint(1, 20), r.randint(1, 10))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int pokok, bunga, tahun;\n    cin >> pokok >> bunga >> tahun;\n    cout << pokok + pokok / 100 * bunga * tahun << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "titik-tengah",
+      "difficulty": "sedang",
+      "comparison_mode": "float",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Titik Tengah",
+          "statement": "Dua titik pada bidang punya koordinat **(x1, y1)** dan **(x2, y2)**. Cetak koordinat titik yang tepat berada di tengah keduanya.\n\nContoh: titik tengah dari (1, 2) dan (4, 6) adalah (2.5, 4).",
+          "input_format": "Satu baris berisi empat bilangan bulat: x1 y1 x2 y2.",
+          "output_format": "Satu baris: koordinat x titik tengah, satu spasi, lalu koordinat y-nya.",
+          "constraints": "−500 ≤ setiap koordinat ≤ 500"
+        },
+        "en": {
+          "title": "Midpoint",
+          "statement": "Two points in the plane have coordinates **(x1, y1)** and **(x2, y2)**. Print the coordinates of the point exactly halfway between them.\n\nExample: the midpoint of (1, 2) and (4, 6) is (2.5, 4).",
+          "input_format": "One line with four integers: x1 y1 x2 y2.",
+          "output_format": "One line: the x coordinate of the midpoint, a space, then its y coordinate.",
+          "constraints": "−500 ≤ each coordinate ≤ 500",
+          "machine": true
+        },
+        "ar": {
+          "title": "نقطة المنتصف",
+          "statement": "نقطتان في المستوي إحداثياتهما **(x1, y1)** و **(x2, y2)**. اطبع إحداثيات النقطة الواقعة في منتصف المسافة بينهما تمامًا.\n\nمثال: منتصف (1, 2) و (4, 6) هو (2.5, 4).",
+          "input_format": "سطر واحد فيه أربعة أعداد صحيحة: x1 y1 x2 y2.",
+          "output_format": "سطر واحد: الإحداثي x لنقطة المنتصف ثم مسافة ثم الإحداثي y.",
+          "constraints": "−500 ≤ كل إحداثي ≤ 500",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(*(r.randint(-500, 500) for _ in range(4)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int x1, y1, x2, y2;\n    cin >> x1 >> y1 >> x2 >> y2;\n    cout << (x1 + x2) / 2.0 << \" \" << (y1 + y2) / 2.0 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "luas-permukaan-balok",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Luas Permukaan Balok",
+          "statement": "Sebuah kotak kado berbentuk balok dengan panjang **p**, lebar **l**, dan tinggi **t** akan dibungkus kertas. Berapa luas kertas yang dibutuhkan untuk menutup seluruh permukaannya tepat satu lapis?\n\nSebuah balok punya enam sisi yang berpasang-pasangan.",
+          "input_format": "Satu baris berisi p, l, t.",
+          "output_format": "Satu bilangan: luas permukaan balok.",
+          "constraints": "1 ≤ p, l, t ≤ 1000"
+        },
+        "en": {
+          "title": "Surface Area of a Box",
+          "statement": "A gift box with length **p**, width **l** and height **t** is to be wrapped in paper. How much paper is needed to cover its whole surface with exactly one layer?\n\nA box has six faces that come in pairs.",
+          "input_format": "One line with p, l, t.",
+          "output_format": "One number: the surface area of the box.",
+          "constraints": "1 ≤ p, l, t ≤ 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "مساحة سطح متوازي المستطيلات",
+          "statement": "علبة هدية على شكل متوازي مستطيلات طولها **p** وعرضها **l** وارتفاعها **t** ستُغلَّف بالورق. ما مساحة الورق اللازمة لتغطية سطحها كله بطبقة واحدة تمامًا؟\n\nلمتوازي المستطيلات ستة أوجه متقابلة مثنى مثنى.",
+          "input_format": "سطر واحد فيه p و l و t.",
+          "output_format": "عدد واحد: مساحة السطح.",
+          "constraints": "1 ≤ p, l, t ≤ 1000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 1000), r.randint(1, 1000), r.randint(1, 1000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int p, l, t;\n    cin >> p >> l >> t;\n    cout << 2 * (p * l + p * t + l * t) << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "paket-lusinan",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Paket Lusinan",
+          "statement": "Sebuah toko menjual pensil **s** rupiah per batang, atau **l** rupiah per lusin (12 batang). Harga selusin selalu lebih murah daripada 12 batang satuan.\n\nSeorang pembeli memerlukan tepat **n** batang. Ia membeli sebanyak mungkin lusin, dan sisanya satuan. Cetak jumlah yang harus dibayarnya.\n\nContoh: 30 batang dengan harga 2000 per batang dan 20000 per lusin: 2 lusin dan 6 batang, jadi 52000 rupiah.",
+          "input_format": "Satu baris berisi n, s, l.",
+          "output_format": "Satu bilangan: jumlah yang harus dibayar.",
+          "constraints": "0 ≤ n ≤ 1000; 500 ≤ s ≤ 10000; l < 12 × s"
+        },
+        "en": {
+          "title": "Buying by the Dozen",
+          "statement": "A shop sells pencils for **s** rupiah each, or **l** rupiah per dozen (12 pencils). A dozen is always cheaper than 12 single pencils.\n\nA customer needs exactly **n** pencils. They buy as many dozens as possible and the rest one by one. Print the amount to pay.\n\nExample: 30 pencils at 2000 each and 20000 per dozen: 2 dozens and 6 singles, so 52000 rupiah.",
+          "input_format": "One line with n, s, l.",
+          "output_format": "One number: the amount to pay.",
+          "constraints": "0 ≤ n ≤ 1000; 500 ≤ s ≤ 10000; l < 12 × s",
+          "machine": true
+        },
+        "ar": {
+          "title": "الشراء بالدزينة",
+          "statement": "يبيع متجر القلم الواحد بـ **s** روبية، أو الدزينة (12 قلمًا) بـ **l** روبية. سعر الدزينة دائمًا أرخص من 12 قلمًا مفردًا.\n\nيحتاج مشترٍ إلى **n** قلمًا بالضبط. يشتري أكبر عدد ممكن من الدزينات والباقي بالمفرد. اطبع المبلغ الواجب دفعه.\n\nمثال: 30 قلمًا بسعر 2000 للقلم و 20000 للدزينة: دزينتان و 6 أقلام، أي 52000 روبية.",
+          "input_format": "سطر واحد فيه n و s و l.",
+          "output_format": "عدد واحد: المبلغ الواجب دفعه.",
+          "constraints": "0 ≤ n ≤ 1000؛ 500 ≤ s ≤ 10000؛ l < 12 × s",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ns = r.randint(1, 20) * 500\nprint({2: 30, 3: 11, 4: 12, 5: 0}.get(i, r.randint(0, 1000)), s, s * 12 - r.randint(1, 10) * 500)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n, satuan, lusin;\n    cin >> n >> satuan >> lusin;\n    cout << n / 12 * lusin + n % 12 * satuan << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "jumlah-deret",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Jumlah Deret",
+          "statement": "Sebuah deret dimulai dari **a**, dan setiap suku berikutnya lebih besar **b** daripada suku sebelumnya: a, a + b, a + 2b, …\n\nCetak jumlah **n** suku pertamanya.\n\nContoh: a = 3, b = 4, n = 5 memberi 3 + 7 + 11 + 15 + 19 = 55.\n\nPerulangan belum dipelajari. Perhatikan: suku pertama ditambah suku terakhir sama dengan suku kedua ditambah suku kedua dari belakang, dan seterusnya.",
+          "input_format": "Satu baris berisi a, b, n.",
+          "output_format": "Satu bilangan: jumlah n suku pertama.",
+          "constraints": "1 ≤ a ≤ 1000; 0 ≤ b ≤ 100; 1 ≤ n ≤ 1000"
+        },
+        "en": {
+          "title": "Sum of a Sequence",
+          "statement": "A sequence starts at **a**, and every next term is **b** larger than the one before: a, a + b, a + 2b, …\n\nPrint the sum of its first **n** terms.\n\nExample: a = 3, b = 4, n = 5 gives 3 + 7 + 11 + 15 + 19 = 55.\n\nLoops have not been taught yet. Notice: the first term plus the last term equals the second term plus the second-to-last term, and so on.",
+          "input_format": "One line with a, b, n.",
+          "output_format": "One number: the sum of the first n terms.",
+          "constraints": "1 ≤ a ≤ 1000; 0 ≤ b ≤ 100; 1 ≤ n ≤ 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "مجموع متتالية",
+          "statement": "متتالية تبدأ بـ **a** وكل حدّ تالٍ يزيد **b** على الحدّ الذي قبله: a، a + b، a + 2b، …\n\nاطبع مجموع أول **n** حدًّا منها.\n\nمثال: a = 3 و b = 4 و n = 5 تعطي 3 + 7 + 11 + 15 + 19 = 55.\n\nلم ندرس الحلقات بعد. لاحظ: الحدّ الأول مع الحدّ الأخير يساوي الحدّ الثاني مع الحدّ قبل الأخير، وهكذا.",
+          "input_format": "سطر واحد فيه a و b و n.",
+          "output_format": "عدد واحد: مجموع أول n حدًّا.",
+          "constraints": "1 ≤ a ≤ 1000؛ 0 ≤ b ≤ 100؛ 1 ≤ n ≤ 1000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\na, b, n = r.randint(1, 1000), r.randint(0, 100), r.randint(1, 1000)\nif i == 2:\n    a, b, n = 3, 4, 5\nif i == 3:\n    n = 1\nprint(a, b, n)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b, n;\n    cin >> a >> b >> n;\n    cout << n * (2 * a + (n - 1) * b) / 2 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "tukar-dua-digit",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Tukar Dua Digit",
+          "statement": "Diberikan sebuah bilangan dua digit. Tukar kedua digitnya, lalu cetak bilangan yang terbentuk.\n\nContoh: 47 menjadi 74. Hasilnya tetap sebuah bilangan, jadi 90 menjadi 9.\n\nPetunjuk: pada bilangan bulat, `n / 10` membuang digit terakhir dan `n % 10` mengambil digit terakhir.",
+          "input_format": "Satu bilangan bulat dua digit.",
+          "output_format": "Satu bilangan: bilangan itu dengan kedua digitnya ditukar.",
+          "constraints": "10 ≤ n ≤ 99"
+        },
+        "en": {
+          "title": "Swap Two Digits",
+          "statement": "Given a two-digit number, swap its two digits and print the number that results.\n\nExample: 47 becomes 74. The result is still a number, so 90 becomes 9.\n\nHint: on integers, `n / 10` drops the last digit and `n % 10` takes the last digit.",
+          "input_format": "One two-digit integer.",
+          "output_format": "One number: the number with its two digits swapped.",
+          "constraints": "10 ≤ n ≤ 99",
+          "machine": true
+        },
+        "ar": {
+          "title": "تبديل رقمين",
+          "statement": "إذا أُعطيت عددًا من رقمين فبدِّل رقميه واطبع العدد الناتج.\n\nمثال: 47 يصبح 74. الناتج يبقى عددًا، لذلك 90 يصبح 9.\n\nتلميح: مع الأعداد الصحيحة يحذف `n / 10` الرقم الأخير ويأخذ `n % 10` الرقم الأخير.",
+          "input_format": "عدد صحيح واحد من رقمين.",
+          "output_format": "عدد واحد: العدد بعد تبديل رقميه.",
+          "constraints": "10 ≤ n ≤ 99",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 47, 3: 90, 4: 55, 5: 10}.get(i, r.randint(10, 99)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    int puluhan = n / 10;\n    int satuan = n % 10;\n    cout << satuan * 10 + puluhan << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "bagi-kelompok",
+      "difficulty": "sulit",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Bagi Kelompok",
+          "statement": "Sebanyak **n** mahasiswa dibagi ke dalam kelompok yang masing-masing berisi tepat **k** orang. Cetak tiga bilangan:\n\n1. banyak kelompok yang penuh;\n2. banyak mahasiswa yang belum mendapat kelompok;\n3. banyak mahasiswa tambahan yang dibutuhkan supaya tidak ada yang tersisa (0 bila sudah pas).\n\nContoh: 23 mahasiswa dengan kelompok berisi 5 orang: 4 kelompok, 3 tersisa, butuh 2 orang lagi.\n\nPercabangan belum dipelajari; bilangan ketiga bisa dihitung dengan `%` saja.",
+          "input_format": "Satu baris berisi n dan k.",
+          "output_format": "Tiga baris: kelompok penuh, mahasiswa tersisa, tambahan yang dibutuhkan.",
+          "constraints": "1 ≤ n ≤ 1000; 2 ≤ k ≤ 50"
+        },
+        "en": {
+          "title": "Forming Groups",
+          "statement": "**n** students are split into groups of exactly **k** people each. Print three numbers:\n\n1. the number of full groups;\n2. the number of students left without a group;\n3. the number of extra students needed so that nobody is left over (0 if it already fits).\n\nExample: 23 students in groups of 5: 4 groups, 3 left over, 2 more needed.\n\nBranching has not been taught yet; the third number can be computed with `%` alone.",
+          "input_format": "One line with n and k.",
+          "output_format": "Three lines: full groups, students left over, extra students needed.",
+          "constraints": "1 ≤ n ≤ 1000; 2 ≤ k ≤ 50",
+          "machine": true
+        },
+        "ar": {
+          "title": "تقسيم المجموعات",
+          "statement": "يُقسَّم **n** طالبًا إلى مجموعات في كل منها **k** أشخاص بالضبط. اطبع ثلاثة أعداد:\n\n1. عدد المجموعات المكتملة؛\n2. عدد الطلاب الذين بقوا بلا مجموعة؛\n3. عدد الطلاب الإضافيين اللازمين حتى لا يبقى أحد (0 إذا كان العدد مناسبًا أصلًا).\n\nمثال: 23 طالبًا في مجموعات من 5: أربع مجموعات، يبقى 3، ونحتاج إلى 2 آخرين.\n\nلم ندرس التفرّع بعد؛ يمكن حساب العدد الثالث باستخدام `%` وحده.",
+          "input_format": "سطر واحد فيه n و k.",
+          "output_format": "ثلاثة أسطر: المجموعات المكتملة، الطلاب المتبقون، الطلاب الإضافيون اللازمون.",
+          "constraints": "1 ≤ n ≤ 1000؛ 2 ≤ k ≤ 50",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn, k = r.randint(1, 1000), r.randint(2, 50)\nif i == 2:\n    n, k = 23, 5\nif i == 3:\n    n, k = 40, 8\nif i == 4:\n    n, k = 3, 10\nprint(n, k)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n, k;\n    cin >> n >> k;\n    cout << n / k << endl;\n    cout << n % k << endl;\n    cout << (k - n % k) % k << endl;\n    return 0;\n}\n"
+    }
+  ]
+}

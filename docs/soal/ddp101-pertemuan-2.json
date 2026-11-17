@@ -19,8 +19,22 @@
           "output_format": "Baris pertama: a + b. Baris kedua: a − b.",
           "constraints": "1 ≤ a, b ≤ 1000"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Sum and Difference",
+          "statement": "Given two integers **a** and **b**, print their sum, then their difference (**a − b**).\n\nThe difference may be negative.",
+          "input_format": "One line with a and b.",
+          "output_format": "First line: a + b. Second line: a − b.",
+          "constraints": "1 ≤ a, b ≤ 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "المجموع والفرق",
+          "statement": "إذا أُعطيت عددين صحيحين **a** و **b** فاطبع مجموعهما ثم الفرق بينهما (**a − b**).\n\nقد يكون الفرق سالبًا.",
+          "input_format": "سطر واحد فيه a و b.",
+          "output_format": "السطر الأول: a + b. السطر الثاني: a − b.",
+          "constraints": "1 ≤ a, b ≤ 1000",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 1000), r.randint(1, 1000))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    cout << a + b << endl;\n    cout << a - b << endl;\n    return 0;\n}\n"
@@ -41,8 +55,22 @@
           "output_format": "Baris pertama: n × n. Baris kedua: n × n × n.",
           "constraints": "1 ≤ n ≤ 1000"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Square and Cube",
+          "statement": "Given an integer **n**, print **n²**, then **n³**.",
+          "input_format": "One integer n.",
+          "output_format": "First line: n × n. Second line: n × n × n.",
+          "constraints": "1 ≤ n ≤ 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "المربع والمكعب",
+          "statement": "إذا أُعطيت عددًا صحيحًا **n** فاطبع **n²** ثم **n³**.",
+          "input_format": "عدد صحيح واحد n.",
+          "output_format": "السطر الأول: n × n. السطر الثاني: n × n × n.",
+          "constraints": "1 ≤ n ≤ 1000",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(1000 if i == 5 else r.randint(1, 1000))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    cout << n * n << endl;\n    cout << n * n * n << endl;\n    return 0;\n}\n"
@@ -63,8 +91,22 @@
           "output_format": "Baris pertama: permen tiap anak. Baris kedua: sisa permen.",
           "constraints": "1 ≤ a ≤ 10000, 1 ≤ b ≤ 100"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Quotient and Remainder",
+          "statement": "**a** sweets are shared equally among **b** children. Every child gets the same number, as many as possible.\n\nPrint how many sweets each child gets, then how many are left over.\n\nIn C++, `/` on two integers gives the quotient rounded down, and `%` gives the remainder.",
+          "input_format": "One line with a and b.",
+          "output_format": "First line: sweets per child. Second line: sweets left over.",
+          "constraints": "1 ≤ a ≤ 10000, 1 ≤ b ≤ 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "خارج القسمة والباقي",
+          "statement": "تُوزَّع **a** قطعة حلوى بالتساوي على **b** طفلًا. يأخذ كل طفل العدد نفسه وبأكبر قدر ممكن.\n\nاطبع عدد القطع لكل طفل ثم عدد القطع المتبقية.\n\nفي ++C يعطي `/` بين عددين صحيحين خارج القسمة مقرَّبًا إلى الأسفل، ويعطي `%` الباقي.",
+          "input_format": "سطر واحد فيه a و b.",
+          "output_format": "السطر الأول: القطع لكل طفل. السطر الثاني: القطع المتبقية.",
+          "constraints": "1 ≤ a ≤ 10000، 1 ≤ b ≤ 100",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 10000), r.randint(1, 100))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    cout << a / b << endl;\n    cout << a % b << endl;\n    return 0;\n}\n"
@@ -85,8 +127,22 @@
           "output_format": "Satu baris: banyak menit, satu spasi, lalu sisa detik.",
           "constraints": "0 ≤ d ≤ 100000"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Seconds to Minutes",
+          "statement": "A video lasts **d** seconds. Write that length in minutes and seconds.\n\nExample: 135 seconds is 2 minutes 15 seconds.",
+          "input_format": "One integer d.",
+          "output_format": "One line: the number of minutes, one space, then the remaining seconds.",
+          "constraints": "0 ≤ d ≤ 100000",
+          "machine": true
+        },
+        "ar": {
+          "title": "من الثواني إلى الدقائق",
+          "statement": "مدة مقطع فيديو **d** ثانية. اكتب هذه المدة بالدقائق والثواني.\n\nمثال: 135 ثانية هي دقيقتان و 15 ثانية.",
+          "input_format": "عدد صحيح واحد d.",
+          "output_format": "سطر واحد: عدد الدقائق ثم مسافة ثم الثواني المتبقية.",
+          "constraints": "0 ≤ d ≤ 100000",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(59 if i == 4 else r.randint(0, 100000))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int d;\n    cin >> d;\n    cout << d / 60 << \" \" << d % 60 << endl;\n    return 0;\n}\n"
@@ -107,8 +163,22 @@
           "output_format": "Satu bilangan: total harga.",
           "constraints": "500 ≤ h ≤ 50000, 1 ≤ n ≤ 100"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Total Price",
+          "statement": "An item costs **h** rupiah. A customer takes **n** of the same item. Print the amount to pay.",
+          "input_format": "One line with h and n.",
+          "output_format": "One number: the total price.",
+          "constraints": "500 ≤ h ≤ 50000, 1 ≤ n ≤ 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "السعر الإجمالي",
+          "statement": "سلعة سعرها **h** روبية. أخذ مشترٍ **n** قطعة منها. اطبع المبلغ الواجب دفعه.",
+          "input_format": "سطر واحد فيه h و n.",
+          "output_format": "عدد واحد: السعر الإجمالي.",
+          "constraints": "500 ≤ h ≤ 50000، 1 ≤ n ≤ 100",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 100) * 500, r.randint(1, 100))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int harga, banyak;\n    cin >> harga >> banyak;\n    cout << harga * banyak << endl;\n    return 0;\n}\n"
@@ -129,8 +199,22 @@
           "output_format": "Satu bilangan: kode huruf itu.",
           "constraints": "Huruf A–Z atau a–z."
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "The Code of a Letter",
+          "statement": "Inside a computer every letter is stored as a number (its ASCII code). The letter `A` is stored as 65, `B` as 66, and `a` as 97.\n\nRead one letter, then print the number that stores it.\n\nHint: keep the letter in a variable of type `char`, then convert it to `int` before printing.",
+          "input_format": "One letter, upper or lower case.",
+          "output_format": "One number: the code of that letter.",
+          "constraints": "A letter A–Z or a–z.",
+          "machine": true
+        },
+        "ar": {
+          "title": "رمز الحرف",
+          "statement": "داخل الحاسوب يُخزَّن كل حرف كعدد (رمز ASCII). الحرف `A` يُخزَّن 65 و `B` يُخزَّن 66 و `a` يُخزَّن 97.\n\nاقرأ حرفًا واحدًا ثم اطبع العدد الذي يخزّنه.\n\nتلميح: احفظ الحرف في متغير من النوع `char` ثم حوّله إلى `int` قبل الطباعة.",
+          "input_format": "حرف لاتيني واحد، كبير أو صغير.",
+          "output_format": "عدد واحد: رمز ذلك الحرف.",
+          "constraints": "حرف من A–Z أو a–z.",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    char huruf;\n    cin >> huruf;\n    cout << (int) huruf << endl;\n    return 0;\n}\n"
@@ -151,8 +235,22 @@
           "output_format": "Satu bilangan: suhu dalam Fahrenheit.",
           "constraints": "−50 ≤ c ≤ 150"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Celsius to Fahrenheit",
+          "statement": "A temperature of **c** degrees Celsius equals **c × 9 / 5 + 32** degrees Fahrenheit.\n\nRead c (an integer) and print the temperature in Fahrenheit as a real number.\n\nCareful: 37 degrees Celsius is 98.6 degrees Fahrenheit, not 98.",
+          "input_format": "One integer c.",
+          "output_format": "One number: the temperature in Fahrenheit.",
+          "constraints": "−50 ≤ c ≤ 150",
+          "machine": true
+        },
+        "ar": {
+          "title": "من مئوي إلى فهرنهايت",
+          "statement": "درجة حرارة **c** مئوية تساوي **c × 9 / 5 + 32** فهرنهايت.\n\nاقرأ c (عدد صحيح) واطبع الحرارة بالفهرنهايت كعدد عشري.\n\nانتبه: 37 درجة مئوية هي 98.6 فهرنهايت، لا 98.",
+          "input_format": "عدد صحيح واحد c.",
+          "output_format": "عدد واحد: الحرارة بالفهرنهايت.",
+          "constraints": "−50 ≤ c ≤ 150",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(37 if i == 3 else r.randint(-50, 150))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int c;\n    cin >> c;\n    double f = c * 9.0 / 5 + 32;\n    cout << f << endl;\n    return 0;\n}\n"
@@ -173,8 +271,22 @@
           "output_format": "Baris pertama: x dipotong. Baris kedua: x dibulatkan.",
           "constraints": "0 ≤ x < 1000"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Truncate and Round",
+          "statement": "Given a positive real number **x**, print two integers:\n\n1. x **truncated**: its fraction is thrown away (7.98 becomes 7);\n2. x **rounded** to the nearest integer (7.98 becomes 8, and 7.50 becomes 8).\n\nHint: converting a `double` to `int` throws away the fraction. What happens if 0.5 is added to x first?",
+          "input_format": "One real number x with two digits after the decimal point.",
+          "output_format": "First line: x truncated. Second line: x rounded.",
+          "constraints": "0 ≤ x < 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "القطع والتقريب",
+          "statement": "إذا أُعطيت عددًا عشريًا موجبًا **x** فاطبع عددين صحيحين:\n\n1. x **مقطوعًا**: يُحذف جزؤه الكسري (7.98 يصبح 7)؛\n2. x **مقرَّبًا** إلى أقرب عدد صحيح (7.98 يصبح 8، و 7.50 يصبح 8).\n\nتلميح: تحويل `double` إلى `int` يحذف الجزء الكسري. ماذا يحدث لو أُضيف 0.5 إلى x قبل ذلك؟",
+          "input_format": "عدد عشري واحد x برقمين بعد الفاصلة العشرية.",
+          "output_format": "السطر الأول: x مقطوعًا. السطر الثاني: x مقرَّبًا.",
+          "constraints": "0 ≤ x < 1000",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nk = {2: 750, 3: 749, 4: 99950}.get(i, r.randint(0, 99999))\nprint(f\"{k / 100:.2f}\")\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    double x;\n    cin >> x;\n    cout << (int) x << endl;\n    cout << (int) (x + 0.5) << endl;\n    return 0;\n}\n"
@@ -195,8 +307,22 @@
           "output_format": "Satu huruf.",
           "constraints": "Huruf a sampai y (bukan z)."
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "The Next Letter",
+          "statement": "Read one lowercase letter, then print the letter that comes right after it in the alphabet. After `a` comes `b`, after `k` comes `l`.\n\nHint: a `char` can be added to a number. The result is a number, so convert it back to `char` before printing.",
+          "input_format": "One lowercase letter.",
+          "output_format": "One letter.",
+          "constraints": "A letter from a to y (not z).",
+          "machine": true
+        },
+        "ar": {
+          "title": "الحرف التالي",
+          "statement": "اقرأ حرفًا لاتينيًا صغيرًا ثم اطبع الحرف الذي يليه مباشرة في الأبجدية. بعد `a` يأتي `b` وبعد `k` يأتي `l`.\n\nتلميح: يمكن جمع `char` مع عدد. الناتج عدد، فحوّله إلى `char` من جديد قبل الطباعة.",
+          "input_format": "حرف لاتيني صغير واحد.",
+          "output_format": "حرف واحد.",
+          "constraints": "حرف من a إلى y (لا z).",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.choice('abcdefghijklmnopqrstuvwxy'))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    char huruf;\n    cin >> huruf;\n    cout << (char) (huruf + 1) << endl;\n    return 0;\n}\n"
@@ -217,8 +343,22 @@
           "output_format": "Baris pertama: digit terakhir n. Baris kedua: n tanpa digit terakhirnya.",
           "constraints": "10 ≤ n ≤ 999999"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "The Last Digit",
+          "statement": "Given an integer **n**, print its last digit, then the number without its last digit.\n\nExample: for 5827 the last digit is 7 and the rest is 582.",
+          "input_format": "One integer n.",
+          "output_format": "First line: the last digit of n. Second line: n without its last digit.",
+          "constraints": "10 ≤ n ≤ 999999",
+          "machine": true
+        },
+        "ar": {
+          "title": "الرقم الأخير",
+          "statement": "إذا أُعطيت عددًا صحيحًا **n** فاطبع رقمه الأخير ثم العدد بلا رقمه الأخير.\n\nمثال: في 5827 الرقم الأخير 7 والباقي 582.",
+          "input_format": "عدد صحيح واحد n.",
+          "output_format": "السطر الأول: الرقم الأخير من n. السطر الثاني: n بلا رقمه الأخير.",
+          "constraints": "10 ≤ n ≤ 999999",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(10, 999999))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    cout << n % 10 << endl;\n    cout << n / 10 << endl;\n    return 0;\n}\n"
@@ -239,8 +379,22 @@
           "output_format": "Satu baris berisi tiga bilangan dipisah spasi: jam, menit, detik.",
           "constraints": "0 ≤ d < 86400"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Hours, Minutes, Seconds",
+          "statement": "A stopwatch shows **d** seconds. Write it as hours, minutes and seconds.\n\nExample: 3725 seconds is 1 hour 2 minutes 5 seconds.",
+          "input_format": "One integer d.",
+          "output_format": "One line with three numbers separated by spaces: hours, minutes, seconds.",
+          "constraints": "0 ≤ d < 86400",
+          "machine": true
+        },
+        "ar": {
+          "title": "ساعات ودقائق وثوانٍ",
+          "statement": "ساعة إيقاف تُظهر **d** ثانية. اكتبها بالساعات والدقائق والثواني.\n\nمثال: 3725 ثانية هي ساعة واحدة ودقيقتان و 5 ثوانٍ.",
+          "input_format": "عدد صحيح واحد d.",
+          "output_format": "سطر واحد فيه ثلاثة أعداد تفصل بينها مسافات: الساعات ثم الدقائق ثم الثواني.",
+          "constraints": "0 ≤ d < 86400",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 0, 3: 86399, 4: 3600}.get(i, r.randint(0, 86399)))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int d;\n    cin >> d;\n    int jam = d / 3600;\n    int menit = d % 3600 / 60;\n    int detik = d % 60;\n    cout << jam << \" \" << menit << \" \" << detik << endl;\n    return 0;\n}\n"
@@ -261,8 +415,22 @@
           "output_format": "Satu bilangan: rata-rata keduanya.",
           "constraints": "0 ≤ kedua bilangan ≤ 1000"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Average of Two Numbers",
+          "statement": "Given two integers, print their average as a real number.\n\nThe average of 3 and 4 is 3.5, not 3.",
+          "input_format": "One line with two integers.",
+          "output_format": "One number: their average.",
+          "constraints": "0 ≤ both numbers ≤ 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "متوسط عددين",
+          "statement": "إذا أُعطيت عددين صحيحين فاطبع متوسطهما كعدد عشري.\n\nمتوسط 3 و 4 هو 3.5، لا 3.",
+          "input_format": "سطر واحد فيه عددان صحيحان.",
+          "output_format": "عدد واحد: متوسطهما.",
+          "constraints": "0 ≤ العددان ≤ 1000",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(0, 1000), r.randint(0, 1000))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    double rata = (a + b) / 2.0;\n    cout << rata << endl;\n    return 0;\n}\n"
@@ -283,8 +451,22 @@
           "output_format": "Satu bilangan: luas segitiga.",
           "constraints": "1 ≤ a, t ≤ 300"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Area of a Triangle",
+          "statement": "A triangle has base **a** and height **t**, both integers. Its area is **a × t / 2**.\n\nPrint the area. A triangle with base 3 and height 5 has area 7.5.",
+          "input_format": "One line with a and t.",
+          "output_format": "One number: the area of the triangle.",
+          "constraints": "1 ≤ a, t ≤ 300",
+          "machine": true
+        },
+        "ar": {
+          "title": "مساحة المثلث",
+          "statement": "مثلث قاعدته **a** وارتفاعه **t**، وكلاهما عدد صحيح. مساحته **a × t / 2**.\n\nاطبع المساحة. مثلث قاعدته 3 وارتفاعه 5 مساحته 7.5.",
+          "input_format": "سطر واحد فيه a و t.",
+          "output_format": "عدد واحد: مساحة المثلث.",
+          "constraints": "1 ≤ a, t ≤ 300",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 300), r.randint(1, 300))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int alas, tinggi;\n    cin >> alas >> tinggi;\n    double luas = alas * tinggi / 2.0;\n    cout << luas << endl;\n    return 0;\n}\n"
@@ -305,8 +487,22 @@
           "output_format": "Satu bilangan: jumlah digitnya.",
           "constraints": "100 ≤ n ≤ 999"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Sum of Three Digits",
+          "statement": "Given a three-digit number, print the sum of its three digits.\n\nExample: for 472 the answer is 4 + 7 + 2 = 13.\n\nHint: `/` and `%` with 10 and 100 can separate the digits of a number.",
+          "input_format": "One three-digit integer.",
+          "output_format": "One number: the sum of its digits.",
+          "constraints": "100 ≤ n ≤ 999",
+          "machine": true
+        },
+        "ar": {
+          "title": "مجموع ثلاثة أرقام",
+          "statement": "إذا أُعطيت عددًا من ثلاثة أرقام فاطبع مجموع أرقامه الثلاثة.\n\nمثال: في 472 الجواب 4 + 7 + 2 = 13.\n\nتلميح: `/` و `%` مع 10 و 100 يفصلان أرقام العدد.",
+          "input_format": "عدد صحيح واحد من ثلاثة أرقام.",
+          "output_format": "عدد واحد: مجموع أرقامه.",
+          "constraints": "100 ≤ n ≤ 999",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 100, 3: 999}.get(i, r.randint(100, 999)))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    int ratusan = n / 100;\n    int puluhan = n / 10 % 10;\n    int satuan = n % 10;\n    cout << ratusan + puluhan + satuan << endl;\n    return 0;\n}\n"
@@ -327,8 +523,22 @@
           "output_format": "Satu bilangan: bilangan itu dengan digit terbalik.",
           "constraints": "100 ≤ n ≤ 999"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Reverse Three Digits",
+          "statement": "Given a three-digit number, print the number with its digits in reverse order.\n\nExample: 472 becomes 274. The result is still a number, so 120 becomes 21 (not 021).",
+          "input_format": "One three-digit integer.",
+          "output_format": "One number: the number with its digits reversed.",
+          "constraints": "100 ≤ n ≤ 999",
+          "machine": true
+        },
+        "ar": {
+          "title": "عكس ثلاثة أرقام",
+          "statement": "إذا أُعطيت عددًا من ثلاثة أرقام فاطبع العدد بعد عكس ترتيب أرقامه.\n\nمثال: 472 يصبح 274. الناتج يبقى عددًا، لذلك 120 يصبح 21 (لا 021).",
+          "input_format": "عدد صحيح واحد من ثلاثة أرقام.",
+          "output_format": "عدد واحد: العدد بأرقام معكوسة.",
+          "constraints": "100 ≤ n ≤ 999",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 120, 3: 500, 4: 707}.get(i, r.randint(100, 999)))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    int ratusan = n / 100;\n    int puluhan = n / 10 % 10;\n    int satuan = n % 10;\n    cout << satuan * 100 + puluhan * 10 + ratusan << endl;\n    return 0;\n}\n"
@@ -349,8 +559,22 @@
           "output_format": "Tujuh baris: banyak lembar 100000, 50000, 20000, 10000, 5000, 2000, 1000.",
           "constraints": "1000 ≤ n ≤ 5000000"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Banknotes",
+          "statement": "A cash machine pays out **n** rupiah using **as few notes as possible**. The notes available are 100000, 50000, 20000, 10000, 5000, 2000 and 1000.\n\nPrint how many notes of each kind come out, starting with the largest.\n\nExample: 188000 = 1 × 100000 + 1 × 50000 + 1 × 20000 + 1 × 10000 + 1 × 5000 + 1 × 2000 + 1 × 1000.",
+          "input_format": "One integer n, a multiple of 1000.",
+          "output_format": "Seven lines: the number of notes of 100000, 50000, 20000, 10000, 5000, 2000, 1000.",
+          "constraints": "1000 ≤ n ≤ 5000000",
+          "machine": true
+        },
+        "ar": {
+          "title": "الأوراق النقدية",
+          "statement": "يصرف صرّاف آلي مبلغ **n** روبية **بأقل عدد ممكن من الأوراق**. الفئات المتاحة: 100000 و 50000 و 20000 و 10000 و 5000 و 2000 و 1000.\n\nاطبع عدد الأوراق من كل فئة، بدءًا من الأكبر.\n\nمثال: 188000 = 1 × 100000 + 1 × 50000 + 1 × 20000 + 1 × 10000 + 1 × 5000 + 1 × 2000 + 1 × 1000.",
+          "input_format": "عدد صحيح واحد n من مضاعفات 1000.",
+          "output_format": "سبعة أسطر: عدد أوراق 100000 ثم 50000 ثم 20000 ثم 10000 ثم 5000 ثم 2000 ثم 1000.",
+          "constraints": "1000 ≤ n ≤ 5000000",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 188000, 3: 1000, 4: 4999000}.get(i, r.randint(1, 5000) * 1000))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    cout << n / 100000 << endl;\n    n = n % 100000;\n    cout << n / 50000 << endl;\n    n = n % 50000;\n    cout << n / 20000 << endl;\n    n = n % 20000;\n    cout << n / 10000 << endl;\n    n = n % 10000;\n    cout << n / 5000 << endl;\n    n = n % 5000;\n    cout << n / 2000 << endl;\n    n = n % 2000;\n    cout << n / 1000 << endl;\n    return 0;\n}\n"
@@ -371,8 +595,22 @@
           "output_format": "Satu huruf besar.",
           "constraints": "Huruf a sampai z."
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Lowercase to Uppercase",
+          "statement": "Read one lowercase letter and print its uppercase form: `a` becomes `A`, `m` becomes `M`.\n\nHint: the codes of the lowercase letters run in order from `'a'` to `'z'`, and those of the uppercase letters from `'A'` to `'Z'`. The distance of a lowercase letter from `'a'` equals the distance of its uppercase letter from `'A'`.",
+          "input_format": "One lowercase letter.",
+          "output_format": "One uppercase letter.",
+          "constraints": "A letter from a to z.",
+          "machine": true
+        },
+        "ar": {
+          "title": "من حرف صغير إلى حرف كبير",
+          "statement": "اقرأ حرفًا لاتينيًا صغيرًا واطبع صورته الكبيرة: `a` يصبح `A` و `m` يصبح `M`.\n\nتلميح: رموز الحروف الصغيرة متتالية من `'a'` إلى `'z'`، ورموز الحروف الكبيرة متتالية من `'A'` إلى `'Z'`. بُعد الحرف الصغير عن `'a'` يساوي بُعد حرفه الكبير عن `'A'`.",
+          "input_format": "حرف لاتيني صغير واحد.",
+          "output_format": "حرف لاتيني كبير واحد.",
+          "constraints": "حرف من a إلى z.",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 'a', 3: 'z'}.get(i, r.choice('abcdefghijklmnopqrstuvwxyz')))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    char kecil;\n    cin >> kecil;\n    char besar = (char) (kecil - 'a' + 'A');\n    cout << besar << endl;\n    return 0;\n}\n"
@@ -393,8 +631,22 @@
           "output_format": "Satu baris: banyak jam, satu spasi, lalu banyak menit.",
           "constraints": "0 ≤ j1, j2 ≤ 23; 0 ≤ m1, m2 ≤ 59; waktu tiba tidak lebih awal dari waktu berangkat."
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Journey Time",
+          "statement": "A train leaves at **j1:m1** and arrives at **j2:m2** on the same day. Print how long the journey takes, in hours and minutes.\n\nExample: leaving at 07:45 and arriving at 10:20 is a journey of 2 hours 35 minutes.\n\nHint: turn both times into minutes since midnight.",
+          "input_format": "One line with four integers: j1 m1 j2 m2.",
+          "output_format": "One line: the number of hours, one space, then the number of minutes.",
+          "constraints": "0 ≤ j1, j2 ≤ 23; 0 ≤ m1, m2 ≤ 59; the arrival is not earlier than the departure.",
+          "machine": true
+        },
+        "ar": {
+          "title": "مدة الرحلة",
+          "statement": "ينطلق قطار في الساعة **j1:m1** ويصل في الساعة **j2:m2** من اليوم نفسه. اطبع مدة الرحلة بالساعات والدقائق.\n\nمثال: الانطلاق 07:45 والوصول 10:20 يعني رحلة مدتها ساعتان و 35 دقيقة.\n\nتلميح: حوّل الوقتين إلى دقائق منذ منتصف الليل.",
+          "input_format": "سطر واحد فيه أربعة أعداد صحيحة: j1 m1 j2 m2.",
+          "output_format": "سطر واحد: عدد الساعات ثم مسافة ثم عدد الدقائق.",
+          "constraints": "0 ≤ j1, j2 ≤ 23؛ 0 ≤ m1, m2 ≤ 59؛ وقت الوصول ليس قبل وقت الانطلاق.",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\na = r.randint(0, 1439)\nb = r.randint(a, 1439)\nif i == 2:\n    a, b = 7 * 60 + 45, 10 * 60 + 20\nif i == 3:\n    b = a\nprint(a // 60, a % 60, b // 60, b % 60)\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int j1, m1, j2, m2;\n    cin >> j1 >> m1 >> j2 >> m2;\n    int lama = (j2 * 60 + m2) - (j1 * 60 + m1);\n    cout << lama / 60 << \" \" << lama % 60 << endl;\n    return 0;\n}\n"
@@ -415,8 +667,22 @@
           "output_format": "Satu bilangan: persentase jawaban benar.",
           "constraints": "0 ≤ b ≤ t; t salah satu dari 4, 5, 8, 10, 20, 25, 40, 50."
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Percentage Correct",
+          "statement": "In a quiz a student answered **b** of **t** questions correctly. Print the percentage of correct answers as a real number.\n\nExample: 3 correct out of 8 questions is 37.5 percent.\n\nBe careful when dividing two integers.",
+          "input_format": "One line with b and t.",
+          "output_format": "One number: the percentage of correct answers.",
+          "constraints": "0 ≤ b ≤ t; t is one of 4, 5, 8, 10, 20, 25, 40, 50.",
+          "machine": true
+        },
+        "ar": {
+          "title": "نسبة الإجابات الصحيحة",
+          "statement": "في اختبار قصير أجاب طالب إجابة صحيحة عن **b** من **t** سؤالًا. اطبع النسبة المئوية للإجابات الصحيحة كعدد عشري.\n\nمثال: 3 إجابات صحيحة من 8 أسئلة تساوي 37.5 بالمئة.\n\nانتبه عند قسمة عددين صحيحين.",
+          "input_format": "سطر واحد فيه b و t.",
+          "output_format": "عدد واحد: النسبة المئوية للإجابات الصحيحة.",
+          "constraints": "0 ≤ b ≤ t؛ t أحد الأعداد 4، 5، 8، 10، 20، 25، 40، 50.",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nt = r.choice([4, 5, 8, 10, 20, 25, 40, 50])\nb = {2: 0, 3: t}.get(i, r.randint(0, t))\nprint(b, t)\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int benar, total;\n    cin >> benar >> total;\n    double persen = 100.0 * benar / total;\n    cout << persen << endl;\n    return 0;\n}\n"
@@ -437,8 +703,22 @@
           "output_format": "Satu baris berisi empat bilangan dipisah spasi: hari, jam, menit, detik.",
           "constraints": "0 ≤ d ≤ 10¹²"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Days, Hours, Minutes, Seconds",
+          "statement": "A server has been running for **d** seconds. Write that time in days, hours, minutes and seconds.\n\nMind the limit of d: it can be far larger than what fits in an `int`.",
+          "input_format": "One integer d.",
+          "output_format": "One line with four numbers separated by spaces: days, hours, minutes, seconds.",
+          "constraints": "0 ≤ d ≤ 10¹²",
+          "machine": true
+        },
+        "ar": {
+          "title": "أيام وساعات ودقائق وثوانٍ",
+          "statement": "خادم يعمل منذ **d** ثانية. اكتب هذه المدة بالأيام والساعات والدقائق والثواني.\n\nانتبه إلى حدّ d: قد يكون أكبر بكثير مما يتّسع له `int`.",
+          "input_format": "عدد صحيح واحد d.",
+          "output_format": "سطر واحد فيه أربعة أعداد تفصل بينها مسافات: الأيام ثم الساعات ثم الدقائق ثم الثواني.",
+          "constraints": "0 ≤ d ≤ 10¹²",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 0, 3: 10**12, 4: 86399, 5: 2147483648}.get(i, r.randint(0, 10**12)))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    long long d;\n    cin >> d;\n    long long hari = d / 86400;\n    long long jam = d % 86400 / 3600;\n    long long menit = d % 3600 / 60;\n    long long detik = d % 60;\n    cout << hari << \" \" << jam << \" \" << menit << \" \" << detik << endl;\n    return 0;\n}\n"
@@ -459,8 +739,22 @@
           "output_format": "Satu bilangan: a × b.",
           "constraints": "1 ≤ a, b ≤ 10⁹"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "A Large Product",
+          "statement": "Given two integers **a** and **b**, print **a × b**.\n\nBoth numbers fit in an `int`, but their product may not. The product of two `int` values is computed as an `int`, even if it is then stored in a larger variable — so one of them must be converted first.",
+          "input_format": "One line with a and b.",
+          "output_format": "One number: a × b.",
+          "constraints": "1 ≤ a, b ≤ 10⁹",
+          "machine": true
+        },
+        "ar": {
+          "title": "حاصل ضرب كبير",
+          "statement": "إذا أُعطيت عددين صحيحين **a** و **b** فاطبع **a × b**.\n\nكلا العددين يتّسع له `int`، لكن حاصل ضربهما قد لا يتّسع. حاصل ضرب قيمتين من النوع `int` يُحسب كـ `int` حتى لو خُزِّن بعد ذلك في متغير أكبر — لذلك يجب تحويل أحدهما أولًا.",
+          "input_format": "سطر واحد فيه a و b.",
+          "output_format": "عدد واحد: a × b.",
+          "constraints": "1 ≤ a, b ≤ 10⁹",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\na, b = r.randint(1, 10**9), r.randint(1, 10**9)\nif i == 2:\n    a, b = 10**9, 10**9\nif i == 3:\n    a, b = 46341, 46341\nprint(a, b)\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    long long hasil = (long long) a * b;\n    cout << hasil << endl;\n    return 0;\n}\n"
@@ -481,8 +775,22 @@
           "output_format": "Satu huruf besar.",
           "constraints": "Huruf A–Z; 0 ≤ k ≤ 1000"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Shift Cipher",
+          "statement": "A simple cipher shifts an uppercase letter **k** steps along the alphabet. After `Z` it wraps around to `A`.\n\nExample: `A` shifted by 3 becomes `D`; `Y` shifted by 3 becomes `B`; `C` shifted by 26 stays `C`.\n\nRead one uppercase letter and k, then print the shifted letter.\n\nHint: first compute the position of the letter (A = 0, B = 1, …, Z = 25). The `%` operator makes the count return to 0 after 25.",
+          "input_format": "One line with one uppercase letter and an integer k, separated by one space.",
+          "output_format": "One uppercase letter.",
+          "constraints": "A letter A–Z; 0 ≤ k ≤ 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "شيفرة الإزاحة",
+          "statement": "شيفرة بسيطة تُزيح الحرف اللاتيني الكبير **k** خطوة في الأبجدية. بعد `Z` نعود إلى `A`.\n\nمثال: `A` بإزاحة 3 يصبح `D`؛ `Y` بإزاحة 3 يصبح `B`؛ `C` بإزاحة 26 يبقى `C`.\n\nاقرأ حرفًا كبيرًا واحدًا و k ثم اطبع الحرف بعد الإزاحة.\n\nتلميح: احسب أولًا ترتيب الحرف (A = 0، B = 1، …، Z = 25). العامل `%` يعيد العدّ إلى 0 بعد 25.",
+          "input_format": "سطر واحد فيه حرف لاتيني كبير وعدد صحيح k تفصل بينهما مسافة واحدة.",
+          "output_format": "حرف لاتيني كبير واحد.",
+          "constraints": "حرف من A–Z؛ 0 ≤ k ≤ 1000",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nh = r.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')\nk = r.randint(0, 1000)\nif i == 2:\n    h, k = 'Y', 3\nif i == 3:\n    h, k = 'C', 26\nif i == 4:\n    h, k = 'Z', 1\nprint(h, k)\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    char huruf;\n    int k;\n    cin >> huruf >> k;\n    int urutan = (huruf - 'A' + k) % 26;\n    cout << (char) ('A' + urutan) << endl;\n    return 0;\n}\n"
@@ -503,8 +811,22 @@
           "output_format": "Satu baris berisi tiga bilangan dipisah spasi: banyak tengah malam yang terlewati, jam selesai, menit selesai.",
           "constraints": "0 ≤ j ≤ 23; 0 ≤ m ≤ 59; 0 ≤ d ≤ 100000"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Finishing Time",
+          "statement": "A process starts at **j:m** and runs for **d** minutes. It may run past midnight, even for days.\n\nPrint how many midnights pass, then the hour and minute at which the process finishes.\n\nExample: starting at 22:30 and running 200 minutes, it finishes at 01:50 the next day: `1 1 50`.",
+          "input_format": "One line with three integers: j m d.",
+          "output_format": "One line with three numbers separated by spaces: midnights passed, finishing hour, finishing minute.",
+          "constraints": "0 ≤ j ≤ 23; 0 ≤ m ≤ 59; 0 ≤ d ≤ 100000",
+          "machine": true
+        },
+        "ar": {
+          "title": "وقت الانتهاء",
+          "statement": "تبدأ عملية في الساعة **j:m** وتستمر **d** دقيقة. قد تتجاوز منتصف الليل، بل قد تستمر أيامًا.\n\nاطبع عدد مرات تجاوز منتصف الليل، ثم ساعة ودقيقة انتهاء العملية.\n\nمثال: تبدأ 22:30 وتستمر 200 دقيقة فتنتهي 01:50 من اليوم التالي: `1 1 50`.",
+          "input_format": "سطر واحد فيه ثلاثة أعداد صحيحة: j m d.",
+          "output_format": "سطر واحد فيه ثلاثة أعداد تفصل بينها مسافات: مرات تجاوز منتصف الليل، ساعة الانتهاء، دقيقة الانتهاء.",
+          "constraints": "0 ≤ j ≤ 23؛ 0 ≤ m ≤ 59؛ 0 ≤ d ≤ 100000",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nj, m, d = r.randint(0, 23), r.randint(0, 59), r.randint(0, 100000)\nif i == 2:\n    j, m, d = 22, 30, 200\nif i == 3:\n    j, m, d = 23, 59, 1\nif i == 4:\n    d = 0\nprint(j, m, d)\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int j, m, d;\n    cin >> j >> m >> d;\n    int total = j * 60 + m + d;\n    cout << total / 1440 << \" \" << total % 1440 / 60 << \" \" << total % 60 << endl;\n    return 0;\n}\n"
@@ -525,8 +847,22 @@
           "output_format": "Satu bilangan: nilai akhir.",
           "constraints": "0 ≤ setiap nilai ≤ 100"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Final Grade",
+          "statement": "The final grade of a course is computed from three integer marks: assignments (weight 20%), midterm (weight 30%) and final exam (weight 50%).\n\nPrint the final grade as a real number.\n\nExample: assignments 80, midterm 75, final exam 91 give 16 + 22.5 + 45.5 = 84.",
+          "input_format": "One line with three integers: assignments, midterm, final exam.",
+          "output_format": "One number: the final grade.",
+          "constraints": "0 ≤ each mark ≤ 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "الدرجة النهائية",
+          "statement": "تُحسب الدرجة النهائية لمقرر من ثلاث درجات صحيحة: الواجبات (وزنها 20%) والامتحان النصفي (30%) والامتحان النهائي (50%).\n\nاطبع الدرجة النهائية كعدد عشري.\n\nمثال: الواجبات 80 والنصفي 75 والنهائي 91 تعطي 16 + 22.5 + 45.5 = 84.",
+          "input_format": "سطر واحد فيه ثلاثة أعداد صحيحة: الواجبات، النصفي، النهائي.",
+          "output_format": "عدد واحد: الدرجة النهائية.",
+          "constraints": "0 ≤ كل درجة ≤ 100",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nt, u, a = r.randint(0, 100), r.randint(0, 100), r.randint(0, 100)\nif i == 2:\n    t, u, a = 80, 75, 91\nif i == 3:\n    t, u, a = 100, 100, 100\nif i == 4:\n    t, u, a = 1, 0, 0\nprint(t, u, a)\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int tugas, uts, uas;\n    cin >> tugas >> uts >> uas;\n    double akhir = (2 * tugas + 3 * uts + 5 * uas) / 10.0;\n    cout << akhir << endl;\n    return 0;\n}\n"
@@ -547,8 +883,22 @@
           "output_format": "Baris pertama: bilangan yang lebih besar. Baris kedua: yang lebih kecil.",
           "constraints": "−1000000 ≤ a, b ≤ 1000000"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "The Larger and the Smaller",
+          "statement": "Given two integers **a** and **b**, print the larger one, then the smaller one.\n\nBranching has not been taught yet, but this can be solved with arithmetic alone. Notice: the sum of the two numbers plus their distance (**|a − b|**) equals twice the larger number.\n\nThe function `abs` from `<cstdlib>` gives the absolute value of an integer.",
+          "input_format": "One line with a and b.",
+          "output_format": "First line: the larger number. Second line: the smaller one.",
+          "constraints": "−1000000 ≤ a, b ≤ 1000000",
+          "machine": true
+        },
+        "ar": {
+          "title": "الأكبر والأصغر",
+          "statement": "إذا أُعطيت عددين صحيحين **a** و **b** فاطبع الأكبر ثم الأصغر.\n\nلم ندرس التفرّع بعد، لكن المسألة تُحلّ بالحساب وحده. لاحظ: مجموع العددين مضافًا إليه المسافة بينهما (**|a − b|**) يساوي ضعف العدد الأكبر.\n\nالدالة `abs` من `<cstdlib>` تعطي القيمة المطلقة لعدد صحيح.",
+          "input_format": "سطر واحد فيه a و b.",
+          "output_format": "السطر الأول: العدد الأكبر. السطر الثاني: الأصغر.",
+          "constraints": "−1000000 ≤ a, b ≤ 1000000",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\na, b = r.randint(-10**6, 10**6), r.randint(-10**6, 10**6)\nif i == 2:\n    b = a\nif i == 3:\n    a, b = -5, -9\nprint(a, b)\n",
       "reference_solution": "#include <iostream>\n#include <cstdlib>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    int jarak = abs(a - b);\n    cout << (a + b + jarak) / 2 << endl;\n    cout << (a + b - jarak) / 2 << endl;\n    return 0;\n}\n"
@@ -569,8 +919,22 @@
           "output_format": "Satu bilangan lima digit.",
           "constraints": "10000 ≤ n ≤ 99999; n tidak habis dibagi 10."
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Swap the End Digits",
+          "statement": "Given a five-digit number, swap its first digit with its last digit and print the number that results.\n\nExample: 52819 becomes 92815. The three middle digits do not change.",
+          "input_format": "One five-digit integer whose last digit is not 0.",
+          "output_format": "One five-digit number.",
+          "constraints": "10000 ≤ n ≤ 99999; n is not divisible by 10.",
+          "machine": true
+        },
+        "ar": {
+          "title": "تبديل الرقمين الطرفيين",
+          "statement": "إذا أُعطيت عددًا من خمسة أرقام فبدِّل رقمه الأول برقمه الأخير واطبع العدد الناتج.\n\nمثال: 52819 يصبح 92815. الأرقام الثلاثة الوسطى لا تتغير.",
+          "input_format": "عدد صحيح واحد من خمسة أرقام رقمه الأخير ليس 0.",
+          "output_format": "عدد واحد من خمسة أرقام.",
+          "constraints": "10000 ≤ n ≤ 99999؛ n لا يقبل القسمة على 10.",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = r.randint(1000, 9999) * 10 + r.randint(1, 9)\nif i == 2:\n    n = 52819\nif i == 3:\n    n = 10001\nif i == 4:\n    n = 90009\nprint(n)\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    int pertama = n / 10000;\n    int tengah = n / 10 % 1000;\n    int terakhir = n % 10;\n    cout << terakhir * 10000 + tengah * 10 + pertama << endl;\n    return 0;\n}\n"
@@ -591,8 +955,22 @@
           "output_format": "Satu baris: jam, satu spasi, lalu menit.",
           "constraints": "0 ≤ j ≤ 23; 0 ≤ m ≤ 59; 0 ≤ k ≤ 10⁹"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "The Clock Backwards",
+          "statement": "It is now **j:m**. What time was it **k** minutes ago? The value of k can be very large: days, even years ago.\n\nPrint the hour and the minute.\n\nExample: 100 minutes before 01:20 is 23:40 on the previous day.\n\nCareful: in C++, `%` on a negative number gives a negative result or zero, not a positive remainder.",
+          "input_format": "One line with three integers: j m k.",
+          "output_format": "One line: the hour, one space, then the minute.",
+          "constraints": "0 ≤ j ≤ 23; 0 ≤ m ≤ 59; 0 ≤ k ≤ 10⁹",
+          "machine": true
+        },
+        "ar": {
+          "title": "الساعة إلى الوراء",
+          "statement": "الساعة الآن **j:m**. كم كانت الساعة قبل **k** دقيقة؟ قد تكون k كبيرة جدًا: أيامًا، بل سنوات.\n\nاطبع الساعة والدقيقة.\n\nمثال: قبل 100 دقيقة من 01:20 كانت الساعة 23:40 من اليوم السابق.\n\nانتبه: في ++C يعطي `%` مع عدد سالب ناتجًا سالبًا أو صفرًا، لا باقيًا موجبًا.",
+          "input_format": "سطر واحد فيه ثلاثة أعداد صحيحة: j m k.",
+          "output_format": "سطر واحد: الساعة ثم مسافة ثم الدقيقة.",
+          "constraints": "0 ≤ j ≤ 23؛ 0 ≤ m ≤ 59؛ 0 ≤ k ≤ 10⁹",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nj, m, k = r.randint(0, 23), r.randint(0, 59), r.randint(0, 10**9)\nif i == 2:\n    j, m, k = 1, 20, 100\nif i == 3:\n    k = 0\nif i == 4:\n    j, m, k = 0, 0, 1\nif i == 5:\n    k = 1440 * r.randint(1, 1000)\nif i == 6:\n    k = r.randint(0, 3000)\nprint(j, m, k)\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int j, m, k;\n    cin >> j >> m >> k;\n    int sekarang = j * 60 + m;\n    int dulu = (sekarang - k % 1440 + 1440) % 1440;\n    cout << dulu / 60 << \" \" << dulu % 60 << endl;\n    return 0;\n}\n"
@@ -613,8 +991,22 @@
           "output_format": "Satu bilangan: nilai tengah.",
           "constraints": "−1000000 ≤ setiap bilangan ≤ 1000000"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "The Middle Value",
+          "statement": "Given three integers, print their **middle value**: the number that is in the middle when the three are sorted.\n\nExample: the middle value of 7, 2, 5 is 5. The middle value of 4, 9, 4 is 4.\n\nBranching has not been taught yet. Think: the sum of the three numbers minus the largest and the smallest is the middle value. The larger of two numbers can be computed from their sum and their distance (see the problem *The Larger and the Smaller*).",
+          "input_format": "One line with three integers.",
+          "output_format": "One number: the middle value.",
+          "constraints": "−1000000 ≤ each number ≤ 1000000",
+          "machine": true
+        },
+        "ar": {
+          "title": "القيمة الوسطى",
+          "statement": "إذا أُعطيت ثلاثة أعداد صحيحة فاطبع **قيمتها الوسطى**: العدد الذي يقع في الوسط عند ترتيب الثلاثة.\n\nمثال: القيمة الوسطى لـ 7 و 2 و 5 هي 5. القيمة الوسطى لـ 4 و 9 و 4 هي 4.\n\nلم ندرس التفرّع بعد. فكّر: مجموع الأعداد الثلاثة مطروحًا منه الأكبر والأصغر هو القيمة الوسطى. يمكن حساب الأكبر بين عددين من مجموعهما والمسافة بينهما (انظر مسألة *الأكبر والأصغر*).",
+          "input_format": "سطر واحد فيه ثلاثة أعداد صحيحة.",
+          "output_format": "عدد واحد: القيمة الوسطى.",
+          "constraints": "−1000000 ≤ كل عدد ≤ 1000000",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\na, b, c = (r.randint(-10**6, 10**6) for _ in range(3))\nif i == 2:\n    a, b, c = 7, 2, 5\nif i == 3:\n    a, b, c = 4, 9, 4\nif i == 4:\n    b, c = a, a\nif i == 5:\n    a, b, c = -3, -1, -2\nprint(a, b, c)\n",
       "reference_solution": "#include <iostream>\n#include <cstdlib>\nusing namespace std;\n\nint main() {\n    int a, b, c;\n    cin >> a >> b >> c;\n    int besarAB = (a + b + abs(a - b)) / 2;\n    int kecilAB = (a + b - abs(a - b)) / 2;\n    int terbesar = (besarAB + c + abs(besarAB - c)) / 2;\n    int terkecil = (kecilAB + c - abs(kecilAB - c)) / 2;\n    cout << a + b + c - terbesar - terkecil << endl;\n    return 0;\n}\n"
@@ -635,11 +1027,136 @@
           "output_format": "Tiga huruf besar tanpa spasi.",
           "constraints": "0 ≤ n ≤ 17575"
         },
-        "en": {},
-        "ar": {}
+        "en": {
+          "title": "Three-Letter Code",
+          "statement": "A warehouse gives every shelf a code of three uppercase letters, counting like an odometer: shelf 0 has code `AAA`, shelf 1 `AAB`, …, shelf 25 `AAZ`, shelf 26 `ABA`, and so on up to `ZZZ`.\n\nGiven the shelf number **n**, print its code.\n\nExample: shelf 28 has code `ABC`, and shelf 17575 has code `ZZZ`.\n\nHint: this is like separating the digits of a number, but every \"digit\" has 26 possibilities instead of 10.",
+          "input_format": "One integer n.",
+          "output_format": "Three uppercase letters without spaces.",
+          "constraints": "0 ≤ n ≤ 17575",
+          "machine": true
+        },
+        "ar": {
+          "title": "رمز من ثلاثة أحرف",
+          "statement": "يعطي مستودع كل رفّ رمزًا من ثلاثة أحرف لاتينية كبيرة، تتوالى كعدّاد المسافات: الرف 0 رمزه `AAA` والرف 1 رمزه `AAB` … والرف 25 رمزه `AAZ` والرف 26 رمزه `ABA` وهكذا حتى `ZZZ`.\n\nإذا أُعطيت رقم الرف **n** فاطبع رمزه.\n\nمثال: الرف 28 رمزه `ABC` والرف 17575 رمزه `ZZZ`.\n\nتلميح: هذا يشبه فصل أرقام عدد، لكن لكل «رقم» 26 احتمالًا بدل 10.",
+          "input_format": "عدد صحيح واحد n.",
+          "output_format": "ثلاثة أحرف لاتينية كبيرة بلا مسافات.",
+          "constraints": "0 ≤ n ≤ 17575",
+          "machine": true
+        }
       },
       "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 28, 3: 0, 4: 17575, 5: 26, 6: 676}.get(i, r.randint(0, 17575)))\n",
       "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    char pertama = (char) ('A' + n / 676);\n    char kedua = (char) ('A' + n / 26 % 26);\n    char ketiga = (char) ('A' + n % 26);\n    cout << pertama << kedua << ketiga << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "tukar-dua-pecahan",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Tukar Dua Bilangan Pecahan",
+          "statement": "Diberikan dua bilangan pecahan **x** dan **y**. Cetak keduanya dengan urutan terbalik: **y** dulu, lalu **x**.",
+          "input_format": "Satu baris berisi dua bilangan pecahan x dan y, dipisah satu spasi.",
+          "output_format": "Satu baris: y, satu spasi, lalu x.",
+          "constraints": "1 ≤ x, y < 1000, paling banyak dua angka di belakang koma."
+        },
+        "en": {
+          "title": "Swap Two Real Numbers",
+          "statement": "Given two real numbers **x** and **y**, print them in reverse order: **y** first, then **x**.",
+          "input_format": "One line with two real numbers x and y, separated by one space.",
+          "output_format": "One line: y, one space, then x.",
+          "constraints": "1 ≤ x, y < 1000, at most two digits after the decimal point.",
+          "machine": true
+        },
+        "ar": {
+          "title": "تبديل عددين عشريين",
+          "statement": "إذا أُعطيت عددين عشريين **x** و **y** فاطبعهما بترتيب معكوس: **y** أولًا ثم **x**.",
+          "input_format": "سطر واحد فيه عددان عشريان x و y تفصل بينهما مسافة واحدة.",
+          "output_format": "سطر واحد: y ثم مسافة ثم x.",
+          "constraints": "1 ≤ x, y < 1000، برقمين على الأكثر بعد الفاصلة العشرية.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\nx = r.randint(100, 99999) / 100\ny = r.randint(100, 99999) / 100\nprint(f\"{x:.2f} {y:.2f}\")\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    double x, y;\n    cin >> x >> y;\n    cout << y << \" \" << x << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "rata-rata-tiga-nilai",
+      "difficulty": "mudah",
+      "comparison_mode": "float",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Rata-Rata Tiga Nilai",
+          "statement": "Tiga nilai ujian berupa bilangan bulat. Hitung rata-ratanya sebagai bilangan pecahan.\n\nIngat: pembagian dua bilangan bulat di C++ membuang bagian pecahannya.",
+          "input_format": "Satu baris berisi tiga bilangan bulat.",
+          "output_format": "Satu bilangan: rata-rata ketiganya.",
+          "constraints": "0 ≤ setiap nilai ≤ 100"
+        },
+        "en": {
+          "title": "Average of Three Scores",
+          "statement": "Three exam scores are integers. Compute their average as a real number.\n\nRemember: dividing two integers in C++ throws away the fraction.",
+          "input_format": "One line with three integers.",
+          "output_format": "One number: the average of the three.",
+          "constraints": "0 ≤ each score ≤ 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "متوسط ثلاث درجات",
+          "statement": "ثلاث درجات امتحان أعداد صحيحة. احسب متوسطها كعدد عشري.\n\nتذكّر: قسمة عددين صحيحين في ++C تُسقط الجزء الكسري.",
+          "input_format": "سطر واحد فيه ثلاثة أعداد صحيحة.",
+          "output_format": "عدد واحد: متوسط الثلاثة.",
+          "constraints": "0 ≤ كل درجة ≤ 100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\nprint(r.randint(0, 100), r.randint(0, 100), r.randint(0, 100))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b, c;\n    cin >> a >> b >> c;\n    double rata = (double) (a + b + c) / 3;\n    cout << rata << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "luas-keliling-persegi-panjang",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "params": {
+        "batas": 1000
+      },
+      "translations": {
+        "id": {
+          "title": "Luas dan Keliling Persegi Panjang",
+          "statement": "Sebuah persegi panjang punya panjang dan lebar berupa bilangan bulat, masing-masing paling besar {{batas}}.\n\nCetak luasnya, lalu kelilingnya.",
+          "input_format": "Satu baris berisi panjang dan lebar.",
+          "output_format": "Baris pertama: luas. Baris kedua: keliling.",
+          "constraints": "1 ≤ panjang, lebar ≤ {{batas}}"
+        },
+        "en": {
+          "title": "Area and Perimeter of a Rectangle",
+          "statement": "A rectangle has an integer length and width, each at most {{batas}}.\n\nPrint its area, then its perimeter.",
+          "input_format": "One line with the length and the width.",
+          "output_format": "First line: the area. Second line: the perimeter.",
+          "constraints": "1 ≤ length, width ≤ {{batas}}",
+          "machine": true
+        },
+        "ar": {
+          "title": "مساحة المستطيل ومحيطه",
+          "statement": "مستطيل طوله وعرضه عددان صحيحان، كل منهما لا يزيد على {{batas}}.\n\nاطبع مساحته ثم محيطه.",
+          "input_format": "سطر واحد فيه الطول والعرض.",
+          "output_format": "السطر الأول: المساحة. السطر الثاني: المحيط.",
+          "constraints": "1 ≤ الطول، العرض ≤ {{batas}}",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\nprint(r.randint(1, 1000), r.randint(1, 1000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int panjang, lebar;\n    cin >> panjang >> lebar;\n    cout << panjang * lebar << endl;\n    cout << 2 * (panjang + lebar) << endl;\n    return 0;\n}\n"
     }
   ]
 }
