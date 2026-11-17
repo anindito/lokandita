@@ -17,6 +17,18 @@ use Lokandita\Auth\Nonce;
  */
 final class SecurityHeaders implements FilterInterface
 {
+    private static bool $gayaSebaris = false;
+
+    /**
+     * Mengizinkan <style> yang dibuat skrip pada jawaban INI saja. Dipakai hanya
+     * oleh halaman soal LokaKode: editor Monaco membuat elemen <style> untuk tema
+     * dan dekorasinya. Skrip tetap hanya dari host sendiri atau dengan nonce.
+     */
+    public static function izinkanGayaSebaris(): void
+    {
+        self::$gayaSebaris = true;
+    }
+
     public function before(RequestInterface $request, $arguments = null)
     {
         return null;
@@ -38,7 +50,7 @@ final class SecurityHeaders implements FilterInterface
         return implode('; ', [
             "default-src 'self'",
             "script-src 'self' 'nonce-" . Nonce::value() . "'",
-            "style-src 'self'",
+            "style-src 'self'" . (self::$gayaSebaris ? " 'unsafe-inline'" : ''),
             "img-src 'self' data:",
             "font-src 'self'",
             "connect-src 'self'",

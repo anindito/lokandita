@@ -137,13 +137,16 @@ final class EksekusiTest extends KodeCase
         $this->assertSame("7\n", $this->tunggu($this->sebagai($mhs), $id)['result']['stdout']);
     }
 
-    public function testJenisYangBelumDidukungDijawabFailedBukanDiam(): void
+    public function testSubmitUntukInstansYangBukanMilikPembuatnyaDijawabFailedBukanDiam(): void
     {
+        // Jalur Submit yang lengkap ada di tests/Latihan/KirimTest.php. Di sini: worker sendiri
+        // menolak instans yang tidak ada atau bukan milik pembuat pekerjaan (KONTRAK.md §6).
         $mhs  = $this->user('mahasiswa', 'Mahasiswa Rani');
         $id   = Antrean::kirim('SUBMIT', ['language' => 'c', 'source' => self::PROGRAM, 'instance_id' => 1, 'submission_id' => 1], $mhs['id']);
         $data = $this->tunggu($this->sebagai($mhs), $id);
         $this->assertSame('FAILED', $data['status']);
-        $this->assertSame('unsupported_kind', $data['result']['error']);
+        $this->assertSame('invalid_payload', $data['result']['error']);
+        $this->assertArrayNotHasKey('submission', $data);
     }
 
     public function testKirimMenolakJenisPrioritasDanTransaksiTerbuka(): void

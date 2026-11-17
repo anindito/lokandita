@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Policy;
 
-use Lokandita\Auth\Testing\Http;
 use Tests\Support\KodeCase;
 
 /**
@@ -13,14 +12,6 @@ use Tests\Support\KodeCase;
  */
 final class LingkupKelasTest extends KodeCase
 {
-    /**
-     * Isi halaman tanpa bagian yang berubah setiap detik.
-     */
-    private function inti(Http $r): string
-    {
-        return (string) preg_replace('/data-sesi-sisa="\d+"/', '', $r->body);
-    }
-
     public function testPengajarTidakBisaMembukaKelasPengajarLainLewatUrl(): void
     {
         $d    = $this->dunia();
@@ -47,11 +38,22 @@ final class LingkupKelasTest extends KodeCase
         $d    = $this->dunia();
         $http = $this->sebagai($d['pengajarA']);
 
-        $terlarang = $http->get('/kelas/' . $d['kelasXB']);
-        $tidakAda  = $http->get('/kelas/99999999');
-        $this->assertSame(404, $tidakAda->status);
-        // Nomor di URL tidak bisa dipakai menebak kelas mana yang ada.
-        $this->assertSame($this->inti($tidakAda), $this->inti($terlarang));
+        // Http mengembalikan dirinya sendiri, jadi isi jawaban pertama disalin dulu. (Sampai tahap 9a
+        // tes ini membandingkan satu obyek dengan dirinya sendiri dan karena itu tidak membuktikan apa-apa.)
+        $jalurTerlarang = '/kelas/' . $d['kelasXB'];
+        $r              = $http->get($jalurTerlarang);
+        $this->assertSame(404, $r->status);
+        $terlarang = self::inti($r->body, $jalurTerlarang);
+
+        $r = $http->get('/kelas/99999999');
+        $this->assertSame(404, $r->status);
+        $tidakAda = self::inti($r->body, '/kelas/99999999');
+
+        // Nomor di URL tidak bisa dipakai menebak kelas mana yang ada: selain token CSRF dan
+        // jalur yang diminta sendiri, kedua jawaban sama persis.
+        $this->assertGreaterThan(500, strlen($terlarang));
+        $this->assertSame($tidakAda, $terlarang);
+        $this->assertStringNotContainsString((string) $d['kelasXB'] . '"', str_replace('JALUR', '', $terlarang));
     }
 
     public function testBerandaPengajarHanyaMemuatKelasnyaSendiri(): void

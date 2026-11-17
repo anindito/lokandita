@@ -25,6 +25,21 @@ $routes->group('', ['filter' => 'masuk'], static function (RouteCollection $rout
     $routes->get('api/executions/(:segment)', 'Eksekusi::lihat/$1');
 });
 
+// Mahasiswa saja (SPEC.md §11): ruang latihan. Lingkupnya — pertemuan kelasnya sendiri,
+// kiriman dan drafnya sendiri — diperiksa App\Libraries\Ruang di dalam kueri.
+$routes->group('', ['filter' => 'masuk:mahasiswa'], static function (RouteCollection $routes): void {
+    $routes->get('latihan/(:num)', 'RuangLatihan::pertemuan/$1');
+    $routes->get('latihan/soal/(:num)', 'RuangLatihan::soal/$1');
+    $routes->get('api/soal/(:num)/keadaan', 'RuangLatihan::keadaan/$1');
+    $routes->post('api/soal/(:num)/draf', 'RuangLatihan::draf/$1');
+    $routes->post('api/soal/(:num)/jalankan', 'RuangLatihan::jalankan/$1');
+    $routes->post('api/soal/(:num)/kirim', 'RuangLatihan::kirim/$1');
+    $routes->get('api/soal/(:num)/riwayat', 'RuangLatihan::riwayat/$1');
+    $routes->get('api/soal/(:num)/riwayat/(:num)', 'RuangLatihan::kiriman/$1/$2');
+    $routes->post('api/integritas', 'RuangLatihan::integritas');
+    $routes->post('api/panel', 'RuangLatihan::panel');
+});
+
 // Staf (superadmin dan dosen). Peran global diperiksa filter; lingkupnya
 // (mata kuliah dan kelas yang mana) diperiksa App\Policy\Akses di dalam kueri.
 $routes->group('', ['filter' => 'masuk:superadmin,dosen'], static function (RouteCollection $routes): void {

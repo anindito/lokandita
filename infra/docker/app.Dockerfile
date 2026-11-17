@@ -29,6 +29,22 @@ RUN mkdir /keluar \
  && grep -q 'kartu' /keluar/lokandita.css \
  && ! grep -q -e '@apply' -e '@source' -e '@import' /keluar/lokandita.css
 
+# Monaco editor (SPEC.md §2, §11) untuk halaman soal LokaKode: paket resmi dari
+# registry npm, versinya dipatok dan sha256-nya diperiksa; hanya build "min"
+# (AMD) yang diambil. Tidak ada Node, tidak ada CDN. Aplikasi lain mendapat
+# direktori kosong. Menaikkan versi: ganti versi DAN sha256 (hitung dari berkas
+# .tgz; sha1-nya harus sama dengan "shasum" di registry.npmjs.org/monaco-editor/<versi>).
+FROM php:8.3.36-apache AS monaco
+ARG APP
+ADD --checksum=sha256:c280cdcf0b0c13d1a2bf01af958d4387ed06d7f6c918401d00c4adcae1bc72b6 \
+    https://registry.npmjs.org/monaco-editor/-/monaco-editor-0.52.2.tgz /tmp/monaco.tgz
+RUN mkdir -p /keluar/monaco \
+ && if [ "$APP" = "lokakode" ]; then \
+        tar -xzf /tmp/monaco.tgz -C /tmp package/min/vs package/LICENSE package/ThirdPartyNotices.txt \
+     && mv /tmp/package/min/vs /tmp/package/LICENSE /tmp/package/ThirdPartyNotices.txt /keluar/monaco/ \
+     && test -s /keluar/monaco/vs/loader.js && test -s /keluar/monaco/vs/editor/editor.main.js; \
+    fi
+
 FROM php:8.3.36-apache
 # upload_max_filesize: unggahan soal JSON sampai 8 MB (SPEC.md §8.3); bawaan PHP hanya 2 MB.
 RUN apt-get update \
@@ -51,6 +67,7 @@ COPY --from=vendor /srv/lokandita/apps/${APP}/vendor /srv/lokandita/apps/${APP}/
 # Aset bersama (CSS, JS) disajikan dari host aplikasi itu sendiri: tidak ada CDN.
 COPY packages/lokandita-auth/aset /srv/lokandita/apps/${APP}/public/aset
 COPY --from=gaya /keluar/lokandita.css /srv/lokandita/apps/${APP}/public/aset/lokandita.css
+COPY --from=monaco /keluar/monaco /srv/lokandita/apps/${APP}/public/monaco
 COPY infra/docker/mulai.sh /usr/local/bin/mulai.sh
 RUN ln -s /srv/lokandita/apps/${APP} /srv/app \
  && cd /srv/app \

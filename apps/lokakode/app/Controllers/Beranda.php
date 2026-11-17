@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Libraries\Penilaian;
+use App\Libraries\Ruang;
 use CodeIgniter\HTTP\ResponseInterface;
 use Lokandita\Auth\UserDirectory;
 
@@ -23,9 +25,12 @@ final class Beranda extends BaseController
         $akademik = $this->akademik();
 
         if (! $this->akses()->staf()) {
+            Penilaian::selesaikan($this->akses()->identitas()->userId);
+
             return $this->halaman('beranda_mahasiswa', [
-                'judul' => lang('Lokandita.beranda'),
-                'kelas' => $akademik->kelasSaya(),
+                'judul'     => lang('Lokandita.beranda'),
+                'kelas'     => $akademik->kelasSaya(),
+                'pertemuan' => (new Ruang($this->akses()))->daftarPertemuan(),
             ]);
         }
 

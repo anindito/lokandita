@@ -41,6 +41,7 @@ final class MatriksAksesTest extends KodeCase
         $staf  = ['mhsA' => 403] + $semua;
         $kelolaXA = ['superadmin' => 'ok', 'pengampuX' => 'ok', 'pengampuY' => 404, 'pengajarA' => 403, 'pengajarB' => 404, 'mhsA' => 403];
         $lihatXA  = ['pengampuY' => 404, 'pengajarB' => 404] + $staf;
+        $mhs      = ['mhsA' => 'ok'] + array_fill_keys(self::PELAKU, 403);
         // Superadmin saja: semua yang lain 403, apa pun lingkupnya.
         $admin = ['superadmin' => 'ok'] + array_fill_keys(self::PELAKU, 403);
 
@@ -122,9 +123,40 @@ final class MatriksAksesTest extends KodeCase
             // juga bagi pengampu mata kuliah tujuannya (yang hanya melihat suntingannya sendiri).
             'GET impor/([^/]+)' => ['/impor/' . $d['imporWeb'], ['superadmin' => 'ok', 'mhsA' => 403] + array_fill_keys(self::PELAKU, 404)],
 
+            // Ruang latihan: hanya peran mahasiswa; staf ditolak filter (403). Bahwa mahasiswa LAIN
+            // tidak bisa membuka soal, draf atau kiriman mahasiswa A diuji di tests/Latihan/RuangTest.php.
+            'GET latihan/{n}'                => ['/latihan/' . $d['pertemuanX2'], $mhs],
+            'GET latihan/soal/{n}'           => ['/latihan/soal/' . $d['mpA'], $mhs],
+            'GET api/soal/{n}/keadaan'       => ['/api/soal/' . $d['mpA'] . '/keadaan', $mhs],
+            'POST api/soal/{n}/draf'         => ['/api/soal/' . $d['mpA'] . '/draf', $mhs],
+            'POST api/soal/{n}/jalankan'     => ['/api/soal/' . $d['mpA'] . '/jalankan', $mhs],
+            'POST api/soal/{n}/kirim'        => ['/api/soal/' . $d['mpA'] . '/kirim', $mhs],
+            'GET api/soal/{n}/riwayat'       => ['/api/soal/' . $d['mpA'] . '/riwayat', $mhs],
+            'GET api/soal/{n}/riwayat/{n}'   => ['/api/soal/' . $d['mpA'] . '/riwayat/' . $d['kirimanA'], $mhs],
+            'POST api/integritas'            => ['/api/integritas', $mhs],
+            'POST api/panel'                 => ['/api/panel', $mhs],
+
             // Gerbang tahap 6: pengajar B tidak bisa membuka kelas XA milik pengajar A.
             'GET kelas/{n}' => ['/kelas/' . $d['kelasXA'], ['pengampuY' => 404, 'pengajarB' => 404] + $staf],
         ];
+    }
+
+    /**
+     * Dunia uji ditambah latihan: pertemuan X2 terbit dan terbuka untuk kelas XA, dengan satu soal
+     * yang instans dan satu kirimannya milik mahasiswa A.
+     *
+     * @return array<string, mixed>
+     */
+    private function duniaLatihan(): array
+    {
+        $d    = $this->dunia();
+        $soal = $this->soalSiap($d['pertemuanX2'], 'latihan-a');
+        $this->terbit($d['pertemuanX2']);
+        $this->jendela($d['pertemuanX2'], $d['kelasXA']);
+        $d['mpA']      = $soal['mp'];
+        $d['kirimanA'] = $this->kirimanDinilai($d['mhsA'], $soal, $this->instans($d['mhsA'], $soal), 7);
+
+        return $d;
     }
 
     /**
@@ -146,14 +178,14 @@ final class MatriksAksesTest extends KodeCase
 
     public function testSetiapRuteTerdaftarAdaDiMatriks(): void
     {
-        $diuji = array_merge(self::PAKET, self::PUBLIK, array_keys($this->matriks($this->dunia())));
+        $diuji = array_merge(self::PAKET, self::PUBLIK, array_keys($this->matriks($this->duniaLatihan())));
         sort($diuji);
         $this->assertSame($diuji, $this->ruteTerdaftar(), 'Rute di Config/Routes.php dan matriks hak akses tidak sama.');
     }
 
     public function testSetiapRuteMenolakYangTidakBerhak(): void
     {
-        $d    = $this->dunia();
+        $d    = $this->duniaLatihan();
         $http = [];
         $csrf = [];
         foreach (self::PELAKU as $p) {
@@ -181,7 +213,7 @@ final class MatriksAksesTest extends KodeCase
      */
     public function testPenolakanTidakMengubahData(): void
     {
-        $d      = $this->dunia();
+        $d      = $this->duniaLatihan();
         $calon  = $this->user('mahasiswa', 'Calon Mahasiswa');
         $potret = fn () => [
             $this->db->query('SELECT * FROM classes ORDER BY id')->fetch_all(MYSQLI_ASSOC),
@@ -192,6 +224,11 @@ final class MatriksAksesTest extends KodeCase
             $this->db->query('SELECT id, course_id, number, title, language, enabled, target_points, min_mudah, starter_template, compiler_flags, published_at FROM meetings ORDER BY id')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT * FROM meeting_class_windows ORDER BY id')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT id FROM problem_instances ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT id, status, score FROM submissions ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT * FROM drafts')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT * FROM integrity_events')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT * FROM ui_prefs')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT * FROM problem_scores')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT * FROM meeting_concepts ORDER BY meeting_id, concept_code')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT * FROM course_base_concepts ORDER BY course_id, concept_code')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT id, status, translations, review_note FROM problem_versions ORDER BY id')->fetch_all(MYSQLI_ASSOC),
@@ -225,6 +262,11 @@ final class MatriksAksesTest extends KodeCase
                 'starter_template' => 'DIBAJAK', 'compiler_flags' => '-Wall', 'autocomplete' => '1'],
             'POST kelas/{n}/pertemuan/{n}'         => ['open_at' => '2026-11-20T08:00', 'close_at' => '2026-11-20T10:00', 'post_close_visibility' => 'review_only'],
             'POST kelas/{n}/pertemuan/{n}/status'  => ['override' => 'open'],
+            'POST api/soal/{n}/draf'     => ['source' => 'int main(){return 1;}'],
+            'POST api/soal/{n}/jalankan' => ['source' => 'int main(){return 1;}'],
+            'POST api/soal/{n}/kirim'    => ['source' => 'int main(){return 1;}'],
+            'POST api/integritas'        => ['mp' => (string) $d['mpA'], 'jalur' => 'paste'],
+            'POST api/panel'             => ['kiri' => '30', 'atas' => '50'],
             'POST soal/{n}/setujui'    => ['versi_id' => (string) $d['versiX']],
             'POST soal/{n}/tolak'      => ['versi_id' => (string) $d['versiX'], 'catatan' => 'Dibajak'],
             'POST soal/{n}/terjemahan' => ['versi_id' => (string) $d['versiX'], 'bahasa' => 'en'],
@@ -265,7 +307,7 @@ final class MatriksAksesTest extends KodeCase
 
     public function testTanpaSesiSemuaRuteDitolak(): void
     {
-        $d = $this->dunia();
+        $d = $this->duniaLatihan();
         foreach ($this->matriks($d) as $pola => [$jalur]) {
             if (str_starts_with($pola, 'GET ')) {
                 $r = $this->tamu()->get($jalur);

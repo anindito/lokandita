@@ -72,10 +72,13 @@ final class JendelaTest extends KodeCase
 
         // Kelas XB milik pengajar B: dijawab persis seperti kelas yang tidak ada.
         $xb    = '/kelas/' . $d['kelasXB'] . '/pertemuan/' . $d['pertemuanX1'];
-        $tiada = $http->get('/kelas/999999/pertemuan/' . $d['pertemuanX1']);
-        $r     = $http->get($xb);
+        // Http mengembalikan dirinya sendiri: isi jawaban pertama disalin dulu sebelum permintaan berikutnya.
+        $jalurTiada = '/kelas/999999/pertemuan/' . $d['pertemuanX1'];
+        $tiada      = self::inti($http->get($jalurTiada)->body, $jalurTiada);
+        $r          = $http->get($xb);
         $this->assertSame(404, $r->status);
-        $this->assertSame($tiada->body, $r->body);
+        $this->assertGreaterThan(500, strlen($tiada));
+        $this->assertSame($tiada, self::inti($r->body, $xb));
         $this->assertSame(404, $http->get('/kelas/' . $d['kelasXB'] . '/pertemuan')->status);
         $this->assertSame(404, $http->post($xb, $isi)->status);
         $this->assertSame(404, $http->post($xb . '/status', ['csrf' => $csrf, 'override' => 'open'])->status);

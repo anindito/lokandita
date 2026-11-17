@@ -111,6 +111,24 @@ final class Akses
         return $this->kelolaMatkul();
     }
 
+    public function mahasiswa(): bool
+    {
+        return $this->identitas->globalRole === 'mahasiswa';
+    }
+
+    /**
+     * Baris milik pengguna ini sendiri di tabel beralias $alias (kiriman, draf,
+     * instans, nilai): `<alias>.user_id = <pengguna>`.
+     */
+    public function milikSendiri(string $alias): string
+    {
+        if (preg_match('/^[a-z]{1,3}$/', $alias) !== 1) {
+            throw new \InvalidArgumentException('alias tabel tidak sah');
+        }
+
+        return "{$alias}.user_id = {$this->u}";
+    }
+
     /**
      * Pendaftaran milik pengguna ini sendiri (halaman mahasiswa). Alias `e` = enrollments.
      */

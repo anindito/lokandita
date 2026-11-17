@@ -3,8 +3,9 @@
  * Tata letak bersama ketiga aplikasi.
  *
  * Variabel: $judul (string), $namaAplikasi (string, opsional), $pesan (list
- * of ['jenis' => 'galat'|'sukses', 'teks' => string], opsional).
- * Bagian: 'isi'.
+ * of ['jenis' => 'galat'|'sukses', 'teks' => string], opsional), $kelasBadan
+ * (string, opsional: kelas CSS pada <body>, misalnya untuk halaman selebar layar).
+ * Bagian: 'isi'; 'kepala' (opsional: tag tambahan di <head>, misalnya skrip halaman itu).
  */
 $locale    = service('request')->getLocale();
 $identitas = \Lokandita\Auth\Current::identity();
@@ -21,8 +22,9 @@ $versi     = substr((string) getenv('LOKANDITA_COMMIT'), 0, 12);
     <link rel="icon" href="/favicon.ico">
     <link rel="stylesheet" href="/aset/lokandita.css?v=<?= esc($versi) ?>">
     <script src="/aset/lokandita.js?v=<?= esc($versi) ?>" defer></script>
+    <?= $this->renderSection('kepala') ?>
 </head>
-<body<?php if ($identitas !== null): ?> data-sesi-sisa="<?= $identitas->detikTersisa() ?>" data-sesi-idle="<?= $identitas->idleLogout ? '1' : '0' ?>" data-csrf="<?= esc(csrf_hash()) ?>"<?php endif ?>>
+<body<?php if (($kelasBadan ?? '') !== ''): ?> class="<?= esc($kelasBadan) ?>"<?php endif ?><?php if ($identitas !== null): ?> data-sesi-sisa="<?= $identitas->detikTersisa() ?>" data-sesi-idle="<?= $identitas->idleLogout ? '1' : '0' ?>" data-csrf="<?= esc(csrf_hash()) ?>"<?php endif ?>>
 <a class="lewati" href="#isi"><?= lang('Lokandita.lewati') ?></a>
 <header class="kepala">
     <a class="merek" href="/">

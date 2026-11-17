@@ -197,4 +197,103 @@
   legend { font-weight: 600; padding: 0 .35rem; }
   .centang { display: flex; gap: .5rem; align-items: center; font-weight: 400; margin: .5rem 0 0; }
   .centang input { width: auto; }
+
+  /* ---- LokaKode: ruang latihan mahasiswa (SPEC.md §11) ---- */
+  .tombol-kecil { padding: .3rem .65rem; font-size: .85rem; }
+  .mode-kerja, .kartu-status-selesai, .verdict-ac, .verdict-ok { border-color: var(--hijau); color: var(--hijau); }
+  .mode-tunggu, .kartu-status-dicoba, .kartu-status-dinilai, .verdict-concept_not_met { border-color: var(--emas); color: var(--emas); }
+  .mode-nilai, .verdict-wa, .verdict-ce, .verdict-re, .verdict-tle, .verdict-mle, .verdict-ole, .verdict-failed { border-color: var(--bahaya); color: var(--bahaya); }
+  /* Lencana tingkat di kartu dan halaman soal: latar berwarna, supaya lima tingkat terbedakan sekilas. */
+  .lencana-tingkat { border-width: 2px; font-weight: 700; }
+
+  .ringkasan-nilai { display: flex; flex-wrap: wrap; gap: 1rem 1.5rem; align-items: center; }
+  .ringkasan-angka { display: flex; flex-direction: column; line-height: 1.2; }
+  .angka-besar { font-size: 2rem; }
+  .ringkasan-rinci { flex: 1 1 16rem; }
+  .ringkasan-rinci progress { width: 100%; height: .8rem; }
+  .ringkasan-butir { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; margin: .35rem 0 0; padding: 0; list-style: none; font-size: .9rem; }
+  .sisa-waktu { margin-bottom: 0; }
+
+  .kartu-soal-daftar { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); margin: 0; padding: 0; list-style: none; }
+  .kartu-soal { background: var(--kartu); border: 1px solid var(--garis); border-inline-start: 4px solid var(--garis); border-radius: .6rem; padding: .75rem .9rem; }
+  .kartu-soal p { margin: .4rem 0 0; font-size: .875rem; display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; }
+  .kartu-soal a { display: flex; gap: .6rem; align-items: baseline; font-weight: 600; text-decoration: none; color: var(--teks); }
+  .kartu-soal a:hover .kartu-soal-judul, .kartu-soal a:focus-visible .kartu-soal-judul { text-decoration: underline; }
+  .kartu-soal-nomor { flex: none; min-width: 1.75rem; color: var(--teks-redup); font-variant-numeric: tabular-nums; }
+  .status-kartu-selesai { border-inline-start-color: var(--hijau); }
+  .status-kartu-dicoba, .status-kartu-dinilai { border-inline-start-color: var(--emas); }
+
+  /* Halaman soal: tiga panel selebar layar. Editor, keluaran dan log selalu kiri-ke-kanan. */
+  .halaman-soal .isi { max-width: none; padding: .5rem .75rem; display: flex; flex-direction: column; min-height: 0; }
+  .halaman-soal .kaki { display: none; }
+  .hanya-cetak { display: none; }
+  .soal-tab-sempit { display: none; }
+  .soal-tata { --kiri: 40%; --atas: 60%; display: flex; flex: 1; height: calc(100vh - 5.5rem); min-height: 26rem; border: 1px solid var(--garis); border-radius: .6rem; background: var(--kartu); overflow: hidden; }
+  .panel { min-width: 0; min-height: 0; }
+  .panel-soal { flex: 0 0 var(--kiri); overflow: auto; padding: .75rem 1rem; }
+  .soal-kanan { flex: 1 1 0; display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .panel-editor { flex: 0 0 var(--atas); display: flex; flex-direction: column; }
+  .panel-hasil { flex: 1 1 0; display: flex; flex-direction: column; overflow: hidden; }
+  .panel-kepala { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; padding: .35rem .6rem; }
+  .panel-editor .panel-kepala, .tab-baris { border-bottom: 1px solid var(--garis); }
+  .panel-soal .panel-kepala { padding: 0 0 .5rem; }
+  .baris-aksi { display: flex; gap: .4rem; margin-inline-start: auto; }
+  .status-draf { font-size: .8rem; }
+  .pilih-bahasa { display: inline-flex; gap: .25rem; margin-inline-start: auto; }
+  .pilih-bahasa button { font: inherit; font-size: .8rem; background: none; color: var(--teks); border: 1px solid var(--garis); border-radius: .4rem; cursor: pointer; }
+  .pilih-bahasa button[aria-pressed=true] { background: var(--utama); color: var(--utama-teks); border-color: var(--utama); }
+  .skor-soal { margin: 0 0 .5rem; font-weight: 600; }
+  .panel-soal .ringkasan-nilai { padding: .5rem .75rem; border: 1px solid var(--garis); border-radius: .5rem; margin-bottom: .75rem; }
+  .panel-soal .angka-besar { font-size: 1.4rem; }
+
+  .pembagi { flex: none; background: var(--garis); touch-action: none; }
+  .pembagi:hover, .pembagi:focus-visible { background: var(--utama); }
+  .pembagi-tegak { width: 6px; cursor: col-resize; }
+  .pembagi-datar { height: 6px; cursor: row-resize; }
+
+  .editor-wadah { position: relative; flex: 1 1 0; min-height: 0; direction: ltr; text-align: left; }
+  .editor-monaco { position: absolute; inset: 0; }
+  textarea.editor-cadangan { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; border: 0; border-radius: 0; resize: none; padding: .5rem .75rem; }
+
+  .tab-baris { display: flex; gap: .25rem; padding: .25rem .5rem 0; overflow-x: auto; flex: none; }
+  .tab-baris [role=tab], .soal-tab-sempit [role=tab] { font: inherit; font-size: .9rem; padding: .35rem .75rem; background: none; color: var(--teks-redup); border: 0; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; }
+  .tab-baris [role=tab][aria-selected=true], .soal-tab-sempit [role=tab][aria-selected=true] { color: var(--teks); font-weight: 700; border-bottom-color: var(--utama); }
+  .tab-isi { flex: 1 1 0; overflow: auto; padding: .6rem .9rem; }
+  .tab-isi h3, .tab-isi h4 { margin: .6rem 0 .25rem; font-size: 1rem; }
+  .status-jalan { margin: 0; font-weight: 600; }
+  .status-jalan:empty { display: none; }
+  .hasil-blok { margin-top: .5rem; }
+  .hasil-blok p { margin: 0; font-size: .85rem; }
+  .hasil-nilai { font-size: 1.1rem; font-weight: 700; margin: .25rem 0; }
+  .tes-daftar { display: grid; gap: .25rem .75rem; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr)); margin: .35rem 0; padding: 0; list-style: none; font-size: .9rem; }
+  .contoh-pasang { display: grid; gap: 0 .75rem; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); }
+  .contoh-pasang p { margin: .35rem 0 0; font-size: .85rem; }
+  .tes-contoh + .tes-contoh { border-top: 1px solid var(--garis); margin-top: .75rem; }
+  .panel-hasil pre.kode-sumber, .panel-soal pre.kode-sumber { max-height: 14rem; white-space: pre; }
+  .toast-soal { top: auto; bottom: 1rem; }
+
+  /* Soal tidak bisa dipilih atau disalin, dan ditutupi tanda air nomor induk, nama dan waktu. */
+  .tanpa-salin { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+  .pernyataan-wadah { position: relative; overflow: hidden; }
+  .pernyataan h1 { font-size: 1.35rem; margin: .25rem 0 .5rem; }
+  .pernyataan h2, .pernyataan-wadah > h2 { font-size: 1.05rem; margin: 1rem 0 .25rem; }
+  .tanda-air { position: absolute; inset: -30% -20%; z-index: 2; display: flex; flex-wrap: wrap; align-content: space-around; justify-content: space-around; gap: 3.5rem 2rem;
+    transform: rotate(-24deg); pointer-events: none; opacity: .14; font-size: .8rem; font-weight: 600; white-space: nowrap; direction: ltr; -webkit-user-select: none; user-select: none; }
+
+  /* Di bawah 1024 px: ketiga panel menjadi tab bertumpuk. */
+  @media (max-width: 1023.98px) {
+    .soal-tab-sempit { display: flex; gap: .25rem; border-bottom: 1px solid var(--garis); margin-bottom: .35rem; }
+    .soal-tata { flex-direction: column; height: calc(100vh - 8.5rem); }
+    .pembagi { display: none; }
+    .panel-soal, .panel-editor, .panel-hasil { flex: 1 1 0; }
+    .soal-tata[data-panel-aktif=soal] .soal-kanan,
+    .soal-tata[data-panel-aktif=editor] .panel-soal, .soal-tata[data-panel-aktif=editor] .panel-hasil,
+    .soal-tata[data-panel-aktif=hasil] .panel-soal, .soal-tata[data-panel-aktif=hasil] .panel-editor { display: none; }
+  }
+
+  /* Mencetak halaman soal: isinya disembunyikan (SPEC.md §11). */
+  @media print {
+    .halaman-soal .kepala, .halaman-soal .isi > :not(.hanya-cetak), .halaman-soal .toast-wadah, .halaman-soal .sesi-peringatan { display: none !important; }
+    .halaman-soal .hanya-cetak { display: block; }
+  }
 }

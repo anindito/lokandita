@@ -2,6 +2,36 @@
 <?= $this->section('isi') ?>
 <h1><?= lang('Lokandita.halo', [esc($akses->identitas()->nama)]) ?></h1>
 
+<h2><?= lang('Latihan.saya.judul') ?></h2>
+<?php if ($pertemuan === []): ?>
+    <div class="kartu"><p><?= lang('Latihan.saya.kosong') ?></p></div>
+<?php else: ?>
+    <div class="tabel-wadah kartu">
+        <table>
+            <thead>
+            <tr>
+                <th scope="col"><?= lang('Soal.pertemuan.judul') ?></th>
+                <th scope="col"><?= lang('Latihan.jendela.keadaan') ?></th>
+                <th scope="col"><?= lang('Latihan.jendela.tutup') ?></th>
+                <th scope="col"><?= lang('Latihan.nilai.nilai') ?></th>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($pertemuan as $p): ?>
+                <tr>
+                    <td>
+                        <a href="/latihan/<?= (int) $p['pertemuan_id'] ?>"><span class="ltr"><?= esc($p['matkul_kode']) ?></span> — <?= lang('Soal.pertemuan.ke', [(int) $p['number']]) ?>: <?= esc($p['title']) ?></a>
+                    </td>
+                    <td><span class="lencana mode-<?= esc($p['mode']) ?>"><?= lang('Latihan.mode.' . $p['mode']) ?></span></td>
+                    <td><?= esc(\App\Libraries\Waktu::lokal($p['close_at'])) ?></td>
+                    <td><?= angka($p['score']) ?></td>
+                </tr>
+            <?php endforeach ?>
+            </tbody>
+        </table>
+    </div>
+<?php endif ?>
+
 <h2><?= lang('Kode.saya.judul') ?></h2>
 <?php if ($kelas === []): ?>
     <div class="kartu"><p><?= lang('Kode.saya.kosong') ?></p></div>

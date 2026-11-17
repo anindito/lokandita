@@ -17,7 +17,7 @@ use Lokandita\Auth\Log;
  */
 abstract class BaseController extends Controller
 {
-    protected $helpers = ['form'];
+    protected $helpers = ['form', 'angka'];
 
     private ?Akses $akses = null;
 

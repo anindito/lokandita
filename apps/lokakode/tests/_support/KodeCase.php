@@ -204,6 +204,79 @@ abstract class KodeCase extends TestCase
     }
 
     /**
+     * Tes sebuah instans uji: 2 contoh lalu 10 tes tersembunyi, "a b" -> a + b. Angkanya
+     * khas, supaya bisa dicari di jawaban server: tes tersembunyi tidak boleh pernah muncul.
+     *
+     * @return list<array{in: string, out: string}>
+     */
+    protected static function tesInstans(int $bibit = 0): array
+    {
+        $tes = [];
+        for ($i = 0; $i < 12; $i++) {
+            $a     = 900001 + $bibit * 1000 + $i * 13;
+            $b     = 800007 + $bibit * 1000 + $i * 17;
+            $tes[] = ['in' => "{$a} {$b}\n", 'out' => ($a + $b) . "\n"];
+        }
+
+        return $tes;
+    }
+
+    /**
+     * Instans $mhs untuk soal itu, disisipkan langsung (seperti yang ditulis worker). Mengembalikan id-nya.
+     *
+     * @param array<string, mixed> $mhs
+     * @param array<string, int>   $soal dari soalSiap()
+     */
+    protected function instans(array $mhs, array $soal, int $bibit = 0): int
+    {
+        Fixtures::insert($this->db, 'problem_instances', [
+            'user_id' => $mhs['id'], 'meeting_problem_id' => $soal['mp'], 'problem_version_id' => $soal['versi'], 'seed' => 1 + $bibit,
+            'tests' => json_encode(self::tesInstans($bibit)), 'created_at' => gmdate('Y-m-d H:i:s'),
+        ]);
+
+        return (int) $this->db->insert_id;
+    }
+
+    /**
+     * Kiriman yang sudah DINILAI, disisipkan langsung bersama pekerjaan judge-nya, lalu nilainya dihitung.
+     *
+     * @param array<string, mixed> $mhs
+     * @param array<string, int>   $soal dari soalSiap()
+     */
+    protected function kirimanDinilai(array $mhs, array $soal, int $instans, int $lulus, int $total = 10, string $sumber = 'int main(){}'): int
+    {
+        $job   = Fixtures::uuid();
+        $tes   = [];
+        for ($i = 0; $i < $total; $i++) {
+            $tes[] = ['index' => $i, 'verdict' => $i < $lulus ? 'AC' : 'WA', 'duration_ms' => 2];
+        }
+        $hasil = ['verdict' => $lulus === $total ? 'AC' : 'WA', 'compile_log' => '', 'tests' => $tes, 'passed' => $lulus, 'total' => $total, 'concepts' => null, 'missing' => []];
+        Fixtures::insert($this->db, 'judge_jobs', [
+            'id' => $job, 'kind' => 'SUBMIT', 'priority' => 'normal', 'status' => 'DONE', 'payload' => '{}', 'result' => json_encode($hasil),
+            'created_by' => $mhs['id'], 'created_at' => gmdate('Y-m-d H:i:s'), 'finished_at' => gmdate('Y-m-d H:i:s'),
+        ]);
+        Fixtures::insert($this->db, 'submissions', [
+            'user_id' => $mhs['id'], 'meeting_problem_id' => $soal['mp'], 'problem_version_id' => $soal['versi'], 'instance_id' => $instans,
+            'language' => 'cpp', 'source' => $sumber, 'job_id' => $job, 'created_at' => gmdate('Y-m-d H:i:s'),
+        ]);
+        $id = (int) $this->db->insert_id;
+        \App\Libraries\Penilaian::selesaikan((string) $mhs['id']);
+
+        return $id;
+    }
+
+    /**
+     * Melupakan pembatas laju Run dan Submit (Redis DB 15), supaya tes tidak perlu menunggu 10 detik.
+     */
+    protected function lupakanLaju(): void
+    {
+        $r = \App\Libraries\Antrean::redis();
+        foreach ($r->keys('lokakode:laju:*') as $kunci) {
+            $r->del($kunci);
+        }
+    }
+
+    /**
      * Menandai pertemuan sudah terbit (langsung di basis data), dengan pengaturan latihan yang diganti $over.
      *
      * @param array<string, int|string> $over
@@ -231,6 +304,22 @@ abstract class KodeCase extends TestCase
         ]);
 
         return (int) $this->db->insert_id;
+    }
+
+    /**
+     * Isi halaman tanpa bagian yang memang berbeda di setiap permintaan: sisa sesi,
+     * token CSRF (diacak tiap kali ditulis), dan jalur yang diminta (dipakai menu
+     * akun untuk kembali). Dipakai untuk membuktikan bahwa dua jawaban tidak bisa dibedakan.
+     *
+     * PERHATIAN: Lokandita\Auth\Testing\Http mengembalikan DIRINYA SENDIRI. Salin isi
+     * jawaban pertama (string) sebelum mengirim permintaan kedua; membandingkan dua
+     * variabel Http berarti membandingkan satu obyek dengan dirinya sendiri.
+     */
+    protected static function inti(string $isi, string $jalur): string
+    {
+        $isi = (string) preg_replace(['/data-sesi-sisa="\d+"/', '/data-csrf="[0-9a-f]+"/', '/name="csrf" value="[0-9a-f]+"/'], ['', 'data-csrf=""', 'name="csrf" value=""'], $isi);
+
+        return str_replace('value="' . $jalur . '"', 'value="JALUR"', $isi);
     }
 
     /**
