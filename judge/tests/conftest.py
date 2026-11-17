@@ -196,13 +196,14 @@ def mulai_worker(r, tmp_path, db_app):
 def kirim(db_app, r):
     """Berperan sebagai web: sisipkan baris, commit, lalu LPUSH id-nya (KONTRAK.md §6)."""
 
-    def _kirim(payload: dict, kind: str = "RUN", priority: str = "normal", dorong: bool = True, umur_s: int = 0) -> str:
+    def _kirim(payload: dict, kind: str = "RUN", priority: str = "normal", dorong: bool = True, umur_s: int = 0,
+               pembuat: str | None = None) -> str:
         id_ = str(uuid.uuid4())
         with db_app.cursor() as cur:
             cur.execute(
-                "INSERT INTO judge_jobs (id, kind, priority, status, payload, created_at)"
-                " VALUES (%s, %s, %s, 'QUEUED', %s, UTC_TIMESTAMP() - INTERVAL %s SECOND)",
-                (id_, kind, priority, json.dumps(payload), umur_s),
+                "INSERT INTO judge_jobs (id, kind, priority, status, payload, created_by, created_at)"
+                " VALUES (%s, %s, %s, 'QUEUED', %s, %s, UTC_TIMESTAMP() - INTERVAL %s SECOND)",
+                (id_, kind, priority, json.dumps(payload), pembuat, umur_s),
             )
         if dorong:
             r.lpush(f"lokandita:judge:{priority}", id_)

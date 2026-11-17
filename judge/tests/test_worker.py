@@ -100,17 +100,7 @@ def test_id_di_redis_tanpa_baris_diabaikan(mulai_worker, kirim, tunggu, r):
     assert w.proses.poll() is None
 
 
-def test_submit_dijawab_failed_unsupported_kind_bukan_diam(mulai_worker, kirim, tunggu):
-    """SUBMIT datang bersama tabel kiriman di tahap 9; sampai itu jawabannya jelas, bukan diam."""
-    mulai_worker()
-    b = tunggu(kirim(HALO, kind="SUBMIT"))
-    assert b["status"] == "FAILED" and b["result"]["error"] == "unsupported_kind" and b["attempts"] == 1
-
-
-def test_run_dengan_instance_id_dijawab_unsupported(mulai_worker, kirim, tunggu):
-    mulai_worker()
-    b = tunggu(kirim({**HALO, "instance_id": 7}))
-    assert b["status"] == "FAILED" and b["result"]["error"] == "unsupported_kind"
+# SUBMIT dan RUN pada tes contoh: tests/test_worker_kiriman.py (tahap 9a).
 
 
 @pytest.mark.parametrize("payload", [

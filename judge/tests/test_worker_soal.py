@@ -15,6 +15,8 @@ def versi_soal(db_app):
     """Satu soal dengan versi yang disetujui dan dipakai sebuah pertemuan, dibuat seperti oleh web."""
 
     def _buat(status: str = "APPROVED", **ganti) -> dict:
+        syarat = json.dumps(ganti.pop("required_in_submission", []))
+        mode = ganti.pop("comparison_mode", "trimmed")
         v = versi(**ganti)
         kode = "UJ" + uuid.uuid4().hex[:8].upper()
         with db_app.cursor() as cur:
@@ -29,10 +31,10 @@ def versi_soal(db_app):
             cur.execute(
                 "INSERT INTO problem_versions (problem_id, version, status, language, difficulty, time_limit_ms, samples_count,"
                 " hidden_count, params, translations, generator, reference_solution, concepts, required_in_submission,"
-                " content_hash, created_by, created_at) VALUES (%s, 1, %s, %s, 'MUDAH', %s, %s, %s, '{}', '{}', %s, %s, '[]', '[]',"
-                " REPEAT('a', 64), 'uji', UTC_TIMESTAMP())",
+                " comparison_mode, content_hash, created_by, created_at) VALUES (%s, 1, %s, %s, 'MUDAH', %s, %s, %s, '{}', '{}',"
+                " %s, %s, '[]', %s, %s, REPEAT('a', 64), 'uji', UTC_TIMESTAMP())",
                 (soal_id, status, v["language"], v["time_limit_ms"], v["samples_count"], v["hidden_count"], v["generator"],
-                 v["reference_solution"]))
+                 v["reference_solution"], syarat, mode))
             versi_id = cur.lastrowid
             cur.execute("INSERT INTO meeting_problems (meeting_id, problem_id, problem_version_id, updated_at)"
                         " VALUES (%s, %s, %s, UTC_TIMESTAMP())", (pertemuan, soal_id, versi_id))

@@ -122,9 +122,9 @@ class Worker:
             self.sedang.add(id_)
         mulai = time.time()
         try:
-            baris = self.db.baca("SELECT kind, payload, attempts FROM judge_jobs WHERE id = %s", (id_,))[0]
+            baris = self.db.baca("SELECT kind, payload, attempts, created_by FROM judge_jobs WHERE id = %s", (id_,))[0]
             try:
-                status, hasil = self.proses(id_, baris["kind"], baris["payload"])
+                status, hasil = self.proses(id_, baris["kind"], baris["payload"], baris["created_by"])
             except Exception as e:  # galat infrastruktur atau kesalahan worker sendiri: diulang
                 self.gagal_infrastruktur(id_, baris["attempts"], e)
                 return
@@ -135,7 +135,7 @@ class Worker:
             with self.kunci:
                 self.sedang.discard(id_)
 
-    def proses(self, id_: str, kind: str, payload_mentah) -> tuple[str, dict]:
+    def proses(self, id_: str, kind: str, payload_mentah, pembuat: str | None = None) -> tuple[str, dict]:
         try:
             payload = json.loads(payload_mentah) if isinstance(payload_mentah, (str, bytes)) else payload_mentah
         except ValueError:
@@ -152,12 +152,17 @@ class Worker:
 
         try:
             if kind == "RUN":
-                if payload.get("instance_id") is not None:
-                    return "FAILED", {"error": "unsupported_kind", "message": "RUN dengan instance_id belum didukung worker ini"}
                 stdin = payload.get("stdin")
                 if stdin is not None and not isinstance(stdin, str):
                     return "FAILED", {"error": "invalid_payload", "message": "stdin harus teks"}
-                return "DONE", mesin.jalankan_sekali(payload.get("language"), payload.get("source"), stdin or "", maju)
+                if payload.get("instance_id") is not None:
+                    if stdin is not None:
+                        return "FAILED", {"error": "invalid_payload", "message": "stdin dan instance_id tidak boleh bersama"}
+                    return "DONE", self.contoh(payload, pembuat, maju)
+                return "DONE", mesin.jalankan_sekali(payload.get("language"), payload.get("source"), stdin or "", maju,
+                                                     payload.get("flags"))
+            if kind == "SUBMIT":
+                return "DONE", self.nilai(id_, payload, pembuat, maju)
             if kind == "VALIDATE":
                 return "DONE", soal.validasi(payload, maju)
             if kind == "GENERATE":
@@ -168,8 +173,65 @@ class Worker:
             return "FAILED", {"error": "invalid_payload", "message": str(e)}
         except kotak.AnalisisGagal as e:
             return "FAILED", {"error": "analysis_failed", "message": str(e)}
-        # SUBMIT membutuhkan tabel kiriman tahap 9.
-        return "FAILED", {"error": "unsupported_kind", "message": f"{kind} belum didukung worker ini"}
+        return "FAILED", {"error": "unsupported_kind", "message": f"{kind} tidak dikenal worker ini"}
+
+    def _instans(self, payload: dict, pembuat: str | None) -> dict:
+        """Instans untuk RUN pada tes contoh dan SUBMIT (KONTRAK.md §6).
+
+        Worker memeriksa sendiri bahwa instans itu milik pembuat pekerjaan: kalau
+        pun web keliru, tes seorang mahasiswa tidak dipakai menilai kode orang lain.
+        Batas waktu dan mode banding diambil dari versi soal, bukan dari payload."""
+        iid = payload.get("instance_id")
+        if not isinstance(iid, int) or isinstance(iid, bool):
+            raise mesin.MasukanSalah("instance_id harus bilangan bulat")
+        baris = self.db.baca(
+            "SELECT i.user_id, i.tests, v.language, v.comparison_mode, v.time_limit_ms, v.samples_count, v.required_in_submission"
+            " FROM problem_instances i JOIN problem_versions v ON v.id = i.problem_version_id WHERE i.id = %s", (iid,))
+        if not baris or pembuat is None or baris[0]["user_id"] != pembuat:
+            raise mesin.MasukanSalah("instance_id tidak ada atau bukan milik pembuat pekerjaan")
+        b = baris[0]
+        if payload.get("language") != b["language"]:
+            raise mesin.MasukanSalah("language tidak sama dengan bahasa soal")
+        tes = [mesin.Tes(t["in"], t["out"]) for t in json.loads(b["tests"])]
+        n = int(b["samples_count"])
+        syarat = b["required_in_submission"]
+        return {
+            "contoh": tes[:n], "tersembunyi": tes[n:], "mode": b["comparison_mode"], "cpu_ms": int(b["time_limit_ms"]),
+            "syarat": json.loads(syarat) if isinstance(syarat, (str, bytes)) else (syarat or []),
+        }
+
+    def contoh(self, payload: dict, pembuat: str | None, maju) -> dict:
+        """RUN dengan instance_id: tes contoh instans itu saja; tes tersembunyi tidak disentuh."""
+        ins = self._instans(payload, pembuat)
+        return mesin.jalankan_contoh(payload.get("language"), payload.get("source"), ins["contoh"], ins["mode"],
+                                     ins["cpu_ms"], maju, payload.get("flags"))
+
+    def nilai(self, id_: str, payload: dict, pembuat: str | None, maju) -> dict:
+        """SUBMIT: semua tes tersembunyi, lalu konsep yang disyaratkan (SPEC.md §7, §9.2).
+
+        Hasilnya tidak memuat masukan, keluaran yang diharapkan, atau keluaran
+        program. Worker tidak menyentuh tabel submissions; web yang menyalin
+        hasil ini dan menghitung nilai."""
+        sid = payload.get("submission_id")
+        if not isinstance(sid, int) or isinstance(sid, bool):
+            raise mesin.MasukanSalah("submission_id harus bilangan bulat")
+        ins = self._instans(payload, pembuat)
+        bahasa, sumber = payload.get("language"), payload.get("source")
+        hasil = mesin.nilai_tes(bahasa, sumber, ins["tersembunyi"], ins["mode"], cpu_ms=ins["cpu_ms"], maju=maju,
+                                bendera=payload.get("flags"))
+        hasil["concepts"], hasil["missing"] = None, []
+        if hasil["verdict"] == "AC" and ins["syarat"]:
+            try:
+                kode = [t["code"] for t in kotak.analisis(bahasa, sumber)]
+                hasil["concepts"] = kode
+                hasil["missing"] = [s for s in ins["syarat"] if s not in kode]
+                if hasil["missing"]:
+                    hasil["verdict"] = "CONCEPT_NOT_MET"
+            except kotak.AnalisisGagal as e:
+                # Kegagalan pengurai kita tidak dibebankan kepada mahasiswa.
+                hasil["analysis_failed"] = True
+                catat("analisis_kiriman_gagal", job=id_, kiriman=sid, pesan=str(e)[:200])
+        return hasil
 
     def bangkit(self, payload: dict) -> tuple[str, dict]:
         """GENERATE: instans satu mahasiswa untuk satu soal pertemuan (SPEC.md §8.2).

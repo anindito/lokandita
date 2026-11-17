@@ -262,14 +262,17 @@ def _galat_bila_docker_gagal(mentah: dict) -> None:
         raise GalatInfrastruktur(f"kontainer berhenti tanpa laporan (docker keluar {mentah['kode_docker']}): {pesan}")
 
 
-def kompilasi(bahasa: str, sumber: str, dir_job: Path) -> HasilKompilasi:
-    """Menulis sumber ke dir_job dan mengompilasinya (C, C++) atau memeriksa sintaksnya (Python)."""
+def kompilasi(bahasa: str, sumber: str, dir_job: Path, bendera: tuple[str, ...] = ()) -> HasilKompilasi:
+    """Menulis sumber ke dir_job dan mengompilasinya (C, C++) atau memeriksa sintaksnya (Python).
+
+    `bendera` adalah bendera kompiler tambahan pertemuan; pemanggil sudah
+    memeriksanya terhadap daftar yang diizinkan (mesin.periksa_bendera)."""
     berkas = dir_job / BERKAS_SUMBER[bahasa]
     berkas.write_text(sumber, encoding="utf-8")
     os.chmod(berkas, 0o644)
 
     perintah = ["pelari", str(BATAS_KOMPILASI_S * 1000), str(BATAS_KOMPILASI_S * 1000)]
-    perintah += ["periksa-python"] if bahasa == "python" else ["kompilasi", bahasa]
+    perintah += ["periksa-python"] if bahasa == "python" else ["kompilasi", bahasa, *bendera]
     mentah = _jalankan_kontainer(
         citra.nama(bahasa), perintah, dir_job, b"", BATAS_KOMPILASI_S,
         batas_stdout=BATAS_BINER, batas_stderr=BATAS_KELUARAN, memori_mb=MEMORI_MB,
