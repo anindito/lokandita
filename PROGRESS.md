@@ -1,6 +1,6 @@
 # Progress
 
-Current stage: **9a — student interface and scoring** — in progress; see "Stage 9a" at the end of this file. Stage 9 was split by the owner on 2026-11-17: 9b (leaderboard, analytics, exports, late policy, three languages and RTL polish) is the next session, and the gate of `SPEC.md` §18 for stage 9 is taken after 9b.
+Current stage: **9a — student interface and scoring** — built and deployed 2026-11-17, **waiting for the owner's check** (no tag yet); see "Stage 9a" at the end of this file. Stage 9 was split by the owner on 2026-11-17: 9b (leaderboard, analytics, exports, late policy, three languages and RTL polish) is the next session, and the gate of `SPEC.md` §18 for stage 9 is taken after 9b.
 
 Stage 8 — Problems, concepts, importer — finished 2026-11-17, tag `tahap-8`; see "Gate result" at the end of this file.
 
@@ -383,7 +383,7 @@ Carried into the next stages:
 - The "Owed by later stages" list of stage 8, and the items stages 6 and 7 left for stage 9.
 - `auth.lokandita.com` and `lokakode.lokandita.com` are open; the Portal is in maintenance.
 
-## Stage 9a — in progress
+## Stage 9a — 2026-11-17
 
 Plan approved by the owner 2026-11-17 (8 steps, one commit each): 1 contract and schema · 2 worker: `SUBMIT`, `RUN` on samples, compiler flags · 3 meeting settings, publishing, class windows, pre-generation · 4 scoring · 5 student meeting page · 6 problem page with Monaco · 7 paste and copy blocking, watermark · 8 close.
 
@@ -419,3 +419,49 @@ Done (anything not listed here is not done):
 - Measured (as promised in the plan), on the test schema with the test worker at `JUDGE_CONCURRENCY=4`, the production value: **pre-generation of one full class, 40 students × 30 problems = 1,200 instances of 12 tests, made 1,199 instances in 28 min 53 s** — about 1.45 s per instance of wall time, 0.69 instances per second. The production worker was idle at the time; with students submitting, pre-generation waits behind them (low queue) and takes longer. A window should therefore be saved or opened at least half an hour before a class of that size starts; students who arrive earlier get their problem on demand on the normal queue.
 - **Found by that measurement: job 1,200 failed for good** with `generation_failed` / `reference_compile_error`, although the same reference solution compiled 1,199 times. The job took 19 s, so the compile most probably hit the 10 s watchdog while four jobs loaded all four CPUs (the worker does not record the reason; this is an inference). The pengajar page reported it ("1 soal gagal dibuat") and *Siapkan sekarang* would have re-queued it, but nobody should have to. Fixed: a compile timeout or out-of-memory of an approved reference solution is now retried by the worker like any infrastructure failure. **The measurement was not repeated after the fix**; the fix is covered by a test with a simulated timeout, not by a second 1,200-job run.
 - The same cause can reach a student under heavy load: a correct program whose compile passes 10 s gets `CE` with reason `timeout` and score 0 for that submission. The best score is unaffected and the student can submit again, but the attempt is counted. Not changed in this stage (the 10 s watchdog is a stage 7 acceptance item); raise it if it shows up in class.
+- Step 8 — close, 2026-11-17 (commands and output shown in the session), at commit `448bdf8`:
+  - `infra/tes.sh lokakode` → **189 tests, 2,847 assertions, all pass** (15 min 34 s), with the real worker and the real browser. `infra/tes.sh auth` → 95 tests, 822 assertions; `infra/tes.sh portal` → 19 tests, 105 assertions (the shared layout, CSP filter and stylesheet changed). All pass.
+  - `infra/tes.sh judge` — **no fully green full run was obtained.** Three full runs: (1) 251 passed, 1 failed, 1 error; (2) 252 passed, 1 error; (3) 250 passed, 2 failed. Every red was about time or a race, in sandbox code this stage did not write, and in no case did a hostile program escape a limit:
+    - `while(1)` was killed as `TLE` within its CPU limit, but the whole test took 8.1 s against the test's own limit of 8 s (run 1); a program that leaves a child behind finished correctly in 4.006 s against a limit of 4 s (run 3). **These two limits were left as they are and the tests are therefore flaky on a loaded server.**
+    - After the stderr-flood test a judge container was still being removed when the "nothing left" check ran (runs 1 and 2). Cause: two overlapping `docker rm -f`; the second returned at once. Fixed: removal now returns only when the container is gone. Did not recur in run 3.
+    - The reaper test lost a race with the **production** worker's reaper, which removes any expired judge container on this host by label (run 3). The race exists since stage 7. Fixed in the test (its "expired" container expires in the future and the test's reaper is run with a later clock).
+    - After the fixes: `infra/tes.sh judge tests/test_kotak_jahat.py tests/test_worker.py` → 67 passed; `judge/uji-terima.sh` → `uji terima: LULUS — 10 dari 10 butir`, 0 judge containers left. **A fourth full run was not made.**
+  - **The sandbox was slower this afternoon and I do not know why.** 200 simultaneous `RUN` jobs took 171 s (98–133 s in stages 7 and 8); one sandbox run measured 0.8–1.3 s at one moment and 0.6 s an hour later with the server idle. An A/B against the stage 8 code showed the same speed (0.60–0.65 s against 0.59 s), so this stage's change to container removal is not the cause.
+  - `infra/cek-env.sh` → passed; no new environment variable in this stage.
+  - `infra/deploy.sh lokakode`, `judge`, `auth`, `portal` → each verified (`/healthz`, worker heartbeat). The migration ran on the real `lokakode` schema: 26 tables now; meetings 1 and 2 of `DDP101` got the defaults (target 60, composition 8 / 8 / 6 / 6 / 4) and are **not published**; 0 windows, 0 instances, 0 submissions. `judge_worker` still has exactly the three grants of `KONTRAK.md` §6.
+  - `infra/smoke.sh` → **22 passed, 0 failed, 0 not active**.
+  - Real requests to the deployed LokaKode, without a session: `GET /latihan/1`, `/latihan/soal/1`, `/api/soal/1/keadaan`, `/api/soal/1/riwayat`, `/kelas/1/pertemuan`, `/kelas/1/pertemuan/1` → 302 to the LokaAuth login with the right `next`; `POST` to the five student endpoints and to publish / practice settings / window status / pre-generate without CSRF → 403. Monaco (`/monaco/vs/…`, 3.8 MB main script, its licence file) and the page scripts are served by the app itself; the Monaco directory is empty in the auth and portal images.
+  - `infra/backup.sh` → done; `infra/uji-restore.sh` → passed, 37 schemas/tables restored and equal, the seven new tables among them; `infra/tes-infra.sh` → 57 passed, 0 failed.
+
+Not verified, or weaker than it looks:
+
+- **No student has run or submitted anything on the deployed system.** Production has no published meeting and no window, and I did not create accounts, publish or open anything there. Run, Submit, scoring and the pages are proven on the test containers (real MySQL, Redis, worker, sandbox, browser) and by smoke checks 6 and 7 in production — not by a real student. The owner's check below is the real one.
+- **No page of 9a has been seen by a person.** The browser tests prove behaviour, not looks: layout, colours, the five level badges, the watermark's legibility, dark mode and the narrow layout need eyes. Arabic was not opened at all (RTL polish is 9b); its texts were written by the agent and not reviewed by an Arabic reader.
+- Browser tests run in headless Chromium only. Firefox, Safari and Safe Exam Browser (stage 10) were not tried.
+- Paste and copy blocking are deterrents until SEB: developer tools can read the statement and can type into the editor programmatically.
+- The full judge suite is not green in one run (above), and the 1,200-instance measurement was not repeated after the retry fix.
+- Under heavy load a student's correct program can get `CE` / `timeout` at compile (above).
+- Pre-generation of a full class takes about half an hour on an idle server; if a window is opened minutes before class, the first students wait for their problem on demand (the screen says so, with an estimate).
+- The estimate on the "Menyiapkan soal Anda" screen uses whole-second job times (the database stores seconds), so it is rough for short queues.
+- If Redis is down the Run / Submit rate limits let requests through (logged); the MySQL guards (one submission being judged per problem, two unfinished Runs per student) still hold.
+- Rate-limit, panel-size and integrity endpoints were tested with one student at a time, not under concurrency.
+- `SPEC.md` §6 lists "leaderboard anonymisation" and "practice-after-close" among the meeting settings: their columns exist, their form fields do not (9b). `late_policy` likewise.
+- Each `infra/smoke.sh` run still leaves two system rows in `judge_jobs`; every Run leaves one row. Retention is not decided (9b).
+
+Owed by 9b (next session): leaderboard; analytics and the staff view of submissions and source; exports; late policy `multiplier` and practice-after-close; anonymisation; calibration (`SPEC.md` §8.4); recompute of per-class aggregates after pindah kelas; retention of `judge_jobs` and `imports`; the three languages and RTL polish; whether a pengajar may see the problem bank; Monaco in the problem edit form; memory limit per problem if wanted. Then the gate of `SPEC.md` §18 for stage 9.
+
+Owner's check for 9a (not the §18 gate; that comes after 9b). Everything is at `https://lokakode.lokandita.com`:
+
+1. As superadmin or the pengampu: *Mata kuliah* → `DDP101` → **Pertemuan dan bank soal** → meeting 2. Under *Pengaturan latihan* set **Target poin** so that 2 × target does not exceed the points available (the page shows them under *Penerbitan*), and lower the five minimums to what the meeting has; save; press **Terbitkan pertemuan**. Try once with the defaults first: it must refuse and say exactly what is missing.
+2. Open the class that holds the test mahasiswa → **Jadwal pertemuan** → meeting 2 → **Buka sekarang**. The section *Soal mahasiswa* should count up to "n dari n" within a few seconds.
+3. In a private window log in as the test mahasiswa. The beranda lists the meeting; the meeting page shows the cards, "Mudah sekali: 0/4 terhitung", points needed.
+4. Open a problem. Check by eye: three panels, the statement with the watermark (your test student's nomor induk, name, time), Monaco with the C++ template. Try to select or copy the statement; try Ctrl+V, Shift+Insert, right-click and dragging text into the editor — each paste must be refused with a short message. Print preview (Ctrl+P is blocked; use the browser menu) must show no statement.
+5. Type a solution. Wait ten seconds, close the tab, open the problem again: the code is back. **Reset** restores the template.
+6. **Jalankan** (or Ctrl+Enter): the two samples with your program's output. **Input Kustom**: your own input. **Kirim** (or Ctrl+Shift+Enter): verdict, score, and ten hidden tests shown as status only. Submit a wrong and a non-compiling program too; the best score must not drop. *Riwayat* lists them.
+7. Back on the meeting page: status, points earned, progress to target.
+8. As the second dosen (pengajar of the other class): `/kelas/<id of the first class>/pertemuan` must say *Halaman tidak ditemukan*.
+9. As superadmin `/audit`: `pertemuan.latihanDiubah`, `pertemuan.diterbitkan`, `jendela.dibuka`.
+10. `infra/smoke.sh` — expect `22 lulus, 0 gagal, 0 belum aktif`.
+11. Say how the pages look, and anything that reads badly in Indonesian.
+
+The meeting published and the submissions made in this check are real production rows, like those of the earlier gates. After the check: tag `tahap-9a`, record the result here.
