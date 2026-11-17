@@ -1,6 +1,8 @@
 # Progress
 
-Current stage: **8 — Problems, concepts, importer** — built and deployed 2026-11-17, **waiting for the owner's gate**; see "Stage 8" at the end of this file. Not tagged yet.
+Next stage: **9 — Student interface, scoring, leaderboard, analytics** — not started.
+
+Stage 8 — Problems, concepts, importer — finished 2026-11-17, tag `tahap-8`; see "Gate result" at the end of this file.
 
 Stage 7 — Judge worker — finished 2026-11-17, tag `tahap-7`; see "Gate result" at the end of this file.
 
@@ -357,3 +359,26 @@ Owner's gate for stage 8 (`SPEC.md` §18: a sample file imports; a deliberately 
 The meetings and problems created in the gate are real production rows. Meetings cannot be deleted, only switched off; DDP101 needs meetings 1 and 2 anyway.
 
 After the gate: tag `tahap-8`, record the result here.
+
+Gate result, 2026-11-17:
+
+- The owner reported, in his words: step 2 (valid file) "safe"; step 3 (wrong file) "rejection for sisi-terpanjang"; step 4 (`cout` with doubles, no string concept, approved) "yes"; `infra/smoke.sh` → `smoke: 22 lulus, 0 gagal, 0 belum aktif` / `smoke: LULUS`; pages in the browser and the Arabic layout "fine". He did not quote the counts of steps 2 and 3 or the line numbers; those below are what the server shows.
+- What the server shows, read by the agent (actions, roles, counts and statuses only):
+  - `DDP101` has meeting 1 (C++; `ARITMETIKA`, `IO_DASAR`, `VARIABEL_TIPE`) and meeting 2 (C++; `KONVERSI_TIPE`). `STRING` and `PERCABANGAN` are not allowed at either, as the gate requires.
+  - Two imports by web upload on 2026-11-17 at 08:31 and 08:32 WIB, both finished: `ddp101-pertemuan-2.json` → 3 accepted, 0 rejected; `ddp101-pertemuan-2-salah.json` → 0 accepted, 1 rejected, 1 unchanged. Nothing is left waiting.
+  - The rejected problem is `sisi-terpanjang`: `concept_not_allowed`, `PERCABANGAN`, construct `if`, source line 7, column 5, JSON line 51 — exactly the expected reason.
+  - `tukar-dua-pecahan` version 1 is `APPROVED` and is the version meeting 2 uses; its detected concepts are `VARIABEL_TIPE` and `IO_DASAR` only. The other two problems are still `PENDING_REVIEW`.
+  - LokaKode `audit_log`, all by the superadmin: `pertemuan.dibuat` 2, `pertemuan.diubah` 2, `soal.impor` 2, `soal.disetujui` 1.
+  - **The three parts of the gate of `SPEC.md` §18 pass on the deployed system.**
+- Not done in the gate, or not reported: the optional step 5 (the pages as pengampu, the 403 for a pengajar, *Ubah soal*, `/audit`) — the audit log has no `soal.disunting` and the container log no `access.denied`, so none of it was tried in production; the CLI import; step 7, the review of `docs/DETEKSI-KONSEP.md`. "Fine" for the pages is the owner's judgement; which pages he opened is not known to the agent. The items under "Not verified, or weaker than it looks" above still hold, except that stage 8 pages have now been used in a browser and one real import, one real rejection and one real approval have happened in production.
+- The tagged commit differs from the deployed `5ffce85` only in this file. **It has not been redeployed**, so `infra/smoke.sh` check 0 and the worker heartbeat line fail until `infra/deploy.sh` is run for the four components; nothing that runs has changed.
+
+**Stage 8 finished 2026-11-17, tag `tahap-8`.**
+
+Carried into the next stages:
+
+- Redeploy the four components at the tagged commit when convenient, or let the first deploy of stage 9 do it.
+- Meetings 1 and 2 of `DDP101` and their three problems are real production rows; two problems still await review. Meetings cannot be deleted, only switched off.
+- `docs/DETEKSI-KONSEP.md` still awaits the owner's review.
+- The "Owed by later stages" list of stage 8, and the items stages 6 and 7 left for stage 9.
+- `auth.lokandita.com` and `lokakode.lokandita.com` are open; the Portal is in maintenance.
