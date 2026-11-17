@@ -6,6 +6,8 @@ namespace App\Controllers;
 
 use App\Libraries\Audit;
 use App\Libraries\BankSoal;
+use App\Libraries\Instans;
+use App\Libraries\Latihan;
 use App\Libraries\Kurikulum;
 use App\Libraries\Waktu;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -21,6 +23,8 @@ final class Pertemuan extends BaseController
     private const PESAN = [
         'disimpan'  => ['sukses', 'Kode.pesan.disimpan'],
         'disetujui' => ['sukses', 'Soal.pesan.disetujui'],
+        'terbit'    => ['sukses', 'Latihan.pesan.terbit'],
+        'ditarik'   => ['sukses', 'Latihan.pesan.ditarik'],
         'ditolak'   => ['sukses', 'Soal.pesan.ditolak'],
     ];
 
@@ -150,17 +154,20 @@ final class Pertemuan extends BaseController
             return $p;
         }
 
-        return $this->tampil($p, ['number' => (string) $p['number'], 'title' => $p['title'], 'language' => $p['language'], 'enabled' => (string) $p['enabled']], []);
+        return $this->tampil($p, self::isiPokok($p), []);
     }
 
     /**
      * @param array<string, mixed>  $p
      * @param array<string, string> $isi
      * @param array<string, string> $galat
+     * @param array<string, string>|null $latihan      isian form latihan (null = nilai tersimpan)
+     * @param array<string, string>      $galatLatihan kolom => kunci galat (Latihan.galat.*)
      */
-    private function tampil(array $p, array $isi, array $galat, int $status = 200): ResponseInterface
+    private function tampil(array $p, array $isi, array $galat, int $status = 200, ?array $latihan = null, array $galatLatihan = [], bool $gagalTerbit = false): ResponseInterface
     {
         $kur = $this->kurikulum();
+        $latihan ??= self::isiLatihan($p);
 
         return $this->halaman('pertemuan_lihat', [
             'judul'    => $p['matkul_kode'] . ' — ' . lang('Soal.pertemuan.ke', [(int) $p['number']]),
@@ -171,8 +178,171 @@ final class Pertemuan extends BaseController
             'soal'     => (new BankSoal($this->akses()))->daftarSoal((int) $p['id']),
             'isi'      => $isi,
             'galat'    => $galat,
-            'pesan'    => $galat !== [] ? [['jenis' => 'galat', 'teks' => lang('Kode.pesan.periksa')]] : $this->pesanDariQuery(self::PESAN),
+            'latihan'      => $latihan,
+            'galatLatihan' => $galatLatihan,
+            // Kesiapan dihitung dari nilai yang TERSIMPAN: itulah yang berlaku saat diterbitkan.
+            'siap'         => Latihan::kesiapan($p),
+            'gagalTerbit'  => $gagalTerbit,
+            'benderaSah'   => Latihan::benderaSah((string) $p['language']),
+            'templatBawaan' => Latihan::templat(['starter_template' => null, 'language' => $p['language']]),
+            'pesan'    => $galat !== [] || $galatLatihan !== [] ? [['jenis' => 'galat', 'teks' => lang('Kode.pesan.periksa')]]
+                : ($gagalTerbit ? [['jenis' => 'galat', 'teks' => lang('Latihan.terbit.ditolak')]] : $this->pesanDariQuery(self::PESAN)),
         ], $status);
+    }
+
+    /**
+     * @param array<string, mixed> $p
+     *
+     * @return array<string, string>
+     */
+    private static function isiPokok(array $p): array
+    {
+        return ['number' => (string) $p['number'], 'title' => (string) $p['title'], 'language' => (string) $p['language'], 'enabled' => (string) $p['enabled']];
+    }
+
+    /**
+     * @param array<string, mixed> $p
+     *
+     * @return array<string, string>
+     */
+    private static function isiLatihan(array $p): array
+    {
+        $isi = ['target_points' => (string) $p['target_points'], 'starter_template' => (string) ($p['starter_template'] ?? ''),
+            'compiler_flags' => (string) $p['compiler_flags'], 'autocomplete' => (string) $p['autocomplete']];
+        foreach (Latihan::KOLOM_MIN as $kolom) {
+            $isi[$kolom] = (string) $p[$kolom];
+        }
+
+        return $isi;
+    }
+
+    /**
+     * Pengaturan latihan (SPEC.md §6): target, komposisi minimum, templat awal,
+     * bendera kompiler, pelengkapan otomatis.
+     */
+    public function latihan(int $id): ResponseInterface
+    {
+        $p = $this->pertemuanKelola($id);
+        if ($p instanceof ResponseInterface) {
+            return $p;
+        }
+        $isi = [
+            'target_points'    => trim((string) $this->request->getPost('target_points')),
+            // Akhir baris dari form selalu CRLF; disimpan sebagai LF.
+            'starter_template' => str_replace(["\r\n", "\r"], "\n", (string) $this->request->getPost('starter_template')),
+            'compiler_flags'   => trim((string) $this->request->getPost('compiler_flags')),
+            'autocomplete'     => $this->request->getPost('autocomplete') === '1' ? '1' : '0',
+        ];
+        foreach (Latihan::KOLOM_MIN as $kolom) {
+            $isi[$kolom] = trim((string) $this->request->getPost($kolom));
+        }
+
+        $galat = [];
+        if (preg_match('/^\d{1,4}$/', $isi['target_points']) !== 1 || (int) $isi['target_points'] < 1 || (int) $isi['target_points'] > 1000) {
+            $galat['target_points'] = 'target';
+        }
+        foreach (Latihan::KOLOM_MIN as $kolom) {
+            if (preg_match('/^\d{1,2}$/', $isi[$kolom]) !== 1 || (int) $isi[$kolom] > 50) {
+                $galat[$kolom] = 'minimum';
+            }
+        }
+        if (mb_strlen($isi['starter_template']) > Latihan::TEMPLAT_MAKS) {
+            $galat['starter_template'] = 'templat';
+        }
+        $bendera = Latihan::bendera($isi['compiler_flags'], (string) $p['language']);
+        if ($bendera === null) {
+            $galat['compiler_flags'] = $p['language'] === 'python' ? 'benderaPython' : 'bendera';
+        }
+
+        $baru = [];
+        if ($galat === []) {
+            $baru = ['target_points' => (int) $isi['target_points'], 'autocomplete' => (int) $isi['autocomplete'],
+                'starter_template' => trim($isi['starter_template']) === '' ? null : $isi['starter_template'],
+                'compiler_flags' => implode(' ', $bendera ?? [])];
+            foreach (Latihan::KOLOM_MIN as $kolom) {
+                $baru[$kolom] = (int) $isi[$kolom];
+            }
+            // Pertemuan yang sudah terbit tidak boleh diubah menjadi tidak memenuhi syarat terbitnya.
+            if ($p['published_at'] !== null && ! Latihan::kesiapan($baru + $p)['siap']) {
+                $galat['target_points'] = 'melanggarTerbit';
+            }
+        }
+        if ($galat !== []) {
+            return $this->tampil($p, self::isiPokok($p), [], 422, $isi, $galat);
+        }
+
+        $sebelum = array_intersect_key($p, $baru);
+        $db      = db_connect();
+        $db->transStart();
+        $db->table('meetings')->where('id', $id)->update($baru + ['updated_at' => Waktu::kini()]);
+        Audit::catat('pertemuan.latihanDiubah', 'meeting', $id, [
+            // Templat bisa panjang: yang dicatat hanya apakah ia diisi.
+            'sebelum' => ['starter_template' => $sebelum['starter_template'] !== null] + $sebelum,
+            'sesudah' => ['starter_template' => $baru['starter_template'] !== null] + $baru,
+        ], (int) $p['course_id']);
+        $db->transComplete();
+
+        return redirect()->to('/pertemuan/' . $id . '?pesan=disimpan');
+    }
+
+    /**
+     * Menerbitkan pertemuan: ditolak bila komposisi minimum belum terpenuhi atau
+     * poin yang tersedia kurang dari 2 × target; halamannya menyebut persis apa
+     * yang kurang (SPEC.md §6).
+     */
+    public function terbitkan(int $id): ResponseInterface
+    {
+        $p = $this->pertemuanKelola($id);
+        if ($p instanceof ResponseInterface) {
+            return $p;
+        }
+        if ($p['published_at'] !== null) {
+            return redirect()->to('/pertemuan/' . $id);
+        }
+        if ((int) $p['enabled'] !== 1 || ! Latihan::kesiapan($p)['siap']) {
+            return $this->tampil($p, self::isiPokok($p), [], 422, null, [], true);
+        }
+
+        $db = db_connect();
+        $db->transStart();
+        // Syarat di dalam UPDATE: dua klik sekaligus menerbitkan sekali.
+        $db->query('UPDATE meetings SET published_at = ?, published_by = ?, updated_at = ? WHERE id = ? AND published_at IS NULL',
+            [Waktu::kini(), $this->akses()->identitas()->userId, Waktu::kini(), $id]);
+        $terbit = $db->affectedRows() === 1;
+        if ($terbit) {
+            Audit::catat('pertemuan.diterbitkan', 'meeting', $id, ['number' => (int) $p['number']], (int) $p['course_id']);
+        }
+        $db->transComplete();
+
+        // Kelas yang jendelanya sudah diatur: instansnya mulai disiapkan sekarang (di luar transaksi).
+        if ($terbit) {
+            $kelas = $db->query('SELECT class_id FROM meeting_class_windows WHERE meeting_id = ?', [$id])->getResultArray();
+            foreach ($kelas as $k) {
+                Instans::siapkan($id, (int) $k['class_id'], $this->akses()->identitas()->userId);
+            }
+        }
+
+        return redirect()->to('/pertemuan/' . $id . '?pesan=terbit');
+    }
+
+    /**
+     * Menarik pertemuan dari mahasiswa. Kiriman, nilai dan instans yang sudah ada tetap tersimpan.
+     */
+    public function tarik(int $id): ResponseInterface
+    {
+        $p = $this->pertemuanKelola($id);
+        if ($p instanceof ResponseInterface) {
+            return $p;
+        }
+        $db = db_connect();
+        $db->transStart();
+        $db->query('UPDATE meetings SET published_at = NULL, published_by = NULL, updated_at = ? WHERE id = ? AND published_at IS NOT NULL', [Waktu::kini(), $id]);
+        if ($db->affectedRows() === 1) {
+            Audit::catat('pertemuan.ditarik', 'meeting', $id, ['number' => (int) $p['number']], (int) $p['course_id']);
+        }
+        $db->transComplete();
+
+        return redirect()->to('/pertemuan/' . $id . '?pesan=ditarik');
     }
 
     public function perbarui(int $id): ResponseInterface

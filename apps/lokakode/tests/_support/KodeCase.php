@@ -181,6 +181,73 @@ abstract class KodeCase extends TestCase
         return ['soal' => $soal, 'versi' => $this->versiBaris($soal, 1, $status)];
     }
 
+    // Generator dan solusi sungguhan untuk soal yang benar-benar dikerjakan judge: dua bilangan, jumlahnya.
+    protected const GEN_ACAK = "import os, random\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\nprint(r.randint(1, 1000), r.randint(1, 1000))\n";
+
+    protected const SOLUSI_JUMLAH = "#include <iostream>\nint main(){long a,b;std::cin>>a>>b;std::cout<<a+b<<\"\\n\";}\n";
+
+    /**
+     * Soal yang sudah DISETUJUI dan dipakai pertemuannya, dengan generator sungguhan.
+     *
+     * @param array<string, mixed> $over kolom problem_versions yang diganti
+     *
+     * @return array{soal: int, versi: int, mp: int}
+     */
+    protected function soalSiap(int $pertemuan, string $slug, string $tingkat = 'MUDAH', array $over = []): array
+    {
+        Fixtures::insert($this->db, 'problems', ['meeting_id' => $pertemuan, 'slug' => $slug, 'created_at' => gmdate('Y-m-d H:i:s')]);
+        $soal  = (int) $this->db->insert_id;
+        $versi = $this->versiBaris($soal, 1, 'APPROVED', $over + ['difficulty' => $tingkat, 'generator' => self::GEN_ACAK, 'reference_solution' => self::SOLUSI_JUMLAH]);
+        Fixtures::insert($this->db, 'meeting_problems', ['meeting_id' => $pertemuan, 'problem_id' => $soal, 'problem_version_id' => $versi, 'updated_at' => gmdate('Y-m-d H:i:s')]);
+
+        return ['soal' => $soal, 'versi' => $versi, 'mp' => (int) $this->db->insert_id];
+    }
+
+    /**
+     * Menandai pertemuan sudah terbit (langsung di basis data), dengan pengaturan latihan yang diganti $over.
+     *
+     * @param array<string, int|string> $over
+     */
+    protected function terbit(int $pertemuan, array $over = []): void
+    {
+        $set = "published_at = UTC_TIMESTAMP(), published_by = 'uji'";
+        foreach ($over as $kolom => $nilai) {
+            $set .= ", {$kolom} = '" . $this->db->real_escape_string((string) $nilai) . "'";
+        }
+        $this->db->query("UPDATE meetings SET {$set} WHERE id = {$pertemuan}");
+    }
+
+    /**
+     * Jendela pertemuan untuk satu kelas; bawaannya dibuka manual.
+     *
+     * @param array<string, mixed> $over
+     */
+    protected function jendela(int $pertemuan, int $kelas, array $over = []): int
+    {
+        $k = $this->row("SELECT course_id FROM classes WHERE id = {$kelas}");
+        Fixtures::insert($this->db, 'meeting_class_windows', $over + [
+            'meeting_id' => $pertemuan, 'class_id' => $kelas, 'course_id' => $k['course_id'], 'override' => 'open',
+            'updated_by' => 'uji', 'created_at' => gmdate('Y-m-d H:i:s'), 'updated_at' => gmdate('Y-m-d H:i:s'),
+        ]);
+
+        return (int) $this->db->insert_id;
+    }
+
+    /**
+     * Menunggu sampai $syarat benar (untuk pekerjaan judge sungguhan); gagal bila lewat $detik.
+     */
+    protected function tungguSampai(callable $syarat, int $detik = 120, string $apa = 'syarat'): void
+    {
+        $batas = microtime(true) + $detik;
+        while (microtime(true) < $batas) {
+            if ($syarat()) {
+                return;
+            }
+            usleep(250_000);
+        }
+        $this->fail("{$apa} tidak tercapai dalam {$detik} detik");
+    }
+
     /**
      * Satu baris impor yang sudah selesai, tanpa butir.
      *

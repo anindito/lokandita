@@ -25,6 +25,36 @@ final class Waktu
     }
 
     /**
+     * Isian <input type="datetime-local"> (waktu Asia/Jakarta, "2026-11-20T08:00")
+     * menjadi DATETIME UTC. null bila bentuknya salah atau bukan waktu yang ada.
+     */
+    public static function dariIsian(string $isian): ?string
+    {
+        if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', $isian) !== 1) {
+            return null;
+        }
+        $t = \DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', $isian, new \DateTimeZone('Asia/Jakarta'));
+        if ($t === false || $t->format('Y-m-d\TH:i') !== $isian) {
+            return null;
+        }
+
+        return $t->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s');
+    }
+
+    /**
+     * DATETIME UTC menjadi nilai untuk <input type="datetime-local"> dalam Asia/Jakarta.
+     */
+    public static function keIsian(?string $utc): string
+    {
+        if ($utc === null || $utc === '') {
+            return '';
+        }
+        $t = new \DateTimeImmutable($utc, new \DateTimeZone('UTC'));
+
+        return $t->setTimezone(new \DateTimeZone('Asia/Jakarta'))->format('Y-m-d\TH:i');
+    }
+
+    /**
      * Tanggal (tanpa jam) dari kolom DATE, untuk ditampilkan.
      */
     public static function tanggal(?string $tanggal): string

@@ -54,6 +54,17 @@ $routes->group('', ['filter' => 'masuk:superadmin,dosen'], static function (Rout
     $routes->post('mata-kuliah/(:num)/konsep-dasar', 'Pertemuan::konsepDasar/$1');
     $routes->get('pertemuan/(:num)', 'Pertemuan::lihat/$1');
     $routes->post('pertemuan/(:num)', 'Pertemuan::perbarui/$1');
+    // Pengaturan latihan dan penerbitan (SPEC.md §6): superadmin dan pengampu; pengajar 403.
+    $routes->post('pertemuan/(:num)/latihan', 'Pertemuan::latihan/$1');
+    $routes->post('pertemuan/(:num)/terbitkan', 'Pertemuan::terbitkan/$1');
+    $routes->post('pertemuan/(:num)/tarik', 'Pertemuan::tarik/$1');
+    // Jendela per kelas dan pra-pembangkitan (SPEC.md §3, §6, §8.2): siapa pun yang
+    // melihat kelas itu — superadmin, pengampu, dan pengajar kelas tersebut.
+    $routes->get('kelas/(:num)/pertemuan', 'Jendela::index/$1');
+    $routes->get('kelas/(:num)/pertemuan/(:num)', 'Jendela::lihat/$1/$2');
+    $routes->post('kelas/(:num)/pertemuan/(:num)', 'Jendela::simpan/$1/$2');
+    $routes->post('kelas/(:num)/pertemuan/(:num)/status', 'Jendela::status/$1/$2');
+    $routes->post('kelas/(:num)/pertemuan/(:num)/siapkan', 'Jendela::siapkan/$1/$2');
     // Bank soal (SPEC.md §8.1): superadmin dan pengampu; pengajar 403.
     $routes->get('soal/(:num)', 'Soal::lihat/$1');
     $routes->post('soal/(:num)/setujui', 'Soal::setujui/$1');

@@ -316,6 +316,7 @@ ui_prefs              (user_id PK, panels JSON, updated_at)
 - `submissions.tests` is the worker's per-test list `{ index, verdict, duration_ms }`; nothing in these tables holds test input or expected output.
 - The judge worker has no right on any of these tables.
 - An instance for a student is requested with one `GENERATE` job whose `idempotency_key` is `gen:<meeting_problem_id>:<user_id>`; pre-generation uses the `low` queue, a student who opens a problem without an instance the `normal` queue.
+- Two things the web app does to an existing `GENERATE` row (`App\Libraries\Antrean`): a `FAILED` one is put back to `QUEUED` in place, with `attempts = 0` and the current payload (`ulangi`); a `QUEUED` one on `low` whose student is now waiting gets `priority = 'normal'` and its id is pushed to the normal queue as well (`dahulukan`). The id may then sit in both queues; the conditional claim runs it once.
 
 Every `user_id`, `owner_id`, `actor_id` and similar column in these tables is `users.id` of §3. An enrollment is one row per student per course per academic year; a class move changes `class_id` on that row, so anything that later points at an enrollment follows the student.
 

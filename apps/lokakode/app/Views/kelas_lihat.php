@@ -41,6 +41,7 @@ $aktif = count(array_filter($pendaftaran, static fn ($p) => $p['status'] === 'AK
         <dt class="redup"><?= lang('Kode.kelas.kapasitas') ?></dt>
         <dd><?= $kelas['capacity'] !== null ? (int) $kelas['capacity'] : lang('Kode.kelas.tanpaBatas') ?></dd>
     </dl>
+    <p><a class="tombol tombol-sekunder" href="/kelas/<?= (int) $kelas['id'] ?>/pertemuan"><?= lang('Latihan.jendela.judul') ?></a></p>
     <?php if ((int) $kelas['boleh_kelola'] !== 1): ?>
         <p class="petunjuk"><?= lang('Kode.kelas.hanyaLihat') ?></p>
     <?php elseif (! $bolehUbah): ?>

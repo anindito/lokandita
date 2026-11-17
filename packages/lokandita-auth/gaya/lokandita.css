@@ -87,7 +87,7 @@
   .ltr { direction: ltr; unicode-bidi: isolate; }
 
   label { display: block; font-weight: 600; margin: 1rem 0 .3rem; }
-  input[type=text], input[type=password], input[type=email], input[type=search], input[type=file], input[type=date], input[type=number], select, textarea {
+  input[type=text], input[type=password], input[type=email], input[type=search], input[type=file], input[type=date], input[type=datetime-local], input[type=number], select, textarea {
     width: 100%; padding: .6rem .75rem; font: inherit; color: var(--teks); background: var(--kartu);
     border: 1px solid var(--garis); border-radius: .5rem;
   }
@@ -176,6 +176,12 @@
   .status-approved, .keadaan-diterima { border-color: var(--hijau); color: var(--hijau); }
   .status-rejected, .keadaan-ditolak { border-color: var(--bahaya); color: var(--bahaya); }
   .status-pending_review, .keadaan-menunggu { border-color: var(--emas); color: var(--emas); }
+  /* Latihan (SPEC.md §6, §11). */
+  .teks-bahaya { color: var(--bahaya); }
+  .teks-peringatan { color: var(--emas); }
+  .keadaan-buka { border-color: var(--hijau); color: var(--hijau); }
+  .keadaan-terjadwal { border-color: var(--emas); color: var(--emas); }
+  .keadaan-tutup { border-color: var(--bahaya); color: var(--bahaya); }
   .daftar-alasan { margin: .35rem 0 0; padding-inline-start: 1.25rem; list-style: disc; font-size: .9rem; }
   .daftar-alasan .letak { color: var(--teks-redup); }
   .dua-kolom { display: grid; gap: 0 1rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); }

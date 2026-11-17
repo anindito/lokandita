@@ -63,14 +63,67 @@ final class Antrean
             return (string) $ada['id'];
         }
 
+        self::dorong($prioritas, $id);
+
+        return $id;
+    }
+
+    /**
+     * Pekerjaan dengan kunci unik itu, bila ada: [id, status, priority].
+     *
+     * @return array{id: string, status: string, priority: string}|null
+     */
+    public static function denganKunci(string $kunciUnik): ?array
+    {
+        return db_connect()->query('SELECT id, status, priority FROM judge_jobs WHERE idempotency_key = ?', [$kunciUnik])->getRowArray();
+    }
+
+    /**
+     * Mengantrekan lagi pekerjaan yang FAILED, di barisnya sendiri (kunci uniknya
+     * tetap). Syarat status ada di dalam UPDATE: dua permintaan sekaligus hanya
+     * mengantrekannya sekali.
+     *
+     * @param array<string, mixed> $payload
+     */
+    public static function ulangi(string $id, array $payload, string $prioritas): bool
+    {
+        $db = db_connect();
+        $db->query(
+            'UPDATE judge_jobs SET status = \'QUEUED\', priority = ?, payload = ?, attempts = 0, progress = NULL, result = NULL,
+                    started_at = NULL, finished_at = NULL, created_at = ?
+             WHERE id = ? AND status = \'FAILED\'',
+            [$prioritas, json_encode($payload, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), Waktu::kini(), $id],
+        );
+        if ($db->affectedRows() !== 1) {
+            return false;
+        }
+        self::dorong($prioritas, $id);
+
+        return true;
+    }
+
+    /**
+     * Pekerjaan antrean low yang masih menunggu dipindahkan ke antrean normal:
+     * mahasiswanya sedang menunggu di depan layar. Id-nya boleh ada di dua
+     * antrean; worker hanya mengklaimnya sekali (KONTRAK.md §6).
+     */
+    public static function dahulukan(string $id): void
+    {
+        $db = db_connect();
+        $db->query('UPDATE judge_jobs SET priority = \'normal\' WHERE id = ? AND status = \'QUEUED\' AND priority = \'low\'', [$id]);
+        if ($db->affectedRows() === 1) {
+            self::dorong('normal', $id);
+        }
+    }
+
+    private static function dorong(string $prioritas, string $id): void
+    {
         try {
             self::redis()->lPush(self::KUNCI[$prioritas], $id);
         } catch (\RedisException $e) {
             self::$redis = null;
             Log::event('judge.lpush_failed', ['job' => $id, 'reason' => $e->getMessage()]);
         }
-
-        return $id;
     }
 
     /**
@@ -150,7 +203,7 @@ final class Antrean
     /**
      * Koneksi Redis dari REDIS_URL (KONTRAK.md §10): redis://:<sandi>@redis:6379/<db>.
      */
-    private static function redis(): \Redis
+    public static function redis(): \Redis
     {
         if (self::$redis === null) {
             $u = parse_url((string) getenv('REDIS_URL'));

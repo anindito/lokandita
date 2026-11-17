@@ -40,6 +40,7 @@ final class MatriksAksesTest extends KodeCase
         $semua = array_fill_keys(self::PELAKU, 'ok');
         $staf  = ['mhsA' => 403] + $semua;
         $kelolaXA = ['superadmin' => 'ok', 'pengampuX' => 'ok', 'pengampuY' => 404, 'pengajarA' => 403, 'pengajarB' => 404, 'mhsA' => 403];
+        $lihatXA  = ['pengampuY' => 404, 'pengajarB' => 404] + $staf;
         // Superadmin saja: semua yang lain 403, apa pun lingkupnya.
         $admin = ['superadmin' => 'ok'] + array_fill_keys(self::PELAKU, 403);
 
@@ -94,6 +95,18 @@ final class MatriksAksesTest extends KodeCase
             'POST mata-kuliah/{n}/konsep-dasar' => ['/mata-kuliah/' . $d['matkulX'] . '/konsep-dasar', ['pengajarB' => 403] + $kelolaXA],
             'GET pertemuan/{n}'                 => ['/pertemuan/' . $d['pertemuanX1'], ['pengajarB' => 403] + $kelolaXA],
             'POST pertemuan/{n}'                => ['/pertemuan/' . $d['pertemuanX1'], ['pengajarB' => 403] + $kelolaXA],
+
+            // Pengaturan latihan dan penerbitan: sama dengan pertemuannya.
+            'POST pertemuan/{n}/latihan'   => ['/pertemuan/' . $d['pertemuanX1'] . '/latihan', ['pengajarB' => 403] + $kelolaXA],
+            'POST pertemuan/{n}/terbitkan' => ['/pertemuan/' . $d['pertemuanX1'] . '/terbitkan', ['pengajarB' => 403] + $kelolaXA],
+            'POST pertemuan/{n}/tarik'     => ['/pertemuan/' . $d['pertemuanX1'] . '/tarik', ['pengajarB' => 403] + $kelolaXA],
+            // Jendela kelas XA dan pra-pembangkitan: siapa pun yang melihat kelas XA, termasuk pengajar A
+            // (SPEC.md §3). Pengajar B dan pengampu Y tidak melihat kelas itu (404).
+            'GET kelas/{n}/pertemuan'               => ['/kelas/' . $d['kelasXA'] . '/pertemuan', $lihatXA],
+            'GET kelas/{n}/pertemuan/{n}'           => ['/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'], $lihatXA],
+            'POST kelas/{n}/pertemuan/{n}'          => ['/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'], $lihatXA],
+            'POST kelas/{n}/pertemuan/{n}/status'   => ['/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'] . '/status', $lihatXA],
+            'POST kelas/{n}/pertemuan/{n}/siapkan'  => ['/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'] . '/siapkan', $lihatXA],
 
             // Bank soal mata kuliah X: sama dengan pertemuannya.
             'GET soal/{n}'             => ['/soal/' . $d['soalX'], ['pengajarB' => 403] + $kelolaXA],
@@ -176,7 +189,9 @@ final class MatriksAksesTest extends KodeCase
             $this->db->query('SELECT id, class_id, status FROM enrollments ORDER BY id')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT id, code, name, owner_id FROM courses ORDER BY id')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT id, label, status FROM academic_years ORDER BY id')->fetch_all(MYSQLI_ASSOC),
-            $this->db->query('SELECT id, course_id, number, title, language, enabled FROM meetings ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT id, course_id, number, title, language, enabled, target_points, min_mudah, starter_template, compiler_flags, published_at FROM meetings ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT * FROM meeting_class_windows ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT id FROM problem_instances ORDER BY id')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT * FROM meeting_concepts ORDER BY meeting_id, concept_code')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT * FROM course_base_concepts ORDER BY course_id, concept_code')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT id, status, translations, review_note FROM problem_versions ORDER BY id')->fetch_all(MYSQLI_ASSOC),
@@ -206,6 +221,10 @@ final class MatriksAksesTest extends KodeCase
             'POST mata-kuliah/{n}/pertemuan'    => ['number' => '9', 'title' => 'Dibajak', 'language' => 'cpp'],
             'POST mata-kuliah/{n}/konsep-dasar' => ['konsep' => ['POINTER', 'STRING']],
             'POST pertemuan/{n}'                => ['number' => '1', 'title' => 'Dibajak', 'language' => 'cpp', 'enabled' => '1', 'konsep' => ['POINTER']],
+            'POST pertemuan/{n}/latihan'   => ['target_points' => '1', 'min_mudah_sekali' => '0', 'min_mudah' => '0', 'min_mudah_sedang' => '0', 'min_sedang' => '0', 'min_sulit' => '0',
+                'starter_template' => 'DIBAJAK', 'compiler_flags' => '-Wall', 'autocomplete' => '1'],
+            'POST kelas/{n}/pertemuan/{n}'         => ['open_at' => '2026-11-20T08:00', 'close_at' => '2026-11-20T10:00', 'post_close_visibility' => 'review_only'],
+            'POST kelas/{n}/pertemuan/{n}/status'  => ['override' => 'open'],
             'POST soal/{n}/setujui'    => ['versi_id' => (string) $d['versiX']],
             'POST soal/{n}/tolak'      => ['versi_id' => (string) $d['versiX'], 'catatan' => 'Dibajak'],
             'POST soal/{n}/terjemahan' => ['versi_id' => (string) $d['versiX'], 'bahasa' => 'en'],
