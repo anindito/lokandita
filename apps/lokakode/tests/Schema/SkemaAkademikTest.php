@@ -19,7 +19,7 @@ final class SkemaAkademikTest extends TestCase
     {
         $this->db = TestSchema::connect((string) getenv('DB_DSN'));
         // Urutan mengikuti kunci asing. Hanya skema *_test (dijaga TestSchema).
-        foreach (['problem_instances', 'meeting_problems', 'import_items', 'imports', 'problem_versions', 'problems', 'meeting_concepts', 'course_base_concepts', 'meetings', 'enrollment_moves', 'enrollments', 'class_teachers', 'classes', 'courses', 'academic_years'] as $tabel) {
+        foreach (['ui_prefs', 'integrity_events', 'drafts', 'meeting_scores', 'problem_scores', 'submissions', 'meeting_class_windows', 'problem_instances', 'meeting_problems', 'import_items', 'imports', 'problem_versions', 'problems', 'meeting_concepts', 'course_base_concepts', 'meetings', 'enrollment_moves', 'enrollments', 'class_teachers', 'classes', 'courses', 'academic_years'] as $tabel) {
             $this->db->query("DELETE FROM {$tabel}");
         }
     }

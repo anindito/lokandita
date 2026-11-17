@@ -185,7 +185,7 @@ Details both sides rely on:
 - `GET /api/executions/{id}` answers `{ "id", "kind", "status", "progress", "result" }` with `Cache-Control: no-store`, never the payload. A job of another user, a system job, an unknown id and a malformed id all get the same `404 {"error":"execution_not_found"}`; this holds for dosen and superadmin too.
 - The claim also increments `attempts` and sets `started_at`. An id in Redis that has no `QUEUED` row (unknown, already claimed, pushed twice) is dropped without effect, so a job is never run twice at the same time.
 - Infrastructure failure (Docker cannot run the container, or an error inside the worker): the row goes back to `QUEUED` and is re-queued by the scan; at the third failed attempt it becomes `FAILED` with `result.error = "judge_unavailable"`. A verdict (`CE`, `TLE`, …) is never an infrastructure failure and is never retried.
-- A kind the worker cannot do yet answers `FAILED` with `result.error = "unsupported_kind"` — since stage 8 that is `SUBMIT`, and `RUN` with an `instance_id`; both arrive in stage 9.
+- Since stage 9a the worker does all five kinds. A kind it does not know answers `FAILED` with `result.error = "unsupported_kind"`.
 - Worker start: rows left `RUNNING` by a previous worker go back to `QUEUED` (or to `FAILED` / `judge_unavailable` when `attempts` is already above 2) and are pushed to Redis at once. While running, the scan does the same for a row that has been `RUNNING` for more than 15 minutes and is not being worked on.
 - There is exactly one worker per schema. It refuses to start — exit code 69, one log line `tidak_mulai` with the reason — when Docker, a required kernel feature (cgroup v2, memory, swap, pids and CPU limits, seccomp), the seccomp profile or a judge image with the current tag is missing. The judge images are `judge-c`, `judge-cpp`, `judge-python` and `judge-analisis` (concept analysis; it parses source and never runs it). Their tag is a hash over `judge/images/`, computed once when the worker starts. Exit code 78 means a missing environment variable.
 - **Heartbeat**: Redis key `lokandita:judge:worker` (same DB as the queues), a JSON object `{ commit, pid, mulai, waktu, konkurensi, image, skema }`, written every 5 s with a lifetime of 15 s and deleted on a clean stop. `commit` is the Git commit of the working tree at worker start. A missing key means no worker is running. `infra/deploy.sh judge` and `infra/smoke.sh` read it; LokaKode reads it through `Antrean::denyut()`.
@@ -197,8 +197,8 @@ Details both sides rely on:
 
 | Kind | Payload |
 |---|---|
-| `RUN` | `{ language, source, stdin? , instance_id? }` |
-| `SUBMIT` | `{ language, source, instance_id, submission_id }` |
+| `RUN` | `{ language, source, stdin?, instance_id?, flags? }` — with `instance_id` the sample tests of that instance are run; `stdin` and `instance_id` together are refused |
+| `SUBMIT` | `{ language, source, instance_id, submission_id, flags? }` — the two ids are integers |
 | `GENERATE` | `{ problem_version_id, user_id, meeting_problem_id, seed }` — the two ids and `seed` are integers, `user_id` a UUID |
 | `VALIDATE` | `{ language, generator, reference_solution, samples_count, hidden_count, time_limit_ms, allowed_concepts[], comparison_mode }` |
 | `ANALYZE` | `{ language, source, required_concepts[] }` |
@@ -211,7 +211,15 @@ Limits the worker applies to a payload: `language` is `c`, `cpp` or `python`; `s
 
 Time: `duration_ms` is CPU time of the program, measured inside the container; starting the container is not counted. `TLE` means the CPU time passed the limit (2 s for C and C++, 5 s for Python), or the wall-clock time passed 2 × limit + 1 s (a program that sleeps or waits).
 
-For `SUBMIT` the result holds per-test `{ index, verdict, duration_ms }`, `compile_log`, `passed`, `total`, and the list of concepts found. It never holds test input or expected output.
+`flags` (optional, C and C++ only) is the meeting's list of extra compiler flags. Web and worker both accept only these: `-Wall`, `-Wextra`, `-Wshadow`, `-Wpedantic`, `-O0`, `-O1`, `-O2`, `-lm`, and `-std=` followed by `c11`, `c17`, `gnu17` (C) or `c++14`, `c++17`, `c++20`, `gnu++17` (C++); at most 8 flags. Anything else gives `invalid_payload`.
+
+Instance jobs (`RUN` with `instance_id`, and `SUBMIT`): the worker reads `problem_instances` itself and refuses, with `invalid_payload`, an instance whose `user_id` is not the job's `created_by`, or whose version's language is not `language`. The time limit and comparison mode come from the instance's `problem_versions` row, never from the payload.
+
+For `RUN` with `instance_id` the result holds `{ verdict, compile_log, samples: [{ index, verdict, stdout, stderr, exit_code, signal, duration_ms }] }`: one entry per sample test (the first `samples_count` tests of the instance), each `AC`, `WA`, `RE`, `TLE`, `MLE` or `OLE`; the job's `verdict` is `AC` when every sample is, otherwise the first other verdict. Sample input and expected output are not in the result; the web app reads them from the instance to show them, because samples are public to their student. Hidden tests are never run by `RUN`.
+
+For `SUBMIT` the result holds `{ verdict, compile_log, tests: [{ index, verdict, duration_ms }], passed, total, concepts, missing }` over the **hidden** tests only (`index` counts them from 0; samples are never scored). It never holds test input, expected output or program output. `verdict` is `CE` (with `compile_error`, `tests: []`, `passed: 0`), `AC`, the first failing test's verdict, or `CONCEPT_NOT_MET`. Concept analysis runs only when every hidden test passed and the version has `required_in_submission`: `concepts` is then the list of codes found and `missing` the required ones not found; a non-empty `missing` makes the verdict `CONCEPT_NOT_MET` with `passed = total`. Otherwise `concepts` is `null` and `missing` is `[]`. If the student's source cannot be analysed the verdict stays `AC`, `concepts` is `null` and `analysis_failed` is `true`: a failure of our parser is never charged to the student.
+
+The worker does not touch `submissions`: `submission_id` is only echoed in its log. The web app copies a finished `SUBMIT` result into `submissions` and computes scores (`App\Libraries\Penilaian`), in the request that polls the job and again whenever scores are read, so a result is never lost because a browser tab was closed.
 
 For `VALIDATE` the result holds `{ ok, reasons[], warnings[], concepts[], tests, max_cpu_ms }`. `concepts` are the codes detected in the reference solution; `ok` is true exactly when `reasons` is empty. A problem that is refused is a result (`DONE`, `ok: false`), not a failure of the job. A reason or warning is `{ code, where, message, line?, column?, concept?, construct?, verdict?, seed?, index? }`:
 
@@ -278,9 +286,36 @@ imports, import_items                                                          o
 ```
 
 - The concepts allowed at a meeting are the course's base concepts plus the concepts of every meeting of that course with a number up to and including its own.
-- `meetings` holds only what the importer needs. Target, composition, class windows and publishing (`SPEC.md` §6) arrive in stage 9.
+- `meetings` gained the rest of `SPEC.md` §6 in stage 9a (below).
 - `problem_versions.status` is `PENDING_REVIEW`, `APPROVED` or `REJECTED`. `meeting_problems` gets its row at the first approval and then always points at the last approved version.
 - `problem_instances.tests` is a JSON array of `{ "in": "<stdin>", "out": "<expected stdout>" }`, the samples first. It is written only by the judge worker and never leaves the server (`SPEC.md` §10).
+
+Since stage 9a it also holds practice and scores (`SPEC.md` §6, §7, §11):
+
+```
+meetings              + target_points (default 60), min_mudah_sekali / min_mudah / min_mudah_sedang / min_sedang / min_sulit
+                        (default 8 / 8 / 6 / 6 / 4), starter_template NULL, compiler_flags, autocomplete,
+                        anonymize_leaderboard, practice_after_close, published_at NULL, published_by
+meeting_class_windows (id, meeting_id, class_id, course_id, open_at, close_at, override 'none'|'open'|'closed',
+                       late_policy, late_factor, post_close_visibility, updated_by, …)   UNIQUE(meeting_id, class_id)
+submissions           (id, user_id, meeting_problem_id, problem_version_id, instance_id, language, source, job_id UNIQUE,
+                       status 'MENUNGGU'|'DINILAI'|'GAGAL', verdict, passed, total, score, late, duration_ms,
+                       compile_log, tests JSON, missing_concepts JSON, created_at, judged_at)
+problem_scores        (user_id, meeting_problem_id, meeting_id, difficulty, points, best_score, best_submission_id,
+                       attempts, reached_at, updated_at)                                PK(user_id, meeting_problem_id)
+meeting_scores        (user_id, meeting_id, total_points, counted_points, target_points, score, surplus,
+                       very_easy_counted, submissions, reached_at, updated_at)          PK(user_id, meeting_id)
+drafts                (user_id, meeting_problem_id, source, updated_at)                 PK(user_id, meeting_problem_id)
+integrity_events      (id, user_id, kind, meeting_problem_id NULL, detail JSON, ip, user_agent, created_at)
+ui_prefs              (user_id PK, panels JSON, updated_at)
+```
+
+- A meeting reaches students only when `published_at` is set and `enabled = 1`. A window is **open** when `override = 'open'`, or `override = 'none'` and `open_at <= now < close_at`; `override = 'closed'` closes it whatever the times say. A class without a window row is closed. The class must belong to the meeting's course (composite foreign keys).
+- `late_policy`, `late_factor`, `practice_after_close`, `anonymize_leaderboard` and `submissions.late` exist with their defaults and are read by nothing until stage 9b. In 9a a submission outside an open window is refused.
+- `problem_scores` and `meeting_scores` are derived from `submissions` and are always recomputed in full for one student and one meeting; they are never adjusted incrementally. `points` is 3 / 5 / 8 / 10 / 15 by `difficulty` of the version the student's instance was made from.
+- `submissions.tests` is the worker's per-test list `{ index, verdict, duration_ms }`; nothing in these tables holds test input or expected output.
+- The judge worker has no right on any of these tables.
+- An instance for a student is requested with one `GENERATE` job whose `idempotency_key` is `gen:<meeting_problem_id>:<user_id>`; pre-generation uses the `low` queue, a student who opens a problem without an instance the `normal` queue.
 
 Every `user_id`, `owner_id`, `actor_id` and similar column in these tables is `users.id` of §3. An enrollment is one row per student per course per academic year; a class move changes `class_id` on that row, so anything that later points at an enrollment follows the student.
 

@@ -66,7 +66,8 @@ def test_worker_tidak_boleh_menyisipkan_atau_menghapus_job(db_worker, buat_job):
 @pytest.mark.parametrize(
     "tabel",
     ["academic_years", "courses", "classes", "class_teachers", "enrollments", "enrollment_moves", "audit_log", "migrations",
-     "concepts", "meetings", "meeting_concepts", "course_base_concepts", "problems", "meeting_problems", "imports", "import_items"],
+     "concepts", "meetings", "meeting_concepts", "course_base_concepts", "problems", "meeting_problems", "imports", "import_items",
+     "meeting_class_windows", "submissions", "problem_scores", "meeting_scores", "drafts", "integrity_events", "ui_prefs"],
 )
 def test_worker_tidak_bisa_membaca_tabel_lain_lokakode(db_worker, tabel):
     assert galat_mysql(db_worker, f"SELECT COUNT(*) FROM {tabel}") == DITOLAK_TABEL

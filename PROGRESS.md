@@ -1,6 +1,6 @@
 # Progress
 
-Next stage: **9 — Student interface, scoring, leaderboard, analytics** — not started.
+Current stage: **9a — student interface and scoring** — in progress; see "Stage 9a" at the end of this file. Stage 9 was split by the owner on 2026-11-17: 9b (leaderboard, analytics, exports, late policy, three languages and RTL polish) is the next session, and the gate of `SPEC.md` §18 for stage 9 is taken after 9b.
 
 Stage 8 — Problems, concepts, importer — finished 2026-11-17, tag `tahap-8`; see "Gate result" at the end of this file.
 
@@ -382,3 +382,13 @@ Carried into the next stages:
 - `docs/DETEKSI-KONSEP.md` still awaits the owner's review.
 - The "Owed by later stages" list of stage 8, and the items stages 6 and 7 left for stage 9.
 - `auth.lokandita.com` and `lokakode.lokandita.com` are open; the Portal is in maintenance.
+
+## Stage 9a — in progress
+
+Plan approved by the owner 2026-11-17 (8 steps, one commit each): 1 contract and schema · 2 worker: `SUBMIT`, `RUN` on samples, compiler flags · 3 meeting settings, publishing, class windows, pre-generation · 4 scoring · 5 student meeting page · 6 problem page with Monaco · 7 paste and copy blocking, watermark · 8 close.
+
+Owner's decisions for this stage: see `DECISIONS.md`, 2026-11-17.
+
+Done (anything not listed here is not done):
+
+- Step 1 — contract and schema: `KONTRAK.md` §6 (payloads and results of `SUBMIT` and `RUN` on samples, flag whitelist, the new tables); migration `BuatLatihanDanNilai` (`meetings` gains target, composition, starter template, flags, publishing; `meeting_class_windows`, `submissions`, `problem_scores`, `meeting_scores`, `drafts`, `integrity_events`, `ui_prefs`). `infra/tes.sh lokakode --filter Skema` → 29 tests, 93 assertions pass. Exists only in `lokakode_test`; not deployed. The worker does not do what the contract now says until step 2.
