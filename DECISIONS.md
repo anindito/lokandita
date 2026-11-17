@@ -2,6 +2,10 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-17 — Owner's decisions for meetings 1 and 3 and the translations: the agent imports and approves all three meetings under the owner's superadmin account; the owner creates meeting 3 in the browser himself.
+- 2026-11-17 — English and Arabic texts written by the agent are imported with `"machine": true` — they were not written or checked by a human translator, and the badge is how the system says so until the pengampu clears it.
+- 2026-11-17 — Meeting 3 problems use comparison mode `trimmed` and fixed Indonesian output words in all language versions — the meeting teaches output formatting, so the exact text is the answer, and one expected output cannot depend on the reader's language.
+- 2026-11-17 — Problem builders share `docs/soal/bangun.py`; each `soal(...)` call holds the generator, the reference solution and the three texts of one problem side by side.
 - 2026-11-17 — Owner's decisions for the DDP101 meeting 2 problems: the agent writes them, imports them by CLI under the owner's superadmin account, and approves all 29 through a new command `spark soal:setujui` — the owner chose not to review each statement in the browser first; the audit rows of these approvals say `lewat: cli`.
 - 2026-11-17 — The 29 problems come from `docs/soal/buat-ddp101-pertemuan-2.py`, which writes `docs/soal/ddp101-pertemuan-2.json` — statement, generator and reference solution of one problem sit together and are readable, and the JSON is reproducible. Statements are Indonesian only (`en` and `ar` left empty, so students in another language see the fallback badge).
 - 2026-11-17 — Problems with a fractional answer use comparison mode `float` and inputs chosen so that the answer has at most six significant digits — `FORMAT_OUTPUT` is not allowed at meeting 2, so the reference prints with `cout`'s default precision, and an answer like 33.3333… would make the expected output itself a rounded number.
