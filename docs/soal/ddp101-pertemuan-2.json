@@ -1,0 +1,645 @@
+{
+  "course": "DDP101",
+  "meeting": 2,
+  "language": "cpp",
+  "problems": [
+    {
+      "slug": "jumlah-dan-selisih",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Jumlah dan Selisih",
+          "statement": "Diberikan dua bilangan bulat **a** dan **b**. Cetak jumlahnya, lalu selisihnya (**a − b**).\n\nSelisihnya boleh negatif.",
+          "input_format": "Satu baris berisi a dan b.",
+          "output_format": "Baris pertama: a + b. Baris kedua: a − b.",
+          "constraints": "1 ≤ a, b ≤ 1000"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 1000), r.randint(1, 1000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    cout << a + b << endl;\n    cout << a - b << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "kuadrat-dan-kubik",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Kuadrat dan Kubik",
+          "statement": "Diberikan sebuah bilangan bulat **n**. Cetak **n²**, lalu **n³**.",
+          "input_format": "Satu bilangan bulat n.",
+          "output_format": "Baris pertama: n × n. Baris kedua: n × n × n.",
+          "constraints": "1 ≤ n ≤ 1000"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(1000 if i == 5 else r.randint(1, 1000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    cout << n * n << endl;\n    cout << n * n * n << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "hasil-bagi-dan-sisa",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Hasil Bagi dan Sisa",
+          "statement": "Sebanyak **a** permen dibagi rata kepada **b** anak. Setiap anak mendapat jumlah yang sama dan sebanyak mungkin.\n\nCetak berapa permen yang didapat tiap anak, lalu berapa permen yang tersisa.\n\nDi C++, `/` pada dua bilangan bulat memberi hasil bagi yang dibulatkan ke bawah, dan `%` memberi sisanya.",
+          "input_format": "Satu baris berisi a dan b.",
+          "output_format": "Baris pertama: permen tiap anak. Baris kedua: sisa permen.",
+          "constraints": "1 ≤ a ≤ 10000, 1 ≤ b ≤ 100"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 10000), r.randint(1, 100))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    cout << a / b << endl;\n    cout << a % b << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "detik-ke-menit",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Detik ke Menit",
+          "statement": "Sebuah video berdurasi **d** detik. Tuliskan durasi itu dalam menit dan detik.\n\nContoh: 135 detik adalah 2 menit 15 detik.",
+          "input_format": "Satu bilangan bulat d.",
+          "output_format": "Satu baris: banyak menit, satu spasi, lalu sisa detik.",
+          "constraints": "0 ≤ d ≤ 100000"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(59 if i == 4 else r.randint(0, 100000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int d;\n    cin >> d;\n    cout << d / 60 << \" \" << d % 60 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "total-harga",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Total Harga",
+          "statement": "Sebuah barang berharga **h** rupiah. Seorang pembeli mengambil **n** barang yang sama. Cetak jumlah yang harus dibayar.",
+          "input_format": "Satu baris berisi h dan n.",
+          "output_format": "Satu bilangan: total harga.",
+          "constraints": "500 ≤ h ≤ 50000, 1 ≤ n ≤ 100"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 100) * 500, r.randint(1, 100))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int harga, banyak;\n    cin >> harga >> banyak;\n    cout << harga * banyak << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "kode-huruf",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Kode Sebuah Huruf",
+          "statement": "Di dalam komputer setiap huruf disimpan sebagai sebuah bilangan (kode ASCII). Huruf `A` disimpan sebagai 65, `B` sebagai 66, dan `a` sebagai 97.\n\nBaca satu huruf, lalu cetak bilangan yang menyimpannya.\n\nPetunjuk: simpan hurufnya di variabel bertipe `char`, lalu ubah ke `int` sebelum dicetak.",
+          "input_format": "Satu huruf, besar atau kecil.",
+          "output_format": "Satu bilangan: kode huruf itu.",
+          "constraints": "Huruf A–Z atau a–z."
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    char huruf;\n    cin >> huruf;\n    cout << (int) huruf << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "celsius-ke-fahrenheit",
+      "difficulty": "mudah",
+      "comparison_mode": "float",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Celsius ke Fahrenheit",
+          "statement": "Suhu **c** derajat Celsius sama dengan **c × 9 / 5 + 32** derajat Fahrenheit.\n\nBaca c (bilangan bulat) dan cetak suhunya dalam Fahrenheit sebagai bilangan pecahan.\n\nHati-hati: 37 derajat Celsius adalah 98.6 derajat Fahrenheit, bukan 98.",
+          "input_format": "Satu bilangan bulat c.",
+          "output_format": "Satu bilangan: suhu dalam Fahrenheit.",
+          "constraints": "−50 ≤ c ≤ 150"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(37 if i == 3 else r.randint(-50, 150))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int c;\n    cin >> c;\n    double f = c * 9.0 / 5 + 32;\n    cout << f << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "potong-dan-bulatkan",
+      "difficulty": "mudah",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Potong dan Bulatkan",
+          "statement": "Diberikan sebuah bilangan pecahan positif **x**. Cetak dua bilangan bulat:\n\n1. x yang **dipotong**: bagian pecahannya dibuang (7.98 menjadi 7);\n2. x yang **dibulatkan** ke bilangan bulat terdekat (7.98 menjadi 8, dan 7.50 menjadi 8).\n\nPetunjuk: mengubah `double` menjadi `int` membuang bagian pecahannya. Apa yang terjadi bila sebelum itu x ditambah 0.5?",
+          "input_format": "Satu bilangan pecahan x dengan dua angka di belakang koma.",
+          "output_format": "Baris pertama: x dipotong. Baris kedua: x dibulatkan.",
+          "constraints": "0 ≤ x < 1000"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nk = {2: 750, 3: 749, 4: 99950}.get(i, r.randint(0, 99999))\nprint(f\"{k / 100:.2f}\")\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    double x;\n    cin >> x;\n    cout << (int) x << endl;\n    cout << (int) (x + 0.5) << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "huruf-berikutnya",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Huruf Berikutnya",
+          "statement": "Baca satu huruf kecil, lalu cetak huruf yang tepat sesudahnya di dalam alfabet. Sesudah `a` adalah `b`, sesudah `k` adalah `l`.\n\nPetunjuk: sebuah `char` bisa dijumlahkan dengan bilangan. Hasilnya bilangan, jadi ubah kembali menjadi `char` sebelum dicetak.",
+          "input_format": "Satu huruf kecil.",
+          "output_format": "Satu huruf.",
+          "constraints": "Huruf a sampai y (bukan z)."
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.choice('abcdefghijklmnopqrstuvwxy'))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    char huruf;\n    cin >> huruf;\n    cout << (char) (huruf + 1) << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "digit-terakhir",
+      "difficulty": "mudah",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Digit Terakhir",
+          "statement": "Diberikan sebuah bilangan bulat **n**. Cetak digit terakhirnya, lalu bilangan itu tanpa digit terakhirnya.\n\nContoh: untuk 5827, digit terakhirnya 7 dan sisanya 582.",
+          "input_format": "Satu bilangan bulat n.",
+          "output_format": "Baris pertama: digit terakhir n. Baris kedua: n tanpa digit terakhirnya.",
+          "constraints": "10 ≤ n ≤ 999999"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(10, 999999))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    cout << n % 10 << endl;\n    cout << n / 10 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "jam-menit-detik",
+      "difficulty": "mudah",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Jam, Menit, Detik",
+          "statement": "Sebuah stopwatch menunjukkan **d** detik. Tuliskan sebagai jam, menit, dan detik.\n\nContoh: 3725 detik adalah 1 jam 2 menit 5 detik.",
+          "input_format": "Satu bilangan bulat d.",
+          "output_format": "Satu baris berisi tiga bilangan dipisah spasi: jam, menit, detik.",
+          "constraints": "0 ≤ d < 86400"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 0, 3: 86399, 4: 3600}.get(i, r.randint(0, 86399)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int d;\n    cin >> d;\n    int jam = d / 3600;\n    int menit = d % 3600 / 60;\n    int detik = d % 60;\n    cout << jam << \" \" << menit << \" \" << detik << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "rata-rata-dua-bilangan",
+      "difficulty": "mudah",
+      "comparison_mode": "float",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Rata-Rata Dua Bilangan",
+          "statement": "Diberikan dua bilangan bulat. Cetak rata-ratanya sebagai bilangan pecahan.\n\nRata-rata 3 dan 4 adalah 3.5, bukan 3.",
+          "input_format": "Satu baris berisi dua bilangan bulat.",
+          "output_format": "Satu bilangan: rata-rata keduanya.",
+          "constraints": "0 ≤ kedua bilangan ≤ 1000"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(0, 1000), r.randint(0, 1000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    double rata = (a + b) / 2.0;\n    cout << rata << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "luas-segitiga",
+      "difficulty": "mudah",
+      "comparison_mode": "float",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Luas Segitiga",
+          "statement": "Sebuah segitiga punya alas **a** dan tinggi **t**, keduanya bilangan bulat. Luasnya **a × t / 2**.\n\nCetak luasnya. Luas segitiga dengan alas 3 dan tinggi 5 adalah 7.5.",
+          "input_format": "Satu baris berisi a dan t.",
+          "output_format": "Satu bilangan: luas segitiga.",
+          "constraints": "1 ≤ a, t ≤ 300"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 300), r.randint(1, 300))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int alas, tinggi;\n    cin >> alas >> tinggi;\n    double luas = alas * tinggi / 2.0;\n    cout << luas << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "jumlah-tiga-digit",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Jumlah Tiga Digit",
+          "statement": "Diberikan sebuah bilangan tiga digit. Cetak jumlah ketiga digitnya.\n\nContoh: untuk 472 jawabannya 4 + 7 + 2 = 13.\n\nPetunjuk: `/` dan `%` dengan 10 dan 100 bisa memisahkan digit-digit sebuah bilangan.",
+          "input_format": "Satu bilangan bulat tiga digit.",
+          "output_format": "Satu bilangan: jumlah digitnya.",
+          "constraints": "100 ≤ n ≤ 999"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 100, 3: 999}.get(i, r.randint(100, 999)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    int ratusan = n / 100;\n    int puluhan = n / 10 % 10;\n    int satuan = n % 10;\n    cout << ratusan + puluhan + satuan << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "balik-tiga-digit",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Balik Tiga Digit",
+          "statement": "Diberikan sebuah bilangan tiga digit. Cetak bilangan yang digit-digitnya dibalik urutannya.\n\nContoh: 472 menjadi 274. Hasilnya tetap sebuah bilangan, jadi 120 menjadi 21 (bukan 021).",
+          "input_format": "Satu bilangan bulat tiga digit.",
+          "output_format": "Satu bilangan: bilangan itu dengan digit terbalik.",
+          "constraints": "100 ≤ n ≤ 999"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 120, 3: 500, 4: 707}.get(i, r.randint(100, 999)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    int ratusan = n / 100;\n    int puluhan = n / 10 % 10;\n    int satuan = n % 10;\n    cout << satuan * 100 + puluhan * 10 + ratusan << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "pecahan-uang",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Pecahan Uang",
+          "statement": "Sebuah mesin ATM mengeluarkan uang sebanyak **n** rupiah dengan lembaran **sesedikit mungkin**. Pecahan yang tersedia: 100000, 50000, 20000, 10000, 5000, 2000, dan 1000.\n\nCetak berapa lembar yang keluar untuk tiap pecahan, mulai dari pecahan terbesar.\n\nContoh: 188000 = 1 × 100000 + 1 × 50000 + 1 × 20000 + 1 × 10000 + 1 × 5000 + 1 × 2000 + 1 × 1000.",
+          "input_format": "Satu bilangan bulat n, kelipatan 1000.",
+          "output_format": "Tujuh baris: banyak lembar 100000, 50000, 20000, 10000, 5000, 2000, 1000.",
+          "constraints": "1000 ≤ n ≤ 5000000"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 188000, 3: 1000, 4: 4999000}.get(i, r.randint(1, 5000) * 1000))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    cout << n / 100000 << endl;\n    n = n % 100000;\n    cout << n / 50000 << endl;\n    n = n % 50000;\n    cout << n / 20000 << endl;\n    n = n % 20000;\n    cout << n / 10000 << endl;\n    n = n % 10000;\n    cout << n / 5000 << endl;\n    n = n % 5000;\n    cout << n / 2000 << endl;\n    n = n % 2000;\n    cout << n / 1000 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "huruf-kecil-ke-besar",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Huruf Kecil ke Huruf Besar",
+          "statement": "Baca satu huruf kecil dan cetak huruf besarnya: `a` menjadi `A`, `m` menjadi `M`.\n\nPetunjuk: kode huruf kecil berurutan dari `'a'` sampai `'z'`, dan kode huruf besar berurutan dari `'A'` sampai `'Z'`. Jarak sebuah huruf kecil dari `'a'` sama dengan jarak huruf besarnya dari `'A'`.",
+          "input_format": "Satu huruf kecil.",
+          "output_format": "Satu huruf besar.",
+          "constraints": "Huruf a sampai z."
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 'a', 3: 'z'}.get(i, r.choice('abcdefghijklmnopqrstuvwxyz')))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    char kecil;\n    cin >> kecil;\n    char besar = (char) (kecil - 'a' + 'A');\n    cout << besar << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "lama-perjalanan",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Lama Perjalanan",
+          "statement": "Sebuah kereta berangkat pukul **j1:m1** dan tiba pukul **j2:m2** pada hari yang sama. Cetak lama perjalanannya dalam jam dan menit.\n\nContoh: berangkat 07:45 dan tiba 10:20 berarti perjalanan 2 jam 35 menit.\n\nPetunjuk: ubah kedua waktu menjadi menit sejak tengah malam.",
+          "input_format": "Satu baris berisi empat bilangan bulat: j1 m1 j2 m2.",
+          "output_format": "Satu baris: banyak jam, satu spasi, lalu banyak menit.",
+          "constraints": "0 ≤ j1, j2 ≤ 23; 0 ≤ m1, m2 ≤ 59; waktu tiba tidak lebih awal dari waktu berangkat."
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\na = r.randint(0, 1439)\nb = r.randint(a, 1439)\nif i == 2:\n    a, b = 7 * 60 + 45, 10 * 60 + 20\nif i == 3:\n    b = a\nprint(a // 60, a % 60, b // 60, b % 60)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int j1, m1, j2, m2;\n    cin >> j1 >> m1 >> j2 >> m2;\n    int lama = (j2 * 60 + m2) - (j1 * 60 + m1);\n    cout << lama / 60 << \" \" << lama % 60 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "persentase-benar",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "float",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Persentase Jawaban Benar",
+          "statement": "Dalam sebuah kuis, seorang mahasiswa menjawab benar **b** dari **t** soal. Cetak persentase jawaban benarnya sebagai bilangan pecahan.\n\nContoh: 3 benar dari 8 soal adalah 37.5 persen.\n\nHati-hati dengan pembagian dua bilangan bulat.",
+          "input_format": "Satu baris berisi b dan t.",
+          "output_format": "Satu bilangan: persentase jawaban benar.",
+          "constraints": "0 ≤ b ≤ t; t salah satu dari 4, 5, 8, 10, 20, 25, 40, 50."
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nt = r.choice([4, 5, 8, 10, 20, 25, 40, 50])\nb = {2: 0, 3: t}.get(i, r.randint(0, t))\nprint(b, t)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int benar, total;\n    cin >> benar >> total;\n    double persen = 100.0 * benar / total;\n    cout << persen << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "hari-jam-menit-detik",
+      "difficulty": "sedang",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Hari, Jam, Menit, Detik",
+          "statement": "Sebuah server sudah menyala selama **d** detik. Tuliskan lamanya dalam hari, jam, menit, dan detik.\n\nPerhatikan batas d: nilainya bisa jauh lebih besar daripada yang muat di sebuah `int`.",
+          "input_format": "Satu bilangan bulat d.",
+          "output_format": "Satu baris berisi empat bilangan dipisah spasi: hari, jam, menit, detik.",
+          "constraints": "0 ≤ d ≤ 10¹²"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 0, 3: 10**12, 4: 86399, 5: 2147483648}.get(i, r.randint(0, 10**12)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    long long d;\n    cin >> d;\n    long long hari = d / 86400;\n    long long jam = d % 86400 / 3600;\n    long long menit = d % 3600 / 60;\n    long long detik = d % 60;\n    cout << hari << \" \" << jam << \" \" << menit << \" \" << detik << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "hasil-kali-besar",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Hasil Kali yang Besar",
+          "statement": "Diberikan dua bilangan bulat **a** dan **b**. Cetak **a × b**.\n\nKedua bilangan muat di `int`, tetapi hasil kalinya belum tentu. Hasil kali dua `int` dihitung sebagai `int`, walaupun kemudian disimpan di variabel yang lebih besar — jadi salah satunya harus diubah tipenya lebih dulu.",
+          "input_format": "Satu baris berisi a dan b.",
+          "output_format": "Satu bilangan: a × b.",
+          "constraints": "1 ≤ a, b ≤ 10⁹"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\na, b = r.randint(1, 10**9), r.randint(1, 10**9)\nif i == 2:\n    a, b = 10**9, 10**9\nif i == 3:\n    a, b = 46341, 46341\nprint(a, b)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    long long hasil = (long long) a * b;\n    cout << hasil << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "sandi-geser",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Sandi Geser",
+          "statement": "Sebuah sandi sederhana menggeser huruf besar sejauh **k** langkah di dalam alfabet. Sesudah `Z` kembali ke `A`.\n\nContoh: `A` digeser 3 menjadi `D`; `Y` digeser 3 menjadi `B`; `C` digeser 26 tetap `C`.\n\nBaca satu huruf besar dan k, lalu cetak huruf hasil geserannya.\n\nPetunjuk: hitung dulu urutan hurufnya (A = 0, B = 1, …, Z = 25). Operator `%` membuat hitungan kembali ke 0 sesudah 25.",
+          "input_format": "Satu baris berisi satu huruf besar dan bilangan bulat k, dipisah satu spasi.",
+          "output_format": "Satu huruf besar.",
+          "constraints": "Huruf A–Z; 0 ≤ k ≤ 1000"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nh = r.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ')\nk = r.randint(0, 1000)\nif i == 2:\n    h, k = 'Y', 3\nif i == 3:\n    h, k = 'C', 26\nif i == 4:\n    h, k = 'Z', 1\nprint(h, k)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    char huruf;\n    int k;\n    cin >> huruf >> k;\n    int urutan = (huruf - 'A' + k) % 26;\n    cout << (char) ('A' + urutan) << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "jam-selesai",
+      "difficulty": "sedang",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Jam Selesai",
+          "statement": "Sebuah proses mulai pukul **j:m** dan berjalan selama **d** menit. Proses itu bisa berjalan melewati tengah malam, bahkan berhari-hari.\n\nCetak berapa kali tengah malam terlewati, lalu jam dan menit saat proses selesai.\n\nContoh: mulai 22:30 dan berjalan 200 menit, selesai pukul 01:50 keesokan harinya: `1 1 50`.",
+          "input_format": "Satu baris berisi tiga bilangan bulat: j m d.",
+          "output_format": "Satu baris berisi tiga bilangan dipisah spasi: banyak tengah malam yang terlewati, jam selesai, menit selesai.",
+          "constraints": "0 ≤ j ≤ 23; 0 ≤ m ≤ 59; 0 ≤ d ≤ 100000"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nj, m, d = r.randint(0, 23), r.randint(0, 59), r.randint(0, 100000)\nif i == 2:\n    j, m, d = 22, 30, 200\nif i == 3:\n    j, m, d = 23, 59, 1\nif i == 4:\n    d = 0\nprint(j, m, d)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int j, m, d;\n    cin >> j >> m >> d;\n    int total = j * 60 + m + d;\n    cout << total / 1440 << \" \" << total % 1440 / 60 << \" \" << total % 60 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "nilai-akhir",
+      "difficulty": "sedang",
+      "comparison_mode": "float",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Nilai Akhir",
+          "statement": "Nilai akhir sebuah mata kuliah dihitung dari tiga nilai bulat: tugas (bobot 20%), UTS (bobot 30%), dan UAS (bobot 50%).\n\nCetak nilai akhirnya sebagai bilangan pecahan.\n\nContoh: tugas 80, UTS 75, UAS 91 memberi 16 + 22.5 + 45.5 = 84.",
+          "input_format": "Satu baris berisi tiga bilangan bulat: tugas, UTS, UAS.",
+          "output_format": "Satu bilangan: nilai akhir.",
+          "constraints": "0 ≤ setiap nilai ≤ 100"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nt, u, a = r.randint(0, 100), r.randint(0, 100), r.randint(0, 100)\nif i == 2:\n    t, u, a = 80, 75, 91\nif i == 3:\n    t, u, a = 100, 100, 100\nif i == 4:\n    t, u, a = 1, 0, 0\nprint(t, u, a)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int tugas, uts, uas;\n    cin >> tugas >> uts >> uas;\n    double akhir = (2 * tugas + 3 * uts + 5 * uas) / 10.0;\n    cout << akhir << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "besar-dan-kecil",
+      "difficulty": "sedang",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Yang Besar dan Yang Kecil",
+          "statement": "Diberikan dua bilangan bulat **a** dan **b**. Cetak yang lebih besar, lalu yang lebih kecil.\n\nPercabangan belum dipelajari, tetapi soal ini bisa diselesaikan dengan aritmetika saja. Perhatikan: jumlah kedua bilangan ditambah jaraknya (**|a − b|**) sama dengan dua kali bilangan yang lebih besar.\n\nFungsi `abs` dari `<cstdlib>` memberi nilai mutlak sebuah bilangan bulat.",
+          "input_format": "Satu baris berisi a dan b.",
+          "output_format": "Baris pertama: bilangan yang lebih besar. Baris kedua: yang lebih kecil.",
+          "constraints": "−1000000 ≤ a, b ≤ 1000000"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\na, b = r.randint(-10**6, 10**6), r.randint(-10**6, 10**6)\nif i == 2:\n    b = a\nif i == 3:\n    a, b = -5, -9\nprint(a, b)\n",
+      "reference_solution": "#include <iostream>\n#include <cstdlib>\nusing namespace std;\n\nint main() {\n    int a, b;\n    cin >> a >> b;\n    int jarak = abs(a - b);\n    cout << (a + b + jarak) / 2 << endl;\n    cout << (a + b - jarak) / 2 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "tukar-digit-ujung",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Tukar Digit Ujung",
+          "statement": "Diberikan sebuah bilangan lima digit. Tukar digit pertamanya dengan digit terakhirnya, lalu cetak bilangan yang terbentuk.\n\nContoh: 52819 menjadi 92815. Tiga digit di tengah tidak berubah.",
+          "input_format": "Satu bilangan bulat lima digit yang digit terakhirnya bukan 0.",
+          "output_format": "Satu bilangan lima digit.",
+          "constraints": "10000 ≤ n ≤ 99999; n tidak habis dibagi 10."
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = r.randint(1000, 9999) * 10 + r.randint(1, 9)\nif i == 2:\n    n = 52819\nif i == 3:\n    n = 10001\nif i == 4:\n    n = 90009\nprint(n)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    int pertama = n / 10000;\n    int tengah = n / 10 % 1000;\n    int terakhir = n % 10;\n    cout << terakhir * 10000 + tengah * 10 + pertama << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "jam-mundur",
+      "difficulty": "sulit",
+      "comparison_mode": "token",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Jam Mundur",
+          "statement": "Sekarang pukul **j:m**. Pukul berapakah **k** menit yang lalu? Nilai k bisa sangat besar: berhari-hari, bahkan bertahun-tahun yang lalu.\n\nCetak jam dan menitnya.\n\nContoh: 100 menit sebelum pukul 01:20 adalah pukul 23:40 hari sebelumnya.\n\nHati-hati: di C++, `%` pada bilangan negatif memberi hasil negatif atau nol, bukan sisa yang positif.",
+          "input_format": "Satu baris berisi tiga bilangan bulat: j m k.",
+          "output_format": "Satu baris: jam, satu spasi, lalu menit.",
+          "constraints": "0 ≤ j ≤ 23; 0 ≤ m ≤ 59; 0 ≤ k ≤ 10⁹"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nj, m, k = r.randint(0, 23), r.randint(0, 59), r.randint(0, 10**9)\nif i == 2:\n    j, m, k = 1, 20, 100\nif i == 3:\n    k = 0\nif i == 4:\n    j, m, k = 0, 0, 1\nif i == 5:\n    k = 1440 * r.randint(1, 1000)\nif i == 6:\n    k = r.randint(0, 3000)\nprint(j, m, k)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int j, m, k;\n    cin >> j >> m >> k;\n    int sekarang = j * 60 + m;\n    int dulu = (sekarang - k % 1440 + 1440) % 1440;\n    cout << dulu / 60 << \" \" << dulu % 60 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "nilai-tengah",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Nilai Tengah",
+          "statement": "Diberikan tiga bilangan bulat. Cetak **nilai tengahnya**: bilangan yang, bila ketiganya diurutkan, berada di tengah.\n\nContoh: nilai tengah dari 7, 2, 5 adalah 5. Nilai tengah dari 4, 9, 4 adalah 4.\n\nPercabangan belum dipelajari. Pikirkan: jumlah ketiga bilangan dikurangi yang terbesar dan yang terkecil adalah nilai tengahnya. Yang lebih besar dari dua bilangan bisa dihitung dari jumlah dan jaraknya (lihat soal *Yang Besar dan Yang Kecil*).",
+          "input_format": "Satu baris berisi tiga bilangan bulat.",
+          "output_format": "Satu bilangan: nilai tengah.",
+          "constraints": "−1000000 ≤ setiap bilangan ≤ 1000000"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\na, b, c = (r.randint(-10**6, 10**6) for _ in range(3))\nif i == 2:\n    a, b, c = 7, 2, 5\nif i == 3:\n    a, b, c = 4, 9, 4\nif i == 4:\n    b, c = a, a\nif i == 5:\n    a, b, c = -3, -1, -2\nprint(a, b, c)\n",
+      "reference_solution": "#include <iostream>\n#include <cstdlib>\nusing namespace std;\n\nint main() {\n    int a, b, c;\n    cin >> a >> b >> c;\n    int besarAB = (a + b + abs(a - b)) / 2;\n    int kecilAB = (a + b - abs(a - b)) / 2;\n    int terbesar = (besarAB + c + abs(besarAB - c)) / 2;\n    int terkecil = (kecilAB + c - abs(kecilAB - c)) / 2;\n    cout << a + b + c - terbesar - terkecil << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "kode-tiga-huruf",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Kode Tiga Huruf",
+          "statement": "Sebuah gudang memberi setiap rak kode tiga huruf besar, berurutan seperti angka pada odometer: rak ke-0 berkode `AAA`, rak ke-1 `AAB`, …, rak ke-25 `AAZ`, rak ke-26 `ABA`, dan seterusnya sampai `ZZZ`.\n\nDiberikan nomor rak **n**, cetak kodenya.\n\nContoh: rak ke-28 berkode `ABC`, dan rak ke-17575 berkode `ZZZ`.\n\nPetunjuk: ini sama dengan memisahkan digit sebuah bilangan, tetapi setiap \"digit\" punya 26 kemungkinan, bukan 10.",
+          "input_format": "Satu bilangan bulat n.",
+          "output_format": "Tiga huruf besar tanpa spasi.",
+          "constraints": "0 ≤ n ≤ 17575"
+        },
+        "en": {},
+        "ar": {}
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 28, 3: 0, 4: 17575, 5: 26, 6: 676}.get(i, r.randint(0, 17575)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    char pertama = (char) ('A' + n / 676);\n    char kedua = (char) ('A' + n / 26 % 26);\n    char ketiga = (char) ('A' + n % 26);\n    cout << pertama << kedua << ketiga << endl;\n    return 0;\n}\n"
+    }
+  ]
+}
