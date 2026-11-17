@@ -1,6 +1,6 @@
 # Progress
 
-Current stage: **9a — student interface and scoring** — built and deployed 2026-11-17, **waiting for the owner's check** (no tag yet); see "Stage 9a" at the end of this file. Stage 9 was split by the owner on 2026-11-17: 9b (leaderboard, analytics, exports, late policy, three languages and RTL polish) is the next session, and the gate of `SPEC.md` §18 for stage 9 is taken after 9b.
+Current stage: **9b — not started** (next session). Stage 9a — student interface and scoring — finished 2026-11-17, tag `tahap-9a`, after the owner's check; see "Result of the owner's check for 9a" at the end of "Stage 9a". Stage 9 was split by the owner on 2026-11-17: 9b (leaderboard, analytics, exports, late policy, three languages and RTL polish) is the next session, and the gate of `SPEC.md` §18 for stage 9 is taken after 9b.
 
 Stage 8 — Problems, concepts, importer — finished 2026-11-17, tag `tahap-8`; see "Gate result" at the end of this file.
 
@@ -465,6 +465,17 @@ Owner's check for 9a (not the §18 gate; that comes after 9b). Everything is at 
 11. Say how the pages look, and anything that reads badly in Indonesian.
 
 The meeting published and the submissions made in this check are real production rows, like those of the earlier gates. After the check: tag `tahap-9a`, record the result here.
+
+### Result of the owner's check for 9a — 2026-11-17
+
+- **The owner ran the check himself and reported:** "everything looks good including arabic how test student open and so on." Tag `tahap-9a`. The agent did not watch the check; the eleven items were not reported one by one, so this entry does not claim each of them individually.
+- What the server shows at the time of tagging (read-only queries and commands in the session):
+  - `lokakode`, `auth` and `portal` all answer `/healthz` with commit `2ea0b23`, the commit the tag's parent points at; the only change after it is this file.
+  - Audit: `pertemuan.diterbitkan` × 2 (meetings 1 and 2 of `DDP101`, 09:06 and 09:07 UTC), `jendela.dibuka` × 2 (09:34 UTC). No `pertemuan.latihanDiubah`: the practice settings were left at their defaults, which the 32 approved problems of each meeting satisfy, so item 1's "must refuse with the defaults" could not occur and was **not exercised in production** (it is covered by tests only).
+  - 2 class windows, 64 instances, **1 submission by 1 student**, 1 meeting score, 1 integrity event.
+  - `infra/smoke.sh` → `22 lulus, 0 gagal, 0 belum aktif` (run by the agent while a test suite was running; the `VALIDATE` check took 28 s instead of the usual few seconds).
+- Not covered by this check, still open: everything under "Not verified, or weaker than it looks" above except the two items the owner's eyes now cover (pages seen by a person; Arabic opened). The Arabic texts are still unreviewed by an Arabic reader. The gate of `SPEC.md` §18 for stage 9 comes after 9b.
+- Outside 9a, same day: the base concepts of `DDP101` were ticked by mistake (seven concepts, `PERCABANGAN` among them) and corrected in the data with the owner's approval (audit rows 134 and 135, `lewat: sql`). The page change that makes the origin of a locked concept visible is **written but not committed or deployed at this tag**; it gets its own commit and entry.
 
 ### Problems for DDP101 meeting 2 — 2026-11-17 (owner's request during the 9a session; this is stage 13 work done early for one meeting)
 
