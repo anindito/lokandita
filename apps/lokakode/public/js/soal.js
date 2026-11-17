@@ -613,6 +613,8 @@
   };
   if (typeof window.require !== 'function' || !window.require.config) { pakaiCadangan(); return; }
 
+  // Pekerja latar Monaco dimuat dari host sendiri, bukan dari URL blob: (lihat monaco-pekerja.js).
+  window.MonacoEnvironment = { getWorkerUrl: function () { return '/js/monaco-pekerja.js'; } };
   window.require.config({ paths: { vs: '/monaco/vs' } });
   window.require(['vs/editor/editor.main'], function () {
     var monaco = window.monaco;

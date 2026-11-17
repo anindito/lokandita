@@ -13,7 +13,9 @@
 #      jaringan internal) yang memakai identity_test dan Redis DB 15;
 #   4. menjalankan PHPUnit; kontainer tes dibuang sesudahnya.
 # Untuk lokakode, judge worker tes juga dijalankan di host (lokakode_test, Redis
-# DB 15), karena tes LokaKode mengirim pekerjaan sungguhan kepadanya.
+# DB 15), karena tes LokaKode mengirim pekerjaan sungguhan kepadanya; dan sebuah
+# peramban Chromium tanpa layar (peramban-tes) dijalankan untuk tes yang hanya
+# bisa dibuktikan di peramban: editor, CSP, blokir tempel, simpan draf otomatis.
 #
 # Hanya skema berakhiran _test yang disentuh; skrip menolak nama lain.
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
@@ -30,11 +32,11 @@ bersih() {
 		kill "$pid_worker" 2> /dev/null || true
 		wait "$pid_worker" 2> /dev/null || true
 	fi
-	docker rm -f auth-tes "$app-tes" tes-jalan > /dev/null 2>&1 || true
+	docker rm -f auth-tes "$app-tes" tes-jalan caddy-tes peramban-tes > /dev/null 2>&1 || true
 	rm -rf "${tmp:?}"
 }
 trap bersih EXIT
-bersih_awal() { docker rm -f auth-tes "$app-tes" tes-jalan > /dev/null 2>&1 || true; }
+bersih_awal() { docker rm -f auth-tes "$app-tes" tes-jalan caddy-tes peramban-tes > /dev/null 2>&1 || true; }
 bersih_awal
 
 bangun() { # <app>
@@ -80,8 +82,10 @@ jalan() {
 	docker rm -f tes-jalan > /dev/null 2>&1 || true
 	docker create --name tes-jalan --network data --env-file "$tmp/$a.env" \
 		-e AUTH_TES_URL=http://auth-tes:8080 -e AUTH_TES_SKEMA="$skema_auth" -e APP_TES_URL="http://$app-tes:8080" \
+		-e PERAMBAN_TES_URL="$url_peramban" \
 		--entrypoint "$1" "lokandita/$a:tes" "${@:2}" > /dev/null
 	docker network connect internal tes-jalan
+	if [ -n "$url_peramban" ]; then docker network connect tes-peramban tes-jalan; fi
 	local kode=0
 	docker start -a tes-jalan || kode=$?
 	docker rm -f tes-jalan > /dev/null 2>&1 || true
@@ -162,6 +166,46 @@ worker_tes() {
 	gagal "judge worker tes tidak berdenyut dalam 30 detik"
 }
 
+# Peramban untuk tes LokaKode. Versinya dipatok dengan digest (Chromium 158.0.8127.37).
+PERAMBAN_IMAGE="chromedp/headless-shell@sha256:8c574e39f0db5c1d9efe7c472c6e0fcfc1d91ac0be70eb1dead0f2d52cf104cc"
+url_peramban=""
+
+# peramban_tes — Chromium tanpa layar yang membuka LokaKode tes lewat HTTPS, persis
+# seperti peramban mahasiswa:
+#   caddy-tes     menerima https://lokakode.lokandita.com (sertifikat internal Caddy)
+#                 dan meneruskannya ke lokakode-tes, seperti Caddy produksi;
+#   peramban-tes  hanya berada di jaringan tes-peramban; nama lokakode.lokandita.com
+#                 dipetakan ke caddy-tes dan SEMUA nama lain dibuat tidak dikenal,
+#                 sehingga tes tidak mungkin menyentuh situs produksi.
+# PHPUnit mengendalikannya lewat Chrome DevTools Protocol (tests/_support/Peramban.php).
+peramban_tes() {
+	docker network inspect tes-peramban > /dev/null 2>&1 || docker network create tes-peramban > /dev/null
+	printf '{\n\tadmin off\n\tauto_https disable_redirects\n}\nhttps://lokakode.lokandita.com {\n\ttls internal\n\treverse_proxy lokakode-tes:8080\n}\n' > "$tmp/Caddyfile"
+	chmod 644 "$tmp/Caddyfile"
+	chmod 711 "$tmp"
+	docker run -d --name caddy-tes --network data -v "$tmp/Caddyfile:/etc/caddy/Caddyfile:ro" caddy:2.11.9-alpine > /dev/null
+	docker network connect --alias lokakode.lokandita.com tes-peramban caddy-tes
+	local ip_caddy
+	ip_caddy="$(docker inspect -f '{{(index .NetworkSettings.Networks "tes-peramban").IPAddress}}' caddy-tes)"
+	[ -n "$ip_caddy" ] || gagal "caddy-tes tidak mendapat alamat di jaringan tes-peramban"
+	docker run -d --name peramban-tes --network tes-peramban --shm-size 512m --entrypoint /bin/bash "$PERAMBAN_IMAGE" -c \
+		"socat TCP4-LISTEN:9222,fork TCP4:127.0.0.1:9223 & exec /headless-shell/headless-shell --no-sandbox --use-gl=angle --use-angle=swiftshader --remote-debugging-port=9223 --ignore-certificate-errors --disable-background-networking --lang=id '--host-resolver-rules=MAP lokakode.lokandita.com $ip_caddy, MAP * ~NOTFOUND' about:blank" > /dev/null
+	local ip_peramban i
+	ip_peramban="$(docker inspect -f '{{(index .NetworkSettings.Networks "tes-peramban").IPAddress}}' peramban-tes)"
+	for ((i = 1; i <= 40; i++)); do
+		if docker exec peramban-tes bash -c 'exec 3<>/dev/tcp/127.0.0.1/9223' 2> /dev/null \
+			&& docker exec caddy-tes wget -q -O /dev/null --no-check-certificate https://lokakode.lokandita.com/healthz 2> /dev/null; then
+			url_peramban="http://$ip_peramban:9222"
+			echo "peramban-tes berjalan (Chromium tanpa layar; hanya mengenal lokakode.lokandita.com -> caddy-tes -> lokakode-tes)"
+			return 0
+		fi
+		sleep 0.5
+	done
+	docker logs --tail 20 peramban-tes >&2 || true
+	docker logs --tail 20 caddy-tes >&2 || true
+	gagal "peramban-tes atau caddy-tes tidak siap dalam 20 detik"
+}
+
 # Judge: tabelnya milik LokaKode, jadi skema lokakode_test dibuat oleh migrasi
 # LokaKode; setelah itu pytest berjalan di host sebagai judge_worker.
 if [ "$app" = "judge" ]; then
@@ -215,7 +259,10 @@ if [ "$app" != "auth" ]; then
 		migrasi "$app" "$skema_app"
 	fi
 	layani "$app" "$app-tes"
-	if [ "$app" = "lokakode" ]; then worker_tes; fi
+	if [ "$app" = "lokakode" ]; then
+		worker_tes
+		peramban_tes
+	fi
 fi
 
 echo "== phpunit $app"
