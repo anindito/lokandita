@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Libraries\Soal\Tinjau;
 use App\Libraries\Antrean;
 use App\Libraries\Audit;
 use App\Libraries\BankSoal;
@@ -110,20 +111,7 @@ final class Soal extends BaseController
             // Versi yang tidak disebut atau bukan milik soal ini: tidak ada yang ditinjau.
             return redirect()->to('/soal/' . $id . '?pesan=bukan-menunggu');
         }
-        $db = db_connect();
-        $db->transStart();
-        // Syarat status ada di UPDATE: dua klik yang berpacu menyetujui sekali saja.
-        $db->query("UPDATE problem_versions SET status = 'APPROVED', reviewed_by = ?, reviewed_at = ?, review_note = NULL WHERE id = ? AND status = 'PENDING_REVIEW'",
-            [$this->akses()->identitas()->userId, Waktu::kini(), $versi['id']]);
-        $berubah = $db->affectedRows() === 1;
-        if ($berubah) {
-            // Pertemuan sekarang memakai versi ini. Instans mahasiswa yang sudah ada tetap pada versinya.
-            $db->query('INSERT INTO meeting_problems (meeting_id, problem_id, problem_version_id, updated_at) VALUES (?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE problem_version_id = VALUES(problem_version_id), updated_at = VALUES(updated_at)',
-                [$soal['meeting_id'], $id, $versi['id'], Waktu::kini()]);
-            Audit::catat('soal.disetujui', 'problem_version', (int) $versi['id'], ['slug' => $soal['slug'], 'version' => (int) $versi['version'], 'meeting_id' => (int) $soal['meeting_id']], (int) $soal['course_id']);
-        }
-        $db->transComplete();
+        $berubah = Tinjau::setujui($soal, $versi, $this->akses()->identitas()->userId);
 
         return redirect()->to('/soal/' . $id . '?pesan=' . ($berubah ? 'disetujui' : 'bukan-menunggu'));
     }
