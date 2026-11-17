@@ -40,7 +40,11 @@ return [
     'konsep' => [
         'judul'       => 'Konsep yang mulai diizinkan di pertemuan ini',
         'info'        => 'Konsep bersifat kumulatif: yang sudah diizinkan di pertemuan sebelumnya tercentang dan terkunci. Solusi referensi sebuah soal hanya boleh memakai konsep yang diizinkan; kode mahasiswa tidak pernah dibatasi.',
-        'diwarisi'    => 'diwarisi',
+        'dariDasar'   => 'konsep dasar',
+        'dariPertemuan' => 'dari pertemuan {0}',
+        'dasarTerkunci' => 'Yang berlabel “konsep dasar” berlaku untuk seluruh mata kuliah, jadi tidak bisa dilepas dari halaman ini.',
+        'dasarUbah'   => 'Ubah konsep dasar mata kuliah',
+        'dasarPeringatan' => 'Ini bukan konsep sebuah pertemuan. Yang dicentang di sini diizinkan sejak pertemuan 1 dan terkunci di semua pertemuan. Konsep sebuah pertemuan diatur di halaman pertemuan itu.',
         'dasarJudul'  => 'Konsep dasar mata kuliah',
         'dasarInfo'   => 'Konsep yang dianggap sudah dikuasai sebelum pertemuan 1, misalnya dari mata kuliah prasyarat. Konsep ini diizinkan di semua pertemuan.',
         'simpanDasar' => 'Simpan konsep dasar',

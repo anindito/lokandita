@@ -189,7 +189,11 @@ use App\Libraries\Waktu;
 
         <h3><?= lang('Soal.konsep.judul') ?></h3>
         <p class="petunjuk"><?= lang('Soal.konsep.info') ?></p>
-        <?= view('_konsep_kotak', ['katalog' => $katalog, 'terkunci' => $warisan, 'dipilih' => $tambahan]) ?>
+        <?php if (in_array(0, $asal, true)): ?>
+            <p class="petunjuk"><?= lang('Soal.konsep.dasarTerkunci') ?>
+                <a href="/mata-kuliah/<?= (int) $p['course_id'] ?>/pertemuan#konsep-dasar"><?= lang('Soal.konsep.dasarUbah') ?></a></p>
+        <?php endif ?>
+        <?= view('_konsep_kotak', ['katalog' => $katalog, 'asal' => $asal, 'dipilih' => $tambahan]) ?>
 
         <div class="baris-tombol">
             <button type="submit" class="tombol"><?= lang('Kode.aksi.simpan') ?></button>

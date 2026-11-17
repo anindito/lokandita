@@ -64,15 +64,17 @@
     </form>
 </div>
 
-<h2><?= lang('Soal.konsep.dasarJudul') ?></h2>
-<div class="kartu">
+<?php // Dilipat selama kosong, supaya tidak dikira bagian dari form "tambah pertemuan" di atasnya. ?>
+<details id="konsep-dasar" class="kartu" <?= $dasar !== [] ? 'open' : '' ?>>
+    <summary><?= lang('Soal.konsep.dasarJudul') ?> (<?= count($dasar) ?>)</summary>
     <p class="petunjuk"><?= lang('Soal.konsep.dasarInfo') ?></p>
+    <p class="petunjuk"><strong><?= lang('Soal.konsep.dasarPeringatan') ?></strong></p>
     <form method="post" action="/mata-kuliah/<?= (int) $matkul['id'] ?>/konsep-dasar">
         <?= csrf_field() ?>
-        <?= view('_konsep_kotak', ['katalog' => $katalog, 'terkunci' => [], 'dipilih' => $dasar]) ?>
+        <?= view('_konsep_kotak', ['katalog' => $katalog, 'asal' => [], 'dipilih' => $dasar]) ?>
         <div class="baris-tombol">
             <button type="submit" class="tombol tombol-sekunder"><?= lang('Soal.konsep.simpanDasar') ?></button>
         </div>
     </form>
-</div>
+</details>
 <?= $this->endSection() ?>

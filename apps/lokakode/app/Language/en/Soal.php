@@ -40,7 +40,11 @@ return [
     'konsep' => [
         'judul'       => 'Concepts first allowed at this meeting',
         'info'        => 'Concepts are cumulative: those allowed at earlier meetings are ticked and locked. A reference solution may only use allowed concepts; student code is never restricted.',
-        'diwarisi'    => 'inherited',
+        'dariDasar'   => 'base concept',
+        'dariPertemuan' => 'from meeting {0}',
+        'dasarTerkunci' => 'Concepts labelled “base concept” apply to the whole course, so they cannot be released on this page.',
+        'dasarUbah'   => 'Change the base concepts of the course',
+        'dasarPeringatan' => 'These are not the concepts of a meeting. Anything ticked here is allowed from meeting 1 and locked at every meeting. The concepts of a meeting are set on that meeting’s page.',
         'dasarJudul'  => 'Base concepts of the course',
         'dasarInfo'   => 'Concepts assumed to be known before meeting 1, for example from a prerequisite course. They are allowed at every meeting.',
         'simpanDasar' => 'Save base concepts',

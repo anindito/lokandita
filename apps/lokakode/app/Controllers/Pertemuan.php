@@ -174,7 +174,7 @@ final class Pertemuan extends BaseController
             'judul'    => $p['matkul_kode'] . ' — ' . lang('Soal.pertemuan.ke', [(int) $p['number']]),
             'p'        => $p,
             'katalog'  => $kur->katalog($isi['language'] !== '' ? $isi['language'] : $p['language']),
-            'warisan'  => $kur->konsepWarisan((int) $p['course_id'], (int) $p['number']),
+            'asal'     => $kur->asalWarisan((int) $p['course_id'], (int) $p['number']),
             'tambahan' => $kur->konsepTambahan((int) $p['id']),
             'soal'     => (new BankSoal($this->akses()))->daftarSoal((int) $p['id']),
             'isi'      => $isi,

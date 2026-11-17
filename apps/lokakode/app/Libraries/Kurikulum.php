@@ -97,11 +97,27 @@ final class Kurikulum
      */
     public function konsepWarisan(int $matkulId, int $nomor): array
     {
-        $dari = array_column($this->db->query('
-            SELECT DISTINCT mc.concept_code FROM meeting_concepts mc JOIN meetings m ON m.id = mc.meeting_id
-            WHERE m.course_id = ? AND m.number < ?', [$matkulId, $nomor])->getResultArray(), 'concept_code');
+        return array_keys($this->asalWarisan($matkulId, $nomor));
+    }
 
-        return array_values(array_unique(array_merge($this->konsepDasar($matkulId), $dari)));
+    /**
+     * Dari mana tiap konsep warisan berasal, supaya halaman bisa menunjukkan
+     * tempat melepasnya: 0 = konsep dasar mata kuliah, N = pertemuan bernomor N
+     * (yang paling awal bila ada lebih dari satu).
+     *
+     * @return array<string, int> kode konsep => asal
+     */
+    public function asalWarisan(int $matkulId, int $nomor): array
+    {
+        $asal = array_fill_keys($this->konsepDasar($matkulId), 0);
+        $dari = $this->db->query('
+            SELECT mc.concept_code, MIN(m.number) AS nomor FROM meeting_concepts mc JOIN meetings m ON m.id = mc.meeting_id
+            WHERE m.course_id = ? AND m.number < ? GROUP BY mc.concept_code', [$matkulId, $nomor])->getResultArray();
+        foreach ($dari as $baris) {
+            $asal[$baris['concept_code']] ??= (int) $baris['nomor'];
+        }
+
+        return $asal;
     }
 
     /**

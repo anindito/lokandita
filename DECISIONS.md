@@ -169,3 +169,4 @@ Technical choices made during the build, newest first. One line each: date, deci
 - 2026-11-15 — One `infra/docker/app.Dockerfile` for the three apps, build context = repository root — the path package must be inside the context.
 - 2026-11-15 — App image is `php:8.3.36-apache` with `FallbackResource`, listening on 8080 as `www-data` — one process, no extra web server container, nothing unusual to maintain.
 - 2026-11-15 — Image versions are pinned: MySQL 8.4.13, Redis 7.4.12, Caddy 2.11.9, Composer 2.11.2, phpredis 6.2.0, CodeIgniter 4.7.6 (lock file) — upgrades should be deliberate.
+- 2026-11-17 — A locked concept on the meeting page names its origin ("konsep dasar" or "dari pertemuan N", `Kurikulum::asalWarisan`, 0 = base concept) and the base-concept form is folded while empty — the owner ticked seven concepts in that form by mistake and the single label "diwarisi" did not say where to untick them. Storage and `KONTRAK.md` §6 are unchanged.

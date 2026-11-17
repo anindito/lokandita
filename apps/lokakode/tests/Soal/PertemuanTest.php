@@ -96,6 +96,62 @@ final class PertemuanTest extends KodeCase
         $this->assertSame(0, $this->hitung("SELECT COUNT(*) FROM course_base_concepts WHERE course_id = {$d['matkulY']}"));
     }
 
+    /**
+     * Kejadian 2026-11-17: konsep tercentang di form konsep dasar, lalu tampil
+     * terkunci di pertemuan 1 tanpa petunjuk dari mana asalnya.
+     */
+    public function testKonsepDasarYangSalahCentangMenyebutAsalnyaDanBisaDilepas(): void
+    {
+        $d      = $this->dunia();
+        $http   = $this->sebagai($d['pengampuX']);
+        $csrf   = $this->csrf($http);
+        $daftar = '/mata-kuliah/' . $d['matkulX'] . '/pertemuan';
+
+        // Selama kosong, form konsep dasar terlipat.
+        $this->assertMatchesRegularExpression('/<details id="konsep-dasar" class="kartu" >/', $http->get($daftar)->body);
+
+        $this->assertSame(303, $http->post('/mata-kuliah/' . $d['matkulX'] . '/konsep-dasar', ['csrf' => $csrf, 'konsep' => ['PERCABANGAN']])->status);
+        $hal = $http->get('/pertemuan/' . $d['pertemuanX1'])->body;
+        $this->assertMatchesRegularExpression('/value="PERCABANGAN"\s+checked disabled>.*?<span class="lencana">konsep dasar<\/span>/s', $hal);
+        $this->assertStringContainsString('href="' . $daftar . '#konsep-dasar"', $hal);
+        // Form konsep dasar kini terbuka, dan di sana kotaknya tercentang tetapi TIDAK terkunci.
+        $hal = $http->get($daftar)->body;
+        $this->assertMatchesRegularExpression('/<details id="konsep-dasar" class="kartu" open>/', $hal);
+        $this->assertMatchesRegularExpression('/value="PERCABANGAN"\s+checked >/', $hal);
+
+        // Dilepas: form dikirim tanpa satu pun kotak tercentang.
+        $this->assertSame(303, $http->post('/mata-kuliah/' . $d['matkulX'] . '/konsep-dasar', ['csrf' => $csrf])->status);
+        $this->assertSame(0, $this->hitung("SELECT COUNT(*) FROM course_base_concepts WHERE course_id = {$d['matkulX']}"));
+        $hal = $http->get('/pertemuan/' . $d['pertemuanX1'])->body;
+        $this->assertMatchesRegularExpression('/value="PERCABANGAN"\s+>/', $hal);
+        $this->assertStringNotContainsString('#konsep-dasar', $hal);
+        $this->assertStringNotContainsString('konsep dasar</span>', $hal);
+    }
+
+    public function testKonsepPertemuanYangSalahCentangBisaDilepasDanTerlepasDiPertemuanBerikutnya(): void
+    {
+        $d    = $this->dunia();
+        $http = $this->sebagai($d['pengampuX']);
+        $csrf = $this->csrf($http);
+        $awal = array_column($this->db->query("SELECT concept_code FROM meeting_concepts WHERE meeting_id = {$d['pertemuanX1']}")->fetch_all(), 0);
+        $this->assertNotContains('PERCABANGAN', $awal);
+        $isi  = ['csrf' => $csrf, 'number' => '1', 'title' => 'Pertemuan uji', 'language' => 'cpp', 'enabled' => '1'];
+
+        // Salah centang di pertemuan 1: pertemuan 2 mewarisinya dan menyebut asalnya.
+        $this->assertSame(303, $http->post('/pertemuan/' . $d['pertemuanX1'], $isi + ['konsep' => [...$awal, 'PERCABANGAN']])->status);
+        $this->assertMatchesRegularExpression('/value="PERCABANGAN"\s+checked >/', $http->get('/pertemuan/' . $d['pertemuanX1'])->body);
+        $this->assertMatchesRegularExpression(
+            '/value="PERCABANGAN"\s+checked disabled>.*?<span class="lencana">dari pertemuan 1<\/span>/s',
+            $http->get('/pertemuan/' . $d['pertemuanX2'])->body,
+        );
+
+        // Dilepas di pertemuan 1: hilang dari basis data dan tidak lagi terkunci di pertemuan 2.
+        $this->assertSame(303, $http->post('/pertemuan/' . $d['pertemuanX1'], $isi + ['konsep' => $awal])->status);
+        $this->assertSame(0, $this->hitung("SELECT COUNT(*) FROM meeting_concepts WHERE concept_code = 'PERCABANGAN'"));
+        $this->assertMatchesRegularExpression('/value="PERCABANGAN"\s+>/', $http->get('/pertemuan/' . $d['pertemuanX1'])->body);
+        $this->assertMatchesRegularExpression('/value="PERCABANGAN"\s+>/', $http->get('/pertemuan/' . $d['pertemuanX2'])->body);
+    }
+
     public function testPertemuanBersoalTidakBisaGantiNomorAtauBahasa(): void
     {
         $d = $this->dunia();
