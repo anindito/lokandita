@@ -15,8 +15,9 @@ use CodeIgniter\Database\BaseConnection;
  */
 final class Jendela
 {
-    private const KOLOM = 'm.id AS pertemuan_id, m.number, m.title, m.language, m.published_at, m.course_id,
-        w.id AS jendela_id, w.open_at, w.close_at, w.override, w.post_close_visibility, w.updated_by, w.updated_at';
+    private const KOLOM = 'm.id AS pertemuan_id, m.number, m.title, m.language, m.published_at, m.course_id, m.anonymize_leaderboard,
+        w.id AS jendela_id, w.open_at, w.close_at, w.override, w.post_close_visibility, w.late_policy, w.late_factor, w.late_until,
+        w.updated_by, w.updated_at';
 
     private readonly BaseConnection $db;
 

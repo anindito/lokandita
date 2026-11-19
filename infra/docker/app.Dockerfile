@@ -45,6 +45,21 @@ RUN mkdir -p /keluar/monaco \
      && test -s /keluar/monaco/vs/loader.js && test -s /keluar/monaco/vs/editor/editor.main.js; \
     fi
 
+# Chart.js (SPEC.md §2, §12) untuk grafik analitik LokaKode: sama seperti Monaco — paket
+# resmi dari registry npm, versi dipatok, sha256 diperiksa (sha1-nya sama dengan "shasum"
+# di registry.npmjs.org/chart.js/<versi>). Hanya satu berkas UMD yang sudah diperkecil,
+# yang sudah memuat @kurkle/color; lisensinya MIT dan ikut disalin.
+FROM php:8.3.36-apache AS grafik
+ARG APP
+ADD --checksum=sha256:9345dacdf4bb4c5d40321f4b9aafab6fe676d37a534fc0bc2d17c4c4e29c4f00 \
+    https://registry.npmjs.org/chart.js/-/chart.js-4.6.1.tgz /tmp/chart.tgz
+RUN mkdir -p /keluar/grafik \
+ && if [ "$APP" = "lokakode" ]; then \
+        tar -xzf /tmp/chart.tgz -C /tmp package/dist/chart.umd.min.js package/LICENSE.md \
+     && mv /tmp/package/dist/chart.umd.min.js /tmp/package/LICENSE.md /keluar/grafik/ \
+     && test -s /keluar/grafik/chart.umd.min.js; \
+    fi
+
 FROM php:8.3.36-apache
 # upload_max_filesize: unggahan soal JSON sampai 8 MB (SPEC.md §8.3); bawaan PHP hanya 2 MB.
 RUN apt-get update \
@@ -68,6 +83,7 @@ COPY --from=vendor /srv/lokandita/apps/${APP}/vendor /srv/lokandita/apps/${APP}/
 COPY packages/lokandita-auth/aset /srv/lokandita/apps/${APP}/public/aset
 COPY --from=gaya /keluar/lokandita.css /srv/lokandita/apps/${APP}/public/aset/lokandita.css
 COPY --from=monaco /keluar/monaco /srv/lokandita/apps/${APP}/public/monaco
+COPY --from=grafik /keluar/grafik /srv/lokandita/apps/${APP}/public/grafik
 COPY infra/docker/mulai.sh /usr/local/bin/mulai.sh
 RUN ln -s /srv/lokandita/apps/${APP} /srv/app \
  && cd /srv/app \

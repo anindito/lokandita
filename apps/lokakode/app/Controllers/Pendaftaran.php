@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Libraries\Audit;
+use App\Libraries\Papan;
 use App\Libraries\Pendaftaran as Layanan;
 use App\Libraries\Waktu;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -108,8 +109,9 @@ final class Pendaftaran extends BaseController
      * Pendaftarannya tetap satu baris, jadi semua yang kelak menunjuk ke
      * pendaftaran itu (instance, submission, nilai) ikut dengan sendirinya.
      *
-     * Tahap 9: sesudah pemindahan, agregat per kelas dan papan peringkat kedua
-     * kelas harus dihitung ulang di sini.
+     * Agregat per kelas dan papan peringkat (SPEC.md §5) tidak disimpan per kelas
+     * kecuali di cache papan, yang dibuang di akhir fungsi ini; selebihnya dihitung
+     * dari pendaftaran yang sekarang setiap kali dibaca.
      */
     public function pindah(int $kelasId): ResponseInterface
     {
@@ -153,6 +155,9 @@ final class Pendaftaran extends BaseController
                 $n++;
             }
             $db->transComplete();
+            // Nilai mengikuti mahasiswanya (kunci user_id); yang berubah adalah kelas tempat ia dihitung.
+            // Papan peringkat disimpan per kelas, jadi dibuang; analitik per kelas selalu dihitung langsung.
+            Papan::lupakan();
         }
 
         return redirect()->to('/kelas/' . $kelasId . '?pesan=' . ($n > 0 ? 'dipindah' : 'tidak-ada-pilihan') . '&n=' . $n);

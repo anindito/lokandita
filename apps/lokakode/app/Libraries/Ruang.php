@@ -19,12 +19,26 @@ use CodeIgniter\Database\BaseConnection;
  * Soal pertemuan lain, kelas lain atau mahasiswa lain karena itu tidak pernah
  * terbaca: fungsinya mengembalikan null, dan pengendali menjawab 404.
  *
+ * Pengecualian yang disengaja (keputusan pemilik, tahap 9b): DAFTAR pertemuan dan
+ * HALAMAN pertemuan juga menampilkan pertemuan mata kuliahnya sendiri yang belum
+ * diterbitkan atau belum dibuka untuk kelasnya — hanya nomor, judul dan sebabnya
+ * (`sebab`), supaya mahasiswa tahu mengapa belum bisa mengerjakan. Soalnya tetap
+ * tidak terbaca: soal() menuntut ketiga syarat di atas.
+ *
  * Apa yang boleh dilakukan ditentukan `mode`:
  *   tunggu  jendela belum terbuka: hanya judul dan waktu bukanya
  *   kerja   jendela terbuka dan pendaftaran AKTIF: Run dan Submit
  *   baca    terbuka tetapi sudah LULUS, atau sudah tutup dengan review_only:
  *           soal dan kiriman sendiri terbaca, tidak bisa Run atau Submit
  *   nilai   sudah tutup dengan hidden: hanya nilainya
+ *
+ * Dalam mode `kerja`, `jenis` mengatakan kiriman macam apa yang sekarang dibuat:
+ *   biasa    jendela terbuka
+ *   telat    waktu tutup terjadwal sudah lewat, kebijakan kelas `multiplier`, dan
+ *            late_until belum lewat: nilai kiriman × faktor (SPEC.md §7)
+ *   latihan  sesudah tutup, pertemuan mengizinkan latihan: dinilai judge tetapi
+ *            tidak pernah dihitung ke nilai, percobaan atau papan peringkat
+ * Penutupan manual mengakhiri masa terlambat. Di luar `kerja`, jenis adalah ''.
  */
 final class Ruang
 {
@@ -36,8 +50,19 @@ final class Ruang
         JOIN meetings m ON m.course_id = k.course_id AND m.enabled = 1 AND m.published_at IS NOT NULL
         JOIN meeting_class_windows w ON w.meeting_id = m.id AND w.class_id = k.id';
 
-    private const KOLOM = 'm.id AS pertemuan_id, m.number, m.title, m.language, m.target_points, m.starter_template,
-        m.compiler_flags, m.autocomplete, c.code AS matkul_kode, c.name AS matkul_nama, k.id AS kelas_id, k.name AS kelas_nama,
+    // Untuk daftar dan halaman pertemuan saja: pertemuan mata kuliah sendiri yang dipakai
+    // untuk latihan, juga yang belum terbit atau belum punya jendela (kolom w.* lalu NULL).
+    private const DARI_LUAS = '
+        FROM enrollments e
+        JOIN classes k ON k.id = e.class_id
+        JOIN courses c ON c.id = k.course_id
+        JOIN academic_years t ON t.id = k.academic_year_id
+        JOIN meetings m ON m.course_id = k.course_id AND m.enabled = 1
+        LEFT JOIN meeting_class_windows w ON w.meeting_id = m.id AND w.class_id = k.id';
+
+    private const KOLOM = 'm.published_at, m.id AS pertemuan_id, m.number, m.title, m.language, m.target_points, m.starter_template,
+        m.compiler_flags, m.autocomplete, m.practice_after_close, m.anonymize_leaderboard,
+        w.late_policy, w.late_factor, w.late_until, c.code AS matkul_kode, c.name AS matkul_nama, k.id AS kelas_id, k.name AS kelas_nama,
         e.status AS status_daftar, t.status AS tahun_status, w.open_at, w.close_at, w.override, w.post_close_visibility';
 
     // Pendaftaran di tahun ajaran aktif didahulukan bila mahasiswa terdaftar di mata kuliah yang sama dua kali (dua tahun).
@@ -58,16 +83,79 @@ final class Ruang
      */
     public static function mode(array $baris): string
     {
-        $keadaan = Latihan::keadaan($baris);
-        if ($keadaan === 'belum' || $keadaan === 'terjadwal') {
+        if (self::sebab($baris) !== '') {
             return 'tunggu';
         }
-        // Tahun ajaran yang sudah diarsipkan tidak menerima kiriman, apa pun keadaan jendelanya.
-        if ($keadaan === 'buka' && $baris['tahun_status'] === 'active') {
-            return $baris['status_daftar'] === 'AKTIF' ? 'kerja' : 'baca';
+        $keadaan = Latihan::keadaan($baris);
+        if (self::jenis($baris) !== '') {
+            return 'kerja';
         }
 
         return $baris['post_close_visibility'] === 'review_only' || $keadaan === 'buka' ? 'baca' : 'nilai';
+    }
+
+    /**
+     * Jenis kiriman yang boleh dibuat sekarang: 'biasa', 'telat', 'latihan', atau '' bila tidak boleh.
+     *
+     * @param array<string, mixed> $baris seperti mode(), ditambah late_policy, late_until, practice_after_close
+     */
+    public static function jenis(array $baris, ?string $kini = null): string
+    {
+        // Tahun ajaran yang sudah diarsipkan dan mahasiswa yang sudah LULUS tidak mengirim apa pun,
+        // apa pun keadaan jendelanya.
+        if ($baris['tahun_status'] !== 'active' || $baris['status_daftar'] !== 'AKTIF') {
+            return '';
+        }
+        // Pertemuan yang belum terbit tidak menerima apa pun, apa pun keadaan jendelanya.
+        if (array_key_exists('published_at', $baris) && $baris['published_at'] === null) {
+            return '';
+        }
+        $kini ??= Waktu::kini();
+        $keadaan = Latihan::keadaan($baris, $kini);
+        if ($keadaan === 'buka') {
+            return 'biasa';
+        }
+        if ($keadaan !== 'tutup') {
+            return '';
+        }
+        if ($baris['override'] === 'none' && $baris['late_policy'] === 'multiplier'
+            && ($baris['late_until'] === null || $kini < $baris['late_until'])) {
+            return 'telat';
+        }
+
+        return (int) $baris['practice_after_close'] === 1 ? 'latihan' : '';
+    }
+
+    /**
+     * Mengapa mahasiswa belum bisa mengerjakan pertemuan ini (mode `tunggu`):
+     *   belum_terbit  pengampu belum menerbitkannya
+     *   belum_dibuka  kelasnya belum punya jendela, atau jendelanya belum dijadwalkan
+     *   terjadwal     waktu bukanya belum tiba
+     * '' bila bukan karena salah satu dari itu.
+     *
+     * @param array<string, mixed> $baris
+     */
+    public static function sebab(array $baris): string
+    {
+        if (array_key_exists('published_at', $baris) && $baris['published_at'] === null) {
+            return 'belum_terbit';
+        }
+
+        return match (Latihan::keadaan($baris)) {
+            'belum'     => 'belum_dibuka',
+            'terjadwal' => 'terjadwal',
+            default     => '',
+        };
+    }
+
+    /**
+     * @param array<string, mixed> $b
+     *
+     * @return array<string, mixed>
+     */
+    private static function denganMode(array $b): array
+    {
+        return $b + ['mode' => self::mode($b), 'jenis' => self::jenis($b), 'sebab' => self::sebab($b)];
     }
 
     /**
@@ -79,29 +167,29 @@ final class Ruang
     {
         $baris = $this->db->query('
             SELECT ' . self::KOLOM . ', ms.score, ms.counted_points, ms.total_points
-            ' . self::DARI . "
+            ' . self::DARI_LUAS . "
             LEFT JOIN meeting_scores ms ON ms.meeting_id = m.id AND ms.user_id = e.user_id
             WHERE {$this->syarat}
             ORDER BY " . self::URUT . ', c.code, m.number')->getResultArray();
         $hasil = [];
         foreach ($baris as $b) {
-            $hasil[(int) $b['pertemuan_id']] ??= $b + ['mode' => self::mode($b)];
+            $hasil[(int) $b['pertemuan_id']] ??= self::denganMode($b);
         }
 
         return array_values($hasil);
     }
 
     /**
-     * @return array<string, mixed>|null null bila tidak ada ATAU bukan pertemuan kelas mahasiswa ini
+     * @return array<string, mixed>|null null bila tidak ada ATAU bukan pertemuan mata kuliah mahasiswa ini
      */
     public function pertemuan(int $id): ?array
     {
         $b = $this->db->query('
-            SELECT ' . self::KOLOM . self::DARI . "
+            SELECT ' . self::KOLOM . self::DARI_LUAS . "
             WHERE m.id = ? AND {$this->syarat}
             ORDER BY " . self::URUT . ' LIMIT 1', [$id])->getRowArray();
 
-        return $b === null ? null : $b + ['mode' => self::mode($b)];
+        return $b === null ? null : self::denganMode($b);
     }
 
     /**
@@ -196,7 +284,7 @@ final class Ruang
             WHERE mp.id = ? AND {$this->syarat}
             ORDER BY " . self::URUT . ' LIMIT 1', [$mpId])->getRowArray();
 
-        return $b === null ? null : $b + ['mode' => self::mode($b)];
+        return $b === null ? null : self::denganMode($b);
     }
 
     /**
@@ -262,7 +350,8 @@ final class Ruang
     public function riwayat(int $mpId, int $batas = 50): array
     {
         return $this->db->query("
-            SELECT s.id, s.status, s.verdict, s.passed, s.total, s.score, s.duration_ms, s.created_at, s.job_id
+            SELECT s.id, s.status, s.verdict, s.passed, s.total, s.score, s.duration_ms, s.created_at, s.job_id,
+                   s.late, s.late_factor, s.practice
             FROM submissions s
             WHERE s.meeting_problem_id = ? AND {$this->akses->milikSendiri('s')}
             ORDER BY s.id DESC LIMIT ?", [$mpId, $batas])->getResultArray();
@@ -277,7 +366,7 @@ final class Ruang
     {
         return $this->db->query("
             SELECT s.id, s.status, s.verdict, s.passed, s.total, s.score, s.duration_ms, s.compile_log, s.tests,
-                   s.missing_concepts, s.source, s.created_at, s.job_id
+                   s.missing_concepts, s.source, s.created_at, s.job_id, s.late, s.late_factor, s.practice
             FROM submissions s
             WHERE s.id = ? AND s.meeting_problem_id = ? AND {$this->akses->milikSendiri('s')}", [$id, $mpId])->getRowArray();
     }
@@ -291,14 +380,16 @@ final class Ruang
     {
         return $this->db->query("
             SELECT s.id, s.meeting_problem_id, s.status, s.verdict, s.passed, s.total, s.score, s.duration_ms,
-                   s.compile_log, s.tests, s.missing_concepts, v.difficulty
+                   s.compile_log, s.tests, s.missing_concepts, s.late, s.late_factor, s.practice, v.difficulty
             FROM submissions s JOIN problem_versions v ON v.id = s.problem_version_id
             WHERE s.job_id = ? AND {$this->akses->milikSendiri('s')}", [$jobId])->getRowArray();
     }
 
     /**
      * Membuat kiriman dan pekerjaan SUBMIT-nya. Pemanggil sudah memastikan
-     * mode `kerja` dan instans yang ada.
+     * mode `kerja` dan instans yang ada. Terlambat atau latihan ditetapkan di sini,
+     * saat kiriman dibuat, bersama faktor yang berlaku saat itu; nilainya tidak
+     * berubah bila pengajar kemudian mengubah jendela.
      *
      * @param array<string, mixed> $soal baris dari soal()
      *
@@ -311,6 +402,8 @@ final class Ruang
             'user_id' => $user, 'meeting_problem_id' => (int) $soal['mp_id'], 'problem_version_id' => (int) $soal['versi_id'],
             'instance_id' => (int) $soal['instans_id'], 'language' => $soal['versi_bahasa'], 'source' => $sumber,
             'status' => 'MENUNGGU', 'created_at' => Waktu::kini(),
+            'late' => $soal['jenis'] === 'telat' ? 1 : 0, 'late_factor' => $soal['jenis'] === 'telat' ? $soal['late_factor'] : null,
+            'practice' => $soal['jenis'] === 'latihan' ? 1 : 0,
         ]);
         $id = (int) $this->db->insertID();
         try {

@@ -209,7 +209,8 @@ final class Pertemuan extends BaseController
     private static function isiLatihan(array $p): array
     {
         $isi = ['target_points' => (string) $p['target_points'], 'starter_template' => (string) ($p['starter_template'] ?? ''),
-            'compiler_flags' => (string) $p['compiler_flags'], 'autocomplete' => (string) $p['autocomplete']];
+            'compiler_flags' => (string) $p['compiler_flags'], 'autocomplete' => (string) $p['autocomplete'],
+            'practice_after_close' => (string) $p['practice_after_close'], 'anonymize_leaderboard' => (string) $p['anonymize_leaderboard']];
         foreach (Latihan::KOLOM_MIN as $kolom) {
             $isi[$kolom] = (string) $p[$kolom];
         }
@@ -233,6 +234,8 @@ final class Pertemuan extends BaseController
             'starter_template' => str_replace(["\r\n", "\r"], "\n", (string) $this->request->getPost('starter_template')),
             'compiler_flags'   => trim((string) $this->request->getPost('compiler_flags')),
             'autocomplete'     => $this->request->getPost('autocomplete') === '1' ? '1' : '0',
+            'practice_after_close'  => $this->request->getPost('practice_after_close') === '1' ? '1' : '0',
+            'anonymize_leaderboard' => $this->request->getPost('anonymize_leaderboard') === '1' ? '1' : '0',
         ];
         foreach (Latihan::KOLOM_MIN as $kolom) {
             $isi[$kolom] = trim((string) $this->request->getPost($kolom));
@@ -258,6 +261,7 @@ final class Pertemuan extends BaseController
         $baru = [];
         if ($galat === []) {
             $baru = ['target_points' => (int) $isi['target_points'], 'autocomplete' => (int) $isi['autocomplete'],
+                'practice_after_close' => (int) $isi['practice_after_close'], 'anonymize_leaderboard' => (int) $isi['anonymize_leaderboard'],
                 'starter_template' => trim($isi['starter_template']) === '' ? null : $isi['starter_template'],
                 'compiler_flags' => implode(' ', $bendera ?? [])];
             foreach (Latihan::KOLOM_MIN as $kolom) {

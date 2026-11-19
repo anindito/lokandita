@@ -29,6 +29,8 @@ $routes->group('', ['filter' => 'masuk'], static function (RouteCollection $rout
 // kiriman dan drafnya sendiri — diperiksa App\Libraries\Ruang di dalam kueri.
 $routes->group('', ['filter' => 'masuk:mahasiswa'], static function (RouteCollection $routes): void {
     $routes->get('latihan/(:num)', 'RuangLatihan::pertemuan/$1');
+    // Papan peringkat kelasnya sendiri saja (SPEC.md §3).
+    $routes->get('latihan/(:num)/papan', 'RuangLatihan::papan/$1');
     $routes->get('latihan/soal/(:num)', 'RuangLatihan::soal/$1');
     $routes->get('api/soal/(:num)/keadaan', 'RuangLatihan::keadaan/$1');
     $routes->post('api/soal/(:num)/draf', 'RuangLatihan::draf/$1');
@@ -80,6 +82,19 @@ $routes->group('', ['filter' => 'masuk:superadmin,dosen'], static function (Rout
     $routes->post('kelas/(:num)/pertemuan/(:num)', 'Jendela::simpan/$1/$2');
     $routes->post('kelas/(:num)/pertemuan/(:num)/status', 'Jendela::status/$1/$2');
     $routes->post('kelas/(:num)/pertemuan/(:num)/siapkan', 'Jendela::siapkan/$1/$2');
+    // Papan peringkat (SPEC.md §3, §12): per kelas untuk siapa pun yang melihat kelas itu;
+    // per mata kuliah untuk superadmin dan pengampu (pengajar 403).
+    $routes->get('kelas/(:num)/pertemuan/(:num)/papan', 'Peringkat::kelas/$1/$2');
+    $routes->get('pertemuan/(:num)/papan', 'Peringkat::matkul/$1');
+    // Analitik, kiriman mahasiswa dan ekspor nilai (SPEC.md §3, §12). Per kelas: siapa pun yang
+    // melihat kelas itu. Lintas kelas (mata-kuliah/…): superadmin dan pengampu; pengajar 403.
+    $routes->get('kelas/(:num)/analitik', 'Analitik::kelasRingkas/$1');
+    $routes->get('kelas/(:num)/pertemuan/(:num)/analitik', 'Analitik::pertemuan/$1/$2');
+    $routes->get('kelas/(:num)/pertemuan/(:num)/kiriman', 'Analitik::kirimanDaftar/$1/$2');
+    $routes->get('kelas/(:num)/kiriman/(:num)', 'Analitik::kiriman/$1/$2');
+    $routes->get('kelas/(:num)/ekspor/(:segment)', 'Analitik::eksporKelas/$1/$2');
+    $routes->get('mata-kuliah/(:num)/analitik', 'Analitik::matkul/$1');
+    $routes->get('mata-kuliah/(:num)/ekspor/(:segment)', 'Analitik::eksporMatkul/$1/$2');
     // Bank soal (SPEC.md §8.1): superadmin dan pengampu; pengajar 403.
     $routes->get('soal/(:num)', 'Soal::lihat/$1');
     $routes->post('soal/(:num)/setujui', 'Soal::setujui/$1');

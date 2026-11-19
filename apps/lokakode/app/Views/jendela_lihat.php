@@ -7,11 +7,13 @@ $alamat = '/kelas/' . (int) $kelas['id'] . '/pertemuan/' . (int) $j['pertemuan_i
 $terbit = $j['published_at'] !== null;
 ?>
 <?= view('_nav', ['akses' => $akses]) ?>
-<p><a href="/kelas/<?= (int) $kelas['id'] ?>/pertemuan">&larr; <?= lang('Latihan.jendela.judul') ?> — <span class="ltr"><?= esc($kelas['matkul_kode']) ?></span> <?= esc($kelas['name']) ?></a></p>
+<p><a href="/kelas/<?= (int) $kelas['id'] ?>/pertemuan"><span class="panah-balik" aria-hidden="true"></span> <?= lang('Latihan.jendela.judul') ?> — <span class="ltr"><?= esc($kelas['matkul_kode']) ?></span> <?= esc($kelas['name']) ?></a></p>
 <h1><?= lang('Soal.pertemuan.ke', [(int) $j['number']]) ?>: <?= esc($j['title']) ?></h1>
 <p class="redup">
     <?= lang('Soal.bahasa.' . $j['language']) ?> · <?= lang('Latihan.jendela.jumlahSoal', [(int) $j['jumlah_soal']]) ?>
 </p>
+
+<p><a href="<?= $alamat ?>/papan"><?= lang('Papan.lihat') ?></a> · <a href="<?= $alamat ?>/analitik"><?= lang('Papan.analitik.judul') ?></a> · <a href="<?= $alamat ?>/kiriman"><?= lang('Papan.kiriman.judul') ?></a></p>
 
 <div class="kartu" role="status">
     <p>
@@ -60,6 +62,23 @@ $terbit = $j['published_at'] !== null;
             </select>
             <?= view('_galat_latihan', ['galat' => $galat, 'kolom' => 'post_close_visibility']) ?>
 
+            <fieldset>
+                <legend><?= lang('Latihan.telat.judul') ?></legend>
+                <?php foreach (['reject', 'multiplier'] as $k): ?>
+                    <label class="centang"><input type="radio" name="late_policy" value="<?= $k ?>" <?= $isi['late_policy'] === $k ? 'checked' : '' ?>> <?= lang('Latihan.telat.' . $k) ?></label>
+                <?php endforeach ?>
+                <?= view('_galat_latihan', ['galat' => $galat, 'kolom' => 'late_policy']) ?>
+
+                <label for="late_factor"><?= lang('Latihan.telat.faktor') ?></label>
+                <input type="text" inputmode="decimal" id="late_factor" name="late_factor" class="ltr" value="<?= esc($isi['late_factor']) ?>">
+                <?= view('_galat_latihan', ['galat' => $galat, 'kolom' => 'late_factor']) ?>
+
+                <label for="late_until"><?= lang('Latihan.telat.sampai') ?> (WIB)</label>
+                <input type="datetime-local" id="late_until" name="late_until" class="ltr" value="<?= esc($isi['late_until']) ?>">
+                <?= view('_galat_latihan', ['galat' => $galat, 'kolom' => 'late_until']) ?>
+                <p class="petunjuk"><?= lang('Latihan.telat.info') ?></p>
+            </fieldset>
+
             <div class="baris-tombol">
                 <button type="submit" class="tombol"><?= lang('Latihan.jendela.simpan') ?></button>
             </div>
@@ -70,6 +89,9 @@ $terbit = $j['published_at'] !== null;
         <dl>
             <dt class="redup"><?= lang('Latihan.jendela.buka') ?></dt><dd><?= esc(Waktu::lokal($j['open_at'])) ?></dd>
             <dt class="redup"><?= lang('Latihan.jendela.tutup') ?></dt><dd><?= esc(Waktu::lokal($j['close_at'])) ?></dd>
+            <dt class="redup"><?= lang('Latihan.telat.judul') ?></dt>
+            <dd><?= lang('Latihan.telat.' . ($j['late_policy'] ?? 'reject')) ?><?php if (($j['late_policy'] ?? '') === 'multiplier'): ?>
+                — <span class="ltr">× <?= angka((float) $j['late_factor']) ?></span><?= $j['late_until'] !== null ? ', ' . esc(Waktu::lokal($j['late_until'])) : '' ?><?php endif ?></dd>
         </dl>
         <p class="petunjuk"><?= lang('Kode.kelas.tahunArsip') ?></p>
     </div>

@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Libraries\Antrean;
 use App\Libraries\Instans;
 use App\Libraries\Latihan;
+use App\Libraries\Papan;
 use App\Libraries\Penilaian;
 use App\Libraries\Ruang;
 use App\Libraries\Soal\Pernyataan;
@@ -65,6 +66,29 @@ final class RuangLatihan extends BaseController
             'p'     => $p,
             'nilai' => $ruang->nilai($p),
             'kartu' => in_array($p['mode'], ['kerja', 'baca'], true) ? $ruang->kartu($p) : [],
+        ]);
+    }
+
+    /**
+     * Papan peringkat KELASNYA SENDIRI untuk pertemuan itu (SPEC.md §3, §12). Kelasnya
+     * diambil dari pendaftaran mahasiswa itu, tidak pernah dari URL; papan kelas lain
+     * dan papan mata kuliah tidak punya rute untuk mahasiswa.
+     */
+    public function papan(int $id): ResponseInterface
+    {
+        $p = $this->ruang()->pertemuan($id);
+        // Sebelum pertemuan dibuka untuk kelasnya belum ada papan.
+        if ($p === null || $p['mode'] === 'tunggu') {
+            return $this->tidakDitemukan('meeting');
+        }
+        Penilaian::selesaikan($this->pengguna());
+        $samar = (int) $p['anonymize_leaderboard'] === 1;
+
+        return $this->halaman('papan_mahasiswa', [
+            'judul' => lang('Papan.judul') . ' — ' . $p['matkul_kode'] . ' ' . lang('Soal.pertemuan.ke', [(int) $p['number']]),
+            'p'     => $p,
+            'samar' => $samar,
+            'papan' => Papan::untukMahasiswa(Papan::kelas($id, (int) $p['kelas_id']), $this->pengguna(), $samar),
         ]);
     }
 
@@ -341,6 +365,7 @@ final class RuangLatihan extends BaseController
             'passed' => $k['passed'] === null ? null : (int) $k['passed'], 'total' => $k['total'] === null ? null : (int) $k['total'],
             'score' => $k['score'] === null ? null : (float) $k['score'], 'at' => Waktu::lokal($k['created_at']),
             'job' => $k['status'] === 'MENUNGGU' ? $k['job_id'] : null,
+            'late' => (int) $k['late'] === 1, 'practice' => (int) $k['practice'] === 1,
         ], $ruang->riwayat($mpId))]);
     }
 
@@ -380,6 +405,10 @@ final class RuangLatihan extends BaseController
             'compile_log' => (string) ($k['compile_log'] ?? ''),
             'tests'       => json_decode((string) ($k['tests'] ?? '[]'), true) ?? [],
             'missing'     => json_decode((string) ($k['missing_concepts'] ?? '[]'), true) ?? [],
+            // Terlambat: nilainya sudah dikali faktor. Latihan: dinilai, tetapi tidak dihitung ke mana pun.
+            'late'        => (int) ($k['late'] ?? 0) === 1,
+            'late_factor' => ($k['late_factor'] ?? null) === null ? null : (float) $k['late_factor'],
+            'practice'    => (int) ($k['practice'] ?? 0) === 1,
         ];
     }
 

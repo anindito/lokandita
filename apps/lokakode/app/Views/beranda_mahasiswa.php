@@ -22,7 +22,8 @@
                     <td>
                         <a href="/latihan/<?= (int) $p['pertemuan_id'] ?>"><span class="ltr"><?= esc($p['matkul_kode']) ?></span> — <?= lang('Soal.pertemuan.ke', [(int) $p['number']]) ?>: <?= esc($p['title']) ?></a>
                     </td>
-                    <td><span class="lencana mode-<?= esc($p['mode']) ?>"><?= lang('Latihan.mode.' . $p['mode']) ?></span></td>
+                    <td><span class="lencana mode-<?= esc($p['mode']) ?>"><?= lang(in_array($p['jenis'], ['telat', 'latihan'], true) ? 'Latihan.jenis.' . $p['jenis'] : 'Latihan.mode.' . $p['mode']) ?></span>
+                        <?php if ($p['mode'] === 'tunggu'): ?><br><small class="redup" data-sebab="<?= esc($p['sebab']) ?>"><?= $p['sebab'] === 'terjadwal' ? lang('Latihan.nilai.bukaPada', [esc(\App\Libraries\Waktu::lokal($p['open_at']))]) : lang('Latihan.sebab.' . $p['sebab'] . 'Pendek') ?></small><?php endif ?></td>
                     <td><?= esc(\App\Libraries\Waktu::lokal($p['close_at'])) ?></td>
                     <td><?= angka($p['score']) ?></td>
                 </tr>

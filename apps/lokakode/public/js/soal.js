@@ -279,6 +279,8 @@
     }
     keluaran.appendChild(kepalaHasil(T.hasilKirim, k.verdict));
     keluaran.appendChild(el('p', 'hasil-nilai', isi(T.nilaiKirim, angka(k.score), k.points)));
+    if (k.practice) { keluaran.appendChild(el('p', 'teks-peringatan', T.kirimanLatihan)); }
+    if (k.late) { keluaran.appendChild(el('p', 'teks-peringatan', isi(T.kirimanTelat, angka(k.late_factor)))); }
     if (k.verdict === 'CE') {
       keluaran.appendChild(blokTeks(T.logKompilasi, k.compile_log || ''));
     } else {
@@ -404,7 +406,8 @@
       return;
     }
     tampilKiriman(k);
-    perbaruiTerbaik(k.score, k.points);
+    // Kiriman latihan sesudah tutup tidak pernah mengubah nilai terbaik.
+    if (!k.practice) { perbaruiTerbaik(k.score, k.points); }
     perbaruiRingkasan(akhir.data.meeting);
     riwayatDimuat = false;
   };
@@ -478,6 +481,8 @@
         baris.appendChild(el('td', 'ltr', k.at));
         var sel = el('td');
         sel.appendChild(k.status === 'MENUNGGU' ? el('span', 'lencana', T.sedangDinilai) : lencanaVerdict(k.status === 'GAGAL' ? 'FAILED' : k.verdict));
+        if (k.practice) { sel.appendChild(el('span', 'lencana', T.lencanaLatihan)); }
+        if (k.late) { sel.appendChild(el('span', 'lencana', T.lencanaTelat)); }
         baris.appendChild(sel);
         baris.appendChild(el('td', 'ltr', k.score === null ? '—' : angka(k.score) + ' / ' + j.data.points));
         baris.appendChild(el('td', 'ltr', k.total ? k.passed + ' / ' + k.total : '—'));

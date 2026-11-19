@@ -9,19 +9,20 @@ use App\Libraries\Waktu;
 
 $mode = $p['mode'];
 // Hitung mundur hanya bila pertemuan terbuka MENURUT JADWAL; buka manual tidak punya waktu tutup.
-$tutupIso = $mode === 'kerja' && $p['override'] === 'none' && $p['close_at'] !== null ? str_replace(' ', 'T', $p['close_at']) . 'Z' : null;
+$tutupIso = $p['jenis'] === 'biasa' && $p['override'] === 'none' && $p['close_at'] !== null ? str_replace(' ', 'T', $p['close_at']) . 'Z' : null;
 ?>
-<p><a href="/beranda">&larr; <?= lang('Latihan.ruang.kembali') ?></a></p>
+<p><a href="/beranda"><span class="panah-balik" aria-hidden="true"></span> <?= lang('Latihan.ruang.kembali') ?></a></p>
 <h1><span class="ltr"><?= esc($p['matkul_kode']) ?></span> — <?= lang('Soal.pertemuan.ke', [(int) $p['number']]) ?>: <?= esc($p['title']) ?></h1>
 <p class="redup">
     <?= esc($p['matkul_nama']) ?> · <?= esc($p['kelas_nama']) ?> · <?= lang('Soal.bahasa.' . $p['language']) ?>
-    · <span class="lencana mode-<?= esc($mode) ?>"><?= lang('Latihan.mode.' . $mode) ?></span>
+    · <span class="lencana mode-<?= esc($mode) ?>"><?= lang(in_array($p['jenis'], ['telat', 'latihan'], true) ? 'Latihan.jenis.' . $p['jenis'] : 'Latihan.mode.' . $mode) ?></span>
 </p>
 
 <?php if ($mode === 'tunggu'): ?>
     <div class="kartu" role="status">
-        <p><strong><?= lang('Latihan.ruang.tunggu') ?></strong></p>
-        <p><?= $p['open_at'] !== null && $p['override'] === 'none' ? lang('Latihan.nilai.bukaPada', [esc(Waktu::lokal($p['open_at']))]) : lang('Latihan.nilai.belumJadwal') ?></p>
+        <?php // Mahasiswa diberi tahu SEBABNYA (Ruang::sebab): belum terbit, belum dibuka untuk kelasnya, atau terjadwal. ?>
+        <p data-sebab="<?= esc($p['sebab']) ?>"><strong><?= lang('Latihan.sebab.' . $p['sebab']) ?></strong></p>
+        <p><?= $p['sebab'] === 'terjadwal' ? lang('Latihan.nilai.bukaPada', [esc(Waktu::lokal($p['open_at']))]) : lang('Latihan.sebab.' . $p['sebab'] . 'Info', [esc($p['kelas_nama'])]) ?></p>
     </div>
 <?php else: ?>
     <div class="kartu">
@@ -34,8 +35,10 @@ $tutupIso = $mode === 'kerja' && $p['override'] === 'none' && $p['close_at'] !==
                 <strong><?= lang('Latihan.nilai.sisaWaktu') ?>:</strong>
                 <span class="ltr" data-hitung-mundur="<?= esc($tutupIso) ?>" data-teks-jam="<?= esc(lang('Latihan.js.sisa')) ?>" data-teks-menit="<?= esc(lang('Latihan.js.sisaMenit')) ?>" data-teks-habis="<?= esc(lang('Latihan.nilai.habis')) ?>"></span>
                 <span class="redup">(<?= lang('Latihan.nilai.tutupPada', [esc(Waktu::lokal($p['close_at']))]) ?>)</span>
-            <?php elseif ($mode === 'kerja'): ?>
+            <?php elseif ($p['jenis'] === 'biasa'): ?>
                 <span class="redup"><?= lang('Latihan.nilai.bukaManual') ?></span>
+            <?php elseif ($mode === 'kerja'): ?>
+                <?= view('_jenis_kerja', ['p' => $p]) ?>
             <?php elseif ($p['status_daftar'] === 'LULUS' && Latihan::keadaan($p) === 'buka'): ?>
                 <strong><?= lang('Latihan.ruang.lulus') ?></strong>
             <?php else: ?>
@@ -43,6 +46,10 @@ $tutupIso = $mode === 'kerja' && $p['override'] === 'none' && $p['close_at'] !==
             <?php endif ?>
         </p>
     </div>
+<?php endif ?>
+
+<?php if ($mode !== 'tunggu'): ?>
+    <p><a href="/latihan/<?= (int) $p['pertemuan_id'] ?>/papan"><?= lang('Papan.lihat') ?></a></p>
 <?php endif ?>
 
 <?php if (in_array($mode, ['kerja', 'baca'], true)): ?>

@@ -33,7 +33,7 @@ final class Penilaian
      *
      * @param array<string, mixed> $hasil judge_jobs.result sebuah SUBMIT
      */
-    public static function nilaiKiriman(int $poin, array $hasil): float
+    public static function nilaiKiriman(int $poin, array $hasil, ?float $faktorTelat = null): float
     {
         $total = (int) ($hasil['total'] ?? 0);
         $lulus = (int) ($hasil['passed'] ?? 0);
@@ -43,6 +43,10 @@ final class Penilaian
         $nilai = $poin * min($lulus, $total) / $total;
         if ($hasil['verdict'] === 'CONCEPT_NOT_MET') {
             $nilai *= 0.5;
+        }
+        // Kiriman terlambat di bawah kebijakan `multiplier` (SPEC.md §7).
+        if ($faktorTelat !== null) {
+            $nilai *= $faktorTelat;
         }
 
         return round($nilai, 2);
@@ -124,7 +128,7 @@ final class Penilaian
     {
         $db->transStart();
         $k = $db->query("
-            SELECT s.id, s.user_id, s.meeting_problem_id, mp.meeting_id, v.difficulty,
+            SELECT s.id, s.user_id, s.meeting_problem_id, s.late, s.late_factor, mp.meeting_id, v.difficulty,
                    j.status AS job_status, j.result, j.finished_at
             FROM submissions s
             JOIN judge_jobs j ON j.id = s.job_id
@@ -154,7 +158,7 @@ final class Penilaian
             'verdict'          => substr((string) $hasil['verdict'], 0, 20),
             'passed'           => (int) ($hasil['passed'] ?? 0),
             'total'            => (int) ($hasil['total'] ?? 0),
-            'score'            => self::nilaiKiriman(Latihan::POIN[$k['difficulty']], $hasil),
+            'score'            => self::nilaiKiriman(Latihan::POIN[$k['difficulty']], $hasil, (int) $k['late'] === 1 ? (float) $k['late_factor'] : null),
             'duration_ms'      => $tes === [] ? null : max(array_map(static fn ($t) => (int) ($t['duration_ms'] ?? 0), $tes)),
             'compile_log'      => mb_strcut((string) ($hasil['compile_log'] ?? ''), 0, 64 * 1024),
             'tests'            => json_encode($tes),
@@ -163,6 +167,8 @@ final class Penilaian
         ]);
         self::hitungUlang($db, (string) $k['user_id'], (int) $k['meeting_id']);
         $db->transComplete();
+        // Papan peringkat disegarkan setiap kali sebuah kiriman selesai dinilai (SPEC.md §12).
+        Papan::lupakan((int) $k['meeting_id']);
 
         return true;
     }
@@ -182,7 +188,7 @@ final class Penilaian
             FROM submissions s
             JOIN meeting_problems mp ON mp.id = s.meeting_problem_id AND mp.meeting_id = ?
             JOIN problem_versions v ON v.id = s.problem_version_id
-            WHERE s.user_id = ? AND s.status = 'DINILAI'
+            WHERE s.user_id = ? AND s.status = 'DINILAI' AND s.practice = 0
             ORDER BY s.judged_at, s.id", [$pertemuanId, $userId])->getResultArray();
 
         // Kiriman diputar ulang menurut urutan penilaiannya: dari situ didapat nilai
@@ -237,12 +243,13 @@ final class Penilaian
         $orang = $db->query("
             SELECT DISTINCT s.user_id FROM submissions s
             JOIN meeting_problems mp ON mp.id = s.meeting_problem_id AND mp.meeting_id = ?
-            WHERE s.status = 'DINILAI'", [$pertemuanId])->getResultArray();
+            WHERE s.status = 'DINILAI' AND s.practice = 0", [$pertemuanId])->getResultArray();
         foreach ($orang as $o) {
             $db->transStart();
             self::hitungUlang($db, (string) $o['user_id'], $pertemuanId);
             $db->transComplete();
         }
+        Papan::lupakan($pertemuanId);
 
         return count($orang);
     }

@@ -256,7 +256,7 @@ abstract class KodeCase extends TestCase
      * @param array<string, mixed> $mhs
      * @param array<string, int>   $soal dari soalSiap()
      */
-    protected function kirimanDinilai(array $mhs, array $soal, int $instans, int $lulus, int $total = 10, string $sumber = 'int main(){}'): int
+    protected function kirimanDinilai(array $mhs, array $soal, int $instans, int $lulus, int $total = 10, string $sumber = 'int main(){}', array $over = []): int
     {
         $job   = Fixtures::uuid();
         $tes   = [];
@@ -268,7 +268,7 @@ abstract class KodeCase extends TestCase
             'id' => $job, 'kind' => 'SUBMIT', 'priority' => 'normal', 'status' => 'DONE', 'payload' => '{}', 'result' => json_encode($hasil),
             'created_by' => $mhs['id'], 'created_at' => gmdate('Y-m-d H:i:s'), 'finished_at' => gmdate('Y-m-d H:i:s'),
         ]);
-        Fixtures::insert($this->db, 'submissions', [
+        Fixtures::insert($this->db, 'submissions', $over + [
             'user_id' => $mhs['id'], 'meeting_problem_id' => $soal['mp'], 'problem_version_id' => $soal['versi'], 'instance_id' => $instans,
             'language' => 'cpp', 'source' => $sumber, 'job_id' => $job, 'created_at' => gmdate('Y-m-d H:i:s'),
         ]);

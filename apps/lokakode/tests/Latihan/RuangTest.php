@@ -55,7 +55,9 @@ final class RuangTest extends KodeCase
         $this->assertStringContainsString('href="/latihan/' . $d['pertemuanX1'] . '"', $beranda->body);
         $this->assertStringContainsString('mode-kerja', $beranda->body);
         $this->assertStringContainsString('<td>10</td>', $beranda->body, 'nilai pertemuan 6/60 = 10');
-        $this->assertStringNotContainsString('/latihan/' . $d['pertemuanX2'], $beranda->body, 'pertemuan yang belum terbit tidak tampil');
+        // Pertemuan mata kuliahnya yang belum terbit tampil juga, dengan sebabnya (keputusan pemilik, tahap 9b).
+        $this->assertStringContainsString('/latihan/' . $d['pertemuanX2'], $beranda->body);
+        $this->assertStringContainsString('data-sebab="belum_terbit"', $beranda->body);
 
         $hal = $http->get('/latihan/' . $d['pertemuanX1']);
         $this->assertSame(200, $hal->status);
@@ -150,21 +152,102 @@ final class RuangTest extends KodeCase
         $this->assertSame(200, $http->get($soal)->status);
         $this->assertSame(403, $http->post($api . '/kirim', ['csrf' => $csrf, 'source' => $kode])->status);
 
-        // Mengundurkan diri, pertemuan ditarik, atau tidak dipakai latihan: tidak ada.
+        // Mengundurkan diri, atau pertemuan tidak dipakai latihan: tidak ada.
         $this->db->query("UPDATE enrollments SET status = 'MENGUNDURKAN_DIRI' WHERE id = {$d['daftarA']}");
         $this->assertSame(404, $http->get($hal)->status);
         $this->assertSame(404, $http->get($soal)->status);
         $this->db->query("UPDATE enrollments SET status = 'AKTIF' WHERE id = {$d['daftarA']}");
         $this->assertSame(200, $http->get($hal)->status);
+        // Pertemuan ditarik: halamannya menyebut sebabnya (testMahasiswaDiberiTahuMengapa…), soalnya tidak ada,
+        // dan jendela yang terbuka tidak membuatnya bisa dikerjakan.
         $this->db->query("UPDATE meetings SET published_at = NULL WHERE id = {$d['pertemuanX1']}");
-        $this->assertSame(404, $http->get($hal)->status);
+        $r = $http->get($hal);
+        $this->assertSame(200, $r->status);
+        $this->assertStringContainsString('data-sebab="belum_terbit"', $r->body);
+        $this->assertStringNotContainsString('kartu-soal', $r->body);
         $this->assertSame(404, $http->get($soal)->status);
+        $this->assertSame(404, $http->post($api . '/kirim', ['csrf' => $csrf, 'source' => $kode])->status);
         $this->terbit($d['pertemuanX1'], ['enabled' => 0]);
         $this->assertSame(404, $http->get($hal)->status);
 
         $this->assertSame(1, $this->hitung('SELECT COUNT(*) FROM submissions'), 'tidak ada kiriman baru dari permintaan yang ditolak');
         // Dua pekerjaan saja: milik dunia uji dan milik kiriman yang disisipkan di atas.
         $this->assertSame(2, $this->hitung('SELECT COUNT(*) FROM judge_jobs'), 'tidak ada pekerjaan judge baru');
+    }
+
+    public function testMahasiswaDiberiTahuMengapaPertemuanBelumBisaDikerjakan(): void
+    {
+        $d = $this->dunia();
+        $d['mudah'] = $this->soalSiap($d['pertemuanX1'], 'jumlah-dua-bilangan', 'MUDAH');
+        $this->db->query("UPDATE meetings SET title = 'Masukan dan Keluaran' WHERE id = {$d['pertemuanX1']}");
+        $http = $this->sebagai($d['mhsA']);
+        $hal  = '/latihan/' . $d['pertemuanX1'];
+        $soal = '/latihan/soal/' . $d['mudah']['mp'];
+
+        // 1. Belum diterbitkan (dan belum ada jendela): beranda dan halaman pertemuan menyebut sebabnya.
+        //    Yang terlihat hanya nomor dan judul; tidak ada kartu, judul soal, atau soal.
+        $beranda = $http->get('/beranda');
+        $this->assertStringContainsString('Masukan dan Keluaran', $beranda->body);
+        $this->assertStringContainsString('data-sebab="belum_terbit"', $beranda->body);
+        $this->assertStringContainsString('Belum diterbitkan dosen pengampu', $beranda->body);
+        $r = $http->get($hal);
+        $this->assertSame(200, $r->status);
+        $this->assertStringContainsString('Pertemuan ini belum diterbitkan.', $r->body);
+        $this->assertStringContainsString('Dosen pengampu belum menerbitkan soalnya', $r->body);
+        $this->assertStringNotContainsString('kartu-soal', $r->body);
+        $this->assertStringNotContainsString('Jumlah Dua Bilangan', $r->body);
+        $this->assertSame(404, $http->get($soal)->status);
+
+        // 2. Diterbitkan, tetapi kelas XA belum punya jendela: "belum dibuka untuk kelas Anda", dengan nama kelasnya.
+        $this->terbit($d['pertemuanX1']);
+        $this->assertStringContainsString('data-sebab="belum_dibuka"', $http->get('/beranda')->body);
+        $r = $http->get($hal);
+        $this->assertSame(200, $r->status);
+        $this->assertStringContainsString('Pertemuan ini belum dibuka untuk kelas Anda.', $r->body);
+        $this->assertStringContainsString('pengajar kelas XA belum membukanya', $r->body);
+        $this->assertStringNotContainsString('kartu-soal', $r->body);
+        $this->assertSame(404, $http->get($soal)->status);
+
+        // Kelas LAIN di mata kuliah yang sama sudah dibuka: itu tidak membuka apa pun untuk kelas XA.
+        $this->jendela($d['pertemuanX1'], $d['kelasXB']);
+        $this->assertStringContainsString('data-sebab="belum_dibuka"', $http->get($hal)->body);
+        $this->assertSame(404, $http->get($soal)->status);
+        $lain = $this->sebagai($d['mhsB']);
+        $this->assertStringContainsString('kartu-soal', $lain->get($hal)->body);
+
+        // 3. Jendela ada tetapi belum dijadwalkan dan tidak dibuka manual: sebab yang sama.
+        $j = $this->jendela($d['pertemuanX1'], $d['kelasXA'], ['override' => 'none']);
+        $this->assertStringContainsString('data-sebab="belum_dibuka"', $http->get($hal)->body);
+
+        // 4. Terjadwal: waktu bukanya disebut.
+        $this->db->query("UPDATE meeting_class_windows SET open_at = '2098-01-01 01:00:00', close_at = '2098-01-01 03:00:00' WHERE id = {$j}");
+        $r = $http->get($hal);
+        $this->assertStringContainsString('data-sebab="terjadwal"', $r->body);
+        $this->assertStringContainsString('Dibuka 01-01-2098 08:00 WIB', $r->body);
+        $this->assertStringContainsString('Dibuka 01-01-2098 08:00 WIB', $http->get('/beranda')->body);
+
+        // 5. Terbuka: tidak ada sebab lagi.
+        $this->db->query("UPDATE meeting_class_windows SET override = 'open' WHERE id = {$j}");
+        $r = $http->get($hal);
+        $this->assertStringNotContainsString('data-sebab', $r->body);
+        $this->assertStringContainsString('kartu-soal', $r->body);
+
+        // Mata kuliah LAIN tetap tidak ada sama sekali — terbit atau belum, jawabannya 404 yang sama
+        // dengan nomor yang tidak ada, dan tidak muncul di beranda.
+        $asing = $http->get('/latihan/' . $d['pertemuanY1']);
+        $isiAsing = self::inti($asing->body, '/latihan/' . $d['pertemuanY1']);
+        $this->assertSame(404, $asing->status);
+        $tiada = $http->get('/latihan/999999');
+        $this->assertSame(404, $tiada->status);
+        $this->assertSame($isiAsing, self::inti($tiada->body, '/latihan/999999'));
+        $this->terbit($d['pertemuanY1']);
+        $this->assertSame(404, $http->get('/latihan/' . $d['pertemuanY1'])->status);
+        $this->assertStringNotContainsString('UJY201', $http->get('/beranda')->body);
+
+        // Pertemuan yang tidak dipakai untuk latihan (UTS, UAS) tidak ditampilkan dan tidak dijelaskan.
+        $this->db->query("UPDATE meetings SET enabled = 0 WHERE id = {$d['pertemuanX2']}");
+        $this->assertSame(404, $http->get('/latihan/' . $d['pertemuanX2'])->status);
+        $this->assertStringNotContainsString('/latihan/' . $d['pertemuanX2'] . '"', $http->get('/beranda')->body);
     }
 
     public function testMahasiswaLainTidakBisaMembukaSoalDrafAtauKirimanOrangLain(): void
@@ -192,7 +275,16 @@ final class RuangTest extends KodeCase
             $this->assertSame(404, $r->status, $siapa);
             $this->assertGreaterThan(500, strlen($tiada));
             $this->assertSame($tiada, self::inti($r->body, "/latihan/soal/{$mp}"), 'soal kelas lain dijawab seperti soal yang tidak ada');
-            $this->assertSame(404, $http->get('/latihan/' . $d['pertemuanX1'])->status, $siapa);
+            // Halaman pertemuan: mahasiswa mata kuliah lain 404. Mahasiswa B (mata kuliah sama, kelasnya belum
+            // dibuka) mendapat SEBABNYA saja sejak tahap 9b — tanpa kartu, judul soal, atau apa pun milik orang lain.
+            $hal = $http->get('/latihan/' . $d['pertemuanX1']);
+            $this->assertSame($siapa === 'mhsB' ? 200 : 404, $hal->status, $siapa);
+            if ($siapa === 'mhsB') {
+                $this->assertStringContainsString('data-sebab="belum_dibuka"', $hal->body);
+            }
+            foreach (['kartu-soal', 'RAHASIA', 'Jumlah Dua Bilangan', $d['mhsA']['nomor_induk']] as $bocor) {
+                $this->assertStringNotContainsString($bocor, $hal->body, "{$siapa}: {$bocor}");
+            }
             foreach (["/api/soal/{$mp}/keadaan", "/api/soal/{$mp}/riwayat", "/api/soal/{$mp}/riwayat/{$kir}", "/api/executions/{$job}"] as $jalur) {
                 $r = $http->get($jalur);
                 $this->assertSame(404, $r->status, "{$siapa} {$jalur}");

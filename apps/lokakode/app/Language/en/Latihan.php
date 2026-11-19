@@ -48,6 +48,10 @@ return [
         'lengkapi'      => 'Autocomplete in the editor',
         'lengkapiInfo'  => 'When off, the editor offers no suggestions while the student types.',
         'simpan'        => 'Save practice settings',
+        'latihanBebas'     => 'Allow practice after the meeting closes',
+        'latihanBebasInfo' => 'Students can still run and submit after closing. Those submissions are judged and shown to the student, but never change the score, the attempt count, the leaderboard or the analytics. Problems stay visible even when the class chose "only see their score".',
+        'anonim'           => 'Hide names on the students\' leaderboard',
+        'anonimInfo'       => 'Students see the others as "Participant 1", "Participant 2", …; only their own row carries a name. Lecturers always see names.',
     ],
 
     'jendela' => [
@@ -115,6 +119,9 @@ return [
         'urutan'          => 'The closing time must be after the opening time.',
         'tampak'          => 'Choose one of the two options.',
         'override'        => 'Unknown choice.',
+        'kebijakan'   => 'Choose one of the two policies.',
+        'faktor'      => 'The factor must be a number from 0 to 1, for example 0.5.',
+        'telatUrutan' => 'The late deadline must be after the closing time, and the closing time must be set.',
     ],
 
     'saya' => [
@@ -145,13 +152,11 @@ return [
         'tutupPada'    => 'Closes {0}',
         'bukaPada'     => 'Opens {0}',
         'bukaManual'   => 'Opened by your teacher; no closing time is scheduled.',
-        'belumJadwal'  => 'Your teacher has not set the opening time yet.',
         'habis'        => 'Time is up',
     ],
 
     'ruang' => [
         'kembali'      => 'Home',
-        'tunggu'       => 'This meeting is not open for your class yet.',
         'tutupNilai'   => 'This meeting is closed. Its problems are no longer shown; your score is kept.',
         'tutupBaca'    => 'This meeting is closed. You can still read the problems and your submissions, but you can no longer submit.',
         'lulus'        => 'You have been marked as graduated in this class. You can still read the problems and your submissions, but you can no longer submit.',
@@ -276,6 +281,10 @@ return [
         'editorGagal'     => 'The full editor could not be loaded; you can still type in this simple box.',
         'sisa'            => '{0} h {1} min',
         'sisaMenit'       => '{0} min {1} s',
+        'kirimanLatihan' => 'This is a practice submission after the meeting closed: it does not change your score.',
+        'kirimanTelat'   => 'Late submission: its score has been multiplied by {0}.',
+        'lencanaLatihan' => 'practice',
+        'lencanaTelat'   => 'late',
     ],
 
     'verdict' => [
@@ -302,5 +311,35 @@ return [
         'terlalu_cepat' => 'Wait {0} seconds before trying again.',
         'masih_dinilai' => 'Your previous submission for this problem is still being judged.',
         'isian_salah'   => 'The input was not recognised.',
+    ],
+
+    'telat' => [
+        'judul'      => 'Submissions after the closing time',
+        'reject'     => 'Rejected',
+        'multiplier' => 'Accepted as late, score multiplied by a factor',
+        'faktor'     => 'Late score factor (0 to 1)',
+        'sampai'     => 'Late submissions accepted until',
+        'info'       => 'Applies only after the scheduled closing time has passed. If the deadline is left empty, late submissions are accepted until you press "Close now". Opening by hand is not late: full score. A student\'s best score never drops because of a late submission.',
+    ],
+
+    'jenis' => [
+        'telat'           => 'Late',
+        'latihan'         => 'Practice',
+        'telatJudul'      => 'The time for this meeting has passed.',
+        'telatInfo'       => 'You may still submit, but the score of a submission made now is multiplied by {0}. Your best score will not drop.',
+        'telatSampai'     => 'Late submissions are accepted until {0}.',
+        'telatTanpaBatas' => 'Late submissions are accepted until your teacher closes this meeting.',
+        'latihanJudul'    => 'This meeting is closed.',
+        'latihanInfo'     => 'You can still practise: your program is run and judged, but the result does not change your score.',
+    ],
+
+    'sebab' => [
+        'belum_terbit'       => 'This meeting has not been published yet.',
+        'belum_terbitInfo'   => 'The course lecturer has not published its problems yet, so there is nothing to work on. This applies to every class, not only class {0}.',
+        'belum_terbitPendek' => 'Not yet published by the course lecturer',
+        'belum_dibuka'       => 'This meeting has not been opened for your class yet.',
+        'belum_dibukaInfo'   => 'Its problems are published, but the teacher of class {0} has not opened it or set an opening time. Ask your class teacher.',
+        'belum_dibukaPendek' => 'Not yet opened for your class',
+        'terjadwal'          => 'This meeting has not been opened for your class yet.',
     ],
 ];

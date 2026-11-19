@@ -5,7 +5,7 @@ use App\Libraries\Latihan;
 use App\Libraries\Waktu;
 ?>
 <?= view('_nav', ['akses' => $akses]) ?>
-<p><a href="/kelas/<?= (int) $kelas['id'] ?>">&larr; <span class="ltr"><?= esc($kelas['matkul_kode']) ?></span> <?= esc($kelas['name']) ?></a></p>
+<p><a href="/kelas/<?= (int) $kelas['id'] ?>"><span class="panah-balik" aria-hidden="true"></span> <span class="ltr"><?= esc($kelas['matkul_kode']) ?></span> <?= esc($kelas['name']) ?></a></p>
 <h1><?= lang('Latihan.jendela.judul') ?></h1>
 <p class="redup"><?= lang('Latihan.jendela.info') ?></p>
 

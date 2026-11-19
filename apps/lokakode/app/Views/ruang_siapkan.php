@@ -4,7 +4,7 @@
 <?= $this->endSection() ?>
 <?= $this->section('isi') ?>
 <?php $detik = $keadaan['perkiraan']; ?>
-<p><a href="/latihan/<?= (int) $soal['pertemuan_id'] ?>">&larr; <?= lang('Latihan.soal.kembali') ?></a></p>
+<p><a href="/latihan/<?= (int) $soal['pertemuan_id'] ?>"><span class="panah-balik" aria-hidden="true"></span> <?= lang('Latihan.soal.kembali') ?></a></p>
 <h1><?= lang('Latihan.siapkan.judul') ?></h1>
 <div class="kartu" role="status" aria-live="polite" data-siapkan="/api/soal/<?= (int) $soal['mp_id'] ?>/keadaan"
      data-teks-detik="<?= esc(lang('Latihan.siapkan.perkiraan')) ?>" data-teks-menit="<?= esc(lang('Latihan.siapkan.perkiraanLama')) ?>"

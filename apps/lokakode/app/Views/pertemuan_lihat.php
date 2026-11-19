@@ -53,6 +53,8 @@ use App\Libraries\Waktu;
     <p><a class="tombol tombol-sekunder" href="/impor"><?= lang('Soal.impor.unggah') ?></a></p>
 <?php endif ?>
 
+<p><a href="/pertemuan/<?= (int) $p['id'] ?>/papan"><?= lang('Papan.seMatkul') ?></a></p>
+
 <h2 id="latihan"><?= lang('Latihan.terbit.judul') ?></h2>
 <div class="kartu">
     <?php if ($p['published_at'] !== null): ?>
@@ -153,6 +155,18 @@ use App\Libraries\Waktu;
             <?= lang('Latihan.atur.lengkapi') ?>
         </label>
         <p class="petunjuk"><?= lang('Latihan.atur.lengkapiInfo') ?></p>
+
+        <label class="centang">
+            <input type="checkbox" name="practice_after_close" value="1" <?= $latihan['practice_after_close'] === '1' ? 'checked' : '' ?>>
+            <?= lang('Latihan.atur.latihanBebas') ?>
+        </label>
+        <p class="petunjuk"><?= lang('Latihan.atur.latihanBebasInfo') ?></p>
+
+        <label class="centang">
+            <input type="checkbox" name="anonymize_leaderboard" value="1" <?= $latihan['anonymize_leaderboard'] === '1' ? 'checked' : '' ?>>
+            <?= lang('Latihan.atur.anonim') ?>
+        </label>
+        <p class="petunjuk"><?= lang('Latihan.atur.anonimInfo') ?></p>
 
         <div class="baris-tombol">
             <button type="submit" class="tombol"><?= lang('Latihan.atur.simpan') ?></button>

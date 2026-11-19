@@ -48,6 +48,10 @@ return [
         'lengkapi'      => 'Pelengkapan otomatis di editor',
         'lengkapiInfo'  => 'Bila dimatikan, editor tidak menawarkan saran saat mahasiswa mengetik.',
         'simpan'        => 'Simpan pengaturan latihan',
+        'latihanBebas'     => 'Boleh berlatih sesudah pertemuan ditutup',
+        'latihanBebasInfo' => 'Mahasiswa masih bisa menjalankan dan mengirim jawaban sesudah tutup. Kiriman itu dinilai dan ditampilkan kepada mahasiswa, tetapi tidak mengubah nilai, jumlah percobaan, papan peringkat, atau analitik. Soal tetap terlihat walaupun kelasnya memilih "hanya melihat nilainya".',
+        'anonim'           => 'Samarkan nama di papan peringkat mahasiswa',
+        'anonimInfo'       => 'Mahasiswa melihat peserta lain sebagai "Peserta 1", "Peserta 2", …; hanya barisnya sendiri yang bernama. Dosen selalu melihat nama.',
     ],
 
     'jendela' => [
@@ -115,6 +119,9 @@ return [
         'urutan'          => 'Waktu tutup harus sesudah waktu buka.',
         'tampak'          => 'Pilih salah satu dari dua pilihan.',
         'override'        => 'Pilihan tidak dikenali.',
+        'kebijakan'   => 'Pilih salah satu dari dua kebijakan.',
+        'faktor'      => 'Faktor harus angka dari 0 sampai 1, misalnya 0.5.',
+        'telatUrutan' => 'Batas akhir terlambat harus sesudah waktu tutup, dan waktu tutup harus diisi.',
     ],
 
     'saya' => [
@@ -145,13 +152,11 @@ return [
         'tutupPada'    => 'Ditutup {0}',
         'bukaPada'     => 'Dibuka {0}',
         'bukaManual'   => 'Dibuka oleh pengajar; tidak ada waktu tutup terjadwal.',
-        'belumJadwal'  => 'Pengajar belum menentukan waktu bukanya.',
         'habis'        => 'Waktu habis',
     ],
 
     'ruang' => [
         'kembali'      => 'Beranda',
-        'tunggu'       => 'Pertemuan ini belum dibuka untuk kelas Anda.',
         'tutupNilai'   => 'Pertemuan ini sudah ditutup. Soalnya tidak ditampilkan lagi; nilai Anda tetap tersimpan.',
         'tutupBaca'    => 'Pertemuan ini sudah ditutup. Soal dan kiriman Anda masih bisa dibaca, tetapi tidak bisa mengirim jawaban lagi.',
         'lulus'        => 'Anda sudah dinyatakan lulus di kelas ini. Soal dan kiriman Anda masih bisa dibaca, tetapi tidak bisa mengirim jawaban lagi.',
@@ -276,6 +281,10 @@ return [
         'editorGagal'     => 'Editor lengkap tidak bisa dimuat; Anda tetap bisa mengetik di kotak sederhana ini.',
         'sisa'            => '{0} j {1} m',
         'sisaMenit'       => '{0} m {1} d',
+        'kirimanLatihan' => 'Ini kiriman latihan sesudah pertemuan ditutup: tidak mengubah nilai Anda.',
+        'kirimanTelat'   => 'Kiriman terlambat: nilainya sudah dikali {0}.',
+        'lencanaLatihan' => 'latihan',
+        'lencanaTelat'   => 'terlambat',
     ],
 
     'verdict' => [
@@ -302,5 +311,35 @@ return [
         'terlalu_cepat' => 'Tunggu {0} detik sebelum mencoba lagi.',
         'masih_dinilai' => 'Kiriman Anda sebelumnya untuk soal ini masih dinilai.',
         'isian_salah'   => 'Isian tidak dikenali.',
+    ],
+
+    'telat' => [
+        'judul'      => 'Kiriman sesudah waktu tutup',
+        'reject'     => 'Ditolak',
+        'multiplier' => 'Diterima sebagai terlambat, nilainya dikali faktor',
+        'faktor'     => 'Faktor nilai terlambat (0 sampai 1)',
+        'sampai'     => 'Terlambat diterima sampai',
+        'info'       => 'Hanya berlaku sesudah waktu tutup terjadwal lewat. Bila batas akhirnya dikosongkan, kiriman terlambat diterima sampai Anda menekan "Tutup sekarang". Membuka manual bukan terlambat: nilainya penuh. Nilai terbaik mahasiswa tidak pernah turun karena kiriman terlambat.',
+    ],
+
+    'jenis' => [
+        'telat'           => 'Terlambat',
+        'latihan'         => 'Latihan bebas',
+        'telatJudul'      => 'Waktu pertemuan ini sudah lewat.',
+        'telatInfo'       => 'Anda masih boleh mengirim, tetapi nilai kiriman sekarang dikali {0}. Nilai terbaik Anda tidak akan turun.',
+        'telatSampai'     => 'Kiriman terlambat diterima sampai {0}.',
+        'telatTanpaBatas' => 'Kiriman terlambat diterima sampai pengajar menutup pertemuan ini.',
+        'latihanJudul'    => 'Pertemuan ini sudah ditutup.',
+        'latihanInfo'     => 'Anda masih bisa berlatih: program Anda dijalankan dan dinilai, tetapi hasilnya tidak mengubah nilai Anda.',
+    ],
+
+    'sebab' => [
+        'belum_terbit'       => 'Pertemuan ini belum diterbitkan.',
+        'belum_terbitInfo'   => 'Dosen pengampu belum menerbitkan soalnya, jadi belum ada yang bisa dikerjakan. Ini berlaku untuk semua kelas, bukan hanya kelas {0}.',
+        'belum_terbitPendek' => 'Belum diterbitkan dosen pengampu',
+        'belum_dibuka'       => 'Pertemuan ini belum dibuka untuk kelas Anda.',
+        'belum_dibukaInfo'   => 'Soalnya sudah diterbitkan, tetapi pengajar kelas {0} belum membukanya atau menentukan waktu bukanya. Tanyakan kepada pengajar kelas Anda.',
+        'belum_dibukaPendek' => 'Belum dibuka untuk kelas Anda',
+        'terjadwal'          => 'Pertemuan ini belum dibuka untuk kelas Anda.',
     ],
 ];

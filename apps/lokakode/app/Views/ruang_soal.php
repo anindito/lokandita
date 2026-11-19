@@ -32,10 +32,11 @@ $tanda   = $akses->identitas()->nomorInduk . ' · ' . $akses->identitas()->nama 
 <div class="soal-tata" data-soal data-panel-aktif="soal">
     <section class="panel panel-soal" aria-label="<?= lang('Latihan.soal.panelSoal') ?>">
         <header class="panel-kepala">
-            <a href="/latihan/<?= (int) $soal['pertemuan_id'] ?>">&larr; <?= lang('Latihan.soal.kembali') ?></a>
+            <a href="/latihan/<?= (int) $soal['pertemuan_id'] ?>"><span class="panah-balik" aria-hidden="true"></span> <?= lang('Latihan.soal.kembali') ?></a>
             <span class="lencana lencana-tingkat tingkat-<?= esc(strtolower($soal['difficulty'])) ?>"><?= lang('Soal.tingkat.' . $soal['difficulty']) ?></span>
             <span class="lencana"><?= lang('Latihan.ruang.poin', [$poin]) ?></span>
             <?php if (! $kerja): ?><span class="lencana mode-baca"><?= lang('Latihan.soal.hanyaBaca') ?></span><?php endif ?>
+            <?php if (in_array($soal['jenis'], ['telat', 'latihan'], true)): ?><span class="lencana jenis-<?= $soal['jenis'] ?>"><?= lang('Latihan.jenis.' . $soal['jenis']) ?></span><?php endif ?>
             <?php if (count($pernyataan) > 1): ?>
                 <span class="pilih-bahasa" role="group" aria-label="<?= lang('Latihan.soal.bahasaSoal') ?>">
                     <?php foreach ($pernyataan as $b => $t): ?>
@@ -46,6 +47,7 @@ $tanda   = $akses->identitas()->nomorInduk . ' · ' . $akses->identitas()->nama 
         </header>
         <p class="skor-soal" data-skor-soal><?= $skor === null ? lang('Latihan.soal.belumKirim') : lang('Latihan.soal.terbaik', [angka($skor['best_score']), $poin]) ?></p>
         <?= view('_ringkasan_nilai', ['nilai' => $nilai]) ?>
+        <?= view('_jenis_kerja', ['p' => $soal]) ?>
 
         <?php // Soal tidak bisa disalin atau dicetak, dan ditutupi tanda air (SPEC.md §11). ?>
         <div class="pernyataan-wadah tanpa-salin" data-tanpa-salin>

@@ -176,6 +176,9 @@
   .status-approved, .keadaan-diterima { border-color: var(--hijau); color: var(--hijau); }
   .status-rejected, .keadaan-ditolak { border-color: var(--bahaya); color: var(--bahaya); }
   .status-pending_review, .keadaan-menunggu { border-color: var(--emas); color: var(--emas); }
+  /* Panah "kembali": menunjuk ke awal baris, jadi ke kanan di halaman kanan-ke-kiri (SPEC.md §11). */
+  .panah-balik::before { content: "\2190"; }
+  [dir="rtl"] .panah-balik::before { content: "\2192"; }
   /* Latihan (SPEC.md §6, §11). */
   .teks-bahaya { color: var(--bahaya); }
   .teks-peringatan { color: var(--emas); }
@@ -213,6 +216,13 @@
   .ringkasan-rinci progress { width: 100%; height: .8rem; }
   .ringkasan-butir { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; margin: .35rem 0 0; padding: 0; list-style: none; font-size: .9rem; }
   .sisa-waktu { margin-bottom: 0; }
+  /* Kiriman terlambat dan latihan sesudah tutup (SPEC.md §6, §7). */
+  .jenis-telat, .jenis-latihan { border-color: var(--emas); color: var(--emas); }
+  /* Grafik analitik: kanvas Chart.js butuh wadah dengan tinggi tetap; angkanya selalu kiri-ke-kanan. */
+  .grafik-wadah { position: relative; height: 16rem; margin: .75rem 0; direction: ltr; }
+  /* Papan peringkat: baris mahasiswa itu sendiri. */
+  .baris-saya td { font-weight: 600; background: color-mix(in srgb, var(--emas) 14%, transparent); }
+  .kartu-peringatan { margin: .5rem 0 0; padding: .5rem .75rem; border: 1px solid var(--emas); border-inline-start-width: 4px; border-radius: .5rem; }
 
   .kartu-soal-daftar { display: grid; gap: .75rem; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); margin: 0; padding: 0; list-style: none; }
   .kartu-soal { background: var(--kartu); border: 1px solid var(--garis); border-inline-start: 4px solid var(--garis); border-radius: .6rem; padding: .75rem .9rem; }

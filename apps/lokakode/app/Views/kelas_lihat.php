@@ -4,7 +4,7 @@
 $aktif = count(array_filter($pendaftaran, static fn ($p) => $p['status'] === 'AKTIF'));
 ?>
 <?= view('_nav', ['akses' => $akses]) ?>
-<p><a href="/mata-kuliah/<?= (int) $kelas['course_id'] ?>?tahun=<?= (int) $kelas['academic_year_id'] ?>">&larr; <?= lang('Kode.kelas.kembali') ?></a></p>
+<p><a href="/mata-kuliah/<?= (int) $kelas['course_id'] ?>?tahun=<?= (int) $kelas['academic_year_id'] ?>"><span class="panah-balik" aria-hidden="true"></span> <?= lang('Kode.kelas.kembali') ?></a></p>
 <h1>
     <span class="ltr"><?= esc($kelas['matkul_kode']) ?></span> <?= esc($kelas['name']) ?>
     <?php if ($kelas['archived_at'] !== null): ?><span class="lencana"><?= lang('Kode.kelas.diarsipkan') ?></span><?php endif ?>
@@ -41,7 +41,8 @@ $aktif = count(array_filter($pendaftaran, static fn ($p) => $p['status'] === 'AK
         <dt class="redup"><?= lang('Kode.kelas.kapasitas') ?></dt>
         <dd><?= $kelas['capacity'] !== null ? (int) $kelas['capacity'] : lang('Kode.kelas.tanpaBatas') ?></dd>
     </dl>
-    <p><a class="tombol tombol-sekunder" href="/kelas/<?= (int) $kelas['id'] ?>/pertemuan"><?= lang('Latihan.jendela.judul') ?></a></p>
+    <p><a class="tombol tombol-sekunder" href="/kelas/<?= (int) $kelas['id'] ?>/pertemuan"><?= lang('Latihan.jendela.judul') ?></a>
+        <a class="tombol tombol-sekunder" href="/kelas/<?= (int) $kelas['id'] ?>/analitik"><?= lang('Papan.analitik.judul') ?></a></p>
     <?php if ((int) $kelas['boleh_kelola'] !== 1): ?>
         <p class="petunjuk"><?= lang('Kode.kelas.hanyaLihat') ?></p>
     <?php elseif (! $bolehUbah): ?>

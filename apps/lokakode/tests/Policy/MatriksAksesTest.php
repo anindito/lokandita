@@ -108,6 +108,19 @@ final class MatriksAksesTest extends KodeCase
             'POST kelas/{n}/pertemuan/{n}'          => ['/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'], $lihatXA],
             'POST kelas/{n}/pertemuan/{n}/status'   => ['/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'] . '/status', $lihatXA],
             'POST kelas/{n}/pertemuan/{n}/siapkan'  => ['/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'] . '/siapkan', $lihatXA],
+            // Papan peringkat (SPEC.md §3): kelas XA untuk yang melihat kelas itu; seluruh mata kuliah
+            // hanya superadmin dan pengampu — pengajar A dan B melihat mata kuliahnya tetapi mendapat 403.
+            'GET kelas/{n}/pertemuan/{n}/papan' => ['/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'] . '/papan', $lihatXA],
+            'GET pertemuan/{n}/papan'           => ['/pertemuan/' . $d['pertemuanX1'] . '/papan', ['pengajarB' => 403] + $kelolaXA],
+            // Analitik, kiriman dan kode sumber mahasiswa, ekspor (SPEC.md §3): per kelas untuk yang melihat
+            // kelas XA; kiriman mhsA (kelas XA) lewat alamat kelas XA. Lintas kelas: superadmin dan pengampu.
+            'GET kelas/{n}/analitik'               => ['/kelas/' . $d['kelasXA'] . '/analitik', $lihatXA],
+            'GET kelas/{n}/pertemuan/{n}/analitik' => ['/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX2'] . '/analitik', $lihatXA],
+            'GET kelas/{n}/pertemuan/{n}/kiriman'  => ['/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX2'] . '/kiriman', $lihatXA],
+            'GET kelas/{n}/kiriman/{n}'            => ['/kelas/' . $d['kelasXA'] . '/kiriman/' . $d['kirimanA'], $lihatXA],
+            'GET kelas/{n}/ekspor/([^/]+)'         => ['/kelas/' . $d['kelasXA'] . '/ekspor/csv', $lihatXA],
+            'GET mata-kuliah/{n}/analitik'         => ['/mata-kuliah/' . $d['matkulX'] . '/analitik', ['pengajarB' => 403] + $kelolaXA],
+            'GET mata-kuliah/{n}/ekspor/([^/]+)'   => ['/mata-kuliah/' . $d['matkulX'] . '/ekspor/csv', ['pengajarB' => 403] + $kelolaXA],
 
             // Bank soal mata kuliah X: sama dengan pertemuannya.
             'GET soal/{n}'             => ['/soal/' . $d['soalX'], ['pengajarB' => 403] + $kelolaXA],
@@ -126,6 +139,8 @@ final class MatriksAksesTest extends KodeCase
             // Ruang latihan: hanya peran mahasiswa; staf ditolak filter (403). Bahwa mahasiswa LAIN
             // tidak bisa membuka soal, draf atau kiriman mahasiswa A diuji di tests/Latihan/RuangTest.php.
             'GET latihan/{n}'                => ['/latihan/' . $d['pertemuanX2'], $mhs],
+            // Papan kelasnya sendiri; papan kelas lain tidak punya rute mahasiswa (tests/Latihan/PapanTest.php).
+            'GET latihan/{n}/papan'          => ['/latihan/' . $d['pertemuanX2'] . '/papan', $mhs],
             'GET latihan/soal/{n}'           => ['/latihan/soal/' . $d['mpA'], $mhs],
             'GET api/soal/{n}/keadaan'       => ['/api/soal/' . $d['mpA'] . '/keadaan', $mhs],
             'POST api/soal/{n}/draf'         => ['/api/soal/' . $d['mpA'] . '/draf', $mhs],

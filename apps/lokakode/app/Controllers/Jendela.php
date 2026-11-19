@@ -29,6 +29,8 @@ final class Jendela extends BaseController
 
     private const TAMPAK = ['hidden', 'review_only'];
 
+    private const TELAT = ['reject', 'multiplier'];
+
     /**
      * @return array<string, mixed>|ResponseInterface baris kelas, atau penolakan
      */
@@ -73,6 +75,8 @@ final class Jendela extends BaseController
         return $this->tampil($kelas, $j, [
             'open_at' => Waktu::keIsian($j['open_at']), 'close_at' => Waktu::keIsian($j['close_at']),
             'post_close_visibility' => $j['post_close_visibility'] ?? 'hidden',
+            'late_policy' => $j['late_policy'] ?? 'reject', 'late_factor' => angka((float) ($j['late_factor'] ?? 0.5)),
+            'late_until'  => Waktu::keIsian($j['late_until']),
         ], []);
     }
 
@@ -84,6 +88,13 @@ final class Jendela extends BaseController
      */
     private function tampil(array $kelas, array $j, array $isi, array $galat, int $status = 200): ResponseInterface
     {
+        // Isian yang tidak dikirim permintaan ini (mis. form buka/tutup manual yang salah) diambil dari jendelanya.
+        $isi += [
+            'open_at' => Waktu::keIsian($j['open_at']), 'close_at' => Waktu::keIsian($j['close_at']),
+            'post_close_visibility' => $j['post_close_visibility'] ?? 'hidden',
+            'late_policy' => $j['late_policy'] ?? 'reject', 'late_factor' => angka((float) ($j['late_factor'] ?? 0.5)),
+            'late_until'  => Waktu::keIsian($j['late_until']),
+        ];
         $maju = Instans::kemajuan((int) $j['pertemuan_id'], (int) $kelas['id']);
         // Selama masih ada instans yang dibuat, halaman memuat ulang dirinya (tanpa JavaScript).
         if ($galat === [] && $maju['antre'] > 0) {
@@ -133,6 +144,10 @@ final class Jendela extends BaseController
             'open_at'  => trim((string) $this->request->getPost('open_at')),
             'close_at' => trim((string) $this->request->getPost('close_at')),
             'post_close_visibility' => (string) $this->request->getPost('post_close_visibility'),
+            // Permintaan tanpa isian kebijakan terlambat tidak mengubah kebijakan yang ada.
+            'late_policy' => (string) ($this->request->getPost('late_policy') ?? $j['late_policy'] ?? 'reject'),
+            'late_factor' => str_replace(',', '.', trim((string) ($this->request->getPost('late_factor') ?? angka((float) ($j['late_factor'] ?? 0.5))))),
+            'late_until'  => trim((string) ($this->request->getPost('late_until') ?? Waktu::keIsian($j['late_until']))),
         ];
 
         $galat = [];
@@ -154,16 +169,44 @@ final class Jendela extends BaseController
         if (! in_array($isi['post_close_visibility'], self::TAMPAK, true)) {
             $galat['post_close_visibility'] = 'tampak';
         }
+        // Kebijakan terlambat (SPEC.md §6, §7). Kiriman terlambat hanya ada sesudah waktu tutup
+        // TERJADWAL lewat; faktor dan batas akhirnya hanya berarti untuk kebijakan `multiplier`.
+        $telat  = $isi['late_policy'] === 'multiplier';
+        $faktor = (float) ($j['late_factor'] ?? 0.5);
+        $sampai = null;
+        if (! in_array($isi['late_policy'], self::TELAT, true)) {
+            $galat['late_policy'] = 'kebijakan';
+        } elseif ($telat) {
+            if (preg_match('/^(0(\.\d{1,2})?|1(\.0{1,2})?)$/', $isi['late_factor']) !== 1) {
+                $galat['late_factor'] = 'faktor';
+            } else {
+                $faktor = (float) $isi['late_factor'];
+            }
+            if ($isi['late_until'] !== '') {
+                $sampai = Waktu::dariIsian($isi['late_until']);
+                if ($sampai === null) {
+                    $galat['late_until'] = 'waktu';
+                } elseif ($tutup === null || $sampai <= $tutup) {
+                    $galat['late_until'] = 'telatUrutan';
+                }
+            }
+        }
         if ($galat !== []) {
             return $this->tampil($kelas, $j, $isi, $galat, 422);
         }
 
-        $baru = ['open_at' => $buka, 'close_at' => $tutup, 'post_close_visibility' => $isi['post_close_visibility']];
+        $baru = [
+            'open_at' => $buka, 'close_at' => $tutup, 'post_close_visibility' => $isi['post_close_visibility'],
+            'late_policy' => $isi['late_policy'], 'late_factor' => $faktor, 'late_until' => $telat ? $sampai : null,
+        ];
         $db   = db_connect();
         $db->transStart();
         (new PustakaJendela($this->akses()))->simpan($kelasId, $j, $baru);
         Audit::catat('jendela.disimpan', 'meeting', $pertemuanId, [
-            'sebelum' => ['open_at' => $j['open_at'], 'close_at' => $j['close_at'], 'post_close_visibility' => $j['post_close_visibility']],
+            'sebelum' => [
+                'open_at' => $j['open_at'], 'close_at' => $j['close_at'], 'post_close_visibility' => $j['post_close_visibility'],
+                'late_policy' => $j['late_policy'], 'late_factor' => $j['late_factor'] === null ? null : (float) $j['late_factor'], 'late_until' => $j['late_until'],
+            ],
             'sesudah' => $baru,
         ], (int) $kelas['course_id'], $kelasId);
         $db->transComplete();

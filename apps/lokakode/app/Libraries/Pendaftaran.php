@@ -158,6 +158,8 @@ final class Pendaftaran
             Audit::catat('pendaftaran.diaktifkan', 'user', $b['id'], ['kelas' => $kelas['name'], 'enrollment_id' => $b['enrollment_id'], 'dari_kelas' => $b['dari_kelas']], $matkulId, $kelasId);
         }
         $db->transComplete();
+        // Siapa yang AKTIF di kelas mana menentukan papan peringkat dan analitik per kelas.
+        Papan::lupakan();
 
         return ['didaftarkan' => count($golongan['siap']), 'diaktifkan' => count($golongan['aktifkanLagi'])];
     }
@@ -190,6 +192,7 @@ final class Pendaftaran
             $jumlah++;
         }
         $db->transComplete();
+        Papan::lupakan();
 
         return $jumlah;
     }
