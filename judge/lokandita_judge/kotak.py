@@ -42,9 +42,14 @@ def dir_job() -> Path:
 
 
 MEMORI_MB = 256
+# SPEC.md §10: satu CPU. Tes menurunkannya untuk meniru server yang sibuk; tidak pernah dinaikkan.
+CPU_KONTAINER = "1"
 BATAS_KELUARAN = 1024 * 1024  # stdout dan stderr, masing-masing
 BATAS_BINER = 8 * 1024 * 1024
 BATAS_KOMPILASI_S = 10
+# Kompilasi yang kena batas waktu dengan CPU di bawah bagian ini dari 10 s dianggap
+# kelaparan CPU (HasilKompilasi.kelaparan). Angkanya diukur; lihat DECISIONS.md.
+AMBANG_KELAPARAN = 0.8
 BATAS_CPU_MS = {"c": 2000, "cpp": 2000, "python": 5000}
 # Kelonggaran untuk menyalakan kontainer; tidak pernah dihitung sebagai waktu program.
 KELONGGARAN_MULAI_S = 4
@@ -78,6 +83,15 @@ class HasilKompilasi:
     # '' bila berhasil atau kompiler sendiri menolak; selain itu:
     # waktu_habis, memori_habis, keluaran_terlalu_besar
     alasan: str = ""
+    # CPU yang dipakai seluruh kontainer kompilasi (cgroup), -1 bila tidak diketahui
+    # (kontainer dimatikan dari luar sebelum pelari sempat melapor).
+    cpu_ms: int = -1
+
+    @property
+    def kelaparan(self) -> bool:
+        """Batas waktu kena padahal kompiler tidak mendapat CPU: server yang sibuk,
+        bukan sumber yang berat. Pemanggil memperlakukannya sebagai galat infrastruktur."""
+        return self.alasan == "waktu_habis" and self.cpu_ms < BATAS_KOMPILASI_S * 1000 * AMBANG_KELAPARAN
 
 
 def batas_wall_s(cpu_ms: int) -> float:
@@ -97,7 +111,7 @@ def bendera_kontainer(nama: str, dir_job: Path, tanda: str, memori_mb: int, umur
         "--read-only",
         "--tmpfs", "/box:rw,size=64m,mode=1777,nosuid,nodev,noexec",
         "--memory", f"{memori_mb}m", "--memory-swap", f"{memori_mb}m",
-        "--cpus", "1",
+        "--cpus", CPU_KONTAINER,
         "--pids-limit", "64",
         "--cap-drop", "ALL",
         "--security-opt", "no-new-privileges",
@@ -288,11 +302,12 @@ def kompilasi(bahasa: str, sumber: str, dir_job: Path, bendera: tuple[str, ...] 
     )
     log = mentah["stderr"].decode("utf-8", "replace")
     lap = mentah["laporan"]
+    cpu = lap.get("cg_cpu_ms", -1) if lap else -1
 
     if mentah["oom_docker"] or (lap and lap["oom"] > 0):
-        return HasilKompilasi(False, log, "memori_habis")
+        return HasilKompilasi(False, log, "memori_habis", cpu)
     if mentah["waktu_habis"] or (lap and (lap["wall"] or lap["cpu_ms"] >= BATAS_KOMPILASI_S * 1000)):
-        return HasilKompilasi(False, log, "waktu_habis")
+        return HasilKompilasi(False, log, "waktu_habis", cpu)
     if mentah["lewat_stdout"] or mentah["lewat_stderr"]:
         return HasilKompilasi(False, log, "keluaran_terlalu_besar")
     _galat_bila_docker_gagal(mentah)

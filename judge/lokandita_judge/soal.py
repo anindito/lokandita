@@ -142,6 +142,8 @@ def validasi(payload: dict, maju: Callable[[str, int, int], None] | None = None)
         # 1. Solusi referensi terkompilasi.
         maju("compiling", 0, langkah)
         k = kotak.kompilasi(bahasa, referensi, dir_job)
+        if k.kelaparan:
+            raise kotak.GalatInfrastruktur(f"kompilasi solusi referensi kena batas waktu dengan hanya {k.cpu_ms} ms CPU")
         if not k.ok:
             alasan.append(_alasan_kompilasi(bahasa, k))
 

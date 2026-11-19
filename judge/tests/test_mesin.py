@@ -6,7 +6,8 @@ import json
 
 import pytest
 
-from lokandita_judge import mesin
+from bahan import KOMPILASI_BERAT_KIRIMAN as KOMPILASI_BERAT
+from lokandita_judge import kotak, mesin
 from lokandita_judge.mesin import Tes
 
 TAMBAH_CPP = '#include <iostream>\nint main(){long a,b;std::cin>>a>>b;std::cout<<a+b<<"\\n";}\n'
@@ -149,3 +150,25 @@ def test_mode_perbandingan_dipakai():
     assert mesin.nilai_tes("python", sumber, [Tes("", "3.1415927 2.7182818\n")], mode="float")["verdict"] == "AC"
     assert mesin.nilai_tes("python", sumber, [Tes("", "3.14159265 2.71828183\n")], mode="token")["verdict"] == "AC"
     assert mesin.nilai_tes("python", sumber, [Tes("", "3.14159265 2.71828183\n")], mode="trimmed")["verdict"] == "WA"
+
+
+# ---- kompilasi yang kehabisan waktu: sumber yang berat, atau server yang sibuk? ---------
+
+def test_kompilasi_berat_adalah_ce_timeout_untuk_run_dan_submit():
+    h = mesin.jalankan_sekali("c", KOMPILASI_BERAT)
+    assert h["verdict"] == "CE" and h["compile_error"] == "timeout"
+    n = mesin.nilai_tes("c", KOMPILASI_BERAT, [Tes("", "")])
+    assert n["verdict"] == "CE" and n["compile_error"] == "timeout" and n["passed"] == 0
+
+
+def test_kompilasi_yang_kelaparan_cpu_bukan_ce_melainkan_galat_infrastruktur(monkeypatch):
+    # Kontainer kompilasi hanya diberi 0,3 CPU: batas 10 detik kena padahal kompiler baru
+    # bekerja sekitar 3 detik. Itu bukan kesalahan mahasiswa; worker mengulang pekerjaannya
+    # (test_worker: dua kali, lalu judge_unavailable) dan tidak ada vonis CE.
+    monkeypatch.setattr(kotak, "CPU_KONTAINER", "0.3")
+    with pytest.raises(kotak.GalatInfrastruktur, match="server sibuk"):
+        mesin.jalankan_sekali("c", KOMPILASI_BERAT)
+    with pytest.raises(kotak.GalatInfrastruktur, match="server sibuk"):
+        mesin.nilai_tes("c", KOMPILASI_BERAT, [Tes("", "")])
+    with pytest.raises(kotak.GalatInfrastruktur, match="server sibuk"):
+        mesin.jalankan_contoh("c", KOMPILASI_BERAT, [Tes("", "")])

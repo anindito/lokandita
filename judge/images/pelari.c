@@ -7,7 +7,12 @@
  * Menjalankan program dengan stdin/stdout/stderr kontainer apa adanya, lalu
  * menulis SATU baris laporan ke stderr:
  *
- *   <tanda> exit=<n> signal=<n> cpu_ms=<n> wall_ms=<n> wall=<0|1> oom=<n> mem_kb=<n>
+ *   <tanda> exit=<n> signal=<n> cpu_ms=<n> wall_ms=<n> wall=<0|1> oom=<n> mem_kb=<n> cg_cpu_ms=<n>
+ *
+ * cpu_ms adalah CPU program utama dan anak-anak yang sempat dipungutnya (wait4).
+ * cg_cpu_ms adalah CPU seluruh kontainer menurut cgroup: ikut menghitung proses yang
+ * dimatikan sebelum dipungut induknya (cc1 di bawah gcc saat batas waktu dinding kena),
+ * dan -1 bila cgroup tidak terbaca.
  *
  * Batas CPU dipaksakan kernel (RLIMIT_CPU: SIGXCPU pada batas, SIGKILL satu
  * detik kemudian). Batas waktu dinding dipaksakan pelari: saat terlampaui
@@ -168,12 +173,18 @@ int main(int argc, char **argv)
 	long long oom = baca_cgroup("/sys/fs/cgroup/memory.events", "oom_kill");
 	long long puncak = baca_cgroup("/sys/fs/cgroup/memory.peak", NULL);
 
+	long long cg_usec = baca_cgroup("/sys/fs/cgroup/cpu.stat", "usage_usec");
+
 	char laporan[256];
-	int n = snprintf(laporan, sizeof laporan, "\n%s exit=%d signal=%d cpu_ms=%lld wall_ms=%lld wall=%d oom=%lld mem_kb=%lld\n",
+	int n = snprintf(laporan, sizeof laporan,
+		"\n%s exit=%d signal=%d cpu_ms=%lld wall_ms=%lld wall=%d oom=%lld mem_kb=%lld cg_cpu_ms=%lld\n",
 		tanda,
 		WIFEXITED(status) ? WEXITSTATUS(status) : -1,
 		WIFSIGNALED(status) ? WTERMSIG(status) : 0,
-		cpu_ms, wall_ms, wall_habis ? 1 : 0, oom < 0 ? 0 : oom, puncak < 0 ? -1 : puncak / 1024);
+		cpu_ms, wall_ms, wall_habis ? 1 : 0, oom < 0 ? 0 : oom, puncak < 0 ? -1 : puncak / 1024,
+		cg_usec < 0 ? -1 : cg_usec / 1000);
+	if (n < 0 || n >= (int)sizeof laporan)
+		return 3;
 	if (write(2, laporan, (size_t)n) != n)
 		return 3;
 	return 0;

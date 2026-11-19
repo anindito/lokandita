@@ -11,6 +11,7 @@ import time
 
 import pytest
 
+from bahan import KOMPILASI_BERAT
 from lokandita_judge import kotak
 
 HALO_C = '#include <stdio.h>\nint main(){int a,b;if(scanf("%d %d",&a,&b)!=2)return 1;printf("%d\\n",a+b);return 0;}\n'
@@ -23,12 +24,16 @@ def jumlah_proses_host() -> int:
 # ---- 1. while(1); dimatikan tepat waktu dan kotak pasir tetap sehat -------------
 
 def test_putaran_tanpa_akhir_dimatikan_tepat_waktu_lalu_program_lain_tetap_jalan(jalan):
-    mulai = time.time()
     h = jalan("c", "int main(){while(1);}")
-    lama = time.time() - mulai
     assert h.status == "TLE"
-    assert 1900 <= h.cpu_ms <= 3100, h.cpu_ms  # batas 2 s CPU
-    assert lama < 8, f"butuh {lama:.1f} s untuk mematikan while(1)"
+    # Diukur pelari di dalam kontainer, jadi tidak terpengaruh lambatnya Docker:
+    # dimatikan pada batas 2 s CPU, dan tidak melewati batas waktu dinding 2 × 2 + 1 s.
+    # cpu_ms hanya terisi bila pelari sendiri yang melapor, artinya pengawas dari luar
+    # tidak perlu turun tangan.
+    assert 1900 <= h.cpu_ms <= 3100, h.cpu_ms
+    assert h.wall_ms <= 5100, h.wall_ms
+    # Dilihat dari host, untuk tahap jalan saja (tanpa kompilasi): batas 8 s yang sama.
+    assert jalan.lama < 8, f"butuh {jalan.lama:.1f} s untuk mematikan while(1)"
     assert jalan("c", HALO_C, b"2 3\n").stdout == b"5\n"
 
 
@@ -263,20 +268,42 @@ def test_swap_tidak_bisa_dipakai_untuk_melewati_batas_memori(jalan):
 # ---- 8. pengawas kompilasi 10 detik ----------------------------------------------------
 
 def test_pengawas_kompilasi_bekerja_pada_10_detik():
-    # 3000 fungsi inline yang digabung ke main: gcc -O2 butuh jauh lebih dari 10 detik.
-    sumber = "".join(
-        f"static inline unsigned f{i}(unsigned x){{for(int i=0;i<64;i++){{x=x*1664525u+1013904223u+{i}u;"
-        f"if(x&1)x^=x>>3;else x+=x<<2;}}return x;}}\n" for i in range(3000))
-    sumber += "int main(void){unsigned x=1;\n" + "".join(f"x=f{i}(x);" for i in range(3000)) + "return x&1;}\n"
     d = kotak.siapkan_dir_job()
     try:
         mulai = time.time()
-        k = kotak.kompilasi("c", sumber, d)
+        k = kotak.kompilasi("c", KOMPILASI_BERAT, d)
         lama = time.time() - mulai
     finally:
         kotak.buang_dir_job(d)
     assert not k.ok and k.alasan == "waktu_habis"
     assert 9.5 <= lama < 14, f"pengawas bekerja setelah {lama:.1f} s"
+    # Kompiler memang bekerja sepanjang 10 detik itu: sumbernya yang berat, bukan servernya
+    # yang sibuk. CPU dihitung cgroup, jadi cc1 yang dimatikan sebelum dipungut ikut terhitung.
+    assert k.cpu_ms >= 8000 and not k.kelaparan, k.cpu_ms
+
+
+def test_kompilasi_yang_tidak_mendapat_cpu_dikenali_sebagai_kelaparan(monkeypatch):
+    # Server sibuk ditiru dengan sungguhan: kontainer yang sama hanya diberi 0,3 CPU,
+    # sehingga dalam 10 detik kompiler mendapat sekitar 3 detik CPU.
+    monkeypatch.setattr(kotak, "CPU_KONTAINER", "0.3")
+    d = kotak.siapkan_dir_job()
+    try:
+        k = kotak.kompilasi("c", KOMPILASI_BERAT, d)
+    finally:
+        kotak.buang_dir_job(d)
+    assert not k.ok and k.alasan == "waktu_habis"
+    assert 1000 <= k.cpu_ms < 6000, k.cpu_ms
+    assert k.kelaparan
+
+
+def test_kelaparan_hanya_untuk_batas_waktu():
+    H = kotak.HasilKompilasi
+    assert H(False, "", "waktu_habis", -1).kelaparan        # dimatikan dari luar, pelari tidak sempat melapor
+    assert H(False, "", "waktu_habis", 7999).kelaparan
+    assert not H(False, "", "waktu_habis", 8000).kelaparan
+    assert not H(False, "", "memori_habis", 100).kelaparan
+    assert not H(False, "galat", "", 100).kelaparan          # kompiler menolak sumbernya
+    assert not H(True, "", "", 100).kelaparan
 
 
 def test_kompilasi_yang_menghabiskan_memori_terkurung():
@@ -405,10 +432,14 @@ while True:
 def test_proses_anak_yang_ditinggal_ikut_mati(jalan):
     sumber = ('#include <unistd.h>\n#include <stdio.h>\n'
               'int main(){if(fork()==0){setsid();for(;;)pause();}puts("induk selesai");return 0;}')
-    mulai = time.time()
     h = jalan("c", sumber)
     assert h.status == "OK" and h.stdout == b"induk selesai\n"
-    assert time.time() - mulai < 4  # tidak menunggu anak yang tidak pernah selesai
+    # Tidak menunggu anak yang tidak pernah selesai. Di dalam kontainer: jalan berakhir
+    # begitu induk selesai, jauh sebelum batas waktu dinding 5 s. Dari host, tahap jalan
+    # saja (tanpa kompilasi): batas 4 s yang sama; menunggu si anak berarti paling cepat 5 s.
+    assert h.wall_ms < 1000, h.wall_ms
+    assert jalan.lama < 4, f"jalan butuh {jalan.lama:.1f} s"
+    # Bahwa anak itu ikut mati dibuktikan `tidak_ada_sisa`: kontainernya sudah tidak ada.
 
 
 # ---- gagal tertutup ---------------------------------------------------------------------

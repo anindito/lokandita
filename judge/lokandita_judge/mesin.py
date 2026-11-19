@@ -67,6 +67,10 @@ ALASAN_CE = {"": "compiler", "waktu_habis": "timeout", "memori_habis": "memory",
 
 
 def _hasil_ce(k: kotak.HasilKompilasi) -> dict:
+    # Kompilasi yang kehabisan waktu karena server sibuk bukan kesalahan mahasiswa:
+    # worker mengulanginya, dan tidak pernah menjadi CE (KONTRAK.md §6).
+    if k.kelaparan:
+        raise kotak.GalatInfrastruktur(f"kompilasi kena batas waktu dengan hanya {k.cpu_ms} ms CPU: server sibuk")
     return {"verdict": "CE", "compile_log": k.log, "compile_error": ALASAN_CE[k.alasan]}
 
 

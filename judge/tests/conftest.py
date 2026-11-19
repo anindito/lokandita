@@ -97,7 +97,11 @@ def galat_mysql(sambung, sql: str) -> int:
 
 @pytest.fixture()
 def jalan():
-    """Mengompilasi dan menjalankan satu program di kotak pasir; mengembalikan kotak.Hasil."""
+    """Mengompilasi dan menjalankan satu program di kotak pasir; mengembalikan kotak.Hasil.
+
+    `jalan.lama` adalah lama kotak.jalankan yang terakhir saja, dalam detik, dilihat dari
+    host: menyalakan kontainer, program, dan membuang kontainer. Kompilasi tidak termasuk,
+    supaya tes tentang "dimatikan tepat waktu" tidak ikut mengukur kompiler."""
     from lokandita_judge import kotak
 
     def _jalan(bahasa: str, sumber: str, stdin: bytes = b"", **batas):
@@ -105,9 +109,15 @@ def jalan():
         try:
             k = kotak.kompilasi(bahasa, sumber, d)
             assert k.ok, f"kompilasi gagal ({k.alasan}): {k.log}"
-            return kotak.jalankan(bahasa, d, stdin, **batas)
+            mulai = time.monotonic()
+            try:
+                return kotak.jalankan(bahasa, d, stdin, **batas)
+            finally:
+                _jalan.lama = time.monotonic() - mulai
         finally:
             kotak.buang_dir_job(d)
+
+    _jalan.lama = 0.0
 
     return _jalan
 
