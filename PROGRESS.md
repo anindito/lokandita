@@ -1,6 +1,6 @@
 # Progress
 
-Current stage: **9b — built, tested and deployed 2026-11-19; waiting for the owner's gate for stage 9** (`SPEC.md` §18). See "Stage 9b" at the end of this file. No tag `tahap-9b` yet: it follows the gate, as with every earlier stage. Stage 9a — student interface and scoring — finished 2026-11-17, tag `tahap-9a`, after the owner's check; see "Result of the owner's check for 9a" at the end of "Stage 9a". Stage 9 was split by the owner on 2026-11-17: 9b (leaderboard, analytics, exports, late policy, three languages and RTL polish) is the next session, and the gate of `SPEC.md` §18 for stage 9 is taken after 9b.
+Stage 9b — leaderboard, analytics, exports, late policy, three languages and RTL — finished 2026-11-19, tag `tahap-9b`, on the owner's report that the gate passed; see "Gate result for stage 9" at the end of this file, which also lists the gate steps that left no trace in production. Stage 9a — student interface and scoring — finished 2026-11-17, tag `tahap-9a`. The next stage is the one after 9 in `SPEC.md` §18; it has not been started.
 
 Stage 8 — Problems, concepts, importer — finished 2026-11-17, tag `tahap-8`; see "Gate result" at the end of this file.
 
@@ -595,3 +595,21 @@ The submissions, the window changes and the export made in this gate are real pr
 
 - The owner reported: the Arabic display and texts have been confirmed by an Arabic speaker. The two notes saying the Arabic texts were still unreviewed (in the result of the 9a check and in "Not verified" of 9b) are removed on his instruction. The older notes of stages 6, 8 and 9a are left as the record of those days and are closed by this entry.
 - The agent did not see the review and cannot judge Arabic itself. Which pages and texts the speaker read was not stated; in particular it is not known whether the review covered the Arabic problem statements of `DDP101` meetings 1–3, so that note and their "machine translation" badge stay until the pengampu clears them.
+
+### Gate result for stage 9 — 2026-11-19
+
+- **The owner reported:** all ten steps of the gate done and passed; `infra/smoke.sh` → 22 lulus, 0 gagal, 0 belum aktif; Arabic display and texts confirmed by an Arabic speaker. Asked about the points below, he decided: tag now. Tag `tahap-9b`. The agent did not watch the gate.
+- What agrees with the report (read by the agent at 15:03 UTC):
+  - `infra/smoke.sh` run again by the agent → `smoke: 22 lulus, 0 gagal, 0 belum aktif` / `smoke: LULUS`; `lokakode`, `auth`, `portal` and the worker heartbeat report `7fe8207`.
+  - The LokaKode container log of the day has requests for the beranda, a meeting page, a problem page, the class analytics, a meeting's analytics and one submission page. Audit: one `jendela.dibuka` at 14:59 UTC.
+- **What the production `lokakode` schema does not show** (counts only):
+  - Step 2, the `SPEC.md` §18 gate itself (a student submits): still 1 submission, the one of 2026-11-17 09:37 UTC. No `SUBMIT` job on 2026-11-19; the day's judge jobs are 4 `RUN` and 4 `VALIDATE`, all from smoke runs.
+  - Step 4 (late, factor 0.5): all three class windows have `late_policy = reject` and no `late_until`; no submission with a late factor below 1.
+  - Step 5 (practice after close): no submission marked `practice`.
+  - Step 7 (export): `audit_log` has never had a `nilai.diekspor` row.
+  - Weaker, from the container log only (it starts at the last deploy): no request for a leaderboard (step 3), the class comparison (step 8) or a download.
+- So on the deployed system the late policy, practice after close, the export and a 9b submission through the real worker remain **proven by the test suites only** (`TelatTest` and the others listed above), not by use. The agent has no explanation for the difference from the owner's report. If Submit was pressed in production and looked successful, a submission was lost and that is a bug to find; nothing in the logs read here points to one.
+- The items under "Not verified, or weaker than it looks" above still hold, except that the pages have now been seen by a person and the Arabic reviewed (next section above).
+- The tagged commit differs from the deployed `7fe8207` only in this file. **It has not been redeployed**, so `infra/smoke.sh` check 0 fails until `infra/deploy.sh` is run for the four components; nothing that runs has changed.
+
+**Stage 9b finished 2026-11-19, tag `tahap-9b`.**
