@@ -1,0 +1,85 @@
+{
+  "pengampu": "197805192024211003",
+  "matkul": [
+    {
+      "kode": "DDP101",
+      "nama": "Dasar-Dasar Pemrograman",
+      "bahasa": "cpp",
+      "kelas": ["A", "B", "C", "D"],
+      "konsep_dasar": [],
+      "pertemuan": [
+        {"nomor": 1,  "judul": "Pengenalan Pemrograman dan C++",       "latihan": true,  "konsep": ["IO_DASAR", "ARITMETIKA", "VARIABEL_TIPE"]},
+        {"nomor": 2,  "judul": "Tipe Data, Variabel, Operator",        "latihan": true,  "konsep": ["KONVERSI_TIPE"]},
+        {"nomor": 3,  "judul": "Input dan Output",                     "latihan": true,  "konsep": ["FORMAT_OUTPUT", "STRING"]},
+        {"nomor": 4,  "judul": "Struktur Kontrol — Percabangan",       "latihan": true,  "konsep": ["PERCABANGAN"]},
+        {"nomor": 5,  "judul": "Struktur Kontrol — Perulangan",        "latihan": true,  "konsep": ["PERULANGAN", "NESTED_LOOP", "BREAK_CONTINUE"]},
+        {"nomor": 6,  "judul": "Fungsi dan Parameter Passing",         "latihan": true,  "konsep": ["FUNGSI", "PARAMETER_REF", "REFERENSI"]},
+        {"nomor": 7,  "judul": "Fungsi Lanjutan, Rekursi, Debugging",  "latihan": true,  "konsep": ["REKURSI", "OVERLOAD_FUNGSI"]},
+        {"nomor": 8,  "judul": "UTS",                                  "latihan": false, "konsep": []},
+        {"nomor": 9,  "judul": "Array 1D",                             "latihan": true,  "konsep": ["ARRAY_1D"]},
+        {"nomor": 10, "judul": "Array Multidimensi",                   "latihan": true,  "konsep": ["ARRAY_2D"]},
+        {"nomor": 11, "judul": "Pointer dan Memori Dinamis",           "latihan": true,  "konsep": ["POINTER", "MEMORI_DINAMIS"]},
+        {"nomor": 12, "judul": "Struct, Union, Typedef",               "latihan": true,  "konsep": ["STRUCT"]},
+        {"nomor": 13, "judul": "Pengenalan OOP",                       "latihan": true,  "konsep": ["CLASS_OBJECT", "ENCAPSULATION"]},
+        {"nomor": 14, "judul": "File Handling dan Exception",          "latihan": true,  "konsep": ["FILE_IO", "EXCEPTION"]},
+        {"nomor": 15, "judul": "C++ di Platform Lain, Tools",          "latihan": false, "konsep": []},
+        {"nomor": 16, "judul": "UAS",                                  "latihan": false, "konsep": []}
+      ]
+    },
+    {
+      "kode": "PBO301",
+      "nama": "Pemrograman Berorientasi Obyek",
+      "bahasa": "cpp",
+      "kelas": ["A", "B", "C", "D"],
+      "konsep_dasar": [
+        "IO_DASAR", "ARITMETIKA", "VARIABEL_TIPE", "KONVERSI_TIPE", "FORMAT_OUTPUT", "STRING",
+        "PERCABANGAN", "PERULANGAN", "NESTED_LOOP", "BREAK_CONTINUE",
+        "FUNGSI", "PARAMETER_REF", "REFERENSI", "REKURSI", "OVERLOAD_FUNGSI",
+        "ARRAY_1D", "ARRAY_2D", "POINTER", "MEMORI_DINAMIS", "STRUCT", "FILE_IO"
+      ],
+      "pertemuan": [
+        {"nomor": 1,  "judul": "Pengantar OOP, C++ Modern, UML",            "latihan": true,  "konsep": ["MODERN_CPP"]},
+        {"nomor": 2,  "judul": "Class, Object, Class Diagram",              "latihan": true,  "konsep": ["CLASS_OBJECT"]},
+        {"nomor": 3,  "judul": "Constructor, Destructor, Copy Semantics",   "latihan": true,  "konsep": ["CONSTRUCTOR_DESTRUCTOR", "COPY_SEMANTICS"]},
+        {"nomor": 4,  "judul": "Encapsulation dan Access Control",          "latihan": true,  "konsep": ["ENCAPSULATION"]},
+        {"nomor": 5,  "judul": "Relasi Antar Obyek, Object Diagram",        "latihan": true,  "konsep": ["KOMPOSISI_AGREGASI"]},
+        {"nomor": 6,  "judul": "Inheritance",                               "latihan": true,  "konsep": ["INHERITANCE"]},
+        {"nomor": 7,  "judul": "Polymorphism dan Virtual Functions",        "latihan": true,  "konsep": ["POLYMORPHISM"]},
+        {"nomor": 8,  "judul": "UTS",                                       "latihan": false, "konsep": []},
+        {"nomor": 9,  "judul": "Abstraction 1 — Abstract Class",            "latihan": true,  "konsep": ["ABSTRACT_CLASS"]},
+        {"nomor": 10, "judul": "Abstraction 2 — Interface",                 "latihan": true,  "konsep": ["INTERFACE"]},
+        {"nomor": 11, "judul": "Operator Overloading",                      "latihan": true,  "konsep": ["OPERATOR_OVERLOAD"]},
+        {"nomor": 12, "judul": "Templates 1",                               "latihan": true,  "konsep": ["TEMPLATE_FUNGSI", "TEMPLATE_CLASS"]},
+        {"nomor": 13, "judul": "Templates 2 — Specialization dan STL",      "latihan": true,  "konsep": ["STL_CONTAINER", "STL_ALGORITMA", "SMART_POINTER"]},
+        {"nomor": 14, "judul": "Exception Handling Lanjut",                 "latihan": true,  "konsep": ["EXCEPTION"]},
+        {"nomor": 15, "judul": "Sequence Diagram, Use Case, Studi Kasus",   "latihan": false, "konsep": []},
+        {"nomor": 16, "judul": "UAS",                                       "latihan": false, "konsep": []}
+      ]
+    },
+    {
+      "kode": "TS-PY",
+      "nama": "Pemrograman untuk Teknik Sipil",
+      "bahasa": "python",
+      "kelas": ["A"],
+      "konsep_dasar": [],
+      "pertemuan": [
+        {"nomor": 1,  "judul": "Pengenalan Pemrograman, Algoritma, Python",          "latihan": true,  "konsep": ["IO_DASAR", "ARITMETIKA", "VARIABEL_TIPE"]},
+        {"nomor": 2,  "judul": "Variabel, Tipe Data, Operasi Matematika, Satuan",    "latihan": true,  "konsep": ["KONVERSI_TIPE", "FORMAT_OUTPUT"]},
+        {"nomor": 3,  "judul": "Logika dan Percabangan",                             "latihan": true,  "konsep": ["PERCABANGAN"]},
+        {"nomor": 4,  "judul": "Perulangan",                                         "latihan": true,  "konsep": ["PERULANGAN", "NESTED_LOOP", "BREAK_CONTINUE"]},
+        {"nomor": 5,  "judul": "Struktur Data dan Fungsi",                           "latihan": true,  "konsep": ["PY_LIST", "PY_DICT_SET", "FUNGSI", "STRING"]},
+        {"nomor": 6,  "judul": "Pengolahan Data dan Visualisasi Awal",               "latihan": true,  "konsep": ["FILE_IO", "PY_COMPREHENSION", "PY_MATPLOTLIB"]},
+        {"nomor": 7,  "judul": "UTS Teori + Praktik",                                "latihan": false, "konsep": []},
+        {"nomor": 8,  "judul": "NumPy dan Komputasi Numerik",                        "latihan": true,  "konsep": ["PY_NUMPY"]},
+        {"nomor": 9,  "judul": "Pengantar Metode Numerik",                           "latihan": true,  "konsep": []},
+        {"nomor": 10, "judul": "Penerapan, Desain Program, Pengujian",               "latihan": true,  "konsep": ["MODUL", "EXCEPTION"]},
+        {"nomor": 11, "judul": "GUI Desktop I — Tkinter",                            "latihan": false, "konsep": ["PY_TKINTER"]},
+        {"nomor": 12, "judul": "GUI Desktop II — Aplikasi Teknik Sipil",             "latihan": false, "konsep": []},
+        {"nomor": 13, "judul": "Integrasi dan Capstone",                             "latihan": false, "konsep": []},
+        {"nomor": 14, "judul": "Validasi Model dan Klinik Capstone",                 "latihan": false, "konsep": []},
+        {"nomor": 15, "judul": "Finalisasi dan Presentasi",                          "latihan": false, "konsep": []},
+        {"nomor": 16, "judul": "UAS Teori + Capstone",                               "latihan": false, "konsep": []}
+      ]
+    }
+  ]
+}

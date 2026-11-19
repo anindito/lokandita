@@ -518,3 +518,18 @@ Values are written without quotes.
 - Redis DB `15` is reserved for tests and is flushed at the start of every run.
 - For `lokakode`, `infra/tes.sh` also starts a headless Chromium (`peramban-tes`, image pinned by digest) and a second Caddy (`caddy-tes`) that serves `https://lokakode.lokandita.com` with Caddy's internal certificate and forwards to `lokakode-tes`, as the production edge does. The browser sits only on the Docker network `tes-peramban`; `lokakode.lokandita.com` is mapped to `caddy-tes` and every other host name is made unresolvable, so a browser test cannot reach a production site. PHPUnit drives it over the Chrome DevTools Protocol (`Tests\Support\Peramban`, address in `PERAMBAN_TES_URL`); the tests in `tests/Peramban/` fail, not skip, when it is missing.
 - `infra/tes.sh judge` is the only way to run the worker's tests (pytest, on the host, in `judge/.venv`). It recreates `lokakode_test` through the LokaKode migrations, gives `judge_worker` its grant there, and runs the tests against real MySQL, Redis DB `15` and real Docker. The tests refuse any schema not ending in `_test` and any Redis DB other than `15`, fail when Docker is unavailable, and fail when a test is skipped.
+
+## 13. Production data (`SPEC.md` §17)
+
+Everything in this section is a `spark` command that previews by default and writes only with `--jalankan`, acts as `--oleh <nomor induk of an active superadmin>`, can be repeated without changing anything the second time, and writes the same audit rows as the web action it replaces, marked `lewat`.
+
+### Curriculum seed
+
+`docker exec lokakode php spark benih:kurikulum --oleh <nomor induk> [--jalankan]` applies `apps/lokakode/app/Data/benih.json` (`App\Libraries\BenihKurikulum`): the three courses with their pengampu, 16 meetings each (title, language, used-for-practice switch, concepts added), base concepts, and the classes in the active academic year. The file holds no personal data.
+
+- What does not exist is created. What exists and differs is reported as `BEDA` and left alone: pengampu or name of a course, language or practice switch of a meeting, a non-empty concept list, an archived class of the same name.
+- Two things are changed on existing rows: a meeting's title is set to the seed's, and an **empty** concept list (of a meeting, or the base concepts of a course) is filled from the seed.
+- It fails, writing nothing, when the pengampu is not an active dosen, when there is no active academic year, or when the seed names a concept that is not in the catalogue or not valid for the course's language.
+- Nothing is published and no class window is created. Audit rows carry `lewat: benih`.
+
+The formats of the source files in `/srv/lokandita-data/` (accounts, teaching assignments, enrollments) and the commands that read them are added here together with their code.

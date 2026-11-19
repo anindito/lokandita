@@ -1,5 +1,7 @@
 # Progress
 
+Stage 12 — production data — **in progress** since 2026-11-19, ahead of stages 10 and 11 by the owner's decision; see "Stage 12" at the end of this file. Anything not listed there is not done.
+
 Stage 9b — leaderboard, analytics, exports, late policy, three languages and RTL — finished 2026-11-19, tag `tahap-9b`, on the owner's report that the gate passed; see "Gate result for stage 9" at the end of this file, which also lists the gate steps that left no trace in production. Stage 9a — student interface and scoring — finished 2026-11-17, tag `tahap-9a`. The next stage is the one after 9 in `SPEC.md` §18; it has not been started.
 
 Stage 8 — Problems, concepts, importer — finished 2026-11-17, tag `tahap-8`; see "Gate result" at the end of this file.
@@ -613,3 +615,15 @@ The submissions, the window changes and the export made in this gate are real pr
 - The tagged commit differs from the deployed `7fe8207` only in this file. **It has not been redeployed**, so `infra/smoke.sh` check 0 fails until `infra/deploy.sh` is run for the four components; nothing that runs has changed.
 
 **Stage 9b finished 2026-11-19, tag `tahap-9b`.**
+
+## Stage 12 — in progress (started 2026-11-19, before stages 10 and 11)
+
+Plan approved by the owner 2026-11-19 (8 steps): 1 contract and curriculum seed · 2 file check (after the owner confirms the files are in place) · 3 account import · 4 teaching assignments and enrollments · 5 count check (the gate) · 6 tests · 7 production run · 8 close. Owner's decisions: `DECISIONS.md`, 2026-11-19.
+
+Consequences of doing this before stages 10 and 11, told to the owner: no SEB (ordinary browsers; paste and copy blocking are deterrents only); the Portal is in maintenance, so a login without `next` lands on the 503 page; "export of own data" does not exist; a password reset from LokaKode and a Submit since the 9b deploy have never happened in production.
+
+Done:
+
+- Step 1 — curriculum seed: `apps/lokakode/app/Data/benih.json`, `App\Libraries\BenihKurikulum`, `spark benih:kurikulum` (`KONTRAK.md` §13). `infra/tes.sh lokakode --filter BenihKurikulum` → `OK (4 tests, 123 assertions)` against real MySQL and `auth-tes`: preview writes nothing; a run creates 3 courses, 48 meetings, 9 classes and PBO301's base concepts with 61 audit rows; a second run changes nothing; a DDP101 that already exists is completed, its differing concepts, language and practice switch reported and left alone; a non-superadmin, a missing pengampu and a missing active year are refused. **Not deployed; nothing has been written to production. The full `infra/tes.sh lokakode` suite was not run at this step.**
+
+Not done: steps 2–8. Nothing has been read from `/srv/lokandita-data/`.
