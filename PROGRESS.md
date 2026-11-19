@@ -1,6 +1,6 @@
 # Progress
 
-Current stage: **9b — built and tested, NOT deployed** (2026-11-19); see "Stage 9b" at the end of this file. The deploy, the smoke run and the owner's gate for stage 9 are still to do. Stage 9a — student interface and scoring — finished 2026-11-17, tag `tahap-9a`, after the owner's check; see "Result of the owner's check for 9a" at the end of "Stage 9a". Stage 9 was split by the owner on 2026-11-17: 9b (leaderboard, analytics, exports, late policy, three languages and RTL polish) is the next session, and the gate of `SPEC.md` §18 for stage 9 is taken after 9b.
+Current stage: **9b — built, tested and deployed 2026-11-19; waiting for the owner's gate for stage 9** (`SPEC.md` §18). See "Stage 9b" at the end of this file. No tag `tahap-9b` yet: it follows the gate, as with every earlier stage. Stage 9a — student interface and scoring — finished 2026-11-17, tag `tahap-9a`, after the owner's check; see "Result of the owner's check for 9a" at the end of "Stage 9a". Stage 9 was split by the owner on 2026-11-17: 9b (leaderboard, analytics, exports, late policy, three languages and RTL polish) is the next session, and the gate of `SPEC.md` §18 for stage 9 is taken after 9b.
 
 Stage 8 — Problems, concepts, importer — finished 2026-11-17, tag `tahap-8`; see "Gate result" at the end of this file.
 
@@ -549,10 +549,19 @@ Verified by the agent (commands and output shown in the session):
 - `infra/tes.sh auth` → `OK (95 tests, 822 assertions)`; `infra/tes.sh portal` → `OK (19 tests, 105 assertions)`, both at `fd73737`.
 - `infra/cek-env.sh` → passed; no new environment variable. Commits pushed to `origin/main`.
 
+Deployed 2026-11-19, after the owner's go-ahead ("do all you recommend"; the first attempt had been refused by the agent's permission system and was not worked around). At commit `57dee87` (output shown in the session):
+
+- `infra/deploy.sh lokakode`, `judge`, `auth`, `portal` → each verified: `/healthz` of the three apps and the worker's heartbeat report `57dee87`; judge image tag `e2b13df94b7c`, the old images removed.
+- The migration ran on the real `lokakode` schema: `meeting_class_windows.late_until`, `submissions.late_factor`, `submissions.practice` exist; still 26 tables; the 1 existing submission has `late = 0`, `practice = 0`; both existing windows keep `late_policy = reject`. Nothing was dropped or rewritten.
+- `infra/smoke.sh` → **`22 lulus, 0 gagal, 0 belum aktif`**.
+- Real requests to the deployed LokaKode, without a session: the seven analytics and export routes and the three leaderboard routes → 302 to the LokaAuth login with the right `next`. `/grafik/chart.umd.min.js` (210,082 bytes), its licence and `/js/grafik.js` → 200 from the app itself; the same path on `auth.lokandita.com` → 404 (Chart.js is only in the LokaKode image). The deployed stylesheet contains the new rules.
+- `infra/backup.sh` → done; `infra/uji-restore.sh` → passed, 37 schemas/tables restored and equal to the live ones; `infra/tes-infra.sh` → 57 passed, 0 failed.
+
 **Not done:**
 
-- **Nothing of 9b is deployed.** `infra/deploy.sh` was refused by the agent's permission system and the agent did not work around it. Production still runs the commit of 2026-11-17. Therefore also not done: the migration on the real `lokakode` schema, `infra/smoke.sh`, real requests to the new routes, `infra/backup.sh`, `infra/uji-restore.sh`, `infra/tes-infra.sh`, the tag `tahap-9b`.
+- **No request with a session was made against production.** The agent has no account there and created none; every new page was exercised only on the test containers. What a logged-in lecturer or student sees on the deployed system is the owner's gate.
 - `judge/uji-terima.sh` was not run in this stage (its items are part of the full judge suite that did run).
+- The tag `tahap-9b`.
 
 Not verified, or weaker than it looks:
 
@@ -568,8 +577,17 @@ Not verified, or weaker than it looks:
 
 Still owed (not in this stage by the owner's decision): retention of `judge_jobs` and `imports`; whether a pengajar may see the problem bank; Monaco in the problem edit form; a memory limit per problem.
 
-To finish the stage:
+Owner's gate for stage 9 (`SPEC.md` §18: a test student completes one meeting end to end; hidden tests show status only). Everything is at `https://lokakode.lokandita.com`:
 
-1. Deploy, in this order: `infra/deploy.sh lokakode` (runs the additive migration: `late_until`, `late_factor`, `practice`), `infra/deploy.sh judge` (new judge image tag, because `pelari` changed), `infra/deploy.sh auth`, `infra/deploy.sh portal` (shared stylesheet).
-2. `infra/smoke.sh` — expect `22 lulus, 0 gagal, 0 belum aktif`.
-3. Owner's gate for stage 9 (`SPEC.md` §18: a test student completes one meeting end to end; hidden tests show status only), plus for 9b: the leaderboard as the student and as the pengajar; *Analitik* on the class page; one export opened in a spreadsheet; a window with "terlambat" and a submission after its closing time; a meeting that is not published seen from the student's home page; the same pages with the language set to Arabic.
+1. As the test mahasiswa: the beranda lists every practice meeting of `DDP101`; one that is not published says *Belum diterbitkan dosen pengampu*, one without a schedule for the class says *Belum dibuka untuk kelas Anda*.
+2. Open a meeting that is open, solve problems until the target is reached (or as far as you like): each Submit shows verdict, score and the hidden tests as status only; the header counts toward the target. This is the §18 gate.
+3. On the meeting page press **Lihat papan peringkat**: your own row is marked, no nomor induk is shown.
+4. As pengajar or pengampu: class page → **Jadwal pertemuan** → the meeting. Under *Kiriman sesudah waktu tutup* choose "Diterima sebagai terlambat", factor 0.5, set the closing time a minute ahead, save. After that minute the student page says the submission is late; a correct Submit scores half and the best score does not drop.
+5. On the meeting's settings (pengampu) tick **Boleh berlatih sesudah pertemuan ditutup**, press *Tutup sekarang* on the class window, and submit as the student: judged, marked "latihan", score unchanged.
+6. Class page → **Analitik**: the score table and "Mahasiswa berisiko"; click a meeting number: distribution with the chart, statistics per problem; click a submission count → the student's submissions → *Lihat* shows the source code.
+7. **Unduh nilai (XLSX)** and open it in a spreadsheet: one row per student, columns `P01`, `P02`, …, a second sheet *Rincian*. `/audit` (superadmin) lists `nilai.diekspor`.
+8. Course page → **Perbandingan kelas** (pengampu or superadmin). As the second dosen the same address must say *tidak berhak*, and `/kelas/<other class>/analitik` must say *Halaman tidak ditemukan*.
+9. Switch the language to Arabic in the account menu and look at the beranda, a problem page and the analytics page: mirrored layout, editor and code left-to-right.
+10. `infra/smoke.sh` — expect `22 lulus, 0 gagal, 0 belum aktif`.
+
+The submissions, the window changes and the export made in this gate are real production rows, like those of the earlier gates. After the gate: tag `tahap-9b`, record the result here.
