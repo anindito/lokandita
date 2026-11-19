@@ -88,6 +88,8 @@ return [
         'terjadwal' => 'The meeting opens by itself at the opening time below.',
         'buka'      => 'Students of this class can work and submit now.',
         'tutup'     => 'Students of this class can no longer submit.',
+        'tutupTelat'   => 'The closing time has passed, but submissions are still accepted as late: their score is multiplied by {0}.',
+        'tutupLatihan' => 'Students of this class can no longer submit for a score, but can still practise: those submissions are not counted.',
     ],
 
     'tampak' => [

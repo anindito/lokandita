@@ -20,7 +20,15 @@ $terbit = $j['published_at'] !== null;
         <span class="lencana keadaan-<?= $keadaan ?>"><?= lang('Latihan.keadaan.' . $keadaan) ?></span>
         <?php if (in_array($j['override'], ['open', 'closed'], true)): ?><span class="redup"><?= lang('Latihan.jendela.manual') ?></span><?php endif ?>
     </p>
-    <p><?= lang('Latihan.keadaanInfo.' . $keadaan) ?></p>
+    <?php
+    // Tertutup belum tentu berarti tidak ada kiriman lagi: terlambat dan latihan sesudah tutup (App\Libraries\Ruang::jenis).
+    $telat   = $keadaan === 'tutup' && $j['override'] === 'none' && ($j['late_policy'] ?? '') === 'multiplier'
+        && ($j['late_until'] === null || Waktu::kini() < $j['late_until']);
+    $latihan = $keadaan === 'tutup' && ! $telat && (int) $j['practice_after_close'] === 1;
+    ?>
+    <p data-keadaan-info="<?= $telat ? 'telat' : ($latihan ? 'latihan' : $keadaan) ?>"><?= $telat
+        ? lang('Latihan.keadaanInfo.tutupTelat', [angka((float) $j['late_factor'])])
+        : lang('Latihan.keadaanInfo.' . ($latihan ? 'tutupLatihan' : $keadaan)) ?></p>
     <?php if (! $terbit): ?>
         <p><strong class="teks-peringatan"><?= lang('Latihan.jendela.belumTerbit') ?></strong> <?= lang('Latihan.jendela.belumTerbitInfo') ?></p>
     <?php endif ?>

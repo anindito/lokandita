@@ -153,6 +153,21 @@ final class TelatTest extends KodeCase
         $this->assertSame(303, $http->post($url, ['late_policy' => 'reject', 'late_factor' => 'apa saja', 'late_until' => '2030-11-20T12:00'] + $jadwal)->status);
         $this->assertSame(['late_policy' => 'reject', 'late_factor' => '0.75', 'late_until' => null], $baris());
 
+        // Halaman pengajar tidak mengatakan "tidak bisa lagi mengirim" selama terlambat atau latihan masih diterima.
+        $atur = fn (string $set) => $this->db->query("UPDATE meeting_class_windows SET {$set} WHERE meeting_id = {$d['pertemuanX1']} AND class_id = {$d['kelasXA']}");
+        $atur("open_at = '2020-01-01 00:00:00', close_at = '2020-01-02 00:00:00'");
+        $this->assertStringContainsString('data-keadaan-info="tutup"', $http->get($url)->body);
+        $atur("late_policy = 'multiplier', late_until = NULL");
+        $hal = $http->get($url)->body;
+        $this->assertStringContainsString('data-keadaan-info="telat"', $hal);
+        $this->assertStringContainsString('masih diterima sebagai terlambat', $hal);
+        $atur("late_until = '2020-01-03 00:00:00'");
+        $this->assertStringContainsString('data-keadaan-info="tutup"', $http->get($url)->body);
+        $this->db->query("UPDATE meetings SET practice_after_close = 1 WHERE id = {$d['pertemuanX1']}");
+        $this->assertStringContainsString('data-keadaan-info="latihan"', $http->get($url)->body);
+        $this->db->query("UPDATE meetings SET practice_after_close = 0 WHERE id = {$d['pertemuanX1']}");
+        $atur("late_policy = 'reject', late_until = NULL, open_at = '2030-11-20 01:00:00', close_at = '2030-11-20 03:00:00'");
+
         // Pengajar kelas lain tidak bisa mengubahnya, dan tidak ada yang berubah.
         $lain = $this->sebagai($d['pengajarB']);
         $r    = $lain->post($url, ['late_policy' => 'multiplier', 'late_factor' => '1', 'csrf' => $this->csrf($lain)] + $jadwal);

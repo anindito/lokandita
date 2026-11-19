@@ -88,6 +88,8 @@ return [
         'terjadwal' => 'Pertemuan terbuka sendiri pada waktu buka di bawah.',
         'buka'      => 'Mahasiswa kelas ini bisa mengerjakan dan mengirim jawaban sekarang.',
         'tutup'     => 'Mahasiswa kelas ini tidak bisa lagi mengirim jawaban.',
+        'tutupTelat'   => 'Waktu tutup sudah lewat, tetapi kiriman masih diterima sebagai terlambat: nilainya dikali {0}.',
+        'tutupLatihan' => 'Mahasiswa kelas ini tidak bisa lagi mengirim jawaban yang dinilai, tetapi masih bisa berlatih: kirimannya tidak dihitung.',
     ],
 
     'tampak' => [
