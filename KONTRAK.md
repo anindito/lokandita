@@ -532,4 +532,14 @@ Everything in this section is a `spark` command that previews by default and wri
 - It fails, writing nothing, when the pengampu is not an active dosen, when there is no active academic year, or when the seed names a concept that is not in the catalogue or not valid for the course's language.
 - Nothing is published and no class window is created. Audit rows carry `lewat: benih`.
 
-The formats of the source files in `/srv/lokandita-data/` (accounts, teaching assignments, enrollments) and the commands that read them are added here together with their code.
+### Student accounts
+
+`docker exec -i [-e SANDI_AWAL] auth php spark akun:impor --oleh <nomor induk> [--jalankan] [--format csv|xlsx] [--apps a,b] [--nama <file name>] < file`
+
+- The file comes in on standard input, so `/srv/lokandita-data/` is never mounted into a container. Columns as on `/admin/impor` (`SPEC.md` §4.1): `nomor_induk`, `nama`, `global_role` required; `email`, `apps` optional; comma or semicolon; at most 2000 rows. Classification and creation are `Importer::analyse` and `Importer::run`, the same code as the web page.
+- Only `mahasiswa` rows are created. `dosen` rows are skipped and counted; a `superadmin` row is a bad row. A row with an empty `apps` gets `--apps` (default: all four apps).
+- The shared initial password is read from the environment variable `SANDI_AWAL` (passed by name with `docker exec -e SANDI_AWAL`, never as an argument), must pass the password policy, and is never printed or audited. Every account is created with `must_change_password = 1`.
+- Any bad row refuses the whole write, so that the number of accounts can equal the file. An account that already exists is left untouched, password included.
+- Output holds counts, line numbers and reason codes only — no name and no nomor induk. Audit: `user.created` per account (`via: import`) and one `user.imported` with the counts and `lewat: cli`.
+
+The formats of the teaching-assignment and enrollment files and the commands that read them are added here together with their code.
