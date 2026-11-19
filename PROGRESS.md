@@ -474,7 +474,7 @@ The meeting published and the submissions made in this check are real production
   - Audit: `pertemuan.diterbitkan` × 2 (meetings 1 and 2 of `DDP101`, 09:06 and 09:07 UTC), `jendela.dibuka` × 2 (09:34 UTC). No `pertemuan.latihanDiubah`: the practice settings were left at their defaults, which the 32 approved problems of each meeting satisfy, so item 1's "must refuse with the defaults" could not occur and was **not exercised in production** (it is covered by tests only).
   - 2 class windows, 64 instances, **1 submission by 1 student**, 1 meeting score, 1 integrity event.
   - `infra/smoke.sh` → `22 lulus, 0 gagal, 0 belum aktif` (run by the agent while a test suite was running; the `VALIDATE` check took 28 s instead of the usual few seconds).
-- Not covered by this check, still open: everything under "Not verified, or weaker than it looks" above except the two items the owner's eyes now cover (pages seen by a person; Arabic opened). The Arabic texts are still unreviewed by an Arabic reader. The gate of `SPEC.md` §18 for stage 9 comes after 9b.
+- Not covered by this check, still open: everything under "Not verified, or weaker than it looks" above except the two items the owner's eyes now cover (pages seen by a person; Arabic opened). The gate of `SPEC.md` §18 for stage 9 comes after 9b.
 - Outside 9a, same day: the base concepts of `DDP101` were ticked by mistake (seven concepts, `PERCABANGAN` among them) and corrected in the data with the owner's approval (audit rows 134 and 135, `lewat: sql`). The page change that makes the origin of a locked concept visible is **written but not committed or deployed at this tag**; it gets its own commit and entry.
 
 ### Problems for DDP101 meeting 2 — 2026-11-17 (owner's request during the 9a session; this is stage 13 work done early for one meeting)
@@ -566,7 +566,6 @@ Deployed 2026-11-19, after the owner's go-ahead ("do all you recommend"; the fir
 Not verified, or weaker than it looks:
 
 - **No page of 9b has been seen by a person**, in any language. The browser tests prove direction and behaviour, not looks.
-- **The Arabic texts are still unreviewed by an Arabic reader**, the new ones included. The parity test proves they exist and are not copies of the Indonesian, nothing about their quality.
 - Calibration thresholds other than "MUDAH below 30 %" are the agent's numbers, and "median time" is the median CPU time of best submissions, because the system does not measure how long a student worked (`DECISIONS.md`).
 - Distribution, mean and class comparison count an active student without a submission as 0, also for a meeting that was never opened for that class; the comparison table says so, but a class that has not started a meeting looks like a class that failed it.
 - Viewing a student's source code is not audited; exports are.
@@ -591,3 +590,8 @@ Owner's gate for stage 9 (`SPEC.md` §18: a test student completes one meeting e
 10. `infra/smoke.sh` — expect `22 lulus, 0 gagal, 0 belum aktif`.
 
 The submissions, the window changes and the export made in this gate are real production rows, like those of the earlier gates. After the gate: tag `tahap-9b`, record the result here.
+
+### Arabic reviewed by an Arabic speaker — 2026-11-19 (reported by the owner)
+
+- The owner reported: the Arabic display and texts have been confirmed by an Arabic speaker. The two notes saying the Arabic texts were still unreviewed (in the result of the 9a check and in "Not verified" of 9b) are removed on his instruction. The older notes of stages 6, 8 and 9a are left as the record of those days and are closed by this entry.
+- The agent did not see the review and cannot judge Arabic itself. Which pages and texts the speaker read was not stated; in particular it is not known whether the review covered the Arabic problem statements of `DDP101` meetings 1–3, so that note and their "machine translation" badge stay until the pengampu clears them.
