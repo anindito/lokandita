@@ -1,6 +1,6 @@
 # Progress
 
-Current stage: **9b — not started** (next session). Stage 9a — student interface and scoring — finished 2026-11-17, tag `tahap-9a`, after the owner's check; see "Result of the owner's check for 9a" at the end of "Stage 9a". Stage 9 was split by the owner on 2026-11-17: 9b (leaderboard, analytics, exports, late policy, three languages and RTL polish) is the next session, and the gate of `SPEC.md` §18 for stage 9 is taken after 9b.
+Current stage: **9b — built and tested, NOT deployed** (2026-11-19); see "Stage 9b" at the end of this file. The deploy, the smoke run and the owner's gate for stage 9 are still to do. Stage 9a — student interface and scoring — finished 2026-11-17, tag `tahap-9a`, after the owner's check; see "Result of the owner's check for 9a" at the end of "Stage 9a". Stage 9 was split by the owner on 2026-11-17: 9b (leaderboard, analytics, exports, late policy, three languages and RTL polish) is the next session, and the gate of `SPEC.md` §18 for stage 9 is taken after 9b.
 
 Stage 8 — Problems, concepts, importer — finished 2026-11-17, tag `tahap-8`; see "Gate result" at the end of this file.
 
@@ -524,3 +524,52 @@ The meeting published and the submissions made in this check are real production
 - Imported after the base concepts were cleared (before that, an import would have allowed `PERCABANGAN` at meeting 3): `spark soal:impor` under the owner's superadmin account → `32 diterima, 0 ditolak, 0 tidak berubah`. Approved without the owner reading them (his decision, "langsung"): `spark soal:setujui DDP101 3` → `32 disetujui, 0 dilewati`. Audit: `soal.impor` 1, `soal.disetujui` 32 with `lewat: cli`.
 - What the server shows: meeting 3 has 32 problems, 32 approved, 8 / 8 / 6 / 6 / 4 by level, none whose detected concepts include `PERCABANGAN`, target 60, **not published** — publishing and opening a class window are the owner's steps.
 - Weaker than it looks: the same as for meetings 1 and 2 above — nobody but the agent has read these statements in any language; meeting 3 demands exact output.
+
+## Stage 9b — 2026-11-19
+
+Plan approved by the owner 2026-11-19 ("approve all", including the six decisions; see `DECISIONS.md`): 0 baseline · 1 flaky judge tests · 2 compile timeout on a busy server · 3 schema and contract · 4 late policy and practice after close · 5 "why can't I see this meeting" · 6 leaderboard · 7 staff analytics · 8 exports · 9 three languages and RTL · 10 close. Steps 3–8 share one commit (`f878193`): the pieces share routes, language files and the scoring library too closely to split honestly.
+
+Done (anything not listed here is not done):
+
+- Step 0 — baseline before any change, at `689e2a9`: `infra/tes.sh lokakode` → `OK (195 tests, 2923 assertions)`. The owner's message said this suite had not been run since the approval command was added; this file shows it had been (twice at `548e63c`, the first run with one failure that was never identified). This run had no failure, so that earlier failure stays unexplained.
+- Step 1 — the two load-sensitive isolation tests (`while(1)` and the orphaned child). Their limits (8 s, 4 s) are unchanged but now apply to the run alone instead of compile + run, and both also assert what `pelari` measured inside the container. Repeated five times with four CPU burners running (load average above 6): 5 of 5 passed, the whole `while(1)` test taking 5.6–6.1 s.
+- Step 2 — a compile that reaches the 10 s limit while its container used less than 8 s of CPU is an infrastructure failure (retried twice, then `judge_unavailable`, which is not an attempt), not a `CE`; for `RUN`, `SUBMIT` and the reference solution in `VALIDATE`. `pelari` now reports the container's CPU from cgroup. Measured: 10,023–10,033 ms of CPU with a whole CPU; 9,044 / 7,082 / 5,103 / 3,046 ms at 0.9 / 0.7 / 0.5 / 0.3 CPU. Tested with a real compile throttled to 0.3 CPU in a real container.
+- **Full judge suite, run once, at `39e0717`: `256 passed in 1047.06s (0:17:27)`**, nothing skipped, no judge container left. This is the first fully green full run since stage 8.
+- Steps 3–4 — `late_until` on a class window, `late_factor` and `practice` on a submission (additive migration). Late: after the scheduled close, policy `multiplier`, until `late_until` or a manual close; the factor is fixed on the submission when it is created. Practice after close: judged and shown, never counted. Forms for the pengajar (late policy) and the pengampu (practice, anonymised leaderboard). Real submissions through the real worker in `TelatTest`.
+- Step 5 — a student's home page and meeting page name the reason a meeting of their own course cannot be worked on: not published, not opened for their class, or scheduled. Problems of such a meeting, meetings of other courses and meetings not used for practice stay 404.
+- Step 6 — leaderboard per class (whoever sees the class) and per course in the active year (superadmin and pengampu; a pengajar gets 403); the student board shows their own class only, names without nomor induk, "Peserta n" when anonymised. Cached in Redis, dropped when a submission is scored or an enrollment changes. This closes "recompute per-class aggregates after pindah kelas" owed since stage 6: nothing per class is stored except that cache.
+- Step 7 — for staff: grade distribution with mean, median and standard deviation, a Chart.js histogram drawn from the table on the page, statistics and calibration hint per problem, students at risk, every submission of the class with source and per-test status, class comparison for the pengampu.
+- Step 8 — export of meeting scores as CSV and XLSX per class and per course, audited as `nilai.diekspor`.
+- Step 9 — a test that fails when a text is missing in `id`, `en` or `ar`, has different placeholders, is left untranslated in Arabic, or is called by code without existing; the views were swept for text outside the language files (none found beyond technical labels such as "IP" and "ms"); "back" arrows follow the page direction; browser tests open the student pages and the analytics page in Arabic and check direction, mirrored layout, Latin digits, no horizontal overflow, zero CSP violations.
+- Every new route (3 leaderboard, 7 analytics and export) is in the authorisation matrix with the cross-class case; the leaderboard, analytics, submission and export tests each assert that the pengajar of another class gets the same 404 as for a class that does not exist, with no name in the body.
+
+Verified by the agent (commands and output shown in the session):
+
+- `infra/tes.sh lokakode` at `577156f` → **`OK (219 tests, 9149 assertions)`**, with the real worker and the real browser. One commit followed (`fd73737`: wording on the pengajar's window page, two texts, one test); after it only `--filter 'Telat|JendelaTest|KunciBahasa|Papan'` was run → `OK (22 tests, 5894 assertions)`. **The full suite was not repeated at `fd73737`.**
+- `infra/tes.sh auth` → `OK (95 tests, 822 assertions)`; `infra/tes.sh portal` → `OK (19 tests, 105 assertions)`, both at `fd73737`.
+- `infra/cek-env.sh` → passed; no new environment variable. Commits pushed to `origin/main`.
+
+**Not done:**
+
+- **Nothing of 9b is deployed.** `infra/deploy.sh` was refused by the agent's permission system and the agent did not work around it. Production still runs the commit of 2026-11-17. Therefore also not done: the migration on the real `lokakode` schema, `infra/smoke.sh`, real requests to the new routes, `infra/backup.sh`, `infra/uji-restore.sh`, `infra/tes-infra.sh`, the tag `tahap-9b`.
+- `judge/uji-terima.sh` was not run in this stage (its items are part of the full judge suite that did run).
+
+Not verified, or weaker than it looks:
+
+- **No page of 9b has been seen by a person**, in any language. The browser tests prove direction and behaviour, not looks.
+- **The Arabic texts are still unreviewed by an Arabic reader**, the new ones included. The parity test proves they exist and are not copies of the Indonesian, nothing about their quality.
+- Calibration thresholds other than "MUDAH below 30 %" are the agent's numbers, and "median time" is the median CPU time of best submissions, because the system does not measure how long a student worked (`DECISIONS.md`).
+- Distribution, mean and class comparison count an active student without a submission as 0, also for a meeting that was never opened for that class; the comparison table says so, but a class that has not started a meeting looks like a class that failed it.
+- Viewing a student's source code is not audited; exports are.
+- Leaderboards and analytics were tested with classes of five students. Nothing was measured at 40 students × 16 meetings; the queries are single joins on indexed columns, which is an expectation, not a measurement.
+- The starved-compile rule was proven by throttling a container, and the worker's retry by the existing stage 7 tests; no test drives a starved compile through the worker process end to end.
+- **Found, not fixed:** scores are keyed by student and meeting, not by enrollment. A student who repeats a course in a later academic year would start with last year's scores for the same meeting. It cannot occur before the first new academic year.
+- The server's uptime was 31 minutes at 20:37 WIB, so it was restarted shortly before this session; the agent did not do that and did not look into it.
+
+Still owed (not in this stage by the owner's decision): retention of `judge_jobs` and `imports`; whether a pengajar may see the problem bank; Monaco in the problem edit form; a memory limit per problem.
+
+To finish the stage:
+
+1. Deploy, in this order: `infra/deploy.sh lokakode` (runs the additive migration: `late_until`, `late_factor`, `practice`), `infra/deploy.sh judge` (new judge image tag, because `pelari` changed), `infra/deploy.sh auth`, `infra/deploy.sh portal` (shared stylesheet).
+2. `infra/smoke.sh` — expect `22 lulus, 0 gagal, 0 belum aktif`.
+3. Owner's gate for stage 9 (`SPEC.md` §18: a test student completes one meeting end to end; hidden tests show status only), plus for 9b: the leaderboard as the student and as the pengajar; *Analitik* on the class page; one export opened in a spreadsheet; a window with "terlambat" and a submission after its closing time; a meeting that is not published seen from the student's home page; the same pages with the language set to Arabic.
