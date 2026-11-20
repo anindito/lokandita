@@ -65,6 +65,11 @@ final class ImporAkunCliTest extends AuthCase
         $this->assertSame(0, $kode, $keluar);
         $this->assertStringContainsString('DITULIS: 2 akun dibuat, 0 dilewati', $keluar);
         $this->assertStringNotContainsString(self::SANDI, $keluar);
+        // Terminal hanya berisi jumlah: tidak ada nomor induk, nama, atau baris log aplikasi.
+        $this->assertStringNotContainsString($t, $keluar);
+        $this->assertStringNotContainsString('Mahasiswa Satu', $keluar);
+        $this->assertStringNotContainsString('user.created', $keluar);
+        $this->assertStringNotContainsString('{"t"', $keluar);
 
         $baris = $this->db->query("SELECT * FROM users WHERE nomor_induk LIKE '{$t}%' ORDER BY nomor_induk")->fetch_all(MYSQLI_ASSOC);
         $this->assertCount(2, $baris, 'baris dosen tidak dibuat');
@@ -95,6 +100,15 @@ final class ImporAkunCliTest extends AuthCase
         $this->assertStringContainsString('akun baru: 0 · sudah terdaftar (tidak diubah): 3', $keluar);
         $this->assertStringContainsString('DITULIS: 0 akun dibuat', $keluar);
         $this->assertSame($baris[0]['password_hash'], $this->userRow($baris[0]['id'])['password_hash']);
+    }
+
+    public function testBarisLogTidakMemuatDataPribadi(): void
+    {
+        $log = \App\Libraries\Audit::untukLog([
+            'via' => 'import', 'global_role' => 'mahasiswa', 'nomor_induk' => '320250401001', 'nama' => 'Seseorang',
+            'name' => 'Seseorang', 'email' => 'seseorang@contoh.test', 'apps' => 'portal,lokakode', 'daftar' => ['a', 'b'], 'kosong' => null,
+        ]);
+        $this->assertSame(['d_via' => 'import', 'd_global_role' => 'mahasiswa', 'd_apps' => 'portal,lokakode', 'd_kosong' => null], $log);
     }
 
     public function testBarisBermasalahDisebutDenganNomorBarisDanMembatalkanPenulisan(): void

@@ -572,3 +572,5 @@ CSV with a header line, comma or semicolon, UTF-8 (a BOM and CRLF line ends are 
 So a leftover test class, account or enrollment makes the check fail until it is archived, disabled or withdrawn.
 
 Output of all these commands holds counts, class names, line numbers and reason codes only — no name and no nomor induk.
+
+The same holds for the terminal's stderr: an audit row written from a `spark` command is not mirrored as a structured log line (`Audit::log` in LokaAuth, `Audit::catat` in LokaKode), because there stderr is the operator's terminal, not the container log. From the web the mirror line is still written to the container log, and in LokaAuth it never carries `nomor_induk`, `nama`, `name` or `email` from the audit detail (`Audit::untukLog`); a person appears in a log line by id only. The audit row in the database keeps the full detail.

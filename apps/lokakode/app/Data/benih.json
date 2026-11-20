@@ -5,7 +5,7 @@
       "kode": "DDP101",
       "nama": "Dasar-Dasar Pemrograman",
       "bahasa": "cpp",
-      "kelas": ["A", "B", "C", "D"],
+      "kelas": ["7A", "7B", "7C", "7D"],
       "konsep_dasar": [],
       "pertemuan": [
         {"nomor": 1,  "judul": "Pengenalan Pemrograman dan C++",       "latihan": true,  "konsep": ["IO_DASAR", "ARITMETIKA", "VARIABEL_TIPE"]},
@@ -30,7 +30,7 @@
       "kode": "PBO301",
       "nama": "Pemrograman Berorientasi Obyek",
       "bahasa": "cpp",
-      "kelas": ["A", "B", "C", "D"],
+      "kelas": ["6A", "6B", "6C", "6D"],
       "konsep_dasar": [
         "IO_DASAR", "ARITMETIKA", "VARIABEL_TIPE", "KONVERSI_TIPE", "FORMAT_OUTPUT", "STRING",
         "PERCABANGAN", "PERULANGAN", "NESTED_LOOP", "BREAK_CONTINUE",
@@ -60,7 +60,7 @@
       "kode": "TS-PY",
       "nama": "Pemrograman untuk Teknik Sipil",
       "bahasa": "python",
-      "kelas": ["A"],
+      "kelas": ["TS-6"],
       "konsep_dasar": [],
       "pertemuan": [
         {"nomor": 1,  "judul": "Pengenalan Pemrograman, Algoritma, Python",          "latihan": true,  "konsep": ["IO_DASAR", "ARITMETIKA", "VARIABEL_TIPE"]},

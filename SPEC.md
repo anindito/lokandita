@@ -329,7 +329,7 @@ After login the Portal shows the user's name and role and the apps allowed by `a
 
 - Courses: `DDP101` Dasar-Dasar Pemrograman (C++), `PBO301` Pemrograman Berorientasi Obyek (C++), `TS-PY` Pemrograman untuk Teknik Sipil (Python); 16 meetings each with concepts from `docs/PETA-KONSEP.md`.
 - All three are owned by pengampu `197805192024211003`.
-- Classes: DDP101 A–D, PBO301 A–D, TS-PY A. Teaching assignments and enrollments come from CSV files in `/srv/lokandita-data/` (outside the repository).
+- Classes: DDP101 7A–7D, PBO301 6A–6D, TS-PY TS-6. Teaching assignments and enrollments come from CSV files in `/srv/lokandita-data/` (outside the repository).
 - Students start with a shared initial password chosen at import time, with forced change.
 - Meetings for UTS, UAS and those marked not auto-gradable exist but are disabled for practice.
 

@@ -656,5 +656,22 @@ Gate and close, 2026-11-20:
 - The owner did not check the gate himself; he told the agent to do it and to tag ("do no 1 and 2"). **The gate of this stage was therefore run by the agent, not by the owner.**
 - `spark data:cocokkan mahasiswa`, `dosen`, `pengajar` run again → `COCOK` three times, exit 0.
 - Independently of that command: the file counted with a short script (235 rows, 235 distinct nomor induk; DDP101 A–D 26 each, PBO301 A 25 and B–D 26 each, TS-PY A 28) and the database counted by direct SQL (the same nine non-archived classes of the active year with the same `AKTIF` counts and 1 pengajar each; 235 active mahasiswa, 2 dosen, 1 superadmin; 16 meetings in each of the three courses). They agree.
-- Not checked by anyone in a browser: the class pages, and a student's first login with the forced password change.
-- The tagged commit differs from the deployed `f182094` only in `PROGRESS.md` and `DECISIONS.md`. **It has not been redeployed**, so `infra/smoke.sh` check 0 fails until `infra/deploy.sh` is run for the four components; nothing that runs has changed.
+- Browser check by the owner after the tag, reported 2026-11-20 in his words: "as pengampu all nine classes show with the right counts; as the second dosen only their four classes show; as one DDP101 student the initial password forced a change, the class meeting appeared and a problem opened." This is the owner's report; the agent did not see it. It covers one student of 235 and one of the three courses from the student's side; a Submit by that student was not reported.
+- The tagged commit `dbd3558` was deployed the same day at the owner's command: four times `LULUS` on that commit, `infra/smoke.sh` → `smoke: 22 lulus, 0 gagal, 0 belum aktif`.
+
+After the tag, 2026-11-20 — classes renamed at the owner's request ("lakukan semuanya. kelas TS-PY A jadi kelas TS-6"):
+
+- New names: DDP101 A–D → 7A–7D, PBO301 A–D → 6A–6D, TS-PY A → TS-6. The two archived gate classes of DDP101 had to give up their names first: 7A → `7A-uji`, 7B → `7B-uji`.
+- In the database by SQL, one transaction, after `infra/backup.sh` (`backup SELESAI`): `baris audit: 11`, `kelas arsip diganti nama: 2`, `kelas aktif diganti nama: 9`. The audit rows are `kelas.diubah` with `sebelum`/`sesudah` as the page writes them, plus `lewat: sql`. Enrollments, pengajar, windows and scores hang on the class id and did not move.
+- In the seed: `apps/lokakode/app/Data/benih.json`, `BenihKurikulumTest`, and the class line of `SPEC.md` §17.
+- In the source files: the `kelas` column of `import-mahasiswa.csv` (235 rows) and `penugasan-pengajar.csv` (9 rows) rewritten by a script that refused to continue unless every other column was unchanged; the files as the owner delivered them are kept beside them as `*.asli`.
+- `spark data:cocokkan mahasiswa`, `dosen`, `pengajar` after the rename → `COCOK` three times, exit 0, with the nine classes under their new names and the same counts as before.
+- Tests at the commit that holds this entry: `infra/tes.sh lokakode` → `OK (228 tests, 9462 assertions)`; `infra/tes.sh auth` → `OK (99 tests, 884 assertions)`. `portal` and `judge` suites not run.
+
+After the tag, 2026-11-20 — `akun:impor` no longer shows personal data on the terminal (the owner's request after the leak noted above):
+
+- Cause: every audit row was mirrored as a JSON line to stderr, and from `docker exec` stderr is the terminal; the `user.created` line carried the nomor induk.
+- Fix: no mirror line from `spark` (LokaAuth and LokaKode); LokaAuth mirror lines from the web never carry `nomor_induk`, `nama`, `name` or `email` (`KONTRAK.md` §13). `ImporAkunCliTest` now asserts that stdout and stderr of a real `--jalankan` run hold no nomor induk, no name and no log line, and `Audit::untukLog` is tested directly.
+- A first attempt (CLI log lines to the container's stderr) failed in the test container and in production and was removed before any commit; `infra/tes.sh auth` showed `Tests: 99, Assertions: 866, Failures: 1` for it.
+- **Not deployed**: the agent's permission system refused the deploy of this commit. Production still runs `dbd3558`, where the leak is still present and the seed still says A–D (`benih:kurikulum --jalankan` there would create empty classes A–D again).
+

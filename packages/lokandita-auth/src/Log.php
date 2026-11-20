@@ -6,7 +6,8 @@ namespace Lokandita\Auth;
 
 /**
  * Log terstruktur: satu baris JSON ke stderr kontainer (`docker logs <app>`).
- * Jangan pernah memasukkan kata sandi, token, atau cookie ke $context.
+ * Jangan pernah memasukkan kata sandi, token, cookie, nama, nomor induk atau
+ * email ke $context — orang disebut dengan id-nya saja.
  */
 final class Log
 {

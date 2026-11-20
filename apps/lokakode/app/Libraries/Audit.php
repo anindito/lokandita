@@ -53,6 +53,10 @@ final class Audit
             'created_at'  => Waktu::kini(),
         ]);
 
-        Log::event($aksi, ['actor' => $pelakuId, 'target' => $targetTipe . ':' . $targetId, 'ip' => $ip]);
+        // Dari perintah spark, stderr adalah terminal operator, bukan log kontainer;
+        // baris audit di atas sudah menjadi catatannya.
+        if (! is_cli()) {
+            Log::event($aksi, ['actor' => $pelakuId, 'target' => $targetTipe . ':' . $targetId, 'ip' => $ip]);
+        }
     }
 }

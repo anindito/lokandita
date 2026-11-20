@@ -80,11 +80,11 @@ final class BenihKurikulumTest extends KodeCase
             ['code' => 'TS-PY', 'name' => 'Pemrograman untuk Teknik Sipil', 'owner_id' => $d['pengampu']['id'], 'n' => '16', 'bahasa' => 'python', 'ragam' => '1'],
         ], $matkul);
 
-        // Kelas di tahun aktif: DDP101 A–D, PBO301 A–D, TS-PY A.
+        // Kelas di tahun aktif: DDP101 7A–7D, PBO301 6A–6D, TS-PY TS-6.
         $kelas = array_column($this->db->query("
             SELECT CONCAT(c.code, ' ', k.name) AS k FROM classes k JOIN courses c ON c.id = k.course_id
             WHERE k.academic_year_id = {$d['tahun']} AND k.archived_at IS NULL ORDER BY 1")->fetch_all(MYSQLI_ASSOC), 'k');
-        $this->assertSame(['DDP101 A', 'DDP101 B', 'DDP101 C', 'DDP101 D', 'PBO301 A', 'PBO301 B', 'PBO301 C', 'PBO301 D', 'TS-PY A'], $kelas);
+        $this->assertSame(['DDP101 7A', 'DDP101 7B', 'DDP101 7C', 'DDP101 7D', 'PBO301 6A', 'PBO301 6B', 'PBO301 6C', 'PBO301 6D', 'TS-PY TS-6'], $kelas);
 
         // UTS, UAS dan yang tidak bisa dinilai otomatis ada tetapi dimatikan untuk latihan.
         $mati = array_column($this->db->query('
@@ -134,7 +134,7 @@ final class BenihKurikulumTest extends KodeCase
         $p4  = $this->pertemuan($ddp, 4, 'cpp', ['PERCABANGAN', 'STRING'], 'Struktur Kontrol — Percabangan');
         $p9  = $this->pertemuan($ddp, 9, 'cpp', [], 'Array 1D');
         $p15 = $this->pertemuan($ddp, 15, 'c', [], 'C++ di Platform Lain, Tools');
-        $lama = $this->kelas($ddp, $d['tahun'], '7A');
+        $lama = $this->kelas($ddp, $d['tahun'], '7A-uji');
         $this->soalBaris($p1, 'sudah-ada');
 
         [$kode, $keluar] = $this->spark(['benih:kurikulum', '--oleh', (string) $d['superadmin']['nomor_induk'], '--jalankan']);
@@ -159,7 +159,7 @@ final class BenihKurikulumTest extends KodeCase
         $this->assertStringContainsString('BEDA   DDP101 pertemuan 15: dipakai untuk latihan, benih mematikannya; tidak diubah', $keluar);
         $this->assertSame(['language' => 'c', 'enabled' => '1'], $this->row("SELECT language, enabled FROM meetings WHERE id = {$p15}"));
 
-        // Kelas lama tetap ada di samping A–D; tidak ada mata kuliah atau pertemuan ganda.
+        // Kelas lama tetap ada di samping 7A–7D; tidak ada mata kuliah atau pertemuan ganda.
         $this->assertSame(5, $this->hitung("SELECT COUNT(*) FROM classes WHERE course_id = {$ddp}"));
         $this->assertNull($this->row("SELECT archived_at FROM classes WHERE id = {$lama}")['archived_at']);
         $this->assertSame(3, $this->hitung('SELECT COUNT(*) FROM courses'));
