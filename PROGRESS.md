@@ -1,6 +1,6 @@
 # Progress
 
-Stage 12 — production data — **in progress** since 2026-11-19, ahead of stages 10 and 11 by the owner's decision; see "Stage 12" at the end of this file. Anything not listed there is not done.
+Stage 12 — production data — finished 2026-11-20, tag `tahap-12`, done ahead of stages 10 and 11 by the owner's decision; see "Stage 12" at the end of this file. Stages 10 and 11 have not been started.
 
 Stage 9b — leaderboard, analytics, exports, late policy, three languages and RTL — finished 2026-11-19, tag `tahap-9b`, on the owner's report that the gate passed; see "Gate result for stage 9" at the end of this file, which also lists the gate steps that left no trace in production. Stage 9a — student interface and scoring — finished 2026-11-17, tag `tahap-9a`. The next stage is the one after 9 in `SPEC.md` §18; it has not been started.
 
@@ -616,7 +616,7 @@ The submissions, the window changes and the export made in this gate are real pr
 
 **Stage 9b finished 2026-11-19, tag `tahap-9b`.**
 
-## Stage 12 — in progress (started 2026-11-19, before stages 10 and 11)
+## Stage 12 — production data (2026-11-19 to 2026-11-20, before stages 10 and 11)
 
 Plan approved by the owner 2026-11-19 (8 steps): 1 contract and curriculum seed · 2 file check (after the owner confirms the files are in place) · 3 account import · 4 teaching assignments and enrollments · 5 count check (the gate) · 6 tests · 7 production run · 8 close. Owner's decisions: `DECISIONS.md`, 2026-11-19.
 
@@ -651,4 +651,10 @@ Went wrong, or weaker than it looks:
 - No student has logged in; that the forced change works on these accounts is shown only by the test suite and the `must_change_password` flag.
 - The Portal is still in maintenance, and `portal` and `judge` suites were not run in this stage.
 
-Not done: step 8. The owner's gate (`SPEC.md` §18: "Account and class counts match the source files") is his to confirm; the tag `tahap-12` waits for that. The deployed commit `f182094` differs from the commit of this entry only in `PROGRESS.md` and `DECISIONS.md`, so `infra/smoke.sh` check 0 fails until the four components are redeployed.
+Gate and close, 2026-11-20:
+
+- The owner did not check the gate himself; he told the agent to do it and to tag ("do no 1 and 2"). **The gate of this stage was therefore run by the agent, not by the owner.**
+- `spark data:cocokkan mahasiswa`, `dosen`, `pengajar` run again → `COCOK` three times, exit 0.
+- Independently of that command: the file counted with a short script (235 rows, 235 distinct nomor induk; DDP101 A–D 26 each, PBO301 A 25 and B–D 26 each, TS-PY A 28) and the database counted by direct SQL (the same nine non-archived classes of the active year with the same `AKTIF` counts and 1 pengajar each; 235 active mahasiswa, 2 dosen, 1 superadmin; 16 meetings in each of the three courses). They agree.
+- Not checked by anyone in a browser: the class pages, and a student's first login with the forced password change.
+- The tagged commit differs from the deployed `f182094` only in `PROGRESS.md` and `DECISIONS.md`. **It has not been redeployed**, so `infra/smoke.sh` check 0 fails until `infra/deploy.sh` is run for the four components; nothing that runs has changed.
