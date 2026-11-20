@@ -130,8 +130,10 @@ final class Pendaftaran
      *
      * @return array{didaftarkan: int, diaktifkan: int}
      */
-    public static function jalankan(array $kelas, array $nomor, string $pelakuId): array
+    public static function jalankan(array $kelas, array $nomor, string $pelakuId, ?string $lewat = null): array
     {
+        // $lewat menandai baris audit dari pekerjaan di luar halaman web (mis. 'cli').
+        $tanda = $lewat === null ? [] : ['lewat' => $lewat];
         $db       = db_connect();
         $golongan = self::golongkan($kelas, $nomor);
         $kelasId  = (int) $kelas['id'];
@@ -144,7 +146,7 @@ final class Pendaftaran
                 'class_id' => $kelasId, 'status' => 'AKTIF', 'created_by' => $pelakuId,
                 'created_at' => Waktu::kini(), 'updated_at' => Waktu::kini(),
             ]);
-            Audit::catat('pendaftaran.dibuat', 'user', $b['id'], ['kelas' => $kelas['name'], 'enrollment_id' => (int) $db->insertID()], $matkulId, $kelasId);
+            Audit::catat('pendaftaran.dibuat', 'user', $b['id'], ['kelas' => $kelas['name'], 'enrollment_id' => (int) $db->insertID()] + $tanda, $matkulId, $kelasId, $pelakuId);
         }
         foreach ($golongan['aktifkanLagi'] as $b) {
             $db->table('enrollments')->where(['id' => $b['enrollment_id'], 'status' => 'MENGUNDURKAN_DIRI'])
@@ -155,7 +157,7 @@ final class Pendaftaran
                     'moved_by' => $pelakuId, 'moved_at' => Waktu::kini(),
                 ]);
             }
-            Audit::catat('pendaftaran.diaktifkan', 'user', $b['id'], ['kelas' => $kelas['name'], 'enrollment_id' => $b['enrollment_id'], 'dari_kelas' => $b['dari_kelas']], $matkulId, $kelasId);
+            Audit::catat('pendaftaran.diaktifkan', 'user', $b['id'], ['kelas' => $kelas['name'], 'enrollment_id' => $b['enrollment_id'], 'dari_kelas' => $b['dari_kelas']] + $tanda, $matkulId, $kelasId, $pelakuId);
         }
         $db->transComplete();
         // Siapa yang AKTIF di kelas mana menentukan papan peringkat dan analitik per kelas.

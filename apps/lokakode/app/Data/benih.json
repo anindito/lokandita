@@ -9,21 +9,21 @@
       "konsep_dasar": [],
       "pertemuan": [
         {"nomor": 1,  "judul": "Pengenalan Pemrograman dan C++",       "latihan": true,  "konsep": ["IO_DASAR", "ARITMETIKA", "VARIABEL_TIPE"]},
-        {"nomor": 2,  "judul": "Tipe Data, Variabel, Operator",        "latihan": true,  "konsep": ["KONVERSI_TIPE"]},
+        {"nomor": 2,  "judul": "Tipe Data, Variabel, dan Operator",   "latihan": true,  "konsep": ["KONVERSI_TIPE"]},
         {"nomor": 3,  "judul": "Input dan Output",                     "latihan": true,  "konsep": ["FORMAT_OUTPUT", "STRING"]},
-        {"nomor": 4,  "judul": "Struktur Kontrol — Percabangan",       "latihan": true,  "konsep": ["PERCABANGAN"]},
-        {"nomor": 5,  "judul": "Struktur Kontrol — Perulangan",        "latihan": true,  "konsep": ["PERULANGAN", "NESTED_LOOP", "BREAK_CONTINUE"]},
+        {"nomor": 4,  "judul": "Struktur Kontrol: Percabangan",       "latihan": true,  "konsep": ["PERCABANGAN"]},
+        {"nomor": 5,  "judul": "Struktur Kontrol: Perulangan",        "latihan": true,  "konsep": ["PERULANGAN", "NESTED_LOOP", "BREAK_CONTINUE"]},
         {"nomor": 6,  "judul": "Fungsi dan Parameter Passing",         "latihan": true,  "konsep": ["FUNGSI", "PARAMETER_REF", "REFERENSI"]},
-        {"nomor": 7,  "judul": "Fungsi Lanjutan, Rekursi, Debugging",  "latihan": true,  "konsep": ["REKURSI", "OVERLOAD_FUNGSI"]},
-        {"nomor": 8,  "judul": "UTS",                                  "latihan": false, "konsep": []},
-        {"nomor": 9,  "judul": "Array 1D",                             "latihan": true,  "konsep": ["ARRAY_1D"]},
+        {"nomor": 7,  "judul": "Fungsi Lanjutan, Rekursi, dan Debugging", "latihan": true,  "konsep": ["REKURSI", "OVERLOAD_FUNGSI"]},
+        {"nomor": 8,  "judul": "Ujian Tengah Semester",                                  "latihan": false, "konsep": []},
+        {"nomor": 9,  "judul": "Array Satu Dimensi dan Operasinya",   "latihan": true,  "konsep": ["ARRAY_1D"]},
         {"nomor": 10, "judul": "Array Multidimensi",                   "latihan": true,  "konsep": ["ARRAY_2D"]},
         {"nomor": 11, "judul": "Pointer dan Memori Dinamis",           "latihan": true,  "konsep": ["POINTER", "MEMORI_DINAMIS"]},
         {"nomor": 12, "judul": "Struct, Union, Typedef",               "latihan": true,  "konsep": ["STRUCT"]},
         {"nomor": 13, "judul": "Pengenalan OOP",                       "latihan": true,  "konsep": ["CLASS_OBJECT", "ENCAPSULATION"]},
         {"nomor": 14, "judul": "File Handling dan Exception",          "latihan": true,  "konsep": ["FILE_IO", "EXCEPTION"]},
         {"nomor": 15, "judul": "C++ di Platform Lain, Tools",          "latihan": false, "konsep": []},
-        {"nomor": 16, "judul": "UAS",                                  "latihan": false, "konsep": []}
+        {"nomor": 16, "judul": "Ujian Akhir Semester",                                  "latihan": false, "konsep": []}
       ]
     },
     {
@@ -45,7 +45,7 @@
         {"nomor": 5,  "judul": "Relasi Antar Obyek, Object Diagram",        "latihan": true,  "konsep": ["KOMPOSISI_AGREGASI"]},
         {"nomor": 6,  "judul": "Inheritance",                               "latihan": true,  "konsep": ["INHERITANCE"]},
         {"nomor": 7,  "judul": "Polymorphism dan Virtual Functions",        "latihan": true,  "konsep": ["POLYMORPHISM"]},
-        {"nomor": 8,  "judul": "UTS",                                       "latihan": false, "konsep": []},
+        {"nomor": 8,  "judul": "Ujian Tengah Semester",                                       "latihan": false, "konsep": []},
         {"nomor": 9,  "judul": "Abstraction 1 — Abstract Class",            "latihan": true,  "konsep": ["ABSTRACT_CLASS"]},
         {"nomor": 10, "judul": "Abstraction 2 — Interface",                 "latihan": true,  "konsep": ["INTERFACE"]},
         {"nomor": 11, "judul": "Operator Overloading",                      "latihan": true,  "konsep": ["OPERATOR_OVERLOAD"]},
@@ -53,7 +53,7 @@
         {"nomor": 13, "judul": "Templates 2 — Specialization dan STL",      "latihan": true,  "konsep": ["STL_CONTAINER", "STL_ALGORITMA", "SMART_POINTER"]},
         {"nomor": 14, "judul": "Exception Handling Lanjut",                 "latihan": true,  "konsep": ["EXCEPTION"]},
         {"nomor": 15, "judul": "Sequence Diagram, Use Case, Studi Kasus",   "latihan": false, "konsep": []},
-        {"nomor": 16, "judul": "UAS",                                       "latihan": false, "konsep": []}
+        {"nomor": 16, "judul": "Ujian Akhir Semester",                                       "latihan": false, "konsep": []}
       ]
     },
     {

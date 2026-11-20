@@ -542,4 +542,33 @@ Everything in this section is a `spark` command that previews by default and wri
 - Any bad row refuses the whole write, so that the number of accounts can equal the file. An account that already exists is left untouched, password included.
 - Output holds counts, line numbers and reason codes only — no name and no nomor induk. Audit: `user.created` per account (`via: import`) and one `user.imported` with the counts and `lewat: cli`.
 
-The formats of the teaching-assignment and enrollment files and the commands that read them are added here together with their code.
+### Source files in `/srv/lokandita-data/`
+
+CSV with a header line, comma or semicolon, UTF-8 (a BOM and CRLF line ends are accepted). They are piped into a command on standard input and never mounted into a container, copied into the repository or printed.
+
+| File | Columns | Read by |
+|---|---|---|
+| `import-mahasiswa.csv` | `nomor_induk, nama, global_role, mata_kuliah, kelas` — one row per student, which is both the account and the enrollment | `akun:impor` (LokaAuth), `data:pendaftaran`, `data:cocokkan mahasiswa` (LokaKode) |
+| `import-dosen.csv` | `nomor_induk, nama, global_role` | `data:cocokkan dosen`; the accounts themselves are created on the LokaAuth page |
+| `penugasan-pengajar.csv` | `mata_kuliah, kelas, nip_pengajar` | `data:pengajar`, `data:cocokkan pengajar` |
+
+`mata_kuliah` is the course code, `kelas` the class name; together they name a class of the **active** academic year that is not archived.
+
+### Teaching assignments and enrollments (LokaKode, `App\Libraries\DataAwal`)
+
+- `docker exec -i lokakode php spark data:pengajar --oleh <nomor induk> [--jalankan] < penugasan-pengajar.csv` assigns each `nip_pengajar` (an active dosen) to its class; an assignment that exists is left alone. Audit: `pengajar.ditugaskan` with `lewat: cli`.
+- `docker exec -i lokakode php spark data:pendaftaran --oleh <nomor induk> [--jalankan] < import-mahasiswa.csv` enrolls through `Pendaftaran::golongkan` and `Pendaftaran::jalankan`, the code behind the class page: a new student is enrolled, one who withdrew from that course is re-activated in the class of the file (the same enrollment row, with a row in `enrollment_moves`), one already `AKTIF` in that class is left alone. Audit: `pendaftaran.dibuat` / `pendaftaran.diaktifkan` with `lewat: cli`.
+- For both, **one bad row refuses the whole write**: an unknown class, an unknown account, an account of the wrong role, a student `AKTIF` in another class of the same course or `LULUS` there, the same person twice. Bad rows are named by line number and reason code.
+- A student whose account has no `lokakode` access or is not `active` is enrolled and counted under `PERHATIAN`, as on the web page.
+
+### Count check — the gate of stage 12
+
+`docker exec -i lokakode php spark data:cocokkan <mahasiswa|dosen|pengajar> < file` only reads, and exits 0 only when everything is `COCOK`:
+
+- `mahasiswa`: every row is an active mahasiswa account with `lokakode` access; the number of distinct nomor induk equals the number of active mahasiswa in LokaAuth; for each class the file's students are exactly its `AKTIF` enrollments (same number, same people); the number of rows equals all `AKTIF` enrollments of the active year.
+- `dosen`: every row is an active dosen account; the number of rows equals the number of active dosen in LokaAuth.
+- `pengajar`: for each class the pengajar in the file are exactly its `class_teachers`; the number of rows equals all assignments in non-archived classes of the active year; the classes named equal the non-archived classes of the active year.
+
+So a leftover test class, account or enrollment makes the check fail until it is archived, disabled or withdrawn.
+
+Output of all these commands holds counts, class names, line numbers and reason codes only — no name and no nomor induk.
