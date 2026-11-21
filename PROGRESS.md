@@ -1,6 +1,8 @@
 # Progress
 
-Stage 12 — production data — finished 2026-11-20, tag `tahap-12`, done ahead of stages 10 and 11 by the owner's decision; see "Stage 12" at the end of this file. Stages 10 and 11 have not been started.
+**Next stage: 11 — Portal and public pages (`SPEC.md` §15), gate: "Login from Portal reaches LokaKode without a second login".** Set by the owner on 2026-11-21, ahead of stage 10 (SEB and integrity, communication), which has not been started either. Stage 11 has not been started: no plan has been presented and no code written. It begins in a new session with a plan for the owner's approval.
+
+Stage 12 — production data — finished 2026-11-20, tag `tahap-12`, done ahead of stages 10 and 11 by the owner's decision; see "Stage 12" at the end of this file. Work done after the tag (class names, the log fix, the deadline for the initial password) is listed there too.
 
 Stage 9b — leaderboard, analytics, exports, late policy, three languages and RTL — finished 2026-11-19, tag `tahap-9b`, on the owner's report that the gate passed; see "Gate result for stage 9" at the end of this file, which also lists the gate steps that left no trace in production. Stage 9a — student interface and scoring — finished 2026-11-17, tag `tahap-9a`. The next stage is the one after 9 in `SPEC.md` §18; it has not been started.
 
@@ -685,5 +687,5 @@ After the tag, 2026-11-21 — deadline for the shared initial password (owner's 
 - Production, 2026-11-21, at `8c28852`: `infra/backup.sh` → `backup SELESAI`; four deploys `LULUS` (the `auth` deploy ran the migration; the column exists); `infra/smoke.sh` → `smoke: 22 lulus, 0 gagal, 0 belum aktif`. `spark akun:batas-sandi-awal --sampai 2026-12-01` previewed, then `--jalankan` → `DITULIS: 233 akun diberi batas, 0 sudah berbatas sama.`; run again → `DITULIS: 0 akun diberi batas, 233 sudah berbatas sama.` The database shows 233 active mahasiswa with `must_change_password = 1` and the deadline `2026-12-01 17:00:00` UTC (1 December 23:59 WIB); the 2 mahasiswa who changed their password, the 2 dosen and the superadmin have none. Two `password.initial_deadline` audit rows (`lewat: cli`).
 - Not verified in production: the refusal after the deadline (it has not passed; shown by `BatasSandiAwalTest` only), and a reset by a pengajar from a class page, which has still never happened in production.
 - Still true until 1 December: any student who knows a classmate's nomor induk can log in as a classmate who has not logged in yet.
-- The commit of this entry differs from the deployed `8c28852` only in `PROGRESS.md`; `infra/smoke.sh` check 0 fails until the four components are redeployed.
+- The owner reported on 2026-11-21 that the students and the second lecturer are being told, and that a password reset from a class page is his to try ("no 1 and 2 okay"); neither is verified by the agent.
 

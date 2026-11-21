@@ -210,3 +210,4 @@ Technical choices made during the build, newest first. One line each: date, deci
 - 2026-11-21 — `--sampai 2026-12-01` means usable through the end of that day in Asia/Jakarta (stored `2026-12-01 17:00:00` UTC) — the agent's reading of "set the date to 1 December 2026"; the command can be run again with another date.
 - 2026-11-21 — After the deadline the login screen shows the same text as for a wrong password — the existing rule that the screen never says why a login failed; the reason is in `audit_log` (`initial_password_expired`). It does not count towards the lockout.
 - 2026-11-21 — "Still on the initial password" is defined as: must change, and exactly one row in `password_history` — a student whose password was reset by a pengajar has a random temporary password and is not given a deadline.
+- 2026-11-21 — Stage 11 (Portal and public pages) comes next, before stage 10 — the owner's decision; students already log in and the Portal still answers 503.
