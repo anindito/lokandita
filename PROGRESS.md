@@ -958,7 +958,12 @@ Verified by the agent, 2026-11-21 (output shown in the session):
 
 - `infra/tes.sh lokakode` → 252 tests, 10878 assertions, pass. 16 of them are new (`tests/Seb/`): Config Key of the downloaded file equals the stored one; both headers needed, for the same configuration and for that exact URL; a header of another URL, another course's keys, the User-Agent and a forged `Host` do not help; staff are not checked; rotation kills the old file and keys; IDOR on the panel (other pengampu 404, pengajar 403, student 403); heartbeat, lease and the two event kinds; banner in `disabled` mode for students only.
 - `infra/tes.sh auth` → 105 tests, 986 assertions; `infra/tes.sh portal` → 85 tests, 6161 assertions; `infra/tes.sh judge` → 258 passed. All pass.
-- Deploy and smoke results: next entry.
+- Deployed 2026-11-21 at `48d2539` after `infra/backup.sh` (`backup SELESAI`): `infra/deploy.sh auth`, `lokakode`, `portal`, `judge`, each verified at `/healthz` (the worker by its heartbeat). Migration `000006` ran on the real `lokakode` schema: `seb_configs` and `seb_exam_keys` exist and are empty.
+- `infra/smoke.sh` → 32 lulus, 0 gagal, 0 belum aktif; check 10 reports `SEB_ENFORCEMENT=disabled` in `.env` and in the container, with its warning.
+- Container log at start: `[lokakode] PERINGATAN: MODE UJI — penegakan SEB dinonaktifkan (SEB_ENFORCEMENT=disabled)`.
+- Real requests to `https://lokakode.lokandita.com`: `/seb` 200 (state "belum"), `/seb/periksa` 200, `/seb/keluar` 200, `/seb/unduh/DDP101.seb` 404 (no configuration yet), `/beranda` 302 to the LokaAuth login.
+- **Not seen by the agent:** a student page in production with the banner (that needs a student session); the banner is proven only on the test container.
+- The commit that holds these lines differs from `48d2539` only in this file and was deployed after it so that `/healthz` reports `HEAD`; that output is in the session.
 
 **Not verified — this is the whole point of the gate:**
 
