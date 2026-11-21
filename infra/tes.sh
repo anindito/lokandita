@@ -16,6 +16,8 @@
 # DB 15), karena tes LokaKode mengirim pekerjaan sungguhan kepadanya; dan sebuah
 # peramban Chromium tanpa layar (peramban-tes) dijalankan untuk tes yang hanya
 # bisa dibuktikan di peramban: editor, CSP, blokir tempel, simpan draf otomatis.
+# Untuk portal, LokaKode tes (lokakode-tes, pada lokakode_test) juga dilayani:
+# gerbang tahap 11 menguji sesi yang sama di Portal dan LokaKode sungguhan.
 #
 # Hanya skema berakhiran _test yang disentuh; skrip menolak nama lain.
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
@@ -32,11 +34,11 @@ bersih() {
 		kill "$pid_worker" 2> /dev/null || true
 		wait "$pid_worker" 2> /dev/null || true
 	fi
-	docker rm -f auth-tes "$app-tes" tes-jalan caddy-tes peramban-tes > /dev/null 2>&1 || true
+	docker rm -f auth-tes "$app-tes" lokakode-tes tes-jalan caddy-tes peramban-tes > /dev/null 2>&1 || true
 	rm -rf "${tmp:?}"
 }
 trap bersih EXIT
-bersih_awal() { docker rm -f auth-tes "$app-tes" tes-jalan caddy-tes peramban-tes > /dev/null 2>&1 || true; }
+bersih_awal() { docker rm -f auth-tes "$app-tes" lokakode-tes tes-jalan caddy-tes peramban-tes > /dev/null 2>&1 || true; }
 bersih_awal
 
 bangun() { # <app>
@@ -82,6 +84,7 @@ jalan() {
 	docker rm -f tes-jalan > /dev/null 2>&1 || true
 	docker create --name tes-jalan --network data --env-file "$tmp/$a.env" \
 		-e AUTH_TES_URL=http://auth-tes:8080 -e AUTH_TES_SKEMA="$skema_auth" -e APP_TES_URL="http://$app-tes:8080" \
+		-e LOKAKODE_TES_URL=http://lokakode-tes:8080 \
 		-e PERAMBAN_TES_URL="$url_peramban" \
 		--entrypoint "$1" "lokandita/$a:tes" "${@:2}" > /dev/null
 	docker network connect internal tes-jalan
@@ -262,6 +265,17 @@ if [ "$app" != "auth" ]; then
 	if [ "$app" = "lokakode" ]; then
 		worker_tes
 		peramban_tes
+	fi
+	# Gerbang tahap 11 (SPEC.md §18): "login dari Portal sampai ke LokaKode tanpa login
+	# kedua" hanya bisa dibuktikan dengan ketiga aplikasi berjalan sungguhan. Untuk
+	# Portal, LokaKode tes juga dilayani (lokakode-tes, pada lokakode_test); tesnya
+	# menemukannya lewat LOKAKODE_TES_URL. Judge worker tidak diperlukan di sini.
+	if [ "$app" = "portal" ]; then
+		bangun lokakode
+		env_tes lokakode
+		buat_ulang_skema lokakode_test
+		migrasi lokakode lokakode_test
+		layani lokakode lokakode-tes
 	fi
 fi
 

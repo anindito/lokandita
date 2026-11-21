@@ -7,6 +7,7 @@
 # Mengaktifkan: ubah angka di bawah menjadi 1 pada tahap yang bersangkutan.
 CEK_AUTH_AKTIF=1   # tahap 5: cek 3, 4, 5 — aktif sejak tahap 5
 CEK_JUDGE_AKTIF=1  # tahap 7: cek 6 — aktif sejak tahap 7; cek 7 (VALIDATE) sejak tahap 8
+# Cek 8 (halaman publik, tahap 11) selalu aktif.
 
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
@@ -149,6 +150,29 @@ if [ "$CEK_JUDGE_AKTIF" = "1" ]; then
 else
 	belum "menunggu judge worker (tahap 7)"
 fi
+
+echo "8. halaman publik terbuka dan beranda mengarah ke LokaAuth (tahap 11)"
+# Ditanyakan langsung ke kontainer aplikasi dari kontainer aplikasi lain, dengan header yang
+# dikirim Caddy, supaya cek ini juga berjalan selagi host-nya masih pemeliharaan.
+# tanya <kontainer penanya> <kontainer tujuan> <jalur>  ->  "<status> <tujuan redirect>"
+tanya() { docker exec "$1" curl -sS -o /tmp/smoke-publik --max-time 10 -H 'X-Forwarded-Proto: https' -w '%{http_code} %{redirect_url}' "http://$2:8080$3" 2>&1 || true; }
+isi() { docker exec "$1" cat /tmp/smoke-publik 2>/dev/null || true; }
+login_url="$(nilai_env "$AKAR/apps/portal/.env" AUTH_LOGIN_URL)"
+for pasangan in "lokakode portal" "portal lokakode"; do
+	read -r penanya a <<< "$pasangan"
+	url="$(nilai_env "$AKAR/apps/$a/.env" APP_URL)"
+	j="$(tanya "$penanya" "$a" /)"
+	if [ "$j" = "200 " ] && isi "$penanya" | grep -q '<meta name="robots" content="index, follow">'; then
+		ok "$a GET / tanpa cookie -> 200, halaman publik yang boleh diindeks"
+	else
+		tidak "$a GET / tanpa cookie -> '$j' (seharusnya 200 dengan robots index, follow)"
+	fi
+	j="$(tanya "$penanya" "$a" /beranda)"
+	harap="302 $login_url?next=$(jq -rn --arg u "$url/beranda" '$u|@uri')"
+	if [ "$j" = "$harap" ]; then ok "$a GET /beranda tanpa cookie -> $j"; else tidak "$a GET /beranda tanpa cookie -> '$j' (seharusnya '$harap')"; fi
+done
+j="$(tanya lokakode portal /privasi)"
+if [ "$j" = "200 " ]; then ok "portal GET /privasi -> 200"; else tidak "portal GET /privasi -> '$j' (seharusnya 200)"; fi
 
 echo
 echo "smoke: $lulus lulus, $gagal_n gagal, $tunda belum aktif"
