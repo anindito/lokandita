@@ -21,13 +21,15 @@ tar -tzf "$sumber/env.tar.gz" | sed 's/^/  env.tar.gz berisi: /'
 
 NAMA=lokandita-uji-restore
 IMAGE="$(docker inspect -f '{{.Config.Image}}' mysql)"
-bongkar="$(mktemp -d)"
+bongkar=""
 bersih() {
 	docker rm -f "$NAMA" > /dev/null 2>&1 || true
-	rm -rf "${bongkar:?}"
+	if [ -n "$bongkar" ]; then rm -rf "$bongkar"; fi
 }
 trap bersih EXIT
 bersih
+# Dibuat SESUDAH pembersihan awal di atas, yang juga menghapus direktori ini.
+bongkar="$(mktemp -d)"
 
 # Server sementara saat inisialisasi image tidak mendengarkan TCP, jadi
 # menunggu lewat TCP berarti menunggu server yang sebenarnya.

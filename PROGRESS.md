@@ -1,6 +1,6 @@
 # Progress
 
-**Stage 11c (visual follow-up, replaceable hero photo, logout to the Portal, Kontak merged into Tentang) is committed at `4ce836d` and pushed but NOT DEPLOYED — the agent's deploy was refused by its permission system on 2026-11-21; production still runs `70b3f0e`. See "Stage 11c" at the end of this file for the commands the owner must run.**
+**Stage 11c — public pages redesigned, replaceable hero photo, logout to the Portal, Kontak merged into Tentang — deployed 2026-11-21 at `6dde6b7`; smoke 29 lulus. Not yet seen by the owner in a browser; see "Stage 11c" at the end of this file. No tag (owner's decision).**
 
 **Stage 11 — Portal and public pages (`SPEC.md` §15) — finished 2026-11-21, tag `tahap-11`, on the owner's report that the gate passed; see "Gate result for stage 11" at the end of this file.** All three hosts are open. **Next: stage 10 — SEB and integrity, communication (`SPEC.md` §13, §14), not started**; it begins in a new session with a plan for the owner's approval. Stage 13 (problem production) follows.
 
@@ -832,7 +832,7 @@ Deploy of stage 11b, 2026-11-21, at `002d4bf` (output in the session):
 
 Asked for by the owner on 2026-11-21; plan presented and approved the same day ("approve all"). During the work he added: "redirect all logout to the portal lokandita.com", "combine Tentang and Kontak page", then "remove kontak and just put it contents in Tentang". Decisions: `DECISIONS.md`, 2026-11-21. Contract: `KONTRAK.md` §2, §4, §9, §11, §15, new §16. Commits: `e62b6e2` (logout), `4ce836d` (everything else). No tag, by the owner's decision.
 
-**NOT DEPLOYED.** `infra/deploy.sh` was refused by the agent's permission system ("Production Deploy") and was not worked around. Production runs `70b3f0e`. Everything below marked "after deploy" has therefore not been done.
+The first deploy attempt was refused by the agent's permission system and not worked around; the owner then said "deploy". Results are under "Deploy of stage 11c" below; the lists "Not verified" and "For the owner" that follow here were written before the deploy and are corrected there.
 
 Built:
 
@@ -883,3 +883,33 @@ For the owner, in this order (or allow the agent to deploy and it will do them a
 3. `infra/tes-infra.sh` and `infra/smoke.sh` (expect `29 lulus, 0 gagal, 0 belum aktif`).
 4. `curl -sI https://lokandita.com/ | grep -i content-security-policy` — must equal the header of before.
 5. Browser: `https://lokandita.com` in three languages and dark mode; **Keluar** from LokaKode lands on the Portal; `/kontak` lands on Tentang; as superadmin *Teks halaman publik* → *Kelola foto pembuka* → upload a photo, preview, publish, then *Kembali ke foto bawaan*.
+
+### Deploy of stage 11c — 2026-11-21, at `6dde6b7` (output in the session)
+
+After the owner's "1. deploy 2. just \"Tentang\"": the navigation entry is plain "Tentang" / "About" / "عن المنصة" (`infra/tes.sh portal` again `OK (85 tests, 6159 assertions)`), then:
+
+- `infra/cek-env.sh` → `cek-env: LULUS`; `infra/deploy.sh portal`, `auth`, `lokakode`, `judge` → each `LULUS` on `6dde6b7`. The Portal migration created `portal.foto` and `portal.foto_tayang`; the container has the volume `lokandita_portal_media` at `/srv/media`.
+- `infra/smoke.sh` → `smoke: 29 lulus, 0 gagal, 0 belum aktif` / `smoke: LULUS`, with check 9: `/merek/hero/hero-480.avif?v=6dde6b750d36 -> 200 image/avif`, `smoke.php -> 403`.
+- `infra/tes-infra.sh` → `tes-infra: 63 lulus, 0 gagal`, including section A2 (volume on `portal` only, writable by `www-data`, a PHP file placed in it answers 403 and is removed again, no directory index).
+- `infra/backup.sh` → `media.tar.gz 134 byte, 0 berkas foto`. `infra/uji-restore.sh` **failed the first time** (`media.tar.gz tidak dapat dibongkar`): the script's own start-up clean-up deleted the temporary directory it was about to unpack into. Fixed (the directory is created after that clean-up); second run → `uji-restore: LULUS — 41 skema/tabel pulih dan sama dengan yang hidup; 0 berkas foto pulih`.
+- Response headers of `GET https://lokandita.com/` after the change: `content-security-policy: default-src 'self'; script-src 'self' 'nonce-…'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self' https://lokandita.com https://auth.lokandita.com`, plus `x-content-type-options: nosniff`, `x-frame-options: DENY`, `referrer-policy: same-origin`, HSTS. The header was not captured before the change; `SecurityHeaders.php` has no diff against `70b3f0e`.
+- **Lighthouse 12.8.2, mobile, `https://lokandita.com/`, three runs each:**
+
+  | | performance | accessibility | best practices | FCP | LCP | CLS |
+  |---|---|---|---|---|---|---|
+  | before (`70b3f0e`) | 97 / 97 / 100 | 91 / 91 / 91 | 100 / 100 / 100 | 0.83–0.95 s | 1.16–1.24 s | 0.000–0.001 |
+  | after (`6dde6b7`) | 98 / 100 / 100 | 100 / 100 / 100 | 100 / 100 / 100 | 0.77–0.89 s | 1.00–1.07 s | 0.000–0.001 |
+
+  Run from a throwaway container on this same server, so the network path is short; the numbers compare before and after, they are not what a phone on a mobile network sees.
+- Real requests to production without a session: `/kontak` → 301 `https://lokandita.com/tentang`; `/tentang` has the headings Tentang Lokandita, Aplikasi, Untuk siapa, Cara kami memperlakukan data, Pengelola, Kontak, Lupa kata sandi, Belum punya akun, Melaporkan masalah; the landing shows `<picture>` with the twelve default files and "Foto: Josh Sorenson / Pexels"; `/media/hero/` and `/media/hero/x.php` → 403; `https://auth.lokandita.com/keluar-selesai` → 302 `https://lokandita.com/`; `GET /admin/teks/foto` → 302 to the LokaAuth login with the right `next`; `POST /admin/teks/foto` → 403. The existing text override (`depan` / `id`) still renders.
+
+Still not verified after the deploy:
+
+- **Nothing has been seen in a browser by the owner**, and no photo has been uploaded in production: upload, preview, publish and restore have run in test containers only.
+- **The restore test has only ever seen an empty photo archive.** Its checks of real files (twelve per photo, the published one present, equal to the live volume) have not run against a real upload. After the first production upload: `infra/backup.sh`, then `infra/uji-restore.sh`.
+- **Keluar has not been pressed in a browser** since the change; proven by the container tests and by the redirect of `/keluar-selesai` above.
+- The remaining points of "Not verified, or weaker than it looks" above still hold: only generated test images, memory measured with one 18-megapixel photo, colour profiles ignored, unreviewed English and Arabic texts, the download date in `LISENSI.md`, the desktop scrollbar shift.
+
+Owner's check: `https://lokandita.com` in three languages and in dark mode, on a phone too; `/tentang`; **Keluar** from LokaKode lands on the Portal; as superadmin *Teks halaman publik* → *Kelola foto pembuka* → upload a photo, look at the preview, publish, then *Kembali ke foto bawaan*; then `infra/backup.sh` and `infra/uji-restore.sh`.
+
+The commit that holds these lines differs from `6dde6b7` in this file and in `infra/uji-restore.sh` only; it was deployed after it so that `/healthz` reports `HEAD`.
