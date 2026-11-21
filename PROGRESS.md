@@ -1,5 +1,7 @@
 # Progress
 
+**Current stage: 11 — Portal and public pages (`SPEC.md` §15). Built, tested and deployed on 2026-11-21; NOT finished: the owner's gate ("Login from Portal reaches LokaKode without a second login") has not been run, `lokandita.com` is still in maintenance, and there is no tag `tahap-11` yet.** See "Stage 11" at the end of this file. Stage 10 (SEB and integrity, communication) has not been started; the owner put stage 11 ahead of it on 2026-11-21.
+
 **Next stage: 11 — Portal and public pages (`SPEC.md` §15), gate: "Login from Portal reaches LokaKode without a second login".** Set by the owner on 2026-11-21, ahead of stage 10 (SEB and integrity, communication), which has not been started either. Stage 11 has not been started: no plan has been presented and no code written. It begins in a new session with a plan for the owner's approval.
 
 Stage 12 — production data — finished 2026-11-20, tag `tahap-12`, done ahead of stages 10 and 11 by the owner's decision; see "Stage 12" at the end of this file. Work done after the tag (class names, the log fix, the deadline for the initial password) is listed there too.
@@ -689,3 +691,60 @@ After the tag, 2026-11-21 — deadline for the shared initial password (owner's 
 - Still true until 1 December: any student who knows a classmate's nomor induk can log in as a classmate who has not logged in yet.
 - The owner reported on 2026-11-21 that the students and the second lecturer are being told, and that a password reset from a class page is his to try ("no 1 and 2 okay"); neither is verified by the agent.
 
+## Stage 11 — Portal and public pages (2026-11-21, before stage 10)
+
+Plan approved by the owner 2026-11-21 (8 steps): 1 contract and environment · 2 shared package · 3 Portal public pages · 4 Portal after login · 5 LokaKode public landing · 6 own-data export · 7 tests · 8 deploy, smoke, close. Owner's decisions and the agent's choices: `DECISIONS.md`, 2026-11-21.
+
+Built:
+
+- Contract (`KONTRAK.md`): §4 public routes, `GET /bahasa/{id|en|ar}`, the Portal exempt from the app-access step; §10 `LOKAKODE_URL` (Portal; added to `apps/portal/.env.example` and, by the agent, to `apps/portal/.env` on this server — not a secret); §11 smoke check 8; new §14 own-data export.
+- Shared package: public layout (indexable, description, canonical, Open Graph, language links, **Masuk**), `Controllers\Bahasa`, `Publik`, `Ekspor`, the shared "Data saya" page; footer of every page links to the Portal's privacy and terms; the temporary stage 5 pages are gone.
+- Portal: `/` (landing with app cards: LokaKode a link, LokaUjian and LokaSiber "segera" and not links), `/tentang`, `/kontak`, `/privasi`, `/ketentuan`, `/sitemap.xml`, `/robots.txt`, all in `id` / `en` / `ar`; `/beranda` (name, role, apps from `app_access`, a LokaAuth admin card for a superadmin), `/data-saya`.
+- LokaKode: public landing at `/` (features, how it works, C / C++ / Python, SEB announced with the official download link and "belum diberlakukan", FAQ, contact), `robots.txt`, Open Graph image from `docs/branding`.
+- Own-data export in LokaAuth and LokaKode: `GET /data-saya`, `POST /data-saya/unduh`.
+- `infra/tes.sh portal` also serves a real `lokakode-tes`; `infra/smoke.sh` check 8.
+
+Verified by the agent (commands and output shown in the session):
+
+- `infra/tes.sh auth` → `OK (105 tests, 986 assertions)`; `infra/tes.sh portal` → `OK (39 tests, 1395 assertions)`; `infra/tes.sh lokakode` → `OK (236 tests, 9974 assertions)`. Real MySQL, Redis, HTTP between containers, real worker and browser for LokaKode; nothing mocked. `infra/tes.sh judge` not run (the worker did not change).
+- **The gate case in containers** (`apps/portal/tests/GerbangTest.php`, four real containers, as mahasiswa and as dosen): Masuk on the Portal → LokaAuth login with `next` → back on the Portal's `/beranda` with the LokaKode card → the same `lokandita_sid` on LokaKode's `/beranda` answers 200 with the user's name and no redirect; the database then holds one session, one successful login attempt and one `login.success`; **Keluar** pressed on the Portal makes LokaKode send that cookie back to the login page. A user without `lokakode` access is not offered LokaKode and gets 403 from LokaKode itself.
+- Export, both apps: A's file holds nothing of B (also for a superadmin, with any parameter), no password hash, session value, audit detail, hidden test, generator or reference solution; refused without session or CSRF; second download within a minute → 429; audited.
+- `infra/cek-env.sh` → `cek-env: LULUS`. `infra/deploy.sh auth`, `portal`, `judge` → `LULUS` at `c28ed68`.
+- `infra/smoke.sh` at `c28ed68` → `smoke: 27 lulus, 0 gagal, 0 belum aktif` (22 old lines plus the 5 of check 8).
+- Real requests after the deploy. From the internet: `https://lokakode.lokandita.com/` without cookie → 200, `index, follow`, the landing; with a made-up `lokandita_sid` → 302 `/beranda`; `/bahasa/ar` then `/` → `lang="ar" dir="rtl"`; `/data-saya` without session → 302 to the LokaAuth login with the right `next` (LokaKode and LokaAuth); `POST /data-saya/unduh` without session or CSRF → 403 (both); `https://lokandita.com/privasi` → 503 (maintenance). At the `portal` container directly: the five public pages, `sitemap.xml`, `robots.txt` → 200; `/beranda`, `/data-saya` → 302 to login; an unknown path → 404.
+
+Went wrong:
+
+- **`infra/deploy.sh lokakode` failed once** with a Docker name conflict (`655cbddd700c_lokakode` already in use) while Compose recreated the container. A minute later the container was up and healthy on the new commit and `https://lokakode.lokandita.com/` answered 200; the deploy was run again and ended `LULUS`. Cause not investigated; a leftover of the test run that had just ended is the agent's guess, not a finding. LokaKode may have been unreachable for some seconds around 12:10 WIB.
+- The LokaKode test run was reported "stopped" to the agent when its session restarted; it was in fact still running and ended with the result above.
+- A read of `app_access` counts per role was refused by the agent's permission system during planning and not worked around; the owner's decision 4 made it unnecessary.
+
+Not verified, or weaker than it looks:
+
+- **The gate has not been done on the deployed system or in a browser.** The Portal is in maintenance and the agent has no account. It is proven between real containers only.
+- **No page of this stage has been seen in a browser**: layout of the landing pages, the header on a narrow screen, the Arabic (right-to-left) pages, dark mode, the download dialog of the export.
+- **Privacy policy and terms are the agent's draft, not legal advice**, and are not yet read by the owner. They name no operator (owner's decision) and say accounts are disabled, never deleted. English and Arabic texts of the whole stage were written by the agent and not reviewed.
+- **Since the deploy, the footer of every LokaAuth and LokaKode page links to `lokandita.com/privasi` and `/ketentuan`, which answer 503 until the Portal is opened.**
+- `https://lokakode.lokandita.com/` now shows the landing to a visitor without a session cookie instead of going straight to the login page (one more click on **Masuk**); with a cookie it still goes to `/beranda`.
+- Search engines see the Indonesian version only (one URL for three languages). No Open Graph image and no logo for the Portal; it shows the LokaAuth icon.
+- The export of a real account has never been downloaded in production. A user with thousands of large submissions could make a big file (at most 5000 rows per list, source included); not tested at that size. The 60 s limit is not enforced when Redis is down (by design).
+- The export has no password re-entry: whoever holds a live session can download that user's data. On shared lab computers the forced idle logout is the protection.
+- The SEB link was checked once (`200` on 2026-11-21); it is an outside address the project does not control.
+- `infra/tes-infra.sh`, `infra/backup.sh` and `infra/uji-restore.sh` were not run in this stage (no schema changed).
+
+Owed by later stages:
+
+- Stage 10: SEB enforcement, the `.seb` download and the instructions page; then the SEB section of the LokaKode landing and the terms (similarity checks) must be updated.
+- Portal artwork (logo, favicon, Open Graph image) when the owner supplies it.
+
+Owner's gate for stage 11 (`SPEC.md` §18):
+
+1. Read the privacy and terms texts first (`apps/portal/app/Language/id/Portal.php`), because step 2 makes them public.
+2. `infra/pemeliharaan.sh portal off`. The agent will not run this without being asked.
+3. Private window → `https://lokandita.com`: landing; switch to English and العربية; open Tentang, Kontak, Privasi, Ketentuan.
+4. Press **Masuk**, log in as a student → the Portal shows name, role and the LokaKode card → click it → LokaKode's beranda opens **without a second login**.
+5. Back on the Portal press **Keluar** (never yet done in a browser), then reload the LokaKode tab → login page.
+6. Without a session open `https://lokakode.lokandita.com` → the LokaKode landing. Logged in, open *Data saya* on the Portal and download the file once from LokaAuth and once from LokaKode.
+7. `infra/smoke.sh` → expect `27 lulus, 0 gagal, 0 belum aktif`; check 1 then expects `lokandita.com` to answer 2xx/3xx.
+
+After the gate: tag `tahap-11`, record the result here.
