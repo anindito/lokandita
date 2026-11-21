@@ -1,8 +1,6 @@
 # Progress
 
-**Current stage: 11 — Portal and public pages (`SPEC.md` §15). Built, tested and deployed on 2026-11-21; NOT finished: the owner's gate ("Login from Portal reaches LokaKode without a second login") has not been run, `lokandita.com` is still in maintenance, and there is no tag `tahap-11` yet.** See "Stage 11" at the end of this file. Stage 10 (SEB and integrity, communication) has not been started; the owner put stage 11 ahead of it on 2026-11-21.
-
-**Next stage: 11 — Portal and public pages (`SPEC.md` §15), gate: "Login from Portal reaches LokaKode without a second login".** Set by the owner on 2026-11-21, ahead of stage 10 (SEB and integrity, communication), which has not been started either. Stage 11 has not been started: no plan has been presented and no code written. It begins in a new session with a plan for the owner's approval.
+**Stage 11 — Portal and public pages (`SPEC.md` §15) — finished 2026-11-21, tag `tahap-11`, on the owner's report that the gate passed; see "Gate result for stage 11" at the end of this file.** All three hosts are open. **Next: stage 10 — SEB and integrity, communication (`SPEC.md` §13, §14), not started**; it begins in a new session with a plan for the owner's approval. Stage 13 (problem production) follows.
 
 Stage 12 — production data — finished 2026-11-20, tag `tahap-12`, done ahead of stages 10 and 11 by the owner's decision; see "Stage 12" at the end of this file. Work done after the tag (class names, the log fix, the deadline for the initial password) is listed there too.
 
@@ -748,3 +746,39 @@ Owner's gate for stage 11 (`SPEC.md` §18):
 7. `infra/smoke.sh` → expect `27 lulus, 0 gagal, 0 belum aktif`; check 1 then expects `lokandita.com` to answer 2xx/3xx.
 
 After the gate: tag `tahap-11`, record the result here.
+
+Gate result for stage 11, 2026-11-21 — the owner's report, in his words:
+
+- "Privacy and terms texts read: fine." · "`infra/pemeliharaan.sh portal off` run." · "Three languages, four text pages, Masuk → LokaKode card without second login, Keluar then reload shows login, 'Data saya' downloaded from each app: all fine." · "`infra/smoke.sh`: 27 lulus, 0 gagal, 0 belum aktif."
+- **The gate of `SPEC.md` §18 passes** — on the owner's report; the agent did not see the browser. This also closes, on his word, "Keluar pressed from the Portal" (open since stage 5) and the first real export downloads.
+- **One defect found by the owner, to be fixed before the tag:** on the Arabic landing of `lokakode.lokandita.com` the hero text was centre-aligned inside a block right of centre, lining up with neither the page centre nor the right edge; and the top bar had the language links and login button at the left "with nothing at the right". Required: Arabic is the mirror of Indonesian — hero right-aligned from the right edge of the content column, top bar starting at the right (brand right, actions left), content column of the same width and position, mirrored; all public pages of the three apps checked; a browser test; screenshots.
+
+Fix, commit `7cf51a8`:
+
+- Cause, seen in screenshots of the unfixed pages taken in the test browser: the hero (`.pembuka`) was `text-align: center` in every language, and the text column (`.prosa`) was a centred column whose text was start-aligned — in Arabic a right-aligned block floating in the middle. Both now start at the start edge of the content column (left for Indonesian and English, right for Arabic). **This also moved the Indonesian and English hero from the centre to the left edge.** The language links in the top bar sat 20 px lower than the button (a margin meant for the login page); fixed.
+- **The top-bar part could not be reproduced.** In Chromium 158 at 1280 px and 390 px the Arabic top bar already had the brand at the right and the actions at the left before the fix. The test now enforces it; if the owner still sees an empty right side, the browser and window width are needed.
+- New browser test `apps/portal/tests/Peramban/ArabPublikTest.php` (real headless Chromium through a test Caddy, as in production) on seven public pages — Portal `/`, `/tentang`, `/kontak`, `/privasi`, `/ketentuan`, LokaKode `/`, LokaAuth `/login` — in Indonesian and Arabic at 1280 px and in Arabic at 390 px: brand at the right edge of the top bar, actions at the left edge and left of the brand; content column equally wide and mirrored; every child of the hero (heading, paragraph, button, note) right-aligned and starting at the right edge of the content column, at the mirrored position of the Indonesian one; text column and its paragraphs likewise; no horizontal overflow, no CSP violation. Against the unfixed pages it failed for both landing pages ("pembuka anak ke-1 harus rata kanan, ternyata center").
+- For this, `infra/tes.sh portal` runs the test browser with three host names mapped to the test containers, and the browser helper moved to the shared package (`KONTRAK.md` §12).
+- Tests at `7cf51a8` (output in the session): `infra/tes.sh auth` → `OK (105 tests, 986 assertions)`; `infra/tes.sh portal` → `OK (53 tests, 1765 assertions)`; `infra/tes.sh lokakode` → `OK (236 tests, 10014 assertions)`.
+  - The first LokaKode run of this fix ended `Tests: 236, Assertions: 10048, Failures: 1`: `ImporTest` expected two imported problems in a fixed order in the export, but the order follows which `VALIDATE` job the judge finishes first. Not caused by this stage; the test now checks the content, not the order, and the rerun above is clean. The export itself still orders by problem id.
+- Deploy: `infra/cek-env.sh` → `cek-env: LULUS`; `infra/deploy.sh auth`, `lokakode`, `portal`, `judge` → each `LULUS` on `7cf51a8`, no name conflict this time; `infra/smoke.sh` → `smoke: 27 lulus, 0 gagal, 0 belum aktif` / `smoke: LULUS`. The stylesheet served by `https://lokandita.com` and `https://lokakode.lokandita.com` (`lokandita.css?v=7cf51a82de6a`) contains `.pembuka{text-align:start;…}`.
+- Screenshots, from the test run at this code (test containers, 1280 × 900 and 390 × 900): `docs/tangkapan/tahap-11/` — `lokakode-depan-ar.png`, `portal-depan-ar.png`, their `-id` twins, `lokakode-depan-ar-sempit.png`, `portal-privasi-ar.png`, `lokaauth-login-ar.png`.
+
+Went wrong in this stage besides the above:
+
+- **Two copies of the agent ran at once** (`claude --continue` twice on the same conversation). Both committed and deployed at about 12:10 WIB: the container-name conflicts recorded above and one `502` on `https://lokakode.lokandita.com/` came from that, not from a leftover test run. From the fix onward one copy stood down and only one acted. A session that is resumed should first check `ps` for another copy.
+
+Not verified, or weaker than it looks, after the fix:
+
+- **The fixed pages have not been seen by the owner**, and not in any browser but Chromium 158. The screenshots are of test containers, not of production; production serves the same commit and the same compiled rule.
+- The test measures positions, not appearance: it does not judge whether the left-aligned Indonesian hero looks good, dark mode, or fonts.
+- Pages behind a session were not part of this check; their Arabic layout was tested in stage 9b for LokaKode only.
+- The remaining items of "Not verified, or weaker than it looks" above still hold, except: the gate has now been done in a browser, the texts have been read by the owner, and exports have been downloaded in production.
+
+**Stage 11 finished 2026-11-21, tag `tahap-11`.** The tagged commit differs from the deployed `7cf51a8` only in this file; **it has not been redeployed**, so `infra/smoke.sh` check 0 and the worker heartbeat line fail until `infra/deploy.sh` is run for the four components. Nothing that runs has changed.
+
+Carried into the next stages:
+
+- Stage 10: SEB enforcement, `.seb` download and instructions page; then update the SEB section of the LokaKode landing and the terms. Integrity pages, similarity, communication.
+- Portal artwork when the owner supplies it; an Open Graph image for the Portal.
+- All three hosts are open. 233 student accounts carry the initial-password deadline of 1 December 2026.
