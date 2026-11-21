@@ -40,7 +40,7 @@ final class SessionTest extends AuthCase
         $this->assertStringContainsString('no-store', (string) $http->header('Cache-Control'));
 
         $keluar = $http->post('/keluar', ['csrf' => $http->input('csrf')]);
-        $this->assertRedirect($keluar, '/login?keluar=1');
+        $this->assertRedirect($keluar, 'https://lokandita.com/');
         $this->assertArrayNotHasKey('lokandita_sid', $http->cookies, 'cookie dihapus di peramban');
         $this->assertMatchesRegularExpression('/domain=\.lokandita\.com/i', (string) $keluar->setCookieLine('lokandita_sid'));
 
@@ -68,7 +68,7 @@ final class SessionTest extends AuthCase
         $this->assertArrayHasKey('lokandita_sid', $http->cookies, 'sesi hidup tidak bisa dikeluarkan lewat tautan');
 
         $this->db->query("UPDATE sessions SET revoked_at = UTC_TIMESTAMP() WHERE token_hash = '" . hash('sha256', $http->cookies['lokandita_sid']) . "'");
-        $this->assertRedirect($http->get('/keluar-selesai'), '/login?keluar=1');
+        $this->assertRedirect($http->get('/keluar-selesai'), 'https://lokandita.com/');
         $this->assertArrayNotHasKey('lokandita_sid', $http->cookies);
     }
 

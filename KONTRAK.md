@@ -37,7 +37,7 @@ Only LokaAuth sets or clears this cookie. The database stores `SHA-256(value)` a
 
 The cookie is sent with `Max-Age=43200`. LokaAuth sends it again, unchanged, whenever it extends a session, so the cookie slides together with the row in `sessions`.
 
-`GET AUTH_PUBLIC_URL/keluar-selesai` is where a client app sends the browser after it has revoked the session through §5. LokaAuth clears the cookie there only when the session is already dead, so the link cannot be used to log somebody else out.
+`GET AUTH_PUBLIC_URL/keluar-selesai` is where a client app sends the browser after it has revoked the session through §5. LokaAuth clears the cookie there only when the session is already dead, so the link cannot be used to log somebody else out. It then redirects to `PORTAL_URL/`, the public landing of the Portal; with a session that is still alive it redirects to LokaAuth's own `/` and clears nothing. LokaAuth's own **Keluar** (`POST /keluar`) ends at `PORTAL_URL/` too: since 2026-11-21 every logout, from whichever app, ends on the Portal's landing (the owner's decision). The login page still shows "you have logged out" for `/login?keluar=1`, but nothing links there any more.
 
 CSRF and other per-app cookies use the `__Host-` prefix and therefore carry no `Domain` attribute: `__Host-csrf` (form field `csrf`) and `__Host-bahasa` (language chosen before login), and on LokaAuth `__Host-tunda` (a login whose password step passed and whose TOTP step has not; state in Redis for 10 minutes, key prefix `auth:tunda:`). No row exists in `sessions` until every login step has passed.
 
@@ -114,7 +114,7 @@ Every app, LokaAuth included, answers these three routes; in client apps they ar
 
 | Route | Does | Answer |
 |---|---|---|
-| `/keluar` | `revoke` through §5 | redirect to `AUTH_PUBLIC_URL/keluar-selesai`; if LokaAuth cannot be reached: `502` and a page saying the user is **not** logged out |
+| `/keluar` | `revoke` through §5 | redirect to `AUTH_PUBLIC_URL/keluar-selesai`, which clears the cookie and redirects to `PORTAL_URL/` (§2); if LokaAuth cannot be reached: `502` and a page saying the user is **not** logged out |
 | `/sesi/perpanjang` | `touch` through §5, re-sends the cookie | `{ "sisa": <seconds> }`, or `502 {"error":"tidak_bisa_diperpanjang"}` |
 | `/preferensi` | `prefs` through §5; form fields `locale`, `idle_logout` (`0`/`1`), `kembali` (local path) | redirect to `kembali` |
 

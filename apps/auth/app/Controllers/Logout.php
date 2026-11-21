@@ -10,6 +10,9 @@ use CodeIgniter\HTTP\ResponseInterface;
 
 /**
  * Keluar: sesi dicabut di server, sehingga berakhir di semua aplikasi (SPEC.md §4.4).
+ *
+ * Sesudah keluar, dari aplikasi mana pun, peramban dibawa ke halaman depan Portal
+ * (PORTAL_URL) — keputusan pemilik 2026-11-21, KONTRAK.md §2.
  */
 final class Logout extends BaseController
 {
@@ -22,10 +25,7 @@ final class Logout extends BaseController
         $userId = Sessions::revoke($token);
         Audit::log('logout', $userId, $userId);
 
-        $jawab = redirect()->to('/login?keluar=1');
-        Sessions::clearCookie($jawab);
-
-        return $jawab;
+        return $this->kePortal();
     }
 
     /**
@@ -42,7 +42,16 @@ final class Logout extends BaseController
             return redirect()->to('/');
         }
 
-        $jawab = redirect()->to('/login?keluar=1');
+        return $this->kePortal();
+    }
+
+    /**
+     * Cookie sesi dihapus, lalu ke halaman depan Portal. Tanpa cookie, Portal menampilkan
+     * halaman publiknya dan bukan /beranda.
+     */
+    private function kePortal(): ResponseInterface
+    {
+        $jawab = redirect()->to(rtrim((string) getenv('PORTAL_URL'), '/') . '/');
         Sessions::clearCookie($jawab);
 
         return $jawab;

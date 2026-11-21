@@ -134,7 +134,7 @@ final class ClientAppTest extends TestCase
         // …dan di LokaAuth, yang lalu menghapus cookie di peramban.
         $this->assertContains($auth->get('/')->status, [302, 303]);
         $selesai = $auth->get('/keluar-selesai');
-        $this->assertSame('https://auth.lokandita.com/login?keluar=1', $selesai->header('Location'));
+        $this->assertSame('https://lokandita.com/', $selesai->header('Location'));
         $this->assertArrayNotHasKey('lokandita_sid', $auth->cookies);
 
         $audit = $this->db->query("SELECT app FROM audit_log WHERE action = 'logout' AND target_id = '{$user['id']}' ORDER BY id DESC LIMIT 1")->fetch_assoc();
