@@ -913,3 +913,16 @@ Still not verified after the deploy:
 Owner's check: `https://lokandita.com` in three languages and in dark mode, on a phone too; `/tentang`; **Keluar** from LokaKode lands on the Portal; as superadmin *Teks halaman publik* → *Kelola foto pembuka* → upload a photo, look at the preview, publish, then *Kembali ke foto bawaan*; then `infra/backup.sh` and `infra/uji-restore.sh`.
 
 The commit that holds these lines differs from `6dde6b7` in this file and in `infra/uji-restore.sh` only; it was deployed after it so that `/healthz` reports `HEAD`.
+
+### Owner's check of stage 11c — 2026-11-21
+
+The owner's report, in his words: "all no 1 to 4 done" and, asked about the upload, "the upload was succesful". The four steps were: the landing in three languages, dark mode and on a phone, and `/tentang`; **Keluar** from LokaKode lands on the Portal; as superadmin upload a photo, preview, publish, back to default; `infra/backup.sh` and `infra/uji-restore.sh`.
+
+- Steps 1 and 2 (pages seen in a browser, Keluar lands on the Portal): on the owner's report; the agent did not see the browser. The Portal log shows a `POST /keluar` → 303 at 11:01:48 UTC.
+- Step 3, what production shows (seen by the agent): `portal.foto` has one photo (1600 × 900, JPEG, uploaded 11:01:25 UTC), `foto_tayang` points at it since 11:01:32, `audit_log` has `foto.diunggah` and `foto.ditayangkan`; the volume holds its 12 files; `https://lokandita.com/` serves `/media/hero/<random name>-1200.jpg` with a photo credit in the footer; the three formats answer 200 with the right content type; the served 1600 px JPEG carries no camera or GPS EXIF. **The first real upload in production works.** There is no `foto.bawaan` row: the uploaded photo is the one that is live now, the default was not put back — which is fine if that is what the owner wants.
+- The agent's first look at the database, a minute or two before the upload, found no photo and said so; the upload came after that look.
+- Step 4, run by the agent after the upload: `infra/backup.sh` → `media.tar.gz 1662502 byte, 12 berkas foto`; `infra/uji-restore.sh` → `1 foto di portal.foto, semuanya lengkap di arsip (12 berkas per foto)`, `foto yang sedang tayang ikut pulih`, `uji-restore: LULUS — 41 skema/tabel pulih dan sama dengan yang hidup; 12 berkas foto pulih`. **This closes "the restore test has only ever seen an empty photo archive".**
+
+Still open: "publish an earlier photo again" and "back to default" have not been done in production (container tests only); the uploaded photo's AVIF at 1200 px is 127 kB against 22 kB for the default, so Lighthouse numbers measured with the default photo no longer describe the live page exactly; the remaining points of "Still not verified after the deploy" except the two closed above.
+
+The commit that holds these lines differs from the deployed `0a6d9cd` only in this file and **has not been deployed**: `infra/smoke.sh` check 0 and the worker heartbeat line fail until `infra/deploy.sh` is run for the four components. Nothing that runs has changed.
