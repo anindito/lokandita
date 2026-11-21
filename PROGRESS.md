@@ -791,4 +791,8 @@ After the tag, 2026-11-21 — hero centred again for Indonesian and English (the
 - The owner confirmed the Arabic pages of the first fix in his browser ("No 1. is okay"), which also settles the top-bar report.
 - The screenshots in `docs/tangkapan/tahap-11/` were replaced by those of this version; `portal-depan-en.png` added.
 - The tag `tahap-11` stays on `0bb9f79`; this change is one commit after it. Deploy and smoke results of that commit are in the next entry.
+- Deploy of `a94bfb0`, 2026-11-21: `infra/cek-env.sh` → `cek-env: LULUS`; `infra/deploy.sh auth`, `lokakode`, `portal`, `judge` → each `SELESAI`; `infra/smoke.sh` → `smoke: 27 lulus, 0 gagal, 0 belum aktif` / `smoke: LULUS`. The stylesheet served by `https://lokandita.com` and `https://lokakode.lokandita.com` (`lokandita.css?v=a94bfb062668`) holds `.pembuka{text-align:center;…}` and `[dir=rtl] .pembuka{text-align:start}`.
+- The centred Indonesian and English pages of this version have not been seen by the owner; the screenshots are of test containers.
+- The commit that holds this line differs from `a94bfb0` only in this file and was deployed right after it at the owner's word ("do no 3"), so that `/healthz` reports `HEAD`; the output of that deploy and its smoke run is in the session.
+- The second agent process the owner asked to close (pid 1911501) had already ended by itself; one `claude` process remained.
 
