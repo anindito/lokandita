@@ -819,3 +819,10 @@ Not verified, or weaker than it looks:
 - Privacy and terms can now be changed without a commit: Git no longer shows what the public pages say. The database (and its daily backup) and `/admin/teks/riwayat` do.
 - The fallback was tested by renaming the table, not by stopping MySQL.
 
+Deploy of stage 11b, 2026-11-21, at `002d4bf` (output in the session):
+
+- `infra/cek-env.sh` → `cek-env: LULUS`; `infra/deploy.sh portal`, `auth`, `lokakode`, `judge` → each `LULUS` on that commit. The Portal migration ran on the real `portal` schema: `teks` 0 rows, `audit_log` 0 rows. `infra/smoke.sh` → `smoke: 27 lulus, 0 gagal, 0 belum aktif` / `smoke: LULUS`.
+- Real requests to `https://lokandita.com` without a session: `GET /admin/teks`, `/admin/teks/privasi/id`, `/admin/teks/riwayat` → 302 to the LokaAuth login with the right `next`; `POST /admin/teks/privasi/id` → 403; `/`, `/privasi`, `/ketentuan` still show their default headings.
+- **Nothing has been edited in production**, so a real save, the preview and the history have run only in the test containers. The owner's check: log in as superadmin at `https://lokandita.com`, open *Teks halaman publik*, change one sentence of Tentang, press Pratinjau, then Simpan, look at `https://lokandita.com/tentang` in a private window, then *Kembalikan ke teks bawaan*.
+- No new tag: `tahap-11` stays on `0bb9f79`. The commit that holds these lines differs from `002d4bf` only in this file and was deployed after it so that `/healthz` reports `HEAD`; that output is in the session.
+
