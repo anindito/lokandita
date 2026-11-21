@@ -14,12 +14,6 @@ use Lokandita\Auth\UserDirectory;
  */
 final class Beranda extends BaseController
 {
-    /** Tanpa sesi dan tanpa data: hanya pengalihan. */
-    public function akar(): ResponseInterface
-    {
-        return redirect()->to('/beranda');
-    }
-
     public function index(): ResponseInterface
     {
         $akademik = $this->akademik();

@@ -1,2 +1,6 @@
+# LokaKode: hanya halaman depan yang publik; semua halaman lain berada di belakang sesi.
 User-agent: *
-Disallow: 
+Allow: /$
+Allow: /merek/
+Allow: /aset/
+Disallow: /
