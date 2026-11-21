@@ -3,6 +3,8 @@
 // نصوص البوابة (SPEC.md §15). يُستبدل {email} بعنوان الاتصال من CONTACT_EMAIL
 // في العرض publik/teks؛ العنوان لا يُكتب هنا أبدًا.
 return [
+    // Tanggal halaman privasi dan ketentuan sesudah disunting lewat /admin/teks (KONTRAK.md §15).
+    'diperbaruiPada' => 'آخر تحديث: {0}',
     'nav' => [
         'tentang'   => 'عن المنصة',
         'kontak'    => 'اتصل بنا',

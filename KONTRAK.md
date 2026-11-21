@@ -122,7 +122,7 @@ The CSRF token is not regenerated after use and lives 12 hours, so a page that s
 
 ### Public routes (since stage 11, `SPEC.md` §15)
 
-Routes that need no session. They never read the session, the identity database or the app's own database, and their content is the same for everybody:
+Routes that need no session. They never read the session or the identity database, and their content is the same for everybody. The only data a public page reads is the Portal's own text overrides (§15); LokaKode's landing reads no database at all:
 
 | App | Routes |
 |---|---|
@@ -627,3 +627,30 @@ Common top level: `{ "aplikasi": "auth|lokakode", "dibuat": "<ISO 8601 UTC>", "p
 | LokaKode | `pendaftaran[]` (`mata_kuliah, kelas, tahun_ajaran, status`), `mengajar[]` (`mata_kuliah, kelas, tahun_ajaran`), `mengampu[]` (`mata_kuliah`), `nilai_pertemuan[]`, `nilai_soal[]`, `kiriman[]` (with the user's own `source`, verdict and score), `draf[]`, `peristiwa_integritas[]` (`created_at, kind`), `preferensi_tampilan` |
 
 Never in any export: `password_hash`, `password_history`, `mfa_secret_enc`, backup codes, `token_hash` or any session value, the `detail` of an audit row, `problem_instances.tests` or anything else of hidden tests, generators and reference solutions, and any row that belongs to another person.
+
+## 15. Portal text overrides (stage 11b)
+
+The wording of the Portal's public pages can be changed by a superadmin without a deploy. The language files (`apps/portal/app/Language/{id,en,ar}/Portal.php`) stay the defaults and stay in Git; an override replaces the text of **one page in one language**.
+
+```
+portal.teks       (halaman VARCHAR(20), bahasa ENUM('id','en','ar'), isi MEDIUMTEXT, updated_by CHAR(36), updated_at DATETIME)   PK(halaman, bahasa)
+portal.audit_log  (id BIGINT PK, actor_id CHAR(36), action VARCHAR(60), halaman, bahasa, sebelum MEDIUMTEXT NULL, sesudah MEDIUMTEXT NULL, ip, user_agent, created_at)
+```
+
+- `halaman` is one of `depan`, `aplikasi` (the three app descriptions, also shown on `/beranda`), `tentang`, `kontak`, `privasi`, `ketentuan`. Navigation labels and the pages behind a session are not editable.
+- `isi`, `sebelum` and `sesudah` hold JSON as text (a MySQL `JSON` column would reorder the keys, and their order is the order on the page).
+- `isi` has exactly the shape of that page's array in the language file: the same keys, the same number of sections (`bagian`); only the texts and the number of paragraphs (`pembuka`, `isi`, `cara`) and bullets (`butir`) may differ. `App\Libraries\Teks::dariForm` builds it from the form and refuses anything else, so a stored row can always be rendered by the same view as the default.
+- Reading (`App\Libraries\Teks::ambil`): the row when there is one, else the language file. When the `portal` database cannot be reached the language file is used and `teks.db_unavailable` is logged — a public page never fails because of this table.
+- Every text is escaped when shown. HTML typed into the editor appears as text. `{email}` is replaced by `CONTACT_EMAIL` on the text pages, as in the defaults.
+- "Terakhir diperbarui" on `privasi` and `ketentuan` is the day (Asia/Jakarta) the override of that language was saved; without an override it is the date in the language file.
+- Routes, all behind `masuk:superadmin` (any other role 403, no session → login), `POST` with the CSRF field `csrf`:
+
+| Route | Does |
+|---|---|
+| `GET /admin/teks` | the six pages × three languages: default or changed, by whom and when, and whether a translation is older than the Indonesian text |
+| `GET /admin/teks/{halaman}/{bahasa}` | the form |
+| `POST /admin/teks/{halaman}/{bahasa}` | field `aksi` = `pratinjau` (shows the page as it would look, saves nothing) or `simpan` (live at once) |
+| `POST /admin/teks/{halaman}/{bahasa}/bawaan` | deletes the override: back to the language file |
+| `GET /admin/teks/riwayat` | the last 200 rows of the Portal's `audit_log` with the text before and after |
+
+- `simpan` and `bawaan` write `teks.diubah` / `teks.dikembalikan` to `portal.audit_log` in the same transaction, with the whole text before and after. The table is append-only: no route changes or deletes a row. An unchanged save writes nothing.

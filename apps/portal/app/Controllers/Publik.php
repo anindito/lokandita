@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Libraries\Aplikasi;
+use App\Libraries\Teks;
 use CodeIgniter\HTTP\ResponseInterface;
 use Lokandita\Auth\Publik as HalamanPublik;
 
 /**
- * Halaman publik Portal (SPEC.md §15). Tidak membaca sesi maupun basis data:
- * isinya sama untuk semua orang dan boleh diindeks mesin pencari.
+ * Halaman publik Portal (SPEC.md §15). Tidak membaca sesi: isinya sama untuk semua orang
+ * dan boleh diindeks mesin pencari. Teksnya dari App\Libraries\Teks — berkas bahasa, atau
+ * pengganti yang ditulis superadmin (KONTRAK.md §15).
  */
 final class Publik extends BaseController
 {
@@ -25,7 +27,12 @@ final class Publik extends BaseController
             return $alih;
         }
 
-        return $this->tampil('publik/depan', lang('Portal.depan.judul'), lang('Portal.depan.deskripsi'), [
+        $bahasa = $this->request->getLocale();
+        $t      = Teks::ambil('depan', $bahasa);
+
+        return $this->tampil('publik/depan', $t['judul'], $t['deskripsi'], [
+            't'        => $t,
+            'ket'      => Teks::ambil('aplikasi', $bahasa),
             'aplikasi' => Aplikasi::daftar(),
         ]);
     }
@@ -81,9 +88,9 @@ final class Publik extends BaseController
 
     private function teks(string $kunci): ResponseInterface
     {
-        return $this->tampil('publik/teks', lang("Portal.{$kunci}.judul"), lang("Portal.{$kunci}.deskripsi"), [
-            'halaman' => lang("Portal.{$kunci}"),
-        ]);
+        $halaman = Teks::ambil($kunci, $this->request->getLocale());
+
+        return $this->tampil('publik/teks', $halaman['judul'], $halaman['deskripsi'], ['halaman' => $halaman]);
     }
 
     /**

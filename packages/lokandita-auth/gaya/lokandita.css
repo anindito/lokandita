@@ -109,6 +109,12 @@
   [dir=rtl] .prosa { margin-inline: 0; }
   .prosa h1 { font-size: 1.75rem; margin: 1rem 0 .5rem; }
   .prosa h2 { font-size: 1.2rem; margin: 1.75rem 0 .35rem; }
+  /* Penyuntingan teks Portal (/admin/teks): pratinjau berbingkai, satu kelompok isian per bagian. */
+  .pratinjau { margin: 1rem 0; padding: 0 1rem 1rem; border: 2px dashed var(--emas); border-radius: .75rem; }
+  .pratinjau-label { color: var(--teks-redup); }
+  .bagian-sunting { margin: 1.25rem 0 0; padding: 0 1rem 1rem; border: 1px solid var(--garis); border-radius: .5rem; }
+  .bagian-sunting legend { padding: 0 .4rem; font-weight: 700; }
+  .riwayat-teks { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: .9rem; margin: .5rem 0 0; }
   .tanya summary { cursor: pointer; font-weight: 600; padding: .5rem 0; }
   .tanya { border-bottom: 1px solid var(--garis); }
 

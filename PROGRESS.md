@@ -796,3 +796,26 @@ After the tag, 2026-11-21 — hero centred again for Indonesian and English (the
 - The commit that holds this line differs from `a94bfb0` only in this file and was deployed right after it at the owner's word ("do no 3"), so that `/healthz` reports `HEAD`; the output of that deploy and its smoke run is in the session.
 - The second agent process the owner asked to close (pid 1911501) had already ended by itself; one `claude` process remained.
 
+## Stage 11b — text editor for the Portal's public pages (2026-11-21, after `tahap-11`)
+
+The owner reported on 2026-11-21 that he has seen the centred Indonesian and English pages of the last correction, and asked for "a page where I can edit the wordings of the portal in superadmin mode". Not in `SPEC.md`; plan presented and approved the same day ("approve", recommended options). Decisions: `DECISIONS.md`, 2026-11-21. Contract: `KONTRAK.md` §15.
+
+Built (Portal only):
+
+- `/admin/teks` (superadmin only; a card on the superadmin's Portal beranda): six pages × three languages — landing, app card descriptions, Tentang, Kontak, Privasi, Ketentuan. Per page and language: a form in the shape of the page, **Pratinjau** (the real page partial, nothing saved), **Simpan dan tayangkan** (live at once), **Kembalikan ke teks bawaan**. `/admin/teks/riwayat`: every change with the text before and after.
+- The language files stay the defaults. Overrides live in the Portal's own database: tables `teks` and `audit_log` (the first tables of the `portal` schema). Public pages read through `App\Libraries\Teks`; when the table cannot be read they show the default.
+- A translation older than the changed Indonesian text is flagged in the list. "Terakhir diperbarui" on Privasi and Ketentuan becomes the day of the save.
+
+Verified by the agent (output in the session):
+
+- `infra/tes.sh portal` → `OK (62 tests, 2488 assertions)`, with real MySQL (`portal_test`), real `auth-tes` and `lokakode-tes`, and the browser tests of stage 11. New `TeksAdminTest` (7 tests): dosen and mahasiswa get 403 on every page and endpoint, also with a valid payload, and nothing is stored; no session → login; preview stores nothing and the public page stays; a save is on the public page at once, other pages and languages unchanged; `<script>` typed into a paragraph is shown as text; `{email}` becomes the contact address; empty or over-long fields, a missing section and control characters are refused with 422; unknown keys and an extra section are ignored; restore to default; one audit row per real change and none for an unchanged save; no route changes the history; the date follows the save in three languages (Asia/Jakarta); with the table renamed away the public pages answer 200 with the default text.
+
+Not verified, or weaker than it looks:
+
+- **The editor has not been seen in a browser** — not by the agent, not by the owner: the long forms (Privasi has eight sections), the preview frame, the Arabic form.
+- `infra/tes.sh auth` and `infra/tes.sh lokakode` were **not** rerun for this change; of the shared code only the stylesheet gained six rules. `infra/tes.sh lokakode` was last run before the hero was centred again (`OK (236 tests, 10014 assertions)`).
+- A save is live at once and there is no second person to approve it. A mistake is undone by saving again or restoring the default; the old text is in the history.
+- English and Arabic texts of the editor itself were written by the agent and not reviewed.
+- Privacy and terms can now be changed without a commit: Git no longer shows what the public pages say. The database (and its daily backup) and `/admin/teks/riwayat` do.
+- The fallback was tested by renaming the table, not by stopping MySQL.
+

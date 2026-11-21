@@ -3,6 +3,8 @@
 // Portal texts (SPEC.md §15). {email} is replaced by the contact address from CONTACT_EMAIL
 // in the view publik/teks; the address is never written here.
 return [
+    // Tanggal halaman privasi dan ketentuan sesudah disunting lewat /admin/teks (KONTRAK.md §15).
+    'diperbaruiPada' => 'Last updated: {0}',
     'nav' => [
         'tentang'   => 'About',
         'kontak'    => 'Contact',

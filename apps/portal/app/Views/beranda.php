@@ -4,7 +4,7 @@
 <p class="redup"><?= lang('Lokandita.peran.' . $identitas->globalRole) ?> · <span class="ltr"><?= esc($identitas->nomorInduk) ?></span></p>
 
 <h2><?= lang('Portal.beranda.aplikasi') ?></h2>
-<?php if ($kartu === [] && $admin === null): ?>
+<?php if ($kartu === [] && $admin === null && ! $sunting): ?>
     <div class="kartu">
         <p><?= lang('Portal.beranda.kosong') ?>
             <a href="mailto:<?= esc($kontak) ?>"><?= esc($kontak) ?></a></p>
@@ -16,13 +16,13 @@
                 <?php if ($a['url'] !== null): ?>
                     <a class="kartu-aplikasi" href="<?= esc($a['url']) ?>/beranda" data-aplikasi="<?= esc($kode) ?>">
                         <strong><?= esc($a['nama']) ?></strong>
-                        <span><?= lang("Portal.aplikasi.{$kode}") ?></span>
+                        <span><?= esc($ket[$kode]) ?></span>
                     </a>
                 <?php else: ?>
                     <div class="kartu-aplikasi kartu-aplikasi-segera" data-aplikasi="<?= esc($kode) ?>">
                         <strong><?= esc($a['nama']) ?></strong>
                         <span class="lencana"><?= lang('Lokandita.segera') ?></span>
-                        <span><?= lang("Portal.aplikasi.{$kode}") ?></span>
+                        <span><?= esc($ket[$kode]) ?></span>
                     </div>
                 <?php endif ?>
             </li>
@@ -32,6 +32,14 @@
                 <a class="kartu-aplikasi" href="<?= esc($admin) ?>" data-aplikasi="auth">
                     <strong>LokaAuth</strong>
                     <span><?= lang('Portal.beranda.admin') ?></span>
+                </a>
+            </li>
+        <?php endif ?>
+        <?php if ($sunting): ?>
+            <li>
+                <a class="kartu-aplikasi" href="/admin/teks" data-aplikasi="teks">
+                    <strong><?= lang('Sunting.judul') ?></strong>
+                    <span><?= lang('Sunting.kartu') ?></span>
                 </a>
             </li>
         <?php endif ?>

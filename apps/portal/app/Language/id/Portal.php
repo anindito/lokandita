@@ -3,6 +3,8 @@
 // Teks Portal Lokandita (SPEC.md §15). {email} diganti alamat kontak dari CONTACT_EMAIL
 // oleh tampilan publik/teks; alamat itu tidak pernah ditulis di sini.
 return [
+    // Tanggal halaman privasi dan ketentuan sesudah disunting lewat /admin/teks (KONTRAK.md §15).
+    'diperbaruiPada' => 'Terakhir diperbarui: {0}',
     'nav' => [
         'tentang'   => 'Tentang',
         'kontak'    => 'Kontak',

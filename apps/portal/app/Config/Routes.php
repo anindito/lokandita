@@ -28,3 +28,12 @@ $routes->group('', ['filter' => 'masuk'], static function (RouteCollection $rout
     $routes->get('beranda', 'Beranda::index');
     $routes->get('data-saya', 'Beranda::dataSaya');
 });
+
+// Penyuntingan teks halaman publik (KONTRAK.md §15): superadmin saja. Peran diperiksa filter.
+$routes->group('admin/teks', ['filter' => 'masuk:superadmin'], static function (RouteCollection $routes): void {
+    $routes->get('/', 'Admin\Teks::index');
+    $routes->get('riwayat', 'Admin\Teks::riwayat');
+    $routes->get('(:segment)/(:segment)', 'Admin\Teks::sunting/$1/$2');
+    $routes->post('(:segment)/(:segment)', 'Admin\Teks::kirim/$1/$2');
+    $routes->post('(:segment)/(:segment)/bawaan', 'Admin\Teks::bawaan/$1/$2');
+});
