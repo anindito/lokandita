@@ -47,4 +47,5 @@ return [
     ],
     'kontak'      => 'Questions and problem reports:',
     'kePortal'    => 'About Lokandita, privacy and terms of use',
+    'logoAlt'     => 'LokaKode logo',
 ];

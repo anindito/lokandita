@@ -34,6 +34,8 @@ return [
     'privasi'          => 'Kebijakan privasi',
     'ketentuan'        => 'Ketentuan penggunaan',
     'segera'           => 'Segera',
+    // Kredit foto di kaki halaman yang menampilkan foto (halaman depan Portal).
+    'kreditFoto'       => 'Foto: {0}',
     'dataSaya'         => [
         'judul'         => 'Data saya',
         'penjelasan'    => 'Anda dapat mengunduh salinan data tentang diri Anda yang disimpan {0}. Berkasnya berisi:',

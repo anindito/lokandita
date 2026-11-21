@@ -5,9 +5,13 @@
 return [
     // Tanggal halaman privasi dan ketentuan sesudah disunting lewat /admin/teks (KONTRAK.md §15).
     'diperbaruiPada' => 'Terakhir diperbarui: {0}',
+    // Tautan pada kartu aplikasi, dan teks alternatif foto pembuka bawaan (docs/branding/LISENSI.md).
+    'buka' => 'Buka',
+    'foto' => [
+        'altBawaan' => 'Deretan komputer dan papan ketik di atas meja panjang sebuah laboratorium komputer.',
+    ],
     'nav' => [
-        'tentang'   => 'Tentang',
-        'kontak'    => 'Kontak',
+        'tentang'   => 'Tentang & kontak',
         'privasi'   => 'Privasi',
         'ketentuan' => 'Ketentuan',
     ],
@@ -77,15 +81,13 @@ return [
                     'Lokandita dikelola oleh pengelola Lokandita. Pertanyaan dan laporan dapat dikirim ke {email}.',
                 ],
             ],
-        ],
-    ],
-    'kontak' => [
-        'judul'     => 'Kontak',
-        'deskripsi' => 'Cara menghubungi pengelola Lokandita dan ke mana meminta bantuan soal akun.',
-        'pembuka'   => [
-            'Pengelola Lokandita dapat dihubungi lewat surel: {email}.',
-        ],
-        'bagian'    => [
+            // Bagian-bagian berikut dahulu halaman Kontak; sejak 2026-11-21 menjadi bagian halaman Tentang.
+            [
+                'judul' => 'Kontak',
+                'isi'   => [
+                    'Pengelola Lokandita dapat dihubungi lewat surel: {email}.',
+                ],
+            ],
             [
                 'judul' => 'Lupa kata sandi',
                 'isi'   => [

@@ -14,7 +14,6 @@ final class PublikTest extends PortalCase
     private const HALAMAN = [
         '/'          => 'Satu akun untuk semua aplikasi belajar Anda',
         '/tentang'   => 'Tentang Lokandita',
-        '/kontak'    => 'Kontak',
         '/privasi'   => 'Kebijakan privasi',
         '/ketentuan' => 'Ketentuan penggunaan',
     ];
@@ -35,9 +34,10 @@ final class PublikTest extends PortalCase
             $this->assertMatchesRegularExpression('/<meta name="description" content="[^"]{40,}">/', $r->body, $jalur);
             // Tombol Masuk, navigasi, dan pilihan bahasa yang kembali ke halaman ini.
             $this->assertStringContainsString('<a class="tombol" href="/beranda" rel="nofollow">Masuk</a>', $r->body, $jalur);
-            foreach (['/tentang', '/kontak', '/privasi', '/ketentuan'] as $nav) {
+            foreach (['/tentang', '/privasi', '/ketentuan'] as $nav) {
                 $this->assertStringContainsString('href="' . $nav . '"', $r->body, $jalur);
             }
+            $this->assertStringNotContainsString('href="/kontak"', $r->body, "{$jalur}: Kontak bukan halaman sendiri lagi");
             $this->assertStringContainsString('href="/bahasa/en?kembali=' . rawurlencode($jalur) . '"', $r->body, $jalur);
             // Tanpa sesi: tidak ada menu akun, tidak ada cookie sesi.
             $this->assertStringNotContainsString('data-menu-akun', $r->body, $jalur);
@@ -53,11 +53,47 @@ final class PublikTest extends PortalCase
         }
     }
 
+    /**
+     * Halaman Kontak dihapus dan isinya menjadi bagian halaman Tentang (keputusan pemilik
+     * 2026-11-21). Alamat lama /kontak dialihkan untuk selamanya ke /tentang.
+     */
+    public function testIsiKontakAdaDiHalamanTentang(): void
+    {
+        $r = $this->tamu()->get('/kontak');
+        $this->assertSame(301, $r->status);
+        $this->assertSame('https://lokandita.com/tentang', $r->header('Location'));
+
+        $r = $this->tamu()->get('/tentang');
+        $this->assertSame(1, preg_match_all('/<h1>/', $r->body), 'satu judul utama');
+        $urut = [];
+        foreach (['<h1>Tentang Lokandita</h1>', '<h2>Pengelola</h2>', '<h2>Kontak</h2>', '<h2>Lupa kata sandi</h2>', '<h2>Belum punya akun</h2>', '<h2>Melaporkan masalah</h2>'] as $judul) {
+            $letak = strpos($r->body, $judul);
+            $this->assertNotFalse($letak, $judul);
+            $urut[] = $letak;
+        }
+        $sudah = $urut;
+        sort($sudah);
+        $this->assertSame($sudah, $urut, 'isi Kontak menyusul isi Tentang, dalam urutan semula');
+        $surel = (string) getenv('CONTACT_EMAIL');
+        $this->assertStringContainsString('dihubungi lewat surel: <a href="mailto:' . $surel . '">' . $surel . '</a>', $r->body);
+        // Navigasi: satu butir; halaman depan menaut ke halaman itu.
+        $this->assertStringContainsString('<a href="/tentang" aria-current="page">Tentang &amp; kontak</a>', $r->body);
+        $this->assertStringContainsString('<a href="/tentang">Tentang &amp; kontak</a>.', $this->tamu()->get('/')->body);
+        foreach (['en' => ['Contact', 'Forgotten password'], 'ar' => ['اتصل بنا', 'نسيت كلمة المرور']] as $b => $judul) {
+            $tamu = $this->tamu();
+            $tamu->get('/bahasa/' . $b);
+            $isi = $tamu->get('/tentang')->body;
+            foreach ($judul as $j) {
+                $this->assertStringContainsString('<h2>' . $j . '</h2>', $isi, $b);
+            }
+        }
+    }
+
     public function testTigaBahasa(): void
     {
         $harap = [
-            'en' => ['<html lang="en" dir="ltr">', ['/' => 'One account for all your learning applications', '/privasi' => 'Privacy policy', '/ketentuan' => 'Terms of use', '/tentang' => 'About Lokandita', '/kontak' => 'Contact']],
-            'ar' => ['<html lang="ar" dir="rtl">', ['/' => 'حساب واحد لكل تطبيقاتك التعليمية', '/privasi' => 'سياسة الخصوصية', '/ketentuan' => 'شروط الاستخدام', '/tentang' => 'عن Lokandita', '/kontak' => 'اتصل بنا']],
+            'en' => ['<html lang="en" dir="ltr">', ['/' => 'One account for all your learning applications', '/privasi' => 'Privacy policy', '/ketentuan' => 'Terms of use', '/tentang' => 'About Lokandita']],
+            'ar' => ['<html lang="ar" dir="rtl">', ['/' => 'حساب واحد لكل تطبيقاتك التعليمية', '/privasi' => 'سياسة الخصوصية', '/ketentuan' => 'شروط الاستخدام', '/tentang' => 'عن Lokandita']],
         ];
         foreach ($harap as $bahasa => [$html, $halaman]) {
             $tamu = $this->tamu();
@@ -82,7 +118,7 @@ final class PublikTest extends PortalCase
         $this->assertStringContainsString('<a class="kartu-aplikasi" href="https://lokakode.lokandita.com/">', $r->body);
         $this->assertSame(1, preg_match_all('/<a class="kartu-aplikasi"/', $r->body));
         $this->assertSame(2, preg_match_all('/<div class="kartu-aplikasi kartu-aplikasi-segera">/', $r->body));
-        $this->assertSame(2, preg_match_all('/<span class="lencana">Segera<\/span>/', $r->body));
+        $this->assertSame(2, preg_match_all('/<span class="lencana lencana-segera">Segera<\/span>/', $r->body));
         foreach (['LokaUjian', 'LokaSiber'] as $nama) {
             $this->assertStringContainsString('<strong>' . $nama . '</strong>', $r->body);
             $this->assertDoesNotMatchRegularExpression('/<a[^>]*>\s*<strong>' . $nama . '/', $r->body, "{$nama} tidak boleh berupa tautan");
@@ -127,6 +163,15 @@ final class PublikTest extends PortalCase
                     "{$jalur}: aset dari host lain: {$alamat}",
                 );
             }
+            // srcset (foto pembuka): setiap alamatnya juga dari host sendiri.
+            preg_match_all('#\bsrcset="([^"]+)"#i', $r->body, $s);
+            foreach ($s[1] as $daftar) {
+                foreach (explode(',', $daftar) as $butir) {
+                    $alamat = trim(explode(' ', trim($butir))[0]);
+                    $this->assertTrue(str_starts_with($alamat, '/') && ! str_starts_with($alamat, '//'), "{$jalur}: srcset dari host lain: {$alamat}");
+                }
+            }
+            $this->assertStringNotContainsString(' style="', $r->body, "{$jalur}: gaya sebaris");
             $this->assertStringNotContainsString('<style', $r->body, $jalur);
             $this->assertDoesNotMatchRegularExpression('/<script(?![^>]*\bsrc=)/', $r->body, "{$jalur}: skrip sebaris");
         }
@@ -141,7 +186,7 @@ final class PublikTest extends PortalCase
         $this->assertSame(200, $r->status);
         $this->assertStringContainsString('xml', (string) $r->header('Content-Type'));
         preg_match_all('#<loc>([^<]+)</loc>#', $r->body, $m);
-        $this->assertSame(['https://lokandita.com/', 'https://lokandita.com/tentang', 'https://lokandita.com/kontak', 'https://lokandita.com/privasi', 'https://lokandita.com/ketentuan'], $m[1]);
+        $this->assertSame(['https://lokandita.com/', 'https://lokandita.com/tentang', 'https://lokandita.com/privasi', 'https://lokandita.com/ketentuan'], $m[1]);
 
         $r = $this->tamu()->get('/robots.txt');
         $this->assertSame(200, $r->status);

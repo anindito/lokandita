@@ -33,6 +33,8 @@ return [
     'privasi'          => 'Privacy policy',
     'ketentuan'        => 'Terms of use',
     'segera'           => 'Coming soon',
+    // Kredit foto di kaki halaman yang menampilkan foto (halaman depan Portal).
+    'kreditFoto'       => 'Photo: {0}',
     'dataSaya'         => [
         'judul'         => 'My data',
         'penjelasan'    => 'You can download a copy of the data about you that {0} stores. The file holds:',

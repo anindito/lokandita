@@ -1,8 +1,10 @@
 .git
-docs
+docs/**
 judge
 **/.env
 **/vendor
 **/writable
 **/node_modules
 infra/caddy/bendera
+# Foto pembuka bawaan Portal ikut ke dalam build (infra/docker/app.Dockerfile, tahap "foto").
+!docs/branding/foto/hero-portal.jpg

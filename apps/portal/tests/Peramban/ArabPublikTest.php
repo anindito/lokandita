@@ -15,8 +15,10 @@ use PHPUnit\Framework\TestCase;
  *   - kepala Arab mulai dari tepi kanan: merek di kanan, tombol dan bahasa di kiri — cermin
  *     kepala Indonesia;
  *   - kolom isi sama lebar dan sama letaknya, dicerminkan;
- *   - pembuka Arab (judul, paragraf, tombol, catatan) rata kanan dan mulai di tepi kanan kolom
- *     isi; pembuka Indonesia dan Inggris tetap DIPUSATKAN;
+ *   - pembuka terbelah dua (keputusan pemilik 2026-11-21 malam, menggantikan "dipusatkan"):
+ *     teksnya (judul, paragraf, tombol, catatan) mulai di tepi AWAL kolom isi — kiri untuk
+ *     Indonesia dan Inggris, kanan untuk Arab — dan gambarnya di sisi seberang; versi Arab
+ *     adalah cermin versi Indonesia;
  *   - kolom teks Arab mulai di tepi kanan kolom isi; kolom teks Indonesia di tengah.
  *
  * Tes ini mengukur kotak elemen yang benar-benar digambar peramban; ia tidak menilai
@@ -49,7 +51,8 @@ final class ArabPublikTest extends TestCase
                 merek: kotak(document.querySelector('.kepala .merek')),
                 aksi: kotak(document.querySelector('.kepala-publik')),
                 isi: kotak(document.querySelector('main.isi')),
-                pembuka: semua('.pembuka > *'),
+                pembuka: semua('.pembuka-teks > *'),
+                gambar: kotak(document.querySelector('.pembuka-foto, .pembuka-logo')),
                 prosa: kotak(document.querySelector('.prosa')),
                 prosaAnak: semua('.prosa > h1, .prosa > h2, .prosa > p'),
                 kartu: kotak(document.querySelector('.isi-sempit')),
@@ -65,7 +68,6 @@ final class ArabPublikTest extends TestCase
     {
         yield 'portal-depan' => [self::PORTAL, '/'];
         yield 'portal-tentang' => [self::PORTAL, '/tentang'];
-        yield 'portal-kontak' => [self::PORTAL, '/kontak'];
         yield 'portal-privasi' => [self::PORTAL, '/privasi'];
         yield 'portal-ketentuan' => [self::PORTAL, '/ketentuan'];
         yield 'lokakode-depan' => [self::KODE, '/'];
@@ -137,10 +139,17 @@ final class ArabPublikTest extends TestCase
             $this->assertContains($k['rata'], ['right', 'start'], "{$apa} harus rata kanan, ternyata {$k['rata']}");
             $this->assertSame('rtl', $k['arah'], $apa);
             $this->assertDekat($ar['isi']['isiKanan'], $k['kanan'], "{$apa} harus mulai di tepi KANAN kolom isi");
-            // Versi Indonesia (dan Inggris) dipusatkan: teksnya rata tengah dan kotaknya di tengah kolom isi.
+            // Versi Indonesia: rata kiri dari tepi kiri kolom isi — dan versi Arab adalah cerminnya.
             $t = $id['pembuka'][$i];
-            $this->assertSame('center', $t['rata'], "{$apa} (id) harus rata tengah");
-            $this->assertDekat(($id['isi']['isiKiri'] + $id['isi']['isiKanan']) / 2, ($t['kiri'] + $t['kanan']) / 2, "{$apa} (id) harus di tengah kolom isi");
+            $this->assertContains($t['rata'], ['left', 'start'], "{$apa} (id) harus rata kiri, ternyata {$t['rata']}");
+            $this->assertDekat($id['isi']['isiKiri'], $t['kiri'], "{$apa} (id) harus mulai di tepi KIRI kolom isi");
+        }
+        // Gambar pembuka di sisi seberang teks: kanan untuk Indonesia, kiri untuk Arab, sama lebar.
+        if ($ar['gambar'] !== null) {
+            $this->assertGreaterThan($id['pembuka'][0]['kanan'] - 1, $id['gambar']['kiri'], "{$nama}: (id) gambar di kanan teks");
+            $this->assertLessThan($ar['pembuka'][0]['kiri'] + 1, $ar['gambar']['kanan'], "{$nama}: (ar) gambar di KIRI teks");
+            $this->assertDekat($id['gambar']['lebar'], $ar['gambar']['lebar'], "{$nama}: lebar gambar");
+            $this->assertDekat($Lid - $id['gambar']['kanan'], $ar['gambar']['kiri'], "{$nama}: letak gambar (cermin)");
         }
 
         // Halaman teks: kolom prosa dicerminkan dan isinya rata kanan dari tepi kanannya.
@@ -161,17 +170,18 @@ final class ArabPublikTest extends TestCase
     }
 
     /**
-     * Bahasa Inggris mengikuti Indonesia: pembuka dipusatkan.
+     * Bahasa Inggris mengikuti Indonesia: teks pembuka mulai di tepi kiri, gambar di kanannya.
      */
-    public function testPembukaInggrisDipusatkan(): void
+    public function testPembukaInggrisSepertiIndonesia(): void
     {
         foreach ([[self::PORTAL, 'portal-depan-en'], [self::KODE, 'lokakode-depan-en']] as [$asal, $nama]) {
             $en = $this->ukur(new Peramban($asal), 'en', '/', 1280, $nama);
             $this->assertGreaterThanOrEqual(4, count($en['pembuka']), $nama);
             foreach ($en['pembuka'] as $i => $t) {
-                $this->assertSame('center', $t['rata'], "{$nama}: pembuka anak ke-" . ($i + 1));
-                $this->assertDekat(($en['isi']['isiKiri'] + $en['isi']['isiKanan']) / 2, ($t['kiri'] + $t['kanan']) / 2, "{$nama}: pembuka anak ke-" . ($i + 1) . ' di tengah kolom isi');
+                $this->assertContains($t['rata'], ['left', 'start'], "{$nama}: pembuka anak ke-" . ($i + 1));
+                $this->assertDekat($en['isi']['isiKiri'], $t['kiri'], "{$nama}: pembuka anak ke-" . ($i + 1) . ' mulai di tepi kiri kolom isi');
             }
+            $this->assertGreaterThan($en['pembuka'][0]['kanan'] - 1, $en['gambar']['kiri'], "{$nama}: gambar di kanan teks");
         }
     }
 

@@ -45,6 +45,16 @@ for a in "${APLIKASI[@]}"; do
 	if [ "$(docker exec "$a" id -u)" != "0" ]; then ok "$a berjalan bukan sebagai root (uid $(docker exec "$a" id -u))"; else tidak "$a berjalan sebagai root"; fi
 done
 
+echo "A2. volume foto Portal (§16)"
+volume() { docker inspect -f '{{range .Mounts}}{{if eq .Destination "/srv/media"}}{{.Name}}{{end}}{{end}}' "$1"; }
+sama "portal: /srv/media adalah volume" "$(volume portal)" "lokandita_portal_media"
+sama "auth tanpa volume foto" "$(volume auth)" ""
+sama "lokakode tanpa volume foto" "$(volume lokakode)" ""
+sama "portal: www-data bisa menulis ke /srv/media/hero" "$(docker exec portal sh -c 'test -w /srv/media/hero && echo ya || echo tidak')" "ya"
+# Berkas PHP yang ditaruh di volume tidak dijalankan dan tidak disajikan; berkasnya langsung dihapus lagi.
+sama "portal: /media/ tidak menjalankan dan tidak menyajikan PHP" "$(docker exec portal sh -c 'f=/srv/media/hero/uji-infra.php; echo "<?php echo 1+1;" > "$f"; curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/media/hero/uji-infra.php; rm -f "$f"')" "403"
+sama "portal: /media/ tanpa daftar isi" "$(docker exec portal curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/media/hero/)" "403"
+
 echo "B. /healthz dan commit (§11)"
 for a in "${APLIKASI[@]}"; do
 	sama "$a /healthz" "$(docker exec "$a" curl -fsS --max-time 3 http://127.0.0.1:8080/healthz 2>&1 || true)" "{\"app\":\"$a\",\"commit\":\"$head\"}"

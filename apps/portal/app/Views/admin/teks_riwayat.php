@@ -18,8 +18,10 @@ use App\Controllers\Admin\Teks;
     <article class="kartu" data-riwayat="<?= esc($b['action']) ?>">
         <p>
             <strong><?= lang('Sunting.halaman.' . $b['halaman']) ?></strong> ·
-            <span lang="<?= esc($b['bahasa']) ?>"><?= lang('Lokandita.bahasa' . ucfirst((string) $b['bahasa'])) ?></span> ·
-            <?= lang('Sunting.riwayat.' . ($b['action'] === 'teks.dikembalikan' ? 'dikembalikan' : 'diubah')) ?> ·
+            <?php if ($b['bahasa'] !== null): ?>
+                <span lang="<?= esc($b['bahasa']) ?>"><?= lang('Lokandita.bahasa' . ucfirst((string) $b['bahasa'])) ?></span> ·
+            <?php endif ?>
+            <?= lang('Sunting.riwayat.aksi.' . str_replace('.', '_', (string) $b['action'])) ?> ·
             <?= esc($orang[$b['actor_id']]['nama'] ?? '—') ?> ·
             <span class="ltr"><?= esc(Teks::wib($b['created_at'])) ?></span>
         </p>

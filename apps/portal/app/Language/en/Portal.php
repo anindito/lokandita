@@ -5,9 +5,13 @@
 return [
     // Tanggal halaman privasi dan ketentuan sesudah disunting lewat /admin/teks (KONTRAK.md §15).
     'diperbaruiPada' => 'Last updated: {0}',
+    // Tautan pada kartu aplikasi, dan teks alternatif foto pembuka bawaan (docs/branding/LISENSI.md).
+    'buka' => 'Open',
+    'foto' => [
+        'altBawaan' => 'A row of computers and keyboards on a long desk in a computer lab.',
+    ],
     'nav' => [
-        'tentang'   => 'About',
-        'kontak'    => 'Contact',
+        'tentang'   => 'About & contact',
         'privasi'   => 'Privacy',
         'ketentuan' => 'Terms',
     ],
@@ -77,15 +81,13 @@ return [
                     'Lokandita is run by the Lokandita administrator. Questions and reports can be sent to {email}.',
                 ],
             ],
-        ],
-    ],
-    'kontak' => [
-        'judul'     => 'Contact',
-        'deskripsi' => 'How to reach the Lokandita administrator and where to ask for help with an account.',
-        'pembuka'   => [
-            'The Lokandita administrator can be reached by e-mail: {email}.',
-        ],
-        'bagian'    => [
+            // Bagian-bagian berikut dahulu halaman Kontak; sejak 2026-11-21 menjadi bagian halaman Tentang.
+            [
+                'judul' => 'Contact',
+                'isi'   => [
+                    'The Lokandita administrator can be reached by e-mail: {email}.',
+                ],
+            ],
             [
                 'judul' => 'Forgotten password',
                 'isi'   => [

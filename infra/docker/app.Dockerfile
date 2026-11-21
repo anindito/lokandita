@@ -60,22 +60,43 @@ RUN mkdir -p /keluar/grafik \
      && test -s /keluar/grafik/chart.umd.min.js; \
     fi
 
-FROM php:8.3.36-apache
-# upload_max_filesize: unggahan soal JSON sampai 8 MB (SPEC.md §8.3); bawaan PHP hanya 2 MB.
+# Dasar bersama: PHP dengan ekstensinya dan Apache. GD dibangun dengan JPEG, WebP dan AVIF,
+# dan exif dipasang, untuk foto pembuka Portal (KONTRAK.md §16): foto dibuka menjadi piksel
+# dan ditulis ulang, orientasi EXIF-nya diterapkan dulu.
+# upload_max_filesize: unggahan soal JSON sampai 8 MB (SPEC.md §8.3) dan foto sampai 10 MB.
+# Batas PHP sengaja lebih longgar daripada batas aplikasi, supaya berkas yang sedikit terlalu
+# besar ditolak aplikasi dengan pesan yang jelas, bukan dibuang PHP tanpa penjelasan.
+FROM php:8.3.36-apache AS dasar
 RUN apt-get update \
- && apt-get install -y --no-install-recommends libicu-dev libzip-dev libpng-dev \
- && docker-php-ext-install -j"$(nproc)" intl mysqli pdo_mysql opcache zip gd \
+ && apt-get install -y --no-install-recommends libicu-dev libzip-dev libpng-dev libjpeg62-turbo-dev libwebp-dev libavif-dev \
+ && docker-php-ext-configure gd --with-jpeg --with-webp --with-avif \
+ && docker-php-ext-install -j"$(nproc)" intl mysqli pdo_mysql opcache zip gd exif \
  && pecl install redis-6.2.0 \
  && docker-php-ext-enable redis \
  && rm -rf /var/lib/apt/lists/* /tmp/pear \
  && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini" \
- && printf 'expose_php = Off\ndate.timezone = UTC\nupload_max_filesize = 9M\npost_max_size = 10M\n' > "$PHP_INI_DIR/conf.d/lokandita.ini"
+ && printf 'expose_php = Off\ndate.timezone = UTC\nupload_max_filesize = 24M\npost_max_size = 25M\n' > "$PHP_INI_DIR/conf.d/lokandita.ini" \
+ && php -r 'foreach (["JPEG Support", "WebP Support", "AVIF Support"] as $k) { gd_info()[$k] || exit(1); } function_exists("exif_read_data") || exit(1);'
 
 COPY infra/docker/apache-app.conf /etc/apache2/sites-available/000-default.conf
 RUN sed -i 's/^Listen 80$/Listen 8080/' /etc/apache2/ports.conf \
  && printf 'ServerName localhost\nServerTokens Prod\nServerSignature Off\n' > /etc/apache2/conf-available/zz-lokandita.conf \
- && a2enconf zz-lokandita >/dev/null
+ && a2enconf zz-lokandita >/dev/null \
+ && a2enmod headers >/dev/null
 
+# Foto pembuka BAWAAN Portal dan gambar Open Graph-nya dibuat di sini, saat build, dari
+# docs/branding/foto/hero-portal.jpg dan dengan kode yang sama yang mengolah foto unggahan.
+# Aplikasi lain mendapat direktori kosong.
+FROM dasar AS foto
+ARG APP
+COPY docs/branding/foto/hero-portal.jpg infra/docker/foto-bawaan.php apps/portal/app/Libraries/Gambar.php /tmp/foto/
+RUN mkdir -p /keluar \
+ && if [ "$APP" = "portal" ]; then \
+        php /tmp/foto/foto-bawaan.php /tmp/foto/Gambar.php /tmp/foto/hero-portal.jpg /keluar \
+     && test -s /keluar/hero/hero-1600.avif && test -s /keluar/hero/hero-480.jpg && test -s /keluar/og-image.jpg; \
+    fi
+
+FROM dasar
 ARG APP
 COPY apps/${APP} /srv/lokandita/apps/${APP}
 COPY --from=vendor /srv/lokandita/apps/${APP}/vendor /srv/lokandita/apps/${APP}/vendor
@@ -84,11 +105,15 @@ COPY packages/lokandita-auth/aset /srv/lokandita/apps/${APP}/public/aset
 COPY --from=gaya /keluar/lokandita.css /srv/lokandita/apps/${APP}/public/aset/lokandita.css
 COPY --from=monaco /keluar/monaco /srv/lokandita/apps/${APP}/public/monaco
 COPY --from=grafik /keluar/grafik /srv/lokandita/apps/${APP}/public/grafik
+COPY --from=foto /keluar/ /srv/lokandita/apps/${APP}/public/merek/
 COPY infra/docker/mulai.sh /usr/local/bin/mulai.sh
+# /srv/media: foto unggahan Portal (volume lokandita_portal_media, KONTRAK.md §16). Di luar
+# akar dokumen; Apache menyajikannya sebagai berkas statis dan tidak pernah menjalankan PHP di sana.
 RUN ln -s /srv/lokandita/apps/${APP} /srv/app \
  && cd /srv/app \
  && mkdir -p writable/cache writable/logs writable/session writable/uploads writable/debugbar \
  && chown -R www-data:www-data writable \
+ && mkdir -p /srv/media/hero && chown -R www-data:www-data /srv/media \
  && chmod 755 /usr/local/bin/mulai.sh
 
 ARG GIT_COMMIT

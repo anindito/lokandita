@@ -6,7 +6,8 @@
  * of ['jenis' => 'galat'|'sukses', 'teks' => string], opsional), $kelasBadan
  * (string, opsional: kelas CSS pada <body>, misalnya untuk halaman selebar layar).
  * Halaman publik (Lokandita\Auth\Publik::data): $publik (true = boleh diindeks, tombol Masuk
- * dan pilihan bahasa di kepala), $deskripsi (string), $navPublik (list of ['href', 'teks']).
+ * dan pilihan bahasa di kepala), $deskripsi (string), $navPublik (list of ['href', 'teks']),
+ * $kreditFoto (string, opsional: sumber foto yang tampil di halaman itu; ditulis di kaki).
  * Tanpa $publik halaman bertanda noindex — itu bawaannya, supaya halaman bersesi tidak
  * pernah terindeks karena lupa.
  * Bagian: 'isi'; 'kepala' (opsional: tag tambahan di <head>, misalnya skrip halaman itu).
@@ -34,9 +35,12 @@ $versi     = substr((string) getenv('LOKANDITA_COMMIT'), 0, 12);
     <meta property="og:title" content="<?= esc($judul ?? $aplikasi) ?>">
     <meta property="og:description" content="<?= esc($deskripsi ?? '') ?>">
     <meta property="og:url" content="<?= esc($kanonik) ?>">
-    <?php if (is_file(FCPATH . 'merek/og-image.png')): ?>
-    <meta property="og:image" content="<?= esc(rtrim((string) getenv('APP_URL'), '/')) ?>/merek/og-image.png">
-    <?php endif ?>
+    <?php foreach (['png', 'jpg'] as $og): ?>
+        <?php if (is_file(FCPATH . 'merek/og-image.' . $og)): ?>
+    <meta property="og:image" content="<?= esc(rtrim((string) getenv('APP_URL'), '/')) ?>/merek/og-image.<?= $og ?>">
+            <?php break ?>
+        <?php endif ?>
+    <?php endforeach ?>
 <?php else: ?>
     <meta name="robots" content="noindex, nofollow">
 <?php endif ?>
@@ -97,13 +101,16 @@ $versi     = substr((string) getenv('LOKANDITA_COMMIT'), 0, 12);
 <?php endif ?>
 
 <footer class="kaki">
-    <span><?= lang('Lokandita.kontak') ?>:
-        <a href="mailto:<?= esc((string) getenv('CONTACT_EMAIL')) ?>"><?= esc((string) getenv('CONTACT_EMAIL')) ?></a></span>
+    <span class="kaki-butir"><?= \Lokandita\Auth\Ikon::svg('mail') ?> <span><?= lang('Lokandita.kontak') ?>:
+        <a href="mailto:<?= esc((string) getenv('CONTACT_EMAIL')) ?>"><?= esc((string) getenv('CONTACT_EMAIL')) ?></a></span></span>
     <?php if ($portal !== ''): ?>
         <span class="kaki-tautan">
-            <a href="<?= esc($portal) ?>/privasi"><?= lang('Lokandita.privasi') ?></a>
-            <a href="<?= esc($portal) ?>/ketentuan"><?= lang('Lokandita.ketentuan') ?></a>
+            <a class="kaki-butir" href="<?= esc($portal) ?>/privasi"><?= \Lokandita\Auth\Ikon::svg('lock') ?> <span><?= lang('Lokandita.privasi') ?></span></a>
+            <a class="kaki-butir" href="<?= esc($portal) ?>/ketentuan"><?= \Lokandita\Auth\Ikon::svg('file-text') ?> <span><?= lang('Lokandita.ketentuan') ?></span></a>
         </span>
+    <?php endif ?>
+    <?php if (($kreditFoto ?? '') !== ''): ?>
+        <span class="kaki-butir kaki-kredit" data-kredit-foto><?= \Lokandita\Auth\Ikon::svg('camera') ?> <span><?= lang('Lokandita.kreditFoto', [esc($kreditFoto)]) ?></span></span>
     <?php endif ?>
 </footer>
 </body>

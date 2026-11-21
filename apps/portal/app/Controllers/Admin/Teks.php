@@ -6,6 +6,7 @@ namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
 use App\Libraries\Aplikasi;
+use App\Libraries\Foto;
 use App\Libraries\Teks as Pustaka;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -155,6 +156,8 @@ final class Teks extends BaseController
                 't'        => $halaman === 'depan' ? $pratinjau : Pustaka::ambil('depan', $bahasa),
                 'ket'      => $halaman === 'aplikasi' ? $pratinjau : Pustaka::ambil('aplikasi', $bahasa),
                 'aplikasi' => Aplikasi::daftar(),
+                'foto'     => Foto::tayang($bahasa),
+                'bahasa'   => $bahasa,
             ];
         }
 

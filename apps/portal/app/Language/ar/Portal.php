@@ -5,9 +5,13 @@
 return [
     // Tanggal halaman privasi dan ketentuan sesudah disunting lewat /admin/teks (KONTRAK.md §15).
     'diperbaruiPada' => 'آخر تحديث: {0}',
+    // Tautan pada kartu aplikasi, dan teks alternatif foto pembuka bawaan (docs/branding/LISENSI.md).
+    'buka' => 'افتح',
+    'foto' => [
+        'altBawaan' => 'صف من الحواسيب ولوحات المفاتيح على طاولة طويلة في مختبر حاسوب.',
+    ],
     'nav' => [
-        'tentang'   => 'عن المنصة',
-        'kontak'    => 'اتصل بنا',
+        'tentang'   => 'عن المنصة والاتصال',
         'privasi'   => 'الخصوصية',
         'ketentuan' => 'الشروط',
     ],
@@ -77,15 +81,13 @@ return [
                     'يدير Lokandita مشرف Lokandita. يمكن إرسال الأسئلة والبلاغات إلى {email}.',
                 ],
             ],
-        ],
-    ],
-    'kontak' => [
-        'judul'     => 'اتصل بنا',
-        'deskripsi' => 'كيفية التواصل مع مشرف Lokandita وأين تطلب المساعدة بخصوص الحساب.',
-        'pembuka'   => [
-            'يمكن التواصل مع مشرف Lokandita عبر البريد الإلكتروني: {email}.',
-        ],
-        'bagian'    => [
+            // Bagian-bagian berikut dahulu halaman Kontak; sejak 2026-11-21 menjadi bagian halaman Tentang.
+            [
+                'judul' => 'اتصل بنا',
+                'isi'   => [
+                    'يمكن التواصل مع مشرف Lokandita عبر البريد الإلكتروني: {email}.',
+                ],
+            ],
             [
                 'judul' => 'نسيت كلمة المرور',
                 'isi'   => [

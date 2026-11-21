@@ -114,6 +114,10 @@ services:
     container_name: portal
     env_file: ../apps/portal/.env
     networks: [edge, internal, data]
+    volumes:
+      # Foto pembuka unggahan yang sudah diolah (KONTRAK.md §16): bertahan melewati deploy,
+      # ikut infra/backup.sh. Apache menyajikannya sebagai berkas statis di /media/.
+      - portal_media:/srv/media
     <<: *app
 
 networks:
@@ -130,3 +134,4 @@ volumes:
   caddy_config:
   mysql_data:
   redis_data:
+  portal_media:

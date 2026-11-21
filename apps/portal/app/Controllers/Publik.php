@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Libraries\Aplikasi;
+use App\Libraries\Foto;
 use App\Libraries\Teks;
 use CodeIgniter\HTTP\ResponseInterface;
 use Lokandita\Auth\Publik as HalamanPublik;
@@ -16,8 +17,11 @@ use Lokandita\Auth\Publik as HalamanPublik;
  */
 final class Publik extends BaseController
 {
-    /** Halaman teks: alamat => kunci di berkas bahasa Portal. */
-    private const HALAMAN = ['tentang', 'kontak', 'privasi', 'ketentuan'];
+    /**
+     * Halaman teks. Kontak bukan halaman lagi: sejak 2026-11-21 isinya menjadi bagian
+     * halaman Tentang (keputusan pemilik), dan /kontak dialihkan ke /tentang.
+     */
+    private const HALAMAN = ['tentang', 'privasi', 'ketentuan'];
 
     public function depan(): ResponseInterface
     {
@@ -30,10 +34,16 @@ final class Publik extends BaseController
         $bahasa = $this->request->getLocale();
         $t      = Teks::ambil('depan', $bahasa);
 
+        $foto   = Foto::tayang($bahasa);
+
         return $this->tampil('publik/depan', $t['judul'], $t['deskripsi'], [
-            't'        => $t,
-            'ket'      => Teks::ambil('aplikasi', $bahasa),
-            'aplikasi' => Aplikasi::daftar(),
+            't'          => $t,
+            'ket'        => Teks::ambil('aplikasi', $bahasa),
+            'aplikasi'   => Aplikasi::daftar(),
+            'foto'       => $foto,
+            'bahasa'     => $bahasa,
+            // Kredit foto di kaki halaman berasal dari isian foto yang sedang tayang.
+            'kreditFoto' => $foto['sumber'],
         ]);
     }
 
@@ -42,9 +52,12 @@ final class Publik extends BaseController
         return $this->teks('tentang');
     }
 
+    /**
+     * Alamat lama halaman Kontak: tautan dan penanda yang sudah beredar tetap sampai ke isinya.
+     */
     public function kontak(): ResponseInterface
     {
-        return $this->teks('kontak');
+        return redirect()->to('/tentang', 301);
     }
 
     public function privasi(): ResponseInterface

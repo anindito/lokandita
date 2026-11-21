@@ -44,6 +44,14 @@
     --bahaya-latar: #fdecea;
     --sukses-latar: #e6f4ec;
     --fokus: #d99a1c;
+    /* Skala jarak, sudut dan bayangan halaman publik. */
+    --j1: .5rem;
+    --j2: 1rem;
+    --j3: 1.5rem;
+    --j4: 2.5rem;
+    --j5: 4rem;
+    --sudut: .875rem;
+    --bayang: 0 1px 2px rgb(0 0 0 / .06), 0 10px 28px rgb(0 0 0 / .08);
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -78,31 +86,77 @@
   .merek { display: flex; align-items: center; gap: .6rem; font-weight: 700; font-size: 1.1rem; color: var(--teks); text-decoration: none; }
   .isi { flex: 1; width: 100%; max-width: 72rem; margin: 0 auto; padding: 1.5rem 1.25rem; }
   .isi-sempit { max-width: 26rem; margin: 2rem auto; }
-  .kaki { padding: 1rem 1.25rem; text-align: center; color: var(--teks-redup); font-size: .875rem; border-top: 1px solid var(--garis); display: flex; flex-wrap: wrap; gap: .35rem 1.5rem; justify-content: center; }
-  .kaki-tautan { display: flex; gap: 1rem; }
+  .kaki { padding: 1.25rem; text-align: center; color: var(--teks-redup); font-size: .875rem; border-top: 1px solid var(--garis); display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; align-items: center; justify-content: center; }
+  .kaki-tautan { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; justify-content: center; }
+  .kaki-butir { display: inline-flex; gap: .4rem; align-items: center; }
 
   /* Halaman publik (Portal, halaman depan LokaKode): kepala dengan navigasi, bahasa dan tombol Masuk. */
   .kepala-publik { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; align-items: center; justify-content: flex-end; }
   .nav-publik { display: flex; flex-wrap: wrap; gap: 1rem; font-size: .95rem; }
   .nav-publik a { color: var(--teks); text-decoration: none; }
-  .nav-publik a:hover, .nav-publik a[aria-current] { text-decoration: underline; }
-  /* Pembuka halaman depan (keputusan pemilik 2026-11-21): dipusatkan untuk Indonesia dan Inggris;
-     untuk Arab rata kanan dan mulai di tepi kanan kolom isi. Teks Arab yang dipusatkan di dalam
-     halaman yang bagian lainnya mulai dari kanan tidak sejajar dengan apa pun.
-     tests/Peramban/ArabPublikTest.php di Portal mengukur keduanya di peramban. */
-  .pembuka { padding: 2.5rem 0 1.5rem; text-align: center; }
-  [dir=rtl] .pembuka { text-align: start; }
-  .pembuka h1 { font-size: 2.1rem; line-height: 1.2; margin: 0 0 .75rem; }
-  .pembuka p { max-width: 42rem; margin: 0 auto 1.25rem; font-size: 1.1rem; color: var(--teks-redup); }
-  [dir=rtl] .pembuka p { margin-inline: 0; }
-  .petak { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); margin: 1rem 0 2rem; padding: 0; list-style: none; }
+  .nav-publik a:hover, .nav-publik a[aria-current] { text-decoration: underline; text-underline-offset: .3em; text-decoration-thickness: 2px; }
+  /* ---- Halaman publik: satu skala jarak, satu gaya kartu, satu ukuran ikon ---- */
+
+  /* Ikon Lucide yang ditulis langsung di HTML (Lokandita\Auth\Ikon): ukuran dan tebal garis sama
+     di mana-mana, warnanya warna teks. Ikon berarah dibalik di halaman kanan-ke-kiri. */
+  .ikon { display: inline-block; flex: none; width: 1.25rem; height: 1.25rem; vertical-align: -.22em; }
+  [dir=rtl] .ikon-arah { transform: scaleX(-1); }
+  .ikon-wadah { display: grid; place-items: center; flex: none; width: 2.75rem; height: 2.75rem; border-radius: .75rem;
+    background: color-mix(in srgb, var(--utama) 12%, transparent); color: var(--utama); }
+
+  /* Pembuka halaman depan (keputusan pemilik 2026-11-21, menggantikan "dipusatkan"): terbelah dua.
+     Teks di tepi awal kolom isi, foto di sisi seberangnya; kisi mengikuti arah halaman, jadi untuk
+     Arab teks mulai di tepi kanan dan foto pindah ke kiri. Di layar sempit foto di bawah teks dan
+     tidak pernah ada teks di atas foto, sehingga kontrasnya kontras warna halaman biasa.
+     tests/Peramban/ArabPublikTest.php dan PembukaTest.php di Portal mengukurnya di peramban. */
+  .pembuka { display: grid; gap: var(--j4); align-items: center; padding: var(--j4) 0 var(--j5); text-align: start; }
+  @media (min-width: 56rem) { .pembuka { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+  .pembuka h1 { font-size: clamp(2rem, 1.2rem + 3vw, 3rem); line-height: 1.12; letter-spacing: -.02em; margin: 0 0 var(--j2); text-wrap: balance; }
+  /* Huruf Arab bersambung: jarak antarhuruf tidak boleh diubah. */
+  [dir=rtl] .pembuka h1 { letter-spacing: 0; line-height: 1.3; }
+  .pembuka-teks p { max-width: 34rem; margin: 0 0 var(--j3); font-size: 1.125rem; color: var(--teks-redup); }
+  .pembuka-teks .petunjuk { margin: var(--j2) 0 0; font-size: .9rem; }
+  .pembuka-foto, .pembuka-logo { display: block; margin: 0; }
+  /* Kotak foto selalu 4:3, apa pun perbandingan fotonya: tempatnya sudah ada sebelum foto tiba. */
+  .pembuka-foto img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 1.25rem; background: var(--garis); box-shadow: var(--bayang); }
+  .pembuka-logo { justify-self: center; width: min(100%, 22rem); }
+  .pembuka-logo img { display: block; width: 100%; height: auto; aspect-ratio: 1; border-radius: 1.25rem; box-shadow: var(--bayang); }
+
+  .judul-bagian { font-size: 1.5rem; line-height: 1.25; margin: var(--j4) 0 var(--j3); }
+  .petak { display: grid; gap: var(--j3); grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); margin: 0 0 var(--j4); padding: 0; list-style: none; }
   .petak > li, .petak > div { margin: 0; }
-  .kartu-aplikasi { display: flex; flex-direction: column; gap: .35rem; height: 100%; padding: 1.1rem 1.25rem; background: var(--kartu); border: 1px solid var(--garis); border-radius: .75rem; color: var(--teks); text-decoration: none; }
-  a.kartu-aplikasi:hover, a.kartu-aplikasi:focus-visible { border-color: var(--utama); }
+  .kartu-aplikasi { display: flex; flex-direction: column; gap: var(--j1); height: 100%; padding: var(--j3); background: var(--kartu); border: 1px solid var(--garis); border-radius: var(--sudut); color: var(--teks); text-decoration: none;
+    box-shadow: 0 1px 2px rgb(0 0 0 / .05); transition: border-color .15s, box-shadow .15s, transform .15s; }
+  a.kartu-aplikasi:hover { border-color: var(--utama); box-shadow: var(--bayang); transform: translateY(-2px); }
+  a.kartu-aplikasi:focus-visible { border-color: var(--utama); }
   .kartu-aplikasi strong { font-size: 1.15rem; }
   .kartu-aplikasi span { color: var(--teks-redup); font-size: .95rem; }
-  .kartu-aplikasi .lencana { align-self: flex-start; color: var(--emas); border-color: var(--emas); }
-  .kartu-aplikasi-segera { opacity: .8; }
+  .kartu-aplikasi .ikon-wadah { color: var(--utama); margin-bottom: var(--j1); }
+  .kartu-aplikasi .kartu-buka { display: inline-flex; gap: .35rem; align-items: center; margin-top: auto; padding-top: var(--j1); color: var(--utama); font-weight: 600; }
+  /* "Segera": latar keemasan dengan teks berwarna teks biasa — emas sebagai warna huruf tidak cukup kontras. */
+  .kartu-aplikasi .lencana, .lencana-segera { align-self: flex-start; color: var(--teks); font-weight: 600; border-color: var(--emas); background: color-mix(in srgb, var(--emas) 22%, transparent); }
+  .kartu-aplikasi-segera { border-style: dashed; box-shadow: none; }
+
+  /* Langkah-langkah "cara": kartu bernomor dengan ikon. */
+  .langkah { display: grid; gap: var(--j2); grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); margin: 0 0 var(--j3); padding: 0; list-style: none; }
+  .langkah li { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto 1fr; gap: .15rem var(--j2); align-items: start; margin: 0; padding: var(--j3); background: var(--kartu); border: 1px solid var(--garis); border-radius: var(--sudut); }
+  .langkah .ikon-wadah { grid-row: span 2; }
+  .langkah-nomor { font-size: .85rem; font-weight: 700; color: var(--teks-redup); font-variant-numeric: tabular-nums; }
+  .bantuan { display: flex; gap: var(--j1); align-items: flex-start; }
+  .bantuan .ikon { margin-top: .2em; color: var(--utama); }
+  .tautan-ikon { display: inline-flex; gap: .4rem; align-items: center; }
+  /* Tautan di dalam kalimat dibedakan dengan garis bawah, bukan hanya dengan warna. */
+  .bantuan a, .prosa a, .kaki a, .tautan-ikon { text-decoration: underline; text-underline-offset: .18em; }
+  .bantuan a:hover, .prosa a:hover, .kaki a:hover, .tautan-ikon:hover { text-decoration-thickness: 2px; }
+  @media (prefers-reduced-motion: reduce) { .kartu-aplikasi { transition: none; } a.kartu-aplikasi:hover { transform: none; } }
+
+  /* Foto pembuka di /admin/teks/foto: daftar foto dengan gambar kecilnya. */
+  .daftar-foto { display: grid; gap: var(--j2); margin: 0; padding: 0; list-style: none; }
+  .daftar-foto > li { display: grid; gap: var(--j2); grid-template-columns: minmax(0, 14rem) minmax(0, 1fr); align-items: start; }
+  .daftar-foto img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: .5rem; background: var(--garis); }
+  .daftar-foto p { margin: 0 0 var(--j1); overflow-wrap: anywhere; }
+  .daftar-foto form { margin: 0; }
+  @media (max-width: 40rem) { .daftar-foto > li { grid-template-columns: minmax(0, 1fr); } }
   /* Kolom teks: dibatasi lebarnya supaya enak dibaca. Di tengah untuk Indonesia dan Inggris; untuk
      Arab mulai di tepi kanan kolom isi, seperti pembukanya. */
   .prosa { max-width: 46rem; margin: 0 auto; text-align: start; }
@@ -115,7 +169,8 @@
   .bagian-sunting { margin: 1.25rem 0 0; padding: 0 1rem 1rem; border: 1px solid var(--garis); border-radius: .5rem; }
   .bagian-sunting legend { padding: 0 .4rem; font-weight: 700; }
   .riwayat-teks { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: .9rem; margin: .5rem 0 0; }
-  .tanya summary { cursor: pointer; font-weight: 600; padding: .5rem 0; }
+  .tanya summary { cursor: pointer; font-weight: 600; padding: .75rem 0; }
+  .tanya summary:hover { color: var(--utama); }
   .tanya { border-bottom: 1px solid var(--garis); }
 
   .kartu { background: var(--kartu); border: 1px solid var(--garis); border-radius: .75rem; padding: 1.5rem; }
@@ -135,6 +190,8 @@
   .tombol { display: inline-block; padding: .6rem 1.1rem; font: inherit; font-weight: 600; text-decoration: none; cursor: pointer;
     border: 1px solid var(--utama); border-radius: .5rem; background: var(--utama); color: var(--utama-teks); }
   .tombol-lebar { width: 100%; margin-top: 1.25rem; }
+  .tombol-besar { display: inline-flex; gap: .5rem; align-items: center; padding: .8rem 1.4rem; font-size: 1.05rem; border-radius: .625rem; }
+  .tombol:hover:not(:disabled) { box-shadow: 0 0 0 3px color-mix(in srgb, var(--utama) 28%, transparent); }
   .tombol-sekunder { background: transparent; color: var(--utama); }
   .tombol-bahaya { background: var(--bahaya); border-color: var(--bahaya); color: #fff; }
   .tombol:disabled { opacity: .5; cursor: not-allowed; }

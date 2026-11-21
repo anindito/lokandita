@@ -58,7 +58,7 @@ final class TeksAdminTest extends PortalCase
         $this->assertStringContainsString('href="/admin/teks"', $admin->get('/beranda')->body, 'kartu penyuntingan di beranda superadmin');
         // Tanpa CSRF ditolak; halaman atau bahasa yang tidak dikenal 404.
         $this->assertSame(403, $admin->post('/admin/teks/tentang/id', ['aksi' => 'simpan', 't' => $isian])->status);
-        foreach (['/admin/teks/beranda/id', '/admin/teks/nav/id', '/admin/teks/tentang/fr', '/admin/teks/tentang'] as $jalur) {
+        foreach (['/admin/teks/beranda/id', '/admin/teks/kontak/id', '/admin/teks/nav/id', '/admin/teks/tentang/fr', '/admin/teks/tentang'] as $jalur) {
             $this->assertSame(404, $admin->get($jalur)->status, $jalur);
         }
         $this->assertSame(404, $admin->post('/admin/teks/data/id', ['csrf' => $this->csrf($admin), 'aksi' => 'simpan', 't' => $isian])->status);
@@ -103,7 +103,7 @@ final class TeksAdminTest extends PortalCase
         $this->assertStringNotContainsString('<b>tebal', $publik->body);
         $this->assertStringContainsString('<li>Butir satu</li>', $publik->body);
         // Halaman lain dan bahasa lain tidak ikut berubah.
-        $this->assertStringContainsString('<h1>Kontak</h1>', $this->tamu()->get('/kontak')->body);
+        $this->assertStringContainsString('<h1>Kebijakan privasi</h1>', $this->tamu()->get('/privasi')->body);
         $en = $this->tamu();
         $en->get('/bahasa/en?kembali=/tentang');
         $this->assertStringContainsString('<h1>About Lokandita</h1>', $en->get('/tentang')->body);
@@ -126,7 +126,7 @@ final class TeksAdminTest extends PortalCase
             $this->assertSame(1, preg_match('/<td data-teks="tentang-' . $b . '">(.*?)<\/td>/s', $daftar->body, $sel));
             $this->assertStringContainsString('Lebih lama dari teks Indonesia', $sel[1], $b);
         }
-        $this->assertSame(1, preg_match('/<td data-teks="kontak-en">(.*?)<\/td>/s', $daftar->body, $sel));
+        $this->assertSame(1, preg_match('/<td data-teks="privasi-en">(.*?)<\/td>/s', $daftar->body, $sel));
         $this->assertStringNotContainsString('Lebih lama', $sel[1]);
 
         // Menyimpan teks yang sama sekali lagi tidak menulis apa pun.
@@ -144,7 +144,7 @@ final class TeksAdminTest extends PortalCase
     {
         [$admin] = $this->admin();
         $csrf    = $this->csrf($admin);
-        $baik    = $this->isianBawaan('kontak');
+        $baik    = $this->isianBawaan('tentang');
 
         $salah = [];
         $salah['judul kosong']          = ['judul' => '   '] + $baik;
@@ -153,7 +153,7 @@ final class TeksAdminTest extends PortalCase
         $salah['bagian tanpa judul']    = $baik;
         $salah['bagian tanpa judul']['bagian'][1]['judul'] = '';
         $salah['bagian tanpa isi']      = $baik;
-        $salah['bagian tanpa isi']['bagian'][0]['isi'] = '';
+        $salah['bagian tanpa isi']['bagian'][4]['isi'] = '';
         $salah['bagian hilang']         = $baik;
         unset($salah['bagian hilang']['bagian'][2]);
         $salah['paragraf terlalu panjang'] = ['pembuka' => str_repeat('k', 3001)] + $baik;
@@ -161,33 +161,33 @@ final class TeksAdminTest extends PortalCase
         $salah['bukan teks']            = ['judul' => ['larik']] + $baik;
         foreach ($salah as $apa => $t) {
             foreach (['simpan', 'pratinjau'] as $aksi) {
-                $r = $admin->post('/admin/teks/kontak/id', ['csrf' => $csrf, 'aksi' => $aksi, 't' => $t]);
+                $r = $admin->post('/admin/teks/tentang/id', ['csrf' => $csrf, 'aksi' => $aksi, 't' => $t]);
                 $this->assertSame(422, $r->status, "{$apa} ({$aksi})");
                 $this->assertStringContainsString('Belum disimpan', $r->body, $apa);
                 $this->assertStringNotContainsString('data-pratinjau', $r->body, $apa);
             }
         }
-        $this->assertSame(422, $admin->post('/admin/teks/kontak/id', ['csrf' => $csrf, 'aksi' => 'lain', 't' => $baik])->status);
-        $this->assertSame(422, $admin->post('/admin/teks/kontak/id', ['csrf' => $csrf, 'aksi' => 'simpan'])->status);
+        $this->assertSame(422, $admin->post('/admin/teks/tentang/id', ['csrf' => $csrf, 'aksi' => 'lain', 't' => $baik])->status);
+        $this->assertSame(422, $admin->post('/admin/teks/tentang/id', ['csrf' => $csrf, 'aksi' => 'simpan'])->status);
         $this->assertSame(0, $this->jumlah('teks'));
         $this->assertSame(0, $this->jumlah('audit_log'));
 
-        // Kunci asing dan bagian keempat diabaikan: yang tersimpan berbentuk persis seperti bawaan.
+        // Kunci asing dan bagian kesembilan diabaikan: yang tersimpan berbentuk persis seperti bawaan.
         $t = $baik;
-        $t['judul']      = 'Kontak kami';
+        $t['judul']      = 'Tentang kami';
         $t['jahat']      = 'tidak dikenal';
         $t['diperbarui'] = 'Tanggal karangan';
-        $t['bagian'][3]  = ['judul' => 'Bagian selundupan', 'isi' => 'x'];
+        $t['bagian'][8]  = ['judul' => 'Bagian selundupan', 'isi' => 'x'];
         $t['bagian'][0]['lain'] = 'x';
-        $r = $admin->post('/admin/teks/kontak/id', ['csrf' => $csrf, 'aksi' => 'simpan', 't' => $t]);
+        $r = $admin->post('/admin/teks/tentang/id', ['csrf' => $csrf, 'aksi' => 'simpan', 't' => $t]);
         $this->assertSame('https://lokandita.com/admin/teks?pesan=tersimpan', $r->header('Location'));
-        $isi    = json_decode((string) $this->db->query("SELECT isi FROM teks WHERE halaman = 'kontak' AND bahasa = 'id'")->fetch_row()[0], true);
-        $bawaan = (require APPPATH . 'Language/id/Portal.php')['kontak'];
+        $isi    = json_decode((string) $this->db->query("SELECT isi FROM teks WHERE halaman = 'tentang' AND bahasa = 'id'")->fetch_row()[0], true);
+        $bawaan = (require APPPATH . 'Language/id/Portal.php')['tentang'];
         $this->assertSame(array_keys($bawaan), array_keys($isi));
         $this->assertCount(count($bawaan['bagian']), $isi['bagian']);
-        $this->assertSame(['judul', 'isi'], array_keys($isi['bagian'][0]));
-        $publik = $this->tamu()->get('/kontak')->body;
-        $this->assertStringContainsString('<h1>Kontak kami</h1>', $publik);
+        $this->assertSame(['judul', 'isi'], array_keys($isi['bagian'][4]));
+        $publik = $this->tamu()->get('/tentang')->body;
+        $this->assertStringContainsString('<h1>Tentang kami</h1>', $publik);
         $this->assertStringNotContainsString('Bagian selundupan', $publik);
         $this->assertStringNotContainsString('Tanggal karangan', $publik);
     }
@@ -240,8 +240,11 @@ final class TeksAdminTest extends PortalCase
         $admin->post('/admin/teks/depan/id', ['csrf' => $csrf, 'aksi' => 'simpan', 't' => $t]);
         $depan = $this->tamu()->get('/');
         $this->assertStringContainsString('<h1>Selamat datang di Lokandita</h1>', $depan->body);
-        $this->assertStringContainsString('<li>Langkah kelima yang baru.</li>', $depan->body);
-        $this->assertSame(5, preg_match_all('/<li>[^<]+<\/li>/', (string) preg_replace('/^.*<ol>(.*?)<\/ol>.*$/s', '$1', $depan->body)));
+        $this->assertStringContainsString('<span>Langkah kelima yang baru.</span>', $depan->body);
+        // Lima langkah, masing-masing dengan ikon; langkah kelima (di luar empat bawaan) mendapat ikon umum.
+        $langkah = (string) preg_replace('/^.*<ol class="langkah"[^>]*>(.*?)<\/ol>.*$/s', '$1', $depan->body);
+        $this->assertSame(5, preg_match_all('/<li>/', $langkah));
+        $this->assertSame(5, preg_match_all('/<svg class="ikon/', $langkah));
 
         // Keterangan kartu: tampil di halaman depan dan di beranda sesudah masuk.
         $k = ['lokakode' => 'Keterangan LokaKode yang baru.'] + $this->isianBawaan('aplikasi');
@@ -295,13 +298,13 @@ final class TeksAdminTest extends PortalCase
     public function testTabelTidakTerbacaHalamanPublikMemakaiBawaan(): void
     {
         [$admin] = $this->admin();
-        $t       = ['judul' => 'Kontak pengganti'] + $this->isianBawaan('kontak');
-        $admin->post('/admin/teks/kontak/id', ['csrf' => $this->csrf($admin), 'aksi' => 'simpan', 't' => $t]);
-        $this->assertStringContainsString('<h1>Kontak pengganti</h1>', $this->tamu()->get('/kontak')->body);
+        $t       = ['judul' => 'Tentang pengganti'] + $this->isianBawaan('tentang');
+        $admin->post('/admin/teks/tentang/id', ['csrf' => $this->csrf($admin), 'aksi' => 'simpan', 't' => $t]);
+        $this->assertStringContainsString('<h1>Tentang pengganti</h1>', $this->tamu()->get('/tentang')->body);
 
         $this->db->query('RENAME TABLE teks TO teks_hilang');
         try {
-            foreach (['/' => 'Satu akun untuk semua aplikasi belajar Anda', '/kontak' => 'Kontak', '/privasi' => 'Kebijakan privasi'] as $jalur => $tajuk) {
+            foreach (['/' => 'Satu akun untuk semua aplikasi belajar Anda', '/tentang' => 'Tentang Lokandita', '/privasi' => 'Kebijakan privasi'] as $jalur => $tajuk) {
                 $r = $this->tamu()->get($jalur);
                 $this->assertSame(200, $r->status, $jalur);
                 $this->assertStringContainsString('<h1>' . $tajuk . '</h1>', $r->body, $jalur);
@@ -310,6 +313,32 @@ final class TeksAdminTest extends PortalCase
         } finally {
             $this->db->query('RENAME TABLE teks_hilang TO teks');
         }
-        $this->assertStringContainsString('<h1>Kontak pengganti</h1>', $this->tamu()->get('/kontak')->body);
+        $this->assertStringContainsString('<h1>Tentang pengganti</h1>', $this->tamu()->get('/tentang')->body);
+    }
+
+    /**
+     * Teks pengganti yang bentuknya tidak lagi sama dengan bawaan — halaman yang sudah tidak ada
+     * (`kontak`), atau Tentang yang disimpan sebelum bagian-bagian Kontak digabungkan ke dalamnya —
+     * tidak dipakai: bawaan yang tampil, lengkap dengan bagian Kontak, dan barisnya tidak dihapus.
+     */
+    public function testTeksPenggantiBerbentukUsangTidakDipakai(): void
+    {
+        [, $user] = $this->admin();
+        $lama     = (require APPPATH . 'Language/id/Portal.php')['tentang'];
+        $lama['judul']  = 'Tentang versi lama';
+        $lama['bagian'] = array_slice($lama['bagian'], 0, 4);
+        $sisip = $this->db->prepare('INSERT INTO teks (halaman, bahasa, isi, updated_by, updated_at) VALUES (?, ?, ?, ?, UTC_TIMESTAMP())');
+        foreach (['tentang' => $lama, 'kontak' => ['judul' => 'Kontak lama', 'deskripsi' => 'x', 'pembuka' => ['x'], 'bagian' => []]] as $halaman => $isi) {
+            $json   = json_encode($isi, JSON_UNESCAPED_UNICODE);
+            $bahasa = 'id';
+            $sisip->bind_param('ssss', $halaman, $bahasa, $json, $user['id']);
+            $sisip->execute();
+        }
+        $r = $this->tamu()->get('/tentang');
+        $this->assertSame(200, $r->status);
+        $this->assertStringContainsString('<h1>Tentang Lokandita</h1>', $r->body);
+        $this->assertStringNotContainsString('versi lama', $r->body);
+        $this->assertStringContainsString('<h2>Lupa kata sandi</h2>', $r->body, 'bagian Kontak tetap tampil');
+        $this->assertSame(2, $this->jumlah('teks'), 'baris lama tidak dihapus');
     }
 }

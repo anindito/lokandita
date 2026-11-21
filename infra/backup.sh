@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Backup harian (SPEC.md §16): semua skema aplikasi + semua .env.
-# Hasil: $BACKUP_DIR/lokandita-YYYYmmdd-HHMMSS/{db.sql.gz,env.tar.gz,SHA256SUMS}
+# Backup harian (SPEC.md §16): semua skema aplikasi + semua .env + foto unggahan Portal.
+# Hasil: $BACKUP_DIR/lokandita-YYYYmmdd-HHMMSS/{db.sql.gz,env.tar.gz,media.tar.gz,SHA256SUMS}
 # Backup yang lebih tua dari BACKUP_RETENTION_DAYS hari dihapus.
 #
 # Isi backup: data pribadi dan rahasia (termasuk INSTANCE_SECRET dan
@@ -35,9 +35,17 @@ for k in "${KOMPONEN[@]}"; do
 done
 tar -C "$AKAR" -czf "$tujuan/env.tar.gz" "${berkas_env[@]}"
 
-(cd "$tujuan" && sha256sum db.sql.gz env.tar.gz > SHA256SUMS)
-echo "  db.sql.gz   $(stat -c %s "$tujuan/db.sql.gz") byte"
-echo "  env.tar.gz  $(stat -c %s "$tujuan/env.tar.gz") byte, ${#berkas_env[@]} berkas .env"
+# Foto pembuka unggahan Portal (KONTRAK.md §16): isi volume lokandita_portal_media, dibaca
+# dari kontainer portal yang sedang berjalan. Dump basis data di atas diambil lebih dulu,
+# dan foto tidak pernah dihapus, jadi setiap foto yang disebut dump itu ada di arsip ini.
+docker exec portal tar -C /srv/media -czf - . > "$tujuan/media.tar.gz" \
+	|| gagal "volume foto Portal tidak dapat dibaca; backup di $tujuan tidak lengkap"
+jumlah_media="$(tar -tzf "$tujuan/media.tar.gz" | grep -c -v '/$' || true)"
+
+(cd "$tujuan" && sha256sum db.sql.gz env.tar.gz media.tar.gz > SHA256SUMS)
+echo "  db.sql.gz    $(stat -c %s "$tujuan/db.sql.gz") byte"
+echo "  env.tar.gz   $(stat -c %s "$tujuan/env.tar.gz") byte, ${#berkas_env[@]} berkas .env"
+echo "  media.tar.gz $(stat -c %s "$tujuan/media.tar.gz") byte, $jumlah_media berkas foto"
 
 # Retensi.
 find "${dir:?}" -maxdepth 1 -type d -name 'lokandita-????????-??????' -mtime "+$hari" -print -exec rm -rf {} + \

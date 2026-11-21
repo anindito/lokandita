@@ -51,6 +51,9 @@ use App\Controllers\Admin\Teks;
         </tbody>
     </table>
 </div>
+<h2><?= lang('Sunting.foto.judul') ?></h2>
+<p><?= lang('Sunting.foto.ringkas') ?> <a href="/admin/teks/foto" data-ke-foto><?= lang('Sunting.foto.kelola') ?></a></p>
+
 <p><a href="/admin/teks/riwayat"><?= lang('Sunting.riwayat.judul') ?></a></p>
 <p class="petunjuk"><?= lang('Sunting.catatan') ?></p>
 <?= $this->endSection() ?>

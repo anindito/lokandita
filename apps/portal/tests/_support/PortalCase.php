@@ -26,6 +26,9 @@ abstract class PortalCase extends TestCase
         // Setiap tes mulai dari teks bawaan: tidak ada teks pengganti, tidak ada riwayat (KONTRAK.md §15).
         $this->db->query('DELETE FROM teks');
         $this->db->query('DELETE FROM audit_log');
+        // …dan dari foto bawaan: tidak ada foto unggahan yang tayang (KONTRAK.md §16).
+        $this->db->query('DELETE FROM foto_tayang');
+        $this->db->query('DELETE FROM foto');
     }
 
     /**
@@ -64,6 +67,51 @@ abstract class PortalCase extends TestCase
         }
 
         return $t;
+    }
+
+    /**
+     * Foto JPEG buatan tes: gradasi warna, supaya bukan bidang kosong.
+     */
+    protected function jpeg(int $lebar = 1800, int $tinggi = 1200, int $merah = 40): string
+    {
+        $g = imagecreatetruecolor($lebar, $tinggi);
+        for ($i = 0; $i < 16; $i++) {
+            imagefilledrectangle($g, intdiv($lebar * $i, 16), 0, intdiv($lebar * ($i + 1), 16), $tinggi, (int) imagecolorallocate($g, $merah, 60 + $i * 10, 200 - $i * 8));
+        }
+        ob_start();
+        imagejpeg($g, null, 85);
+
+        return (string) ob_get_clean();
+    }
+
+    /**
+     * Isian yang wajib menyertai unggahan foto.
+     *
+     * @return array<string, string>
+     */
+    protected function isianFoto(string $csrf, string $sumber = 'Fotografer Uji / Arsip Uji'): array
+    {
+        return [
+            'csrf'    => $csrf,
+            'alt_id'  => 'Teks alternatif Indonesia untuk ' . $sumber,
+            'alt_en'  => 'English alternative text for ' . $sumber,
+            'alt_ar'  => 'نص بديل عربي ' . $sumber,
+            'sumber'  => $sumber,
+            'lisensi' => 'Lisensi Uji 1.0',
+            'berhak'  => '1',
+        ];
+    }
+
+    /**
+     * Mengunggah foto sebagai superadmin $admin dan mengembalikan id-nya (dari alamat pratinjau).
+     */
+    protected function unggahFoto(Http $admin, string $isi, string $sumber = 'Fotografer Uji / Arsip Uji', string $nama = 'foto uji.jpg'): int
+    {
+        $r = $admin->upload('/admin/teks/foto', $this->isianFoto($this->csrf($admin, '/admin/teks/foto'), $sumber), 'foto', $nama, $isi);
+        $this->assertContains($r->status, [302, 303], 'unggah foto: ' . substr(strip_tags($r->body), 0, 400));
+        $this->assertSame(1, preg_match('#/admin/teks/foto/(\d+)\?pesan=diunggah$#', (string) $r->header('Location'), $m), (string) $r->header('Location'));
+
+        return (int) $m[1];
     }
 
     protected function csrf(Http $http, string $jalur = '/admin/teks/tentang/id'): string

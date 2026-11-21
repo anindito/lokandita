@@ -126,7 +126,7 @@ Routes that need no session. They never read the session or the identity databas
 
 | App | Routes |
 |---|---|
-| Portal | `/`, `/tentang`, `/kontak`, `/privasi`, `/ketentuan`, `/sitemap.xml`, `/robots.txt` |
+| Portal | `/`, `/tentang`, `/privasi`, `/ketentuan`, `/sitemap.xml`, `/robots.txt`; `/kontak` answers `301` to `/tentang` (the contact page became part of Tentang) |
 | LokaKode | `/` (public landing), `/robots.txt` |
 | every app | `/healthz`, `GET /bahasa/{id\|en\|ar}` |
 
@@ -427,6 +427,7 @@ Both must match. `config_key` is computed by the server from the generated confi
 - Every app container serves HTTP on port **8080**. No app publishes a port to the host.
 - Caddy reaches apps by container name on `edge`. Apps reach LokaAuth **only** by `auth-internal` on `internal`.
 - MySQL `3306` and Redis `6379` are published on `127.0.0.1` only, for the worker and for CLI use.
+- Named volumes (Compose project `lokandita`): `lokandita_mysql_data`, `lokandita_redis_data`, `lokandita_caddy_data`, `lokandita_caddy_config`, and `lokandita_portal_media` (the Portal's uploaded hero photos, §16).
 - LokaAuth must not decide trust from the caller's IP or subnet.
 - The `internal` network is created with `internal: true`: it has no route out of the host.
 - Compose project name is `lokandita`; the file is `infra/compose.yml`. App images are `lokandita/<app>:<commit>`, and the one in use also carries the tag `aktif`.
@@ -520,6 +521,7 @@ Values are written without quotes.
   6. the judge worker is running and a trivial `RUN` job completes.
   7. the judge validates a small built-in problem: one `VALIDATE` job through LokaKode (`php spark judge:coba --validasi`) answers `ok` after 240 tests; nothing is stored in the problem bank.
   8. public pages and the way in (stage 11), asked directly at the app container from another app container, with the `X-Forwarded-Proto: https` header Caddy sends, so that it also works while a host is in maintenance: `GET /` of `portal` and of `lokakode` without a cookie answers `200` with an indexable page; `GET /beranda` of both without a cookie redirects to `AUTH_LOGIN_URL` with `next` equal to that app's own `/beranda`; `GET /privasi` of `portal` answers `200`.
+  9. the Portal's hero photo (stage 11c, §16), asked the same way: the first AVIF file named by the landing page answers `200 image/avif`, and `/media/hero/smoke.php` answers `403`.
 - `smoke.sh` additionally checks (as check 0) that every app container reports the current `HEAD` at `/healthz`.
 - In check 1 a host in maintenance must answer `503`, an open host `2xx`/`3xx`, and `www` a `301` to the apex; the certificate must validate.
 - Checks 3–5 become active in stage 5, check 6 in stage 7 and check 7 in stage 8, by a switch at the top of `smoke.sh`. Until then each prints `BELUM AKTIF`, is counted separately, and is not reported as passed.
@@ -533,7 +535,7 @@ Values are written without quotes.
 - Tests talk to these containers over real HTTP (`Lokandita\Auth\Testing\Http`) and to MySQL directly. Nothing is mocked.
 - Redis DB `15` is reserved for tests and is flushed at the start of every run.
 - For `lokakode`, `infra/tes.sh` also starts a headless Chromium (`peramban-tes`, image pinned by digest) and a second Caddy (`caddy-tes`) that serves `https://lokakode.lokandita.com` with Caddy's internal certificate and forwards to `lokakode-tes`, as the production edge does. The browser sits only on the Docker network `tes-peramban`; `lokakode.lokandita.com` is mapped to `caddy-tes` and every other host name is made unresolvable, so a browser test cannot reach a production site. PHPUnit drives it over the Chrome DevTools Protocol (`Lokandita\Auth\Testing\Peramban` in the shared package, address in `PERAMBAN_TES_URL`); the tests in `tests/Peramban/` fail, not skip, when it is missing.
-- For `portal`, `infra/tes.sh` also serves `lokakode-tes` on `lokakode_test` (the stage 11 gate needs three real apps; `LOKAKODE_TES_URL`) and starts the same browser with three host names mapped — `lokandita.com` → `portal-tes`, `lokakode.lokandita.com` → `lokakode-tes`, `auth.lokandita.com` → `auth-tes` — and every other name unresolvable. `apps/portal/tests/Peramban/ArabPublikTest.php` measures there that every public page of the three apps in Arabic is the mirror of its Indonesian version.
+- For `portal`, `infra/tes.sh` also serves `lokakode-tes` on `lokakode_test` (the stage 11 gate needs three real apps; `LOKAKODE_TES_URL`) and starts the same browser with three host names mapped — `lokandita.com` → `portal-tes`, `lokakode.lokandita.com` → `lokakode-tes`, `auth.lokandita.com` → `auth-tes` — and every other name unresolvable. `apps/portal/tests/Peramban/ArabPublikTest.php` measures there that every public page of the three apps in Arabic is the mirror of its Indonesian version. `PembukaTest.php` measures the two landing pages in Indonesian and Arabic, light and dark, at 1280 and 390 pixels: the hero image loads as AVIF or WebP from the same origin, text never lies over it, no layout shift, WCAG AA contrast, and one size and stroke width for every icon.
 - With `TANGKAPAN=<host directory>` set, `infra/tes.sh` mounts that directory into the test container (`TANGKAPAN_DIR`) and the browser tests that take screenshots write them there; without it nothing is written.
 - `infra/tes.sh judge` is the only way to run the worker's tests (pytest, on the host, in `judge/.venv`). It recreates `lokakode_test` through the LokaKode migrations, gives `judge_worker` its grant there, and runs the tests against real MySQL, Redis DB `15` and real Docker. The tests refuse any schema not ending in `_test` and any Redis DB other than `15`, fail when Docker is unavailable, and fail when a test is skipped.
 
@@ -637,20 +639,86 @@ portal.teks       (halaman VARCHAR(20), bahasa ENUM('id','en','ar'), isi MEDIUMT
 portal.audit_log  (id BIGINT PK, actor_id CHAR(36), action VARCHAR(60), halaman, bahasa, sebelum MEDIUMTEXT NULL, sesudah MEDIUMTEXT NULL, ip, user_agent, created_at)
 ```
 
-- `halaman` is one of `depan`, `aplikasi` (the three app descriptions, also shown on `/beranda`), `tentang`, `kontak`, `privasi`, `ketentuan`. Navigation labels and the pages behind a session are not editable.
+- `halaman` is one of `depan`, `aplikasi` (the three app descriptions, also shown on `/beranda`), `tentang`, `privasi`, `ketentuan`. Until 2026-11-21 there was a sixth, `kontak`; its contents are now the last sections of `tentang`, and `/kontak` answers `301` to `/tentang`.
 - `isi`, `sebelum` and `sesudah` hold JSON as text (a MySQL `JSON` column would reorder the keys, and their order is the order on the page).
 - `isi` has exactly the shape of that page's array in the language file: the same keys, the same number of sections (`bagian`); only the texts and the number of paragraphs (`pembuka`, `isi`, `cara`) and bullets (`butir`) may differ. `App\Libraries\Teks::dariForm` builds it from the form and refuses anything else, so a stored row can always be rendered by the same view as the default.
-- Reading (`App\Libraries\Teks::ambil`): the row when there is one, else the language file. When the `portal` database cannot be reached the language file is used and `teks.db_unavailable` is logged — a public page never fails because of this table.
+- Reading (`App\Libraries\Teks::ambil`): the row when there is one **and it still has the shape of the default** (same keys, same number of sections), else the language file; a row of another shape is left in the table, not shown, and logged as `teks.bentuk_usang`. When the `portal` database cannot be reached the language file is used and `teks.db_unavailable` is logged — a public page never fails because of this table.
 - Every text is escaped when shown. HTML typed into the editor appears as text. `{email}` is replaced by `CONTACT_EMAIL` on the text pages, as in the defaults.
 - "Terakhir diperbarui" on `privasi` and `ketentuan` is the day (Asia/Jakarta) the override of that language was saved; without an override it is the date in the language file.
 - Routes, all behind `masuk:superadmin` (any other role 403, no session → login), `POST` with the CSRF field `csrf`:
 
 | Route | Does |
 |---|---|
-| `GET /admin/teks` | the six pages × three languages: default or changed, by whom and when, and whether a translation is older than the Indonesian text |
+| `GET /admin/teks` | the five pages × three languages: default or changed, by whom and when, and whether a translation is older than the Indonesian text; and the way to the hero photo (§16) |
 | `GET /admin/teks/{halaman}/{bahasa}` | the form |
 | `POST /admin/teks/{halaman}/{bahasa}` | field `aksi` = `pratinjau` (shows the page as it would look, saves nothing) or `simpan` (live at once) |
 | `POST /admin/teks/{halaman}/{bahasa}/bawaan` | deletes the override: back to the language file |
-| `GET /admin/teks/riwayat` | the last 200 rows of the Portal's `audit_log` with the text before and after |
+| `GET /admin/teks/riwayat` | the last 200 rows of the Portal's `audit_log` with the text before and after; the photo actions of §16 are in the same list |
 
 - `simpan` and `bawaan` write `teks.diubah` / `teks.dikembalikan` to `portal.audit_log` in the same transaction, with the whole text before and after. The table is append-only: no route changes or deletes a row. An unchanged save writes nothing.
+
+## 16. Portal hero photo (stage 11c)
+
+The photo next to the heading of the Portal's landing page. The default is part of the image; a superadmin can upload another one, preview it and publish it, inside the editor of §15. Nothing here adds an environment variable.
+
+### What is served
+
+A photo is always served as **twelve generated files**: AVIF, WebP and JPEG at 480, 768, 1200 and 1600 pixels wide, made by `App\Libraries\Gambar` (GD) from decoded pixels, so they carry no metadata (EXIF, GPS, comments, colour profile) and nothing that was appended to the upload. The uploaded file itself is never stored and never served. The landing page uses them in one `<picture>` with `width` and `height` written out; the box is always 4:3 (`object-fit: cover`).
+
+| Photo | Files | Address |
+|---|---|---|
+| Default (`docs/branding/foto/hero-portal.jpg`, the only file of `docs/` in the Docker build context) | made **at image build** by `infra/docker/foto-bawaan.php` with the same `Gambar` code, into `public/merek/hero/hero-<width>.<ext>` plus `hero.json` (`{ lebar, tinggi }`) and `public/merek/og-image.jpg` (1200 × 630 crop, the Portal's Open Graph image) | `/merek/hero/hero-<width>.<ext>?v=<commit>` |
+| Uploaded | `/srv/media/hero/<kunci>-<width>.<ext>` in the volume; `kunci` is 32 hex characters from `random_bytes(16)`, never derived from the upload | `/media/hero/<kunci>-<width>.<ext>` |
+
+### Volume and static serving
+
+- Docker volume **`lokandita_portal_media`** (Compose name `portal_media`), mounted at **`/srv/media`** in the `portal` container only. It survives deploys. `auth` and `lokakode` have the directory in their image but no volume and no use for it.
+- Apache in the app container serves `/media/` from `/srv/media` (`infra/docker/apache-app.conf`): PHP engine off, `SetHandler default-handler`, no `.htaccess`, no index, and **only** names matching `<32 hex>-<digits>.(avif|webp|jpg)` are answered; everything else is `403`. Responses carry `X-Content-Type-Options: nosniff` and `Cache-Control: public, max-age=31536000, immutable` (a name is never reused). The directory is outside the document root, so CodeIgniter never sees these requests and they carry no cookie and no CSP header.
+- The CSP is unchanged: images are same-origin (`img-src 'self' data:`).
+- `infra/backup.sh` writes the volume as `media.tar.gz` (read through `docker exec portal tar`) next to `db.sql.gz`, after the dump; `infra/uji-restore.sh` unpacks it into a temporary directory and checks it against the restored `portal.foto` and against the live volume (`docs/RESTORE.md`).
+- Test containers (`portal-tes`) have no volume: their `/srv/media` is the image's own directory and disappears with the container.
+
+### Tables (`portal` schema)
+
+```
+portal.foto         (id INT PK, kunci CHAR(32) UNIQUE, nama_asli VARCHAR(255), jenis 'jpeg'|'png'|'webp', lebar, tinggi,
+                     alt_id, alt_en, alt_ar VARCHAR(300), sumber VARCHAR(200), lisensi VARCHAR(200), berhak TINYINT(1),
+                     uploaded_by CHAR(36), uploaded_at DATETIME, published_at DATETIME NULL)
+portal.foto_tayang  (slot VARCHAR(20) PK, foto_id INT NULL → foto.id, updated_by CHAR(36), updated_at DATETIME)
+```
+
+- `foto` is append-only: no route changes or deletes a row or a file, so every earlier photo can be published again. `nama_asli` is the browser's file name kept as text only (control characters and slashes removed); it never names a file. `lebar` × `tinggi` is the size of the largest generated file. `published_at` is the first time the photo went live.
+- `foto_tayang` has at most the row `slot = 'hero'`. No row, or `foto_id` NULL, means the default photo.
+- Reading (`App\Libraries\Foto::tayang`): the published photo; the **default** when nothing is published, when the `portal` database cannot be reached (`foto.db_unavailable` is logged) or when a file of the published photo is missing from the volume (`foto.berkas_hilang`). The landing page never fails because of the photo.
+- Alt text comes from `alt_<language>` of the published photo, for the default from `Portal.foto.altBawaan` in the language files. The footer of the landing page shows `Foto: <sumber>` (`Lokandita.kreditFoto`), escaped; for the default `Josh Sorenson / Pexels`.
+
+### Upload rules (`Gambar::periksa`, all checked before the image is decoded)
+
+| Rule | Value | Error code |
+|---|---|---|
+| Size | at most 10 MB (PHP itself accepts 24 MB, so that a slightly larger file gets this message instead of being dropped) | `terlalu_besar` |
+| Type | JPEG, PNG or WebP, decided from the content: `finfo` and the image header must agree. Extension and the browser's MIME type are ignored. GIF, SVG and anything else are refused | `bukan_gambar` |
+| Pixels | width × height from the header at most 30,000,000 | `terlalu_banyak_piksel` |
+| Smallest | at least 1600 × 900 after EXIF orientation is applied | `terlalu_kecil` |
+| Decodable | GD must open it; a truncated JPEG is refused (`gd.jpeg_ignore_warning = 0`) | `tidak_terbaca` |
+
+Required with every upload: `alt_id`, `alt_en`, `alt_ar` (at most 300 characters each), `sumber` and `lisensi` (at most 200), and `berhak = 1` (the tick box "Saya berhak memakai foto ini"). The request raises its own memory limit to 512 MB.
+
+### Routes
+
+In the route group of §15: behind `masuk:superadmin` (any other role `403`, no session → login), every `POST` with the CSRF field `csrf`.
+
+| Route | Does |
+|---|---|
+| `GET /admin/teks/foto` | the upload form and every photo ever uploaded, with the one that is live |
+| `POST /admin/teks/foto` | multipart, file field `foto` plus the required fields: checks, generates the twelve files, stores the photo as **not published**, redirects to its preview. An error answers `422` with the form and the reason |
+| `GET /admin/teks/foto/{id}` | preview: the real landing partial (`publik/_depan`) with this photo, in Indonesian and in Arabic, and the publish button |
+| `POST /admin/teks/foto/{id}/tayang` | publishes that photo — a new one, or an earlier one again |
+| `POST /admin/teks/foto/bawaan` | back to the default photo |
+
+- Written to `portal.audit_log` (§15) in the same transaction, with `halaman = 'foto'`, `bahasa` NULL and the photo's description (id, original file name, size, source, licence, alt texts) in `sebelum` / `sesudah`: `foto.diunggah`, `foto.ditayangkan` (first time live), `foto.dipulihkan` (an earlier photo live again), `foto.bawaan`. Publishing the photo that is already live writes nothing.
+- A photo that is uploaded but not published is not referenced by any public page, but its files answer to anyone who knows the random name.
+
+### Icons
+
+Icons on the public pages are Lucide SVG files in `packages/lokandita-auth/ikon/` (`docs/branding/LISENSI.md`), written inline by `Lokandita\Auth\Ikon::svg()`: `aria-hidden="true"` unless a label is given, class `ikon-arah` for icons that are mirrored under `dir="rtl"`. The footer of every page of the three apps uses them.

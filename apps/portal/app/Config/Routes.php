@@ -29,10 +29,16 @@ $routes->group('', ['filter' => 'masuk'], static function (RouteCollection $rout
     $routes->get('data-saya', 'Beranda::dataSaya');
 });
 
-// Penyuntingan teks halaman publik (KONTRAK.md §15): superadmin saja. Peran diperiksa filter.
+// Penyuntingan teks dan foto halaman publik (KONTRAK.md §15, §16): superadmin saja. Peran diperiksa filter.
 $routes->group('admin/teks', ['filter' => 'masuk:superadmin'], static function (RouteCollection $routes): void {
     $routes->get('/', 'Admin\Teks::index');
     $routes->get('riwayat', 'Admin\Teks::riwayat');
+    // Foto pembuka (KONTRAK.md §16). Didaftarkan sebelum rute {halaman}/{bahasa} di bawah.
+    $routes->get('foto', 'Admin\Foto::index');
+    $routes->post('foto', 'Admin\Foto::unggah');
+    $routes->post('foto/bawaan', 'Admin\Foto::bawaan');
+    $routes->get('foto/(:num)', 'Admin\Foto::lihat/$1');
+    $routes->post('foto/(:num)/tayang', 'Admin\Foto::tayang/$1');
     $routes->get('(:segment)/(:segment)', 'Admin\Teks::sunting/$1/$2');
     $routes->post('(:segment)/(:segment)', 'Admin\Teks::kirim/$1/$2');
     $routes->post('(:segment)/(:segment)/bawaan', 'Admin\Teks::bawaan/$1/$2');

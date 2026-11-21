@@ -17,8 +17,11 @@ use Lokandita\Auth\Log;
  */
 final class Teks
 {
-    /** Halaman yang bisa disunting. `aplikasi` = keterangan tiga kartu aplikasi. */
-    public const HALAMAN = ['depan', 'aplikasi', 'tentang', 'kontak', 'privasi', 'ketentuan'];
+    /**
+     * Halaman yang bisa disunting. `aplikasi` = keterangan tiga kartu aplikasi. `kontak` tidak
+     * ada lagi: sejak 2026-11-21 isinya adalah bagian-bagian terakhir halaman `tentang`.
+     */
+    public const HALAMAN = ['depan', 'aplikasi', 'tentang', 'privasi', 'ketentuan'];
 
     /** Halaman yang menampilkan "Terakhir diperbarui". */
     private const BERTANGGAL = ['privasi', 'ketentuan'];
@@ -80,7 +83,16 @@ final class Teks
             try {
                 $hasil = [];
                 foreach (db_connect()->query('SELECT halaman, isi, updated_by, updated_at FROM teks WHERE bahasa = ?', [$bahasa])->getResultArray() as $b) {
-                    $hasil[$b['halaman']] = ['isi' => json_decode((string) $b['isi'], true, 16, JSON_THROW_ON_ERROR), 'updated_by' => $b['updated_by'], 'updated_at' => $b['updated_at']];
+                    $isi = json_decode((string) $b['isi'], true, 16, JSON_THROW_ON_ERROR);
+                    // Teks pengganti yang bentuknya tidak lagi sama dengan bawaan (halaman yang sudah tidak
+                    // ada, atau jumlah bagiannya berubah oleh sebuah deploy) tidak dipakai: bawaan yang tampil,
+                    // dan teks lama tetap ada di tabel serta di riwayat untuk disalin ke form.
+                    if (! self::dikenal((string) $b['halaman'], $bahasa) || ! self::sebentuk($isi, self::bawaan((string) $b['halaman'], $bahasa))) {
+                        Log::event('teks.bentuk_usang', ['halaman' => $b['halaman'], 'bahasa' => $bahasa]);
+
+                        continue;
+                    }
+                    $hasil[$b['halaman']] = ['isi' => $isi, 'updated_by' => $b['updated_by'], 'updated_at' => $b['updated_at']];
                 }
                 self::$muat[$bahasa] = $hasil;
             } catch (\Throwable $e) {
@@ -90,6 +102,18 @@ final class Teks
         }
 
         return self::$muat[$bahasa] ?? [];
+    }
+
+    /**
+     * Kunci yang sama dan jumlah bagian yang sama dengan bawaan.
+     *
+     * @param array<string, mixed> $bawaan
+     */
+    private static function sebentuk(mixed $isi, array $bawaan): bool
+    {
+        return is_array($isi)
+            && array_keys($isi) === array_keys($bawaan)
+            && count((array) ($isi['bagian'] ?? [])) === count((array) ($bawaan['bagian'] ?? []));
     }
 
     /**
@@ -191,10 +215,13 @@ final class Teks
     }
 
     /**
-     * @param array<string, mixed>      $sebelum
+     * Satu baris log audit Portal (hanya ditambah). Dipakai juga oleh App\Libraries\Foto,
+     * dengan $halaman = 'foto' dan tanpa bahasa. Panggil di dalam transaksi perubahannya.
+     *
+     * @param array<string, mixed>|null $sebelum
      * @param array<string, mixed>|null $sesudah
      */
-    private static function audit(string $aksi, string $halaman, string $bahasa, array $sebelum, ?array $sesudah, string $pelaku, string $kini): void
+    public static function audit(string $aksi, string $halaman, ?string $bahasa, ?array $sebelum, ?array $sesudah, string $pelaku, string $kini): void
     {
         $request = service('request');
         $json    = static fn (?array $a): ?string => $a === null ? null : json_encode($a, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);

@@ -33,6 +33,8 @@ return [
     'privasi'          => 'سياسة الخصوصية',
     'ketentuan'        => 'شروط الاستخدام',
     'segera'           => 'قريبًا',
+    // Kredit foto di kaki halaman yang menampilkan foto (halaman depan Portal).
+    'kreditFoto'       => 'الصورة: {0}',
     'dataSaya'         => [
         'judul'         => 'بياناتي',
         'penjelasan'    => 'يمكنك تنزيل نسخة من البيانات التي يحفظها {0} عنك. يحتوي الملف على:',

@@ -174,6 +174,19 @@ done
 j="$(tanya lokakode portal /privasi)"
 if [ "$j" = "200 " ]; then ok "portal GET /privasi -> 200"; else tidak "portal GET /privasi -> '$j' (seharusnya 200)"; fi
 
+echo "9. foto pembuka Portal (tahap 11c, KONTRAK.md §16)"
+# Foto yang ditunjuk halaman depan (bawaan atau unggahan) harus benar-benar terjawab sebagai gambar.
+tanya lokakode portal / > /dev/null
+foto="$(isi lokakode | grep -o '<source type="image/avif" srcset="[^" ]*' | head -n 1 | sed 's/.*srcset="//; s/&amp;/\&/g')"
+if [ -n "$foto" ]; then
+	j="$(docker exec lokakode curl -sS -o /dev/null --max-time 10 -w '%{http_code} %{content_type}' "http://portal:8080$foto" 2>&1 || true)"
+	if [ "$j" = "200 image/avif" ]; then ok "portal: foto pembuka halaman depan ($foto) -> $j"; else tidak "portal: foto pembuka $foto -> '$j' (seharusnya 200 image/avif)"; fi
+else
+	tidak "portal: halaman depan tidak memuat <source type=\"image/avif\"> untuk foto pembuka"
+fi
+j="$(docker exec lokakode curl -sS -o /dev/null --max-time 10 -w '%{http_code}' "http://portal:8080/media/hero/smoke.php" 2>&1 || true)"
+if [ "$j" = "403" ]; then ok "portal: /media/ hanya menjawab berkas foto buatan server (smoke.php -> 403)"; else tidak "portal: /media/hero/smoke.php -> '$j' (seharusnya 403)"; fi
+
 echo
 echo "smoke: $lulus lulus, $gagal_n gagal, $tunda belum aktif"
 if [ "$gagal_n" -gt 0 ]; then
