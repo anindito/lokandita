@@ -26,7 +26,10 @@ final class LoginTest extends AuthCase
         $this->assertSame('same-origin', $http->header('Referrer-Policy'));
         $this->assertStringContainsString('no-store', (string) $http->header('Cache-Control'));
         $this->assertStringNotContainsString('<script>', $http->body, 'tidak boleh ada skrip sebaris tanpa nonce');
-        $this->assertDoesNotMatchRegularExpression('#(src|href)="https?://#', $http->body, 'tidak boleh ada aset dari host lain');
+        // Aset (skrip, gaya, gambar, bingkai) hanya dari host sendiri. Tautan <a> ke Portal — privasi dan
+        // ketentuan di kaki halaman sejak tahap 11 — bukan aset dan tidak memuat apa pun.
+        $this->assertDoesNotMatchRegularExpression('#<(?:script|link|img|iframe|source)\b[^>]*\b(?:src|href)="(?:https?:)?//#i', $http->body, 'tidak boleh ada aset dari host lain');
+        $this->assertStringContainsString('href="https://lokandita.com/privasi"', $http->body);
     }
 
     public function testLembarGayaAdalahTailwindTerkompilasiDanDisajikanSendiri(): void

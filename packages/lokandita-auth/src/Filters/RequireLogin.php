@@ -52,8 +52,9 @@ final class RequireLogin implements FilterInterface
             return redirect()->to(rtrim((string) getenv('AUTH_PUBLIC_URL'), '/') . '/ganti-password?next=' . rawurlencode($kini));
         }
 
-        // 4. Akses ke aplikasi ini.
-        if (! SessionReader::hasAccess($identitas->userId, Aplikasi::kode())) {
+        // 4. Akses ke aplikasi ini. Portal dilewati (KONTRAK.md §4): setiap sesi yang hidup
+        //    boleh membukanya, dan Portal hanya menampilkan aplikasi yang diizinkan app_access.
+        if (Aplikasi::kode() !== 'portal' && ! SessionReader::hasAccess($identitas->userId, Aplikasi::kode())) {
             Log::event('access.denied', ['user' => $identitas->userId, 'reason' => 'no_app_access', 'path' => $request->getUri()->getPath()]);
 
             return self::tolak(lang('Lokandita.tidakAdaAkses'));

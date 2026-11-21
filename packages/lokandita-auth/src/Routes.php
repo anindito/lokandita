@@ -21,11 +21,10 @@ final class Routes
     }
 
     /**
-     * Halaman sementara tahap 5; dihapus ketika aplikasi punya beranda sendiri.
+     * Rute tanpa sesi yang sama di setiap aplikasi klien: pilihan bahasa sebelum masuk.
      */
-    public static function sementara(RouteCollection $routes): void
+    public static function publik(RouteCollection $routes): void
     {
-        $routes->get('/', '\Lokandita\Auth\Controllers\Sementara::keBeranda');
-        $routes->get('beranda', '\Lokandita\Auth\Controllers\Sementara::index', ['filter' => 'masuk']);
+        $routes->get('bahasa/(:segment)', '\Lokandita\Auth\Controllers\Bahasa::atur/$1');
     }
 }

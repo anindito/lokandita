@@ -167,11 +167,21 @@ final class ClientAppTest extends TestCase
     public function testTanpaAksesAplikasiDitolak403DenganTautanPortal(): void
     {
         $lain = $this->app === 'lokakode' ? 'portal' : 'lokakode';
-        [$klien, $user] = $this->masuk(['apps' => [$lain]]);
+        [$klien, $user] = $this->masuk(['apps' => [$lain], 'nama' => 'Tanpa Akses Sini']);
         $r = $klien->get('/beranda');
+        if ($this->app === 'portal') {
+            // KONTRAK.md §4 langkah 4: Portal terbuka bagi setiap sesi yang hidup, juga tanpa
+            // akses `portal` dan juga bila akses itu dimatikan.
+            $this->assertSame(200, $r->status);
+            $this->assertStringContainsString('Tanpa Akses Sini', $r->body);
+            $this->db->query("INSERT INTO app_access (user_id, app, enabled, granted_at) VALUES ('{$user['id']}', 'portal', 0, UTC_TIMESTAMP())");
+            $this->assertSame(200, $klien->get('/beranda')->status);
+
+            return;
+        }
         $this->assertSame(403, $r->status);
         $this->assertStringContainsString('href="https://lokandita.com"', $r->body);
-        $this->assertStringNotContainsString('class="kartu">' . "\n" . '    <h1>Halo', $r->body);
+        $this->assertStringNotContainsString('Halo, Tanpa Akses Sini', $r->body);
 
         // Akses yang dimatikan (enabled = 0) sama dengan tidak punya akses.
         $this->db->query("INSERT INTO app_access (user_id, app, enabled, granted_at) VALUES ('{$user['id']}', '{$this->app}', 0, UTC_TIMESTAMP())");
@@ -292,10 +302,49 @@ final class ClientAppTest extends TestCase
         $this->assertSame('1', (string) $this->db->query("SELECT idle_logout FROM users WHERE id = '{$m['id']}'")->fetch_assoc()['idle_logout'], 'ditolak LokaAuth walau form dipalsukan');
     }
 
-    public function testAkarDialihkanKeBeranda(): void
+    /**
+     * KONTRAK.md §4 "Public routes": halaman depan publik; pembawa cookie sesi dibawa ke beranda.
+     */
+    public function testAkarPublikDanPembawaCookieDialihkanKeBeranda(): void
     {
-        $r = (new Http((string) getenv('APP_TES_URL')))->get('/');
+        $tamu = new Http((string) getenv('APP_TES_URL'));
+        $r    = $tamu->get('/');
+        $this->assertSame(200, $r->status);
+        $this->assertStringContainsString('<meta name="robots" content="index, follow">', $r->body);
+        $this->assertStringContainsString('<link rel="canonical" href="' . $this->appUrl . '/">', $r->body);
+        $this->assertStringContainsString('href="/beranda"', $r->body, 'tombol Masuk');
+        $this->assertArrayNotHasKey('lokandita_sid', $tamu->cookies);
+        $this->assertMatchesRegularExpression("/script-src 'self' 'nonce-/", (string) $r->header('Content-Security-Policy'));
+
+        // Cukup ADA cookie; hidup-tidaknya sesi diputuskan di /beranda.
+        $tamu->cookies['lokandita_sid'] = str_repeat('A', 43);
+        $r = $tamu->get('/');
+        $this->assertContains($r->status, [302, 303, 307]);
         $this->assertSame($this->appUrl . '/beranda', $r->header('Location'));
+        $this->assertSame($this->loginUrl(), $tamu->get('/beranda')->header('Location'));
+
+        [$klien] = $this->masuk();
+        $this->assertSame($this->appUrl . '/beranda', $klien->get('/')->header('Location'));
+    }
+
+    public function testBahasaSebelumMasukDisimpanDiCookieDanKembaliHanyaLokal(): void
+    {
+        $tamu = new Http((string) getenv('APP_TES_URL'));
+        $this->assertStringContainsString('<html lang="id" dir="ltr">', $tamu->get('/')->body);
+
+        $r = $tamu->get('/bahasa/ar?kembali=' . rawurlencode('/'));
+        $this->assertSame($this->appUrl . '/', $r->header('Location'));
+        $this->assertSame('ar', $tamu->cookies['__Host-bahasa'] ?? null);
+        $this->assertStringContainsString('<html lang="ar" dir="rtl">', $tamu->get('/')->body);
+
+        $tamu->get('/bahasa/en');
+        $this->assertStringContainsString('<html lang="en" dir="ltr">', $tamu->get('/')->body);
+
+        // Kode tak dikenal tidak mengubah apa pun; tujuan di luar host ini diabaikan.
+        $r = $tamu->get('/bahasa/xx?kembali=' . rawurlencode('https://evil.example/'));
+        $this->assertSame($this->appUrl . '/', $r->header('Location'));
+        $this->assertSame('en', $tamu->cookies['__Host-bahasa'] ?? null);
+        $this->assertSame($this->appUrl . '/', $tamu->get('/bahasa/id?kembali=' . rawurlencode('//evil.example'))->header('Location'));
     }
 
     public function testKlienLokaAuthMemakaiTokenAplikasiIni(): void

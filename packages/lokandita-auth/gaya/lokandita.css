@@ -78,7 +78,31 @@
   .merek { display: flex; align-items: center; gap: .6rem; font-weight: 700; font-size: 1.1rem; color: var(--teks); text-decoration: none; }
   .isi { flex: 1; width: 100%; max-width: 72rem; margin: 0 auto; padding: 1.5rem 1.25rem; }
   .isi-sempit { max-width: 26rem; margin: 2rem auto; }
-  .kaki { padding: 1rem 1.25rem; text-align: center; color: var(--teks-redup); font-size: .875rem; border-top: 1px solid var(--garis); }
+  .kaki { padding: 1rem 1.25rem; text-align: center; color: var(--teks-redup); font-size: .875rem; border-top: 1px solid var(--garis); display: flex; flex-wrap: wrap; gap: .35rem 1.5rem; justify-content: center; }
+  .kaki-tautan { display: flex; gap: 1rem; }
+
+  /* Halaman publik (Portal, halaman depan LokaKode): kepala dengan navigasi, bahasa dan tombol Masuk. */
+  .kepala-publik { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; align-items: center; justify-content: flex-end; }
+  .nav-publik { display: flex; flex-wrap: wrap; gap: 1rem; font-size: .95rem; }
+  .nav-publik a { color: var(--teks); text-decoration: none; }
+  .nav-publik a:hover, .nav-publik a[aria-current] { text-decoration: underline; }
+  .bahasa-kepala { margin-top: 0; }
+  .pembuka { padding: 2.5rem 0 1.5rem; text-align: center; }
+  .pembuka h1 { font-size: 2.1rem; line-height: 1.2; margin: 0 0 .75rem; }
+  .pembuka p { max-width: 42rem; margin: 0 auto 1.25rem; font-size: 1.1rem; color: var(--teks-redup); }
+  .petak { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); margin: 1rem 0 2rem; padding: 0; list-style: none; }
+  .petak > li, .petak > div { margin: 0; }
+  .kartu-aplikasi { display: flex; flex-direction: column; gap: .35rem; height: 100%; padding: 1.1rem 1.25rem; background: var(--kartu); border: 1px solid var(--garis); border-radius: .75rem; color: var(--teks); text-decoration: none; }
+  a.kartu-aplikasi:hover, a.kartu-aplikasi:focus-visible { border-color: var(--utama); }
+  .kartu-aplikasi strong { font-size: 1.15rem; }
+  .kartu-aplikasi span { color: var(--teks-redup); font-size: .95rem; }
+  .kartu-aplikasi .lencana { align-self: flex-start; color: var(--emas); border-color: var(--emas); }
+  .kartu-aplikasi-segera { opacity: .8; }
+  .prosa { max-width: 46rem; margin: 0 auto; }
+  .prosa h1 { font-size: 1.75rem; margin: 1rem 0 .5rem; }
+  .prosa h2 { font-size: 1.2rem; margin: 1.75rem 0 .35rem; }
+  .tanya summary { cursor: pointer; font-weight: 600; padding: .5rem 0; }
+  .tanya { border-bottom: 1px solid var(--garis); }
 
   .kartu { background: var(--kartu); border: 1px solid var(--garis); border-radius: .75rem; padding: 1.5rem; }
   h1 { font-size: 1.5rem; margin: 0 0 1rem; }
