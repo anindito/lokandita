@@ -18,12 +18,24 @@ RuteBersama::akun($routes);
 // dan pilihan bahasa. Tidak ada soal, kelas atau data mahasiswa di sini.
 $routes->get('/', 'Depan::index');
 RuteBersama::publik($routes);
+// Safe Exam Browser (SPEC.md §13.1), tanpa sesi: petunjuk, berkas .seb per mata kuliah, halaman
+// periksa header, dan alamat keluar (quitURL). Yang dibaca hanya konfigurasi SEB (KONTRAK.md §8).
+$routes->get('seb', 'Seb::petunjuk');
+$routes->get('seb/periksa', 'Seb::periksa');
+$routes->get('seb/keluar', 'Seb::keluar');
+$routes->get('seb/unduh/(:segment)', 'Seb::unduh/$1');
+
+// Filter `seb` (App\Filters\WajibSeb, KONTRAK.md §8) selalu SESUDAH `masuk`: ia hanya berlaku bagi
+// peran mahasiswa dan melewatkan staf. Setiap rute yang bisa dibuka mahasiswa memakainya, kecuali
+// ekspor data sendiri di bawah — hak atas data sendiri tidak bergantung pada SEB, dan SEB melarang unduhan.
 
 // Semua pengguna yang masuk.
-$routes->group('', ['filter' => 'masuk'], static function (RouteCollection $routes): void {
+$routes->group('', ['filter' => ['masuk', 'seb']], static function (RouteCollection $routes): void {
     $routes->get('beranda', 'Beranda::index');
     // Hasil dan kemajuan pekerjaan judge milik pengguna itu sendiri (KONTRAK.md §6).
     $routes->get('api/executions/(:segment)', 'Eksekusi::lihat/$1');
+});
+$routes->group('', ['filter' => 'masuk'], static function (RouteCollection $routes): void {
     // Ekspor data sendiri (KONTRAK.md §14): selalu milik pengguna sesi ini.
     $routes->get('data-saya', 'DataSaya::index');
     $routes->post('data-saya/unduh', 'DataSaya::unduh');
@@ -31,7 +43,9 @@ $routes->group('', ['filter' => 'masuk'], static function (RouteCollection $rout
 
 // Mahasiswa saja (SPEC.md §11): ruang latihan. Lingkupnya — pertemuan kelasnya sendiri,
 // kiriman dan drafnya sendiri — diperiksa App\Libraries\Ruang di dalam kueri.
-$routes->group('', ['filter' => 'masuk:mahasiswa'], static function (RouteCollection $routes): void {
+$routes->group('', ['filter' => ['masuk:mahasiswa', 'seb']], static function (RouteCollection $routes): void {
+    // Denyut SEB tiap 25 detik (KONTRAK.md §8): filter `seb` yang memeriksa dan memperpanjang sewa.
+    $routes->post('api/seb/denyut', 'RuangLatihan::denyutSeb');
     $routes->get('latihan/(:num)', 'RuangLatihan::pertemuan/$1');
     // Papan peringkat kelasnya sendiri saja (SPEC.md §3).
     $routes->get('latihan/(:num)/papan', 'RuangLatihan::papan/$1');
@@ -99,6 +113,10 @@ $routes->group('', ['filter' => 'masuk:superadmin,dosen'], static function (Rout
     $routes->get('kelas/(:num)/ekspor/(:segment)', 'Analitik::eksporKelas/$1/$2');
     $routes->get('mata-kuliah/(:num)/analitik', 'Analitik::matkul/$1');
     $routes->get('mata-kuliah/(:num)/ekspor/(:segment)', 'Analitik::eksporMatkul/$1/$2');
+    // Konfigurasi SEB mata kuliah (SPEC.md §13.1): superadmin dan pengampu; pengajar 403.
+    $routes->get('mata-kuliah/(:num)/seb', 'SebKelola::lihat/$1');
+    $routes->post('mata-kuliah/(:num)/seb', 'SebKelola::simpan/$1');
+    $routes->post('mata-kuliah/(:num)/seb/kunci', 'SebKelola::kunci/$1');
     // Bank soal (SPEC.md §8.1): superadmin dan pengampu; pengajar 403.
     $routes->get('soal/(:num)', 'Soal::lihat/$1');
     $routes->post('soal/(:num)/setujui', 'Soal::setujui/$1');

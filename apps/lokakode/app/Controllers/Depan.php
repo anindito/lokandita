@@ -30,6 +30,8 @@ final class Depan extends Controller
 
         return $this->response->setBody(view('depan', Publik::data(lang('Depan.judul'), lang('Depan.deskripsi')) + [
             'sebUnduh' => self::SEB_UNDUH,
+            // Hanya membaca variabel lingkungan; halaman ini tetap tidak menyentuh basis data.
+            'sebBerlaku' => getenv('SEB_ENFORCEMENT') !== 'disabled',
             'kontak'   => (string) getenv('CONTACT_EMAIL'),
             'portal'   => rtrim((string) getenv('PORTAL_URL'), '/'),
         ]));

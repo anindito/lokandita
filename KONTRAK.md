@@ -122,12 +122,12 @@ The CSRF token is not regenerated after use and lives 12 hours, so a page that s
 
 ### Public routes (since stage 11, `SPEC.md` §15)
 
-Routes that need no session. They never read the session or the identity database, and their content is the same for everybody. The only data a public page reads is the Portal's own text overrides (§15); LokaKode's landing reads no database at all:
+Routes that need no session. They never read the session or the identity database, and their content is the same for everybody. The only data a public page reads is the Portal's own text overrides (§15) and, on LokaKode's SEB pages, the SEB configurations with the code and name of their course (§8); LokaKode's landing reads no database at all:
 
 | App | Routes |
 |---|---|
 | Portal | `/`, `/tentang`, `/privasi`, `/ketentuan`, `/sitemap.xml`, `/robots.txt`; `/kontak` answers `301` to `/tentang` (the contact page became part of Tentang) |
-| LokaKode | `/` (public landing), `/robots.txt` |
+| LokaKode | `/` (public landing), `/robots.txt`, `/seb`, `/seb/periksa`, `/seb/keluar`, `/seb/unduh/<course code>.seb` (§8) |
 | every app | `/healthz`, `GET /bahasa/{id\|en\|ar}` |
 
 - `GET /` in the Portal and in LokaKode looks only at whether a `lokandita_sid` cookie **is present**: with one it redirects to `/beranda` (where §4 decides whether the session is alive), without one it shows the landing page. The value of the cookie is not read.
@@ -406,14 +406,66 @@ Rules of an import (`SPEC.md` §8.3):
 
 ## 8. Safe Exam Browser verification
 
-For each request from a mahasiswa, with `url` = `APP_URL` origin + request path + query (no fragment; the client's `Host` header is not trusted):
+Applies to requests of a user whose global role is `mahasiswa`, after §4 has identified the user: filter `seb` (`App\Filters\WajibSeb`) always follows filter `masuk`. Staff are never checked. The User-Agent is never read.
+
+For each such request, with `url` = `APP_URL` origin + the raw path and query of the request line (no fragment; the client's `Host` header is not trusted):
 
 ```
 X-SafeExamBrowser-ConfigKeyHash  ==  hex( SHA256( url + config_key ) )
 X-SafeExamBrowser-RequestHash    ==  hex( SHA256( url + browser_exam_key ) )   for any registered key of the course
 ```
 
-Both must match. `config_key` is computed by the server from the generated configuration exactly as defined by the SEB developer documentation; the `.seb` file is the same configuration, so the two cannot drift. Configurations are stored encrypted with `SEB_ENCRYPTION_KEY`.
+Both must match **for the same configuration**. The configurations that count for a student are the current ones of the courses in which the student has an `AKTIF` enrollment in the active academic year; a student none of whose courses has a configuration is refused.
+
+`config_key` is computed by the server from the generated configuration exactly as defined by the SEB developer documentation; the `.seb` file is the same configuration, so the two cannot drift. Configurations are stored encrypted with `SEB_ENCRYPTION_KEY`.
+
+### Configuration and keys
+
+```
+seb_configs    (id, course_id, version, config_enc MEDIUMBLOB, config_key CHAR(64), created_by, created_at, retired_at NULL)
+               UNIQUE(course_id, version); at most one row per course with retired_at IS NULL — the current one
+seb_exam_keys  (id, seb_config_id, exam_key CHAR(64), created_by, created_at)      UNIQUE(seb_config_id, exam_key)
+```
+
+- One settings array (`App\Libraries\Seb\Setelan::bangun`) is written twice by `App\Libraries\Seb\Plist`: as the XML plist of the file, and as the "SEB-JSON" whose SHA-256 is the Config Key. `config_enc` is that XML, encrypted (libsodium secretbox, key = SHA-256 of `SEB_ENCRYPTION_KEY`, stored as nonce + ciphertext).
+- SEB-JSON follows SEB for Windows 3.10.2 (`Json.cs`): keys sorted without regard to case (lower case first on a tie), no whitespace, no escaping, binary data as quoted Base64, `originatorVersion` left out. The generated settings hold only booleans, integers, ASCII strings, one data value, arrays and dictionaries.
+- The **Browser Exam Key cannot be computed by the server**: since SEB 3.4 it comes from the client's own integrity module. The pengampu reads it from the SEB Configuration Tool of the client version in use and registers it (lower-case hex, 64 characters, at most 20 per configuration). Keys belong to one configuration row.
+- **Rotation** retires the current row and inserts the next `version` with a new `examKeySalt`; the old file and every key registered for it stop matching at once.
+- The quit password (12–200 characters) is never stored; the configuration holds its SHA-256 as `hashedQuitPassword`.
+- The App Signature Key of SEB 3.5+ is **not** checked: it is exchanged only with SEB Server.
+
+Settings written (key names of SEB for Windows 3.10.2): `startURL` = `APP_URL/beranda`; `quitURL` = `APP_URL/seb/keluar` with `quitURLConfirm`; `allowQuit`, `hashedQuitPassword`; `sendBrowserExamKey` (switches on both headers), `examKeySalt`; `createNewDesktop` = true, `killExplorerShell` = false; `monitorProcesses` = true, `permittedProcesses` = empty, `prohibitedProcesses` (other browsers, remote-control tools, screen recorders, screen-sharing and chat applications; each `os` = 1, `active`, `strongKill`; no system process); `allowVirtualMachine`, `enablePrintScreen`, `allowScreenCapture`, `allowScreenSharing` = false; `allowedDisplaysMaxNumber` = 1; `URLFilterEnable` with one allow rule per origin of `APP_URL`, `AUTH_PUBLIC_URL` and `PORTAL_URL` (exact host, `https://.<host>`); `allowDeveloperConsole`, `allowDownloads`, `allowUploads`, `allowSpellCheck`, `allowPDFReaderToolbar`, `allowApplicationLog` = false; `clipboardPolicy` = 2 (isolated); cookies cleared at start and end. The allowed-URL list is never taken from a form.
+
+The `.seb` file is `gzip( "plnd" + gzip( plist XML ) )`: not password-protected, so a double click opens it.
+
+### Lease, heartbeat and refusal
+
+- A request that passes sets the Redis key `lokakode:seb:sewa:<user id>:<SHA-256 of the session cookie>` for 30 s (DB 0) and the page loads `/js/seb.js`, which sends `POST /api/seb/denyut` every 25 s. The heartbeat is an ordinary checked request; it answers `{ "ok": true, "sewa": 30 }`.
+- A request that fails is answered `403`: for a path under `/api/` as `{ "error": "seb_wajib", "message": … }`, otherwise as a page that names the reason (`tanpa_header`, `tanpa_konfigurasi`, `kunci_konfigurasi`, `kunci_peramban`) and links to `/seb`. On a refused heartbeat the page reloads itself and so shows that page: a lost or invalid header ends the LokaKode session within 30 s.
+- Nothing is revoked in LokaAuth: the student's session stays alive, and LokaKode simply answers `403` until the headers match again. Drafts and accepted submissions are untouched.
+- Integrity events (`integrity_events.kind`): `seb_terminated` when the refused request still held a lease (it was inside a valid SEB a moment ago; always recorded, lease deleted), otherwise `seb_rejected` (at most one per user per minute). `detail` is `{ alasan, jalur }`.
+- Without Redis the check itself still works; only the lease, and with it the difference between the two kinds, is lost (`seb.sewa_gagal` in the log).
+
+### `SEB_ENFORCEMENT`
+
+`enabled` or `disabled`; any other value stops the container at start. With `disabled` the filter checks nothing and every page of a mahasiswa carries the red banner "MODE UJI: penegakan SEB dinonaktifkan" (`Lokandita\Auth\Sisipan`, drawn by the shared layout); the container logs that state at start. Configurations, keys, the download and `/seb/periksa` work in both modes.
+
+### Routes
+
+| Route | Who | Does |
+|---|---|---|
+| `GET /seb` | public | instructions; lists the courses that have a configuration; states the supported client (SEB 3.10.x, Windows x64) |
+| `GET /seb/unduh/<course code>.seb` | public | the current file of that course; `404` when there is none |
+| `GET /seb/periksa` | public, `noindex` | whether each header arrived and, per configured course, whether it matches; never shows a key |
+| `GET /seb/keluar` | public | the `quitURL`: SEB closes when it is opened; an ordinary browser gets a short explanation |
+| `GET /mata-kuliah/{id}/seb` | superadmin, pengampu of the course | the panel |
+| `POST /mata-kuliah/{id}/seb` | same | field `sandi_keluar`: create, or rotate |
+| `POST /mata-kuliah/{id}/seb/kunci` | same | field `kunci`: Browser Exam Keys, one per line, replacing the list |
+| `POST /api/seb/denyut` | mahasiswa | heartbeat |
+
+Filter `seb` is on every route a mahasiswa can open **except** `GET /data-saya` and `POST /data-saya/unduh` (§14): the right to one's own data does not depend on SEB, and the SEB configuration forbids downloads. The account routes of §4 (`/keluar`, `/sesi/perpanjang`, `/preferensi`) are not checked either, so logging out always works.
+
+Audit (`audit_log` of LokaKode): `seb.dibuat`, `seb.dirotasi` (`{ versi }`), `seb.kunci` (`{ versi, jumlah }`) — never a key or a password.
 
 ## 9. Docker networks and names
 
@@ -502,6 +554,8 @@ Rules:
 - `LOKANDITA_APP` and `LOKANDITA_COMMIT` are baked into the image by `infra/deploy.sh`. They are not `.env` variables.
 - `judge/.env` holds `DB_DSN` (user `judge_worker`), `REDIS_URL` (DB `0`) and `JUDGE_CONCURRENCY` (1–32). The worker runs on the host, so both addresses use `127.0.0.1` instead of the container names. The worker reads `judge/.env.example` as its list of required variables and refuses to start, naming the variable, when one is missing or empty.
 
+`SEB_ENFORCEMENT` is `enabled` or `disabled` (§8); `packages/lokandita-auth/bin/cek-env.php` refuses any other value at container start and logs which of the two is in force. `SEB_ENCRYPTION_KEY` must not change while configurations exist: a stored configuration could no longer be opened and every course would need a rotation.
+
 `INSTANCE_SECRET` must never change once students have instances. It and `SEB_ENCRYPTION_KEY` are included in every backup.
 
 Values are written without quotes.
@@ -522,6 +576,7 @@ Values are written without quotes.
   7. the judge validates a small built-in problem: one `VALIDATE` job through LokaKode (`php spark judge:coba --validasi`) answers `ok` after 240 tests; nothing is stored in the problem bank.
   8. public pages and the way in (stage 11), asked directly at the app container from another app container, with the `X-Forwarded-Proto: https` header Caddy sends, so that it also works while a host is in maintenance: `GET /` of `portal` and of `lokakode` without a cookie answers `200` with an indexable page; `GET /beranda` of both without a cookie redirects to `AUTH_LOGIN_URL` with `next` equal to that app's own `/beranda`; `GET /privasi` of `portal` answers `200`.
   9. the Portal's hero photo (stage 11c, §16), asked the same way: the first AVIF file named by the landing page answers `200 image/avif`, and `/media/hero/smoke.php` answers `403`.
+  10. Safe Exam Browser (stage 10a, §8), asked the same way: `GET /seb` of `lokakode` answers `200` and names the state of enforcement that the running container has; `GET /seb/periksa` answers `200` and reports no SEB header; `SEB_ENFORCEMENT` in the running container equals the value in `apps/lokakode/.env`. `disabled` passes, with a warning line that says students are not required to use SEB.
 - `smoke.sh` additionally checks (as check 0) that every app container reports the current `HEAD` at `/healthz`.
 - In check 1 a host in maintenance must answer `503`, an open host `2xx`/`3xx`, and `www` a `301` to the apex; the certificate must validate.
 - Checks 3–5 become active in stage 5, check 6 in stage 7 and check 7 in stage 8, by a switch at the top of `smoke.sh`. Until then each prints `BELUM AKTIF`, is counted separately, and is not reported as passed.
@@ -534,6 +589,7 @@ Values are written without quotes.
 - A second LokaAuth named `auth-tes` runs for the duration of the tests on `identity_test` and Redis DB `15`. Its alias on the `internal` network is `auth-internal-tes`; client apps under test use `AUTH_INTERNAL_URL=http://auth-internal-tes:8080`. When a client app is tested it is also served as `<app>-tes`.
 - Tests talk to these containers over real HTTP (`Lokandita\Auth\Testing\Http`) and to MySQL directly. Nothing is mocked.
 - Redis DB `15` is reserved for tests and is flushed at the start of every run.
+- For `lokakode`, `infra/tes.sh` serves the same image twice: `lokakode-tes` with `SEB_ENFORCEMENT=disabled` (`APP_TES_URL`; the test client is not SEB) and `lokakode-seb-tes` with `enabled` (`APP_SEB_TES_URL`), where `tests/Seb/SebTest.php` sends headers it computes itself by the formula of §8. The value in the production `.env` plays no part. No test can show that a real SEB client sends the same headers; that is the owner's gate.
 - For `lokakode`, `infra/tes.sh` also starts a headless Chromium (`peramban-tes`, image pinned by digest) and a second Caddy (`caddy-tes`) that serves `https://lokakode.lokandita.com` with Caddy's internal certificate and forwards to `lokakode-tes`, as the production edge does. The browser sits only on the Docker network `tes-peramban`; `lokakode.lokandita.com` is mapped to `caddy-tes` and every other host name is made unresolvable, so a browser test cannot reach a production site. PHPUnit drives it over the Chrome DevTools Protocol (`Lokandita\Auth\Testing\Peramban` in the shared package, address in `PERAMBAN_TES_URL`); the tests in `tests/Peramban/` fail, not skip, when it is missing.
 - For `portal`, `infra/tes.sh` also serves `lokakode-tes` on `lokakode_test` (the stage 11 gate needs three real apps; `LOKAKODE_TES_URL`) and starts the same browser with three host names mapped — `lokandita.com` → `portal-tes`, `lokakode.lokandita.com` → `lokakode-tes`, `auth.lokandita.com` → `auth-tes` — and every other name unresolvable. `apps/portal/tests/Peramban/ArabPublikTest.php` measures there that every public page of the three apps in Arabic is the mirror of its Indonesian version. `PembukaTest.php` measures the two landing pages in Indonesian and Arabic, light and dark, at 1280 and 390 pixels: the hero image loads as AVIF or WebP from the same origin, text never lies over it, no layout shift, WCAG AA contrast, and one size and stroke width for every icon.
 - With `TANGKAPAN=<host directory>` set, `infra/tes.sh` mounts that directory into the test container (`TANGKAPAN_DIR`) and the browser tests that take screenshots write them there; without it nothing is written.

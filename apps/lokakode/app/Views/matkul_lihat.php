@@ -10,6 +10,7 @@
     <?php if ((int) $matkul['boleh_kelola'] === 1): ?>
         · <a href="/mata-kuliah/<?= (int) $matkul['id'] ?>/pertemuan"><?= lang('Soal.pertemuan.kelola') ?></a>
         · <a href="/mata-kuliah/<?= (int) $matkul['id'] ?>/analitik"><?= lang('Papan.banding.judul') ?></a>
+        · <a href="/mata-kuliah/<?= (int) $matkul['id'] ?>/seb"><?= lang('Seb.kelola.tautan') ?></a>
     <?php endif ?>
 </p>
 

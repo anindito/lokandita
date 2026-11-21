@@ -31,4 +31,16 @@ if ($missing !== []) {
     exit(1);
 }
 
+// SEB (KONTRAK.md §8, §10): hanya dua nilai yang sah; keadaan "dinonaktifkan" dicatat saat mulai.
+$seb = getenv('SEB_ENFORCEMENT');
+if (in_array('SEB_ENFORCEMENT', $keys, true)) {
+    if (! in_array($seb, ['enabled', 'disabled'], true)) {
+        fwrite(STDERR, "[{$app}] GAGAL MULAI: SEB_ENFORCEMENT harus 'enabled' atau 'disabled'\n");
+        exit(1);
+    }
+    fwrite(STDERR, $seb === 'disabled'
+        ? "[{$app}] PERINGATAN: MODE UJI — penegakan SEB dinonaktifkan (SEB_ENFORCEMENT=disabled)\n"
+        : "[{$app}] penegakan SEB aktif (SEB_ENFORCEMENT=enabled)\n");
+}
+
 fwrite(STDERR, "[{$app}] env lengkap (" . count($keys) . " variabel)\n");

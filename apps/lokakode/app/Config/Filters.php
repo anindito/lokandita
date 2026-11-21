@@ -23,6 +23,8 @@ class Filters extends BaseFilters
         'keamanan'    => SecurityHeaders::class,
         // Sesi LokaAuth: satu-satunya cara aplikasi ini mengenali pengguna (KONTRAK.md §4).
         'masuk'       => RequireLogin::class,
+        // Safe Exam Browser bagi mahasiswa; selalu dipasang sesudah `masuk` (KONTRAK.md §8).
+        'seb'         => \App\Filters\WajibSeb::class,
     ];
 
     /**

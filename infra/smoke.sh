@@ -187,6 +187,34 @@ fi
 j="$(docker exec lokakode curl -sS -o /dev/null --max-time 10 -w '%{http_code}' "http://portal:8080/media/hero/smoke.php" 2>&1 || true)"
 if [ "$j" = "403" ]; then ok "portal: /media/ hanya menjawab berkas foto buatan server (smoke.php -> 403)"; else tidak "portal: /media/hero/smoke.php -> '$j' (seharusnya 403)"; fi
 
+echo "10. Safe Exam Browser (tahap 10a, KONTRAK.md §8)"
+# Halaman petunjuk dan halaman periksa terjawab, dan keadaan penegakan yang BERJALAN di kontainer
+# sama dengan yang tertulis di apps/lokakode/.env. Keadaan "disabled" lulus, tetapi disebut jelas.
+seb_env="$(nilai_env "$AKAR/apps/lokakode/.env" SEB_ENFORCEMENT)"
+seb_jalan="$(docker exec lokakode printenv SEB_ENFORCEMENT 2>/dev/null || true)"
+j="$(tanya portal lokakode /seb)"
+case "$seb_jalan" in enabled) harap_keadaan=berlaku ;; disabled) harap_keadaan=belum ;; *) harap_keadaan=tidak-sah ;; esac
+if [ "$j" = "200 " ] && isi portal | grep -q "data-seb-keadaan=\"$harap_keadaan\""; then
+	ok "lokakode GET /seb -> 200, halaman petunjuk menyebut keadaan '$harap_keadaan'"
+else
+	tidak "lokakode GET /seb -> '$j' atau keadaan di halaman bukan '$harap_keadaan'"
+fi
+j="$(tanya portal lokakode /seb/periksa)"
+if [ "$j" = "200 " ] && isi portal | grep -q 'data-seb-periksa="tanpa_'; then
+	ok "lokakode GET /seb/periksa tanpa header SEB -> 200, melaporkan tidak ada header atau konfigurasi"
+else
+	tidak "lokakode GET /seb/periksa -> '$j' (seharusnya 200 dengan hasil tanpa_header atau tanpa_konfigurasi)"
+fi
+if [ -n "$seb_jalan" ] && [ "$seb_jalan" = "$seb_env" ]; then
+	if [ "$seb_jalan" = "disabled" ]; then
+		ok "SEB_ENFORCEMENT=disabled di .env dan di kontainer — PERINGATAN: MODE UJI, mahasiswa TIDAK diwajibkan memakai SEB"
+	else
+		ok "SEB_ENFORCEMENT=$seb_jalan di .env dan di kontainer: mahasiswa wajib memakai SEB"
+	fi
+else
+	tidak "SEB_ENFORCEMENT di kontainer ('$seb_jalan') berbeda dari apps/lokakode/.env ('$seb_env'): deploy ulang lokakode"
+fi
+
 echo
 echo "smoke: $lulus lulus, $gagal_n gagal, $tunda belum aktif"
 if [ "$gagal_n" -gt 0 ]; then

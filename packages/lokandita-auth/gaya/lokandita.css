@@ -202,6 +202,9 @@
   /* Di kepala halaman publik pilihan bahasa sebaris dengan tombol Masuk. */
   .kepala-publik .bahasa { margin-top: 0; }
 
+  /* Pita peringatan selebar halaman (Lokandita\Auth\Sisipan), mis. "MODE UJI" SEB di LokaKode. */
+  .pita-bahaya { background: #b91c1c; color: #fff; font-weight: 700; font-size: 1.125rem; text-align: center; padding: .75rem 1rem; letter-spacing: .02em; }
+
   /* Toast: di pojok, bisa ditutup, hilang sendiri (lokandita.js). */
   .toast-wadah { position: fixed; top: 4.25rem; inset-inline-end: 1rem; z-index: 40; display: flex; flex-direction: column; gap: .5rem; max-width: min(26rem, calc(100vw - 2rem)); }
   .toast { display: flex; align-items: flex-start; gap: .75rem; padding: .75rem 1rem; border-radius: .5rem; border: 1px solid var(--garis); background: var(--kartu); box-shadow: 0 4px 14px rgba(0, 0, 0, .15); }
@@ -278,6 +281,7 @@
   [dir="rtl"] .panah-balik::before { content: "\2192"; }
   /* Latihan (SPEC.md §6, §11). */
   .teks-bahaya { color: var(--bahaya); }
+  .teks-sukses { color: var(--hijau); }
   .teks-peringatan { color: var(--emas); }
   .keadaan-buka { border-color: var(--hijau); color: var(--hijau); }
   .keadaan-terjadwal { border-color: var(--emas); color: var(--emas); }

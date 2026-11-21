@@ -27,7 +27,8 @@ final class MatriksAksesTest extends KodeCase
     // Rute tanpa sesi. Hanya boleh berisi rute yang tidak membaca data apa pun.
     // Halaman depan publik dan pilihan bahasa (KONTRAK.md §4 "Public routes"): tests/Publik/DepanTest.php
     // dan ClientAppTest di paket.
-    private const PUBLIK = ['GET /', 'GET bahasa/([^/]+)'];
+    // Halaman SEB publik (petunjuk, periksa, keluar, berkas .seb): tests/Seb/SebTest.php.
+    private const PUBLIK = ['GET /', 'GET bahasa/([^/]+)', 'GET seb', 'GET seb/periksa', 'GET seb/keluar', 'GET seb/unduh/([^/]+)'];
 
     /**
      * Pola rute => [jalur untuk dunia uji, jawaban yang diharapkan per pelaku].
@@ -102,6 +103,13 @@ final class MatriksAksesTest extends KodeCase
             'POST mata-kuliah/{n}/konsep-dasar' => ['/mata-kuliah/' . $d['matkulX'] . '/konsep-dasar', ['pengajarB' => 403] + $kelolaXA],
             'GET pertemuan/{n}'                 => ['/pertemuan/' . $d['pertemuanX1'], ['pengajarB' => 403] + $kelolaXA],
             'POST pertemuan/{n}'                => ['/pertemuan/' . $d['pertemuanX1'], ['pengajarB' => 403] + $kelolaXA],
+
+            // Konfigurasi SEB mata kuliah X (SPEC.md §13.1): superadmin dan pengampu X; rincian di tests/Seb/SebTest.php.
+            'GET mata-kuliah/{n}/seb'        => ['/mata-kuliah/' . $d['matkulX'] . '/seb', ['pengajarB' => 403] + $kelolaXA],
+            'POST mata-kuliah/{n}/seb'       => ['/mata-kuliah/' . $d['matkulX'] . '/seb', ['pengajarB' => 403] + $kelolaXA],
+            'POST mata-kuliah/{n}/seb/kunci' => ['/mata-kuliah/' . $d['matkulX'] . '/seb/kunci', ['pengajarB' => 403] + $kelolaXA],
+            // Denyut SEB: hanya peran mahasiswa.
+            'POST api/seb/denyut'            => ['/api/seb/denyut', $mhs],
 
             // Pengaturan latihan dan penerbitan: sama dengan pertemuannya.
             'POST pertemuan/{n}/latihan'   => ['/pertemuan/' . $d['pertemuanX1'] . '/latihan', ['pengajarB' => 403] + $kelolaXA],
@@ -256,6 +264,8 @@ final class MatriksAksesTest extends KodeCase
             $this->db->query('SELECT * FROM meeting_problems ORDER BY id')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT id FROM imports ORDER BY id')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT id FROM judge_jobs ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT id, course_id, version, config_key, retired_at FROM seb_configs ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT seb_config_id, exam_key FROM seb_exam_keys ORDER BY id')->fetch_all(MYSQLI_ASSOC),
         ];
         $awal = $potret();
 

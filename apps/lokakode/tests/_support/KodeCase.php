@@ -25,7 +25,7 @@ abstract class KodeCase extends TestCase
         $this->db  = TestSchema::connect((string) getenv('DB_DSN'));
         $this->idn = TestSchema::connect((string) getenv('TES_IDENTITY_DSN'));
         // Urutan mengikuti kunci asing. Hanya skema *_test (dijaga TestSchema).
-        $tabel = ['ui_prefs', 'integrity_events', 'drafts', 'meeting_scores', 'problem_scores', 'submissions', 'meeting_class_windows', 'judge_jobs', 'audit_log', 'problem_instances', 'meeting_problems', 'import_items', 'imports', 'problem_versions', 'problems', 'meeting_concepts', 'course_base_concepts', 'meetings', 'enrollment_moves', 'enrollments', 'class_teachers', 'classes', 'courses', 'academic_years'];
+        $tabel = ['seb_exam_keys', 'seb_configs', 'ui_prefs', 'integrity_events', 'drafts', 'meeting_scores', 'problem_scores', 'submissions', 'meeting_class_windows', 'judge_jobs', 'audit_log', 'problem_instances', 'meeting_problems', 'import_items', 'imports', 'problem_versions', 'problems', 'meeting_concepts', 'course_base_concepts', 'meetings', 'enrollment_moves', 'enrollments', 'class_teachers', 'classes', 'courses', 'academic_years'];
         // Permintaan terakhir peramban tes sebelumnya (simpan draf otomatis) bisa tiba di tengah
         // pengosongan dan membuat kunci asing menolak; diulang sampai tiga kali.
         for ($coba = 1; ; $coba++) {

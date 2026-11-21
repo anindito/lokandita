@@ -33,8 +33,13 @@ return [
     'sebJudul'    => 'Safe Exam Browser',
     'seb'         => [
         'Mahasiswa nantinya wajib membuka LokaKode melalui Safe Exam Browser (SEB) versi 3.10.x untuk Windows 64-bit. Saat ini kewajiban itu belum diberlakukan, dan LokaKode masih bisa dibuka dengan peramban biasa.',
-        'Berkas konfigurasi dan petunjuk pemasangannya akan diumumkan di halaman ini sebelum kewajiban itu mulai berlaku. Anda sudah boleh memasang SEB dari situs resminya.',
+        'Berkas konfigurasi dan petunjuk pemasangannya sudah tersedia di halaman petunjuk SEB. Anda sudah boleh memasang SEB dan mencobanya.',
     ],
+    'sebBerlaku'  => [
+        'Mahasiswa wajib membuka LokaKode melalui Safe Exam Browser (SEB) versi 3.10.x untuk Windows 64-bit, dengan berkas konfigurasi mata kuliahnya. Peramban biasa ditolak untuk akun mahasiswa.',
+        'Berkas konfigurasi dan langkah pemasangannya ada di halaman petunjuk SEB.',
+    ],
+    'sebPetunjuk' => 'Petunjuk SEB dan berkas konfigurasi',
     'sebTautan'   => 'Unduh Safe Exam Browser dari situs resminya (safeexambrowser.org)',
     'tanyaJudul'  => 'Pertanyaan yang sering diajukan',
     'tanya'       => [

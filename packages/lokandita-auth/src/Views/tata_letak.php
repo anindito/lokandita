@@ -10,6 +10,7 @@
  * $kreditFoto (string, opsional: sumber foto yang tampil di halaman itu; ditulis di kaki).
  * Tanpa $publik halaman bertanda noindex — itu bawaannya, supaya halaman bersesi tidak
  * pernah terindeks karena lupa.
+ * Pita peringatan dan skrip tambahan per permintaan: Lokandita\Auth\Sisipan.
  * Bagian: 'isi'; 'kepala' (opsional: tag tambahan di <head>, misalnya skrip halaman itu).
  */
 $publik    = ($publik ?? false) === true;
@@ -48,6 +49,9 @@ $versi     = substr((string) getenv('LOKANDITA_COMMIT'), 0, 12);
     <link rel="icon" href="/favicon.ico">
     <link rel="stylesheet" href="/aset/lokandita.css?v=<?= esc($versi) ?>">
     <script src="/aset/lokandita.js?v=<?= esc($versi) ?>" defer></script>
+    <?php foreach (\Lokandita\Auth\Sisipan::semuaSkrip() as $skripSisipan): ?>
+    <script src="<?= esc($skripSisipan) ?>?v=<?= esc($versi) ?>" defer></script>
+    <?php endforeach ?>
     <?= $this->renderSection('kepala') ?>
 </head>
 <body<?php if (($kelasBadan ?? '') !== ''): ?> class="<?= esc($kelasBadan) ?>"<?php endif ?><?php if ($identitas !== null): ?> data-sesi-sisa="<?= $identitas->detikTersisa() ?>" data-sesi-idle="<?= $identitas->idleLogout ? '1' : '0' ?>" data-csrf="<?= esc(csrf_hash()) ?>"<?php endif ?>>
@@ -79,6 +83,9 @@ $versi     = substr((string) getenv('LOKANDITA_COMMIT'), 0, 12);
         </div>
     <?php endif ?>
 </header>
+<?php foreach (\Lokandita\Auth\Sisipan::semuaPita() as $pita): ?>
+<div class="pita-bahaya" role="alert" data-pita><?= esc($pita) ?></div>
+<?php endforeach ?>
 
 <div class="toast-wadah" aria-live="assertive">
     <?php foreach (($pesan ?? []) as $p): ?>

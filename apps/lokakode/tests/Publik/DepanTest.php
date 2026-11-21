@@ -41,16 +41,21 @@ final class DepanTest extends KodeCase
     }
 
     /**
-     * Keputusan pemilik 2026-11-21: SEB diumumkan dengan tautan ke situs resminya; berkas .seb
-     * dan petunjuk menyusul di tahap 10.
+     * SEB di halaman depan (tahap 10a): tautan ke situs resmi dan ke halaman petunjuk; berkas .seb
+     * sendiri hanya ada di halaman petunjuk. Teksnya mengikuti SEB_ENFORCEMENT kontainer itu.
      */
-    public function testSebDiumumkanDenganTautanResmiTanpaBerkasKonfigurasi(): void
+    public function testSebDiumumkanMenurutKeadaanPenegakan(): void
     {
         $r = $this->tamu()->get('/');
         $this->assertStringContainsString('3.10.x', $r->body);
-        $this->assertStringContainsString('belum diberlakukan', $r->body);
+        $this->assertStringContainsString('belum diberlakukan', $r->body, 'lokakode-tes: penegakan dinonaktifkan');
         $this->assertStringContainsString('href="https://safeexambrowser.org/download_en.html"', $r->body);
+        $this->assertStringContainsString('href="/seb"', $r->body);
         $this->assertStringNotContainsString('.seb"', $r->body);
+
+        $r = (new \Lokandita\Auth\Testing\Http((string) getenv('APP_SEB_TES_URL')))->get('/');
+        $this->assertStringNotContainsString('belum diberlakukan', $r->body, 'lokakode-seb-tes: penegakan aktif');
+        $this->assertStringContainsString('Peramban biasa ditolak untuk akun mahasiswa', $r->body);
     }
 
     /**

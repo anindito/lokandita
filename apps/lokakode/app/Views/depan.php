@@ -57,9 +57,10 @@ $berarah     = ['log-in', 'send'];
     </ul>
 
     <h2 id="seb"><?= lang('Depan.sebJudul') ?></h2>
-    <?php foreach (lang('Depan.seb') as $p): ?>
+    <?php foreach (lang($sebBerlaku ? 'Depan.sebBerlaku' : 'Depan.seb') as $p): ?>
         <p><?= esc($p) ?></p>
     <?php endforeach ?>
+    <p><a href="/seb"><?= lang('Depan.sebPetunjuk') ?></a></p>
     <p><a class="tautan-ikon" href="<?= esc($sebUnduh) ?>" rel="noopener noreferrer external"><?= Ikon::svg('external-link', '', true) ?><span><?= lang('Depan.sebTautan') ?></span></a></p>
 
     <h2><?= lang('Depan.tanyaJudul') ?></h2>

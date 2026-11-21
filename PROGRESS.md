@@ -1,5 +1,7 @@
 # Progress
 
+**Stage 10a — Safe Exam Browser (`SPEC.md` §13.1) — built and tested 2026-11-21, shipped with `SEB_ENFORCEMENT=disabled`; NOT finished: the gate needs the owner's real SEB 3.10.2 on Windows. See "Stage 10a" at the end of this file. Stage 10b (similarity, typing anomaly, integrity page, notifications, clarifications, announcements) is not started.**
+
 **Stage 11c — public pages redesigned, replaceable hero photo, logout to the Portal, Kontak merged into Tentang — deployed 2026-11-21, running `a6637c0`; smoke 29 lulus. Checked by the owner in a browser the same day, first production upload works, restore test passed with real photo files; see "Stage 11c" at the end of this file. No tag (owner's decision).**
 
 **Stage 11 — Portal and public pages (`SPEC.md` §15) — finished 2026-11-21, tag `tahap-11`, on the owner's report that the gate passed; see "Gate result for stage 11" at the end of this file.** All three hosts are open. **Next: stage 10 — SEB and integrity, communication (`SPEC.md` §13, §14), not started**; it begins in a new session with a plan for the owner's approval. Stage 13 (problem production) follows.
@@ -931,3 +933,52 @@ Deploy of `a6637c0` (the commit that holds the lines above), 2026-11-21, at the 
 - **The uploaded photo survived the redeploy**: the landing still serves `/media/hero/<the same random name>-1200.jpg`, and smoke check 9 got `200 image/avif` for its 480 px file. First proof in production that the volume `lokandita_portal_media` outlives a deploy.
 
 The commit that holds *this* deploy record differs from the running `a6637c0` only in this file and is **not deployed**: `infra/smoke.sh` check 0 and the worker heartbeat line report a mismatch until the next `infra/deploy.sh` of the four components. Nothing that runs has changed.
+
+## Stage 10a — Safe Exam Browser (2026-11-21)
+
+Stage 10 was split by the owner's decision into 10a (SEB) and 10b (the rest of `SPEC.md` §13.2 and §14). Plan approved "approve all"; decisions in `DECISIONS.md`.
+
+Built (LokaKode unless noted):
+
+- Tables `seb_configs`, `seb_exam_keys` (migration `000006`).
+- `App\Libraries\Seb`: one settings array written as the XML plist of the `.seb` file and as the SEB-JSON whose SHA-256 is the Config Key; configurations stored encrypted with `SEB_ENCRYPTION_KEY`; verification of both headers per `KONTRAK.md` §8.
+- Filter `seb` after `masuk`: mahasiswa only, by role. `enabled`: both headers must match one configuration of a course where the student is `AKTIF`; otherwise `403` (page or JSON) and an integrity event `seb_rejected` / `seb_terminated`. `disabled`: no check, red banner "MODE UJI: penegakan SEB dinonaktifkan" on every student page, logged at container start; any other value stops the container.
+- Heartbeat `POST /api/seb/denyut` every 25 s, lease 30 s in Redis.
+- Pengampu panel `/mata-kuliah/{id}/seb`: create or rotate (quit password ≥ 12 characters, only its hash kept), download the `.seb`, register Browser Exam Keys.
+- Public pages `/seb` (instructions, supported client stated), `/seb/unduh/<code>.seb`, `/seb/periksa` (do my headers match?), `/seb/keluar` (quit link). The landing page links to `/seb` and its SEB text follows the mode.
+- Shared package: `Lokandita\Auth\Sisipan` (banner and extra script in the shared layout), startup validation of `SEB_ENFORCEMENT`.
+- `infra/tes.sh lokakode` serves the image twice (`disabled` and `enabled`); `infra/smoke.sh` check 10.
+- `apps/lokakode/.env` in production: `SEB_ENFORCEMENT` changed from `enabled` to `disabled` on the owner's instruction, before the first deploy of this code.
+
+Config keys for the owner's hardening list, as written to the file: `createNewDesktop` true / `killExplorerShell` false; `monitorProcesses` true, `permittedProcesses` empty, `prohibitedProcesses` (71 entries, `strongKill`, no system process); `allowVirtualMachine` false; `enablePrintScreen`, `allowScreenCapture`, `allowScreenSharing` false; `allowedDisplaysMaxNumber` 1; `sendBrowserExamKey` true.
+
+App Signature Key: researched, **not built** — it exists only for SEB Server sessions.
+
+Verified by the agent, 2026-11-21 (output shown in the session):
+
+- `infra/tes.sh lokakode` → 252 tests, 10878 assertions, pass. 16 of them are new (`tests/Seb/`): Config Key of the downloaded file equals the stored one; both headers needed, for the same configuration and for that exact URL; a header of another URL, another course's keys, the User-Agent and a forged `Host` do not help; staff are not checked; rotation kills the old file and keys; IDOR on the panel (other pengampu 404, pengajar 403, student 403); heartbeat, lease and the two event kinds; banner in `disabled` mode for students only.
+- `infra/tes.sh auth` → 105 tests, 986 assertions; `infra/tes.sh portal` → 85 tests, 6161 assertions; `infra/tes.sh judge` → 258 passed. All pass.
+- Deploy and smoke results: next entry.
+
+**Not verified — this is the whole point of the gate:**
+
+- **No real Safe Exam Browser has touched this code.** Every "SEB request" in the tests is a header computed by the test with the formula of `KONTRAK.md` §8.
+- **Whether SEB 3.10.2 computes the same Config Key as the server.** Our calculation follows the client's source (`Json.cs`) as read on GitHub, not a published test vector.
+- **Whether the Browser Exam Key shown by the SEB Configuration Tool is the one the client sends** for a file the tool did not write. If it is not, there is no way to register a key and enforcement cannot be switched on as built; the agent must be told.
+- Whether SEB accepts the file at all (format `gzip("plnd" + gzip(XML))`), the URL filter expressions `https://.<host>`, login through LokaAuth inside SEB, Monaco inside SEB's Chromium, the quit link, and the quit password hash (SHA-256 per the key PDF; the client code that compares it was not read).
+- `originalName` of the prohibited processes that are not in SEB's built-in list (browsers, AnyDesk, RustDesk, Quick Assist, ShareX, WhatsApp, Signal, LINE, WeChat, Messenger, bdcam, parsecd, UltraViewer, msra, SnippingTool) was not checked against real Windows binaries; a wrong name may mean that process is not killed.
+- The heartbeat script and the banner were not looked at in a browser; the Arabic texts of `Seb.php` were written by the agent and not read by an Arabic speaker.
+- Two additions of the agent that were not in the approved plan and need the owner's yes or no: the quit link (`quitURL`, button on the student's home page inside SEB), and `/data-saya` staying open without SEB.
+- The terms page (Portal) is unchanged; it gets its sentence on similarity checks in 10b.
+
+Owner's gate for stage 10a (`SPEC.md` §18: "verified with real SEB 3.10.x on Windows from login to submit"). Enforcement stays `disabled` during steps 1–6, so students are not affected:
+
+1. As pengampu open `https://lokakode.lokandita.com/mata-kuliah` → a course → **Safe Exam Browser** → set a quit password → *Buat konfigurasi*. Download the `.seb` file.
+2. On Windows with SEB 3.10.2: double-click the file. Expected: SEB starts on a new desktop and shows the LokaAuth login page. **If SEB refuses the file, stop and report the message.**
+3. Inside SEB log in as a test **mahasiswa** enrolled in that course. The home page shows the red MODE UJI banner and, because SEB sent its headers, a link **Periksa Safe Exam Browser**. Open it. Expected: both headers "Ya", and for your course **Config Key: cocok**; Browser Exam Key says "tidak cocok" (nothing registered yet). **If the link is missing (no headers arrived) or Config Key says "tidak cocok", stop and report** — the agent must fix the calculation.
+4. Open the same `.seb` file in the **SEB Configuration Tool 3.10.2**, tab *Exam*, copy the Browser Exam Key **without saving the file**, paste it into the panel, *Simpan daftar kunci*.
+5. Start SEB with the file again and open the check page as in step 3. Expected: **Browser Exam Key: cocok**. If not, report.
+6. Still inside SEB as that student: open a meeting, a problem, type, Run, Submit. Try: a second monitor, PrintScreen, Alt+Tab, starting Chrome beforehand (SEB should offer to close it), the quit link on the home page, and closing SEB with the quit password.
+7. Only when 2–6 are fine, and every course with active students has a configuration and a key: set `SEB_ENFORCEMENT=enabled` in `apps/lokakode/.env`, commit nothing (the file is not in Git), run `infra/deploy.sh lokakode` and `infra/smoke.sh`. Then check as the test student: an ordinary browser gets the "harus dibuka melalui Safe Exam Browser" page; SEB works from login to submit; a staff account still works in an ordinary browser.
+
+After the gate: tag `tahap-10a`, record the result here.

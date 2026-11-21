@@ -34,11 +34,11 @@ bersih() {
 		kill "$pid_worker" 2> /dev/null || true
 		wait "$pid_worker" 2> /dev/null || true
 	fi
-	docker rm -f auth-tes "$app-tes" lokakode-tes tes-jalan caddy-tes peramban-tes > /dev/null 2>&1 || true
+	docker rm -f auth-tes "$app-tes" lokakode-tes lokakode-seb-tes tes-jalan caddy-tes peramban-tes > /dev/null 2>&1 || true
 	rm -rf "${tmp:?}"
 }
 trap bersih EXIT
-bersih_awal() { docker rm -f auth-tes "$app-tes" lokakode-tes tes-jalan caddy-tes peramban-tes > /dev/null 2>&1 || true; }
+bersih_awal() { docker rm -f auth-tes "$app-tes" lokakode-tes lokakode-seb-tes tes-jalan caddy-tes peramban-tes > /dev/null 2>&1 || true; }
 bersih_awal
 
 bangun() { # <app>
@@ -67,6 +67,17 @@ env_tes() {
 	fi
 	grep -q '^DB_DSN=.*_test$' "$tmp/$1.env" || gagal "env tes $1: DB_DSN tidak berakhiran _test"
 	grep -q '^REDIS_URL=.*/15$' "$tmp/$1.env" || gagal "env tes $1: REDIS_URL bukan DB 15"
+	# SEB (KONTRAK.md §8): tes LokaKode berjalan pada DUA kontainer sungguhan dari image yang sama —
+	# lokakode-tes dengan penegakan dinonaktifkan (klien tes bukan SEB), dan lokakode-seb-tes dengan
+	# penegakan aktif, tempat tes SEB mengirim header yang dihitungnya sendiri. Nilai di .env
+	# produksi tidak ikut menentukan.
+	if [ "$1" = "lokakode" ]; then
+		sed -i -E 's#^SEB_ENFORCEMENT=.*#SEB_ENFORCEMENT=disabled#' "$tmp/$1.env"
+		sed -E 's#^SEB_ENFORCEMENT=.*#SEB_ENFORCEMENT=enabled#' "$tmp/$1.env" > "$tmp/$1-seb.env"
+		chmod 600 "$tmp/$1-seb.env"
+		grep -q '^SEB_ENFORCEMENT=disabled$' "$tmp/$1.env" || gagal "env tes lokakode: SEB_ENFORCEMENT tidak ada"
+		grep -q '^SEB_ENFORCEMENT=enabled$' "$tmp/$1-seb.env" || gagal "env tes lokakode-seb: SEB_ENFORCEMENT tidak ada"
+	fi
 }
 
 buat_ulang_skema() { # <skema_test>
@@ -85,6 +96,7 @@ jalan() {
 	docker create --name tes-jalan --network data --env-file "$tmp/$a.env" \
 		-e AUTH_TES_URL=http://auth-tes:8080 -e AUTH_TES_SKEMA="$skema_auth" -e APP_TES_URL="http://$app-tes:8080" \
 		-e LOKAKODE_TES_URL=http://lokakode-tes:8080 \
+		-e APP_SEB_TES_URL=http://lokakode-seb-tes:8080 \
 		-e PERAMBAN_TES_URL="$url_peramban" \
 		${TANGKAPAN:+-v "$TANGKAPAN:/tangkapan" -e TANGKAPAN_DIR=/tangkapan} \
 		--entrypoint "$1" "lokandita/$a:tes" "${@:2}" > /dev/null
@@ -112,9 +124,9 @@ migrasi() {
 	echo "migrasi $1 pada $2: selesai"
 }
 
-# layani <app> <nama kontainer> [alias di jaringan internal]
+# layani <app> <nama kontainer> [alias di jaringan internal] [nama berkas env di $tmp, tanpa .env]
 layani() {
-	docker run -d --name "$2" --network data --network-alias "$2" --env-file "$tmp/$1.env" "lokandita/$1:tes" > /dev/null
+	docker run -d --name "$2" --network data --network-alias "$2" --env-file "$tmp/${4:-$1}.env" "lokandita/$1:tes" > /dev/null
 	docker network connect ${3:+--alias "$3"} internal "$2"
 	local i
 	for ((i = 1; i <= 30; i++)); do
@@ -273,6 +285,7 @@ if [ "$app" != "auth" ]; then
 	fi
 	layani "$app" "$app-tes"
 	if [ "$app" = "lokakode" ]; then
+		layani lokakode lokakode-seb-tes "" lokakode-seb
 		worker_tes
 		peramban_tes lokakode.lokandita.com=lokakode-tes
 	fi
