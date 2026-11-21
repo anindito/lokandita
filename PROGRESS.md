@@ -973,7 +973,7 @@ Verified by the agent, 2026-11-21 (output shown in the session):
 - Whether SEB accepts the file at all (format `gzip("plnd" + gzip(XML))`), the URL filter expressions `https://.<host>`, login through LokaAuth inside SEB, Monaco inside SEB's Chromium, the quit link, and the quit password hash (SHA-256 per the key PDF; the client code that compares it was not read).
 - `originalName` of the prohibited processes that are not in SEB's built-in list (browsers, AnyDesk, RustDesk, Quick Assist, ShareX, WhatsApp, Signal, LINE, WeChat, Messenger, bdcam, parsecd, UltraViewer, msra, SnippingTool) was not checked against real Windows binaries; a wrong name may mean that process is not killed.
 - The heartbeat script and the banner were not looked at in a browser; the Arabic texts of `Seb.php` were written by the agent and not read by an Arabic speaker.
-- Two additions of the agent that were not in the approved plan and need the owner's yes or no: the quit link (`quitURL`, button on the student's home page inside SEB), and `/data-saya` staying open without SEB.
+- Two additions of the agent that were not in the approved plan — the quit link (`quitURL`, button on the student's home page inside SEB), and `/data-saya` staying open without SEB — were **confirmed by the owner on 2026-11-21 ("both yes")**. Whether the quit link actually closes SEB is still part of the gate.
 - The terms page (Portal) is unchanged; it gets its sentence on similarity checks in 10b.
 
 Owner's gate for stage 10a (`SPEC.md` §18: "verified with real SEB 3.10.x on Windows from login to submit"). Enforcement stays `disabled` during steps 1–6, so students are not affected:
