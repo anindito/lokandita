@@ -25,7 +25,9 @@ final class MatriksAksesTest extends KodeCase
     private const PAKET = ['GET healthz', 'POST keluar', 'POST sesi/perpanjang', 'POST preferensi'];
 
     // Rute tanpa sesi. Hanya boleh berisi rute yang tidak membaca data apa pun.
-    private const PUBLIK = ['GET /'];
+    // Halaman depan publik dan pilihan bahasa (KONTRAK.md §4 "Public routes"): tests/Publik/DepanTest.php
+    // dan ClientAppTest di paket.
+    private const PUBLIK = ['GET /', 'GET bahasa/([^/]+)'];
 
     /**
      * Pola rute => [jalur untuk dunia uji, jawaban yang diharapkan per pelaku].
@@ -47,6 +49,10 @@ final class MatriksAksesTest extends KodeCase
 
         return [
             'GET beranda' => ['/beranda', $semua],
+            // Ekspor data sendiri (KONTRAK.md §14): semua peran, selalu data pengguna sesi itu.
+            // Bahwa berkasnya tidak memuat data orang lain diuji di tests/Publik/DataSayaTest.php.
+            'GET data-saya'         => ['/data-saya', $semua],
+            'POST data-saya/unduh'  => ['/data-saya/unduh', $semua],
             // Pekerjaan judge milik mhsA: hanya pembuatnya; superadmin dan dosen pun 404 (KONTRAK.md §6).
             'GET api/executions/([^/]+)' => ['/api/executions/' . $d['jobA'], ['mhsA' => 'ok'] + array_fill_keys(self::PELAKU, 404)],
 
@@ -312,12 +318,27 @@ final class MatriksAksesTest extends KodeCase
         $this->assertSame(0, $this->hitung('SELECT COUNT(*) FROM audit_log'), 'permintaan yang ditolak tidak menulis audit perubahan');
     }
 
-    public function testRutePublikHanyaMengalihkan(): void
+    /**
+     * Rute publik tidak membaca data: halaman depan sama persis sebelum dan sesudah dunia uji dibuat,
+     * dan tidak menyebut satu pun nama, nomor induk, kelas atau mata kuliah dari dunia itu.
+     */
+    public function testRutePublikTidakMemuatData(): void
     {
+        $bersih = static fn (string $html): string => (string) preg_replace('/nonce-[A-Za-z0-9+\/=_-]+|name="csrf" value="[^"]*"/', '', $html);
+        $sebelum = $this->tamu()->get('/');
+        $this->assertSame(200, $sebelum->status);
+
+        $d = $this->duniaLatihan();
         $r = $this->tamu()->get('/');
-        $this->assertContains($r->status, [302, 303, 307]);
-        $this->assertSame('https://lokakode.lokandita.com/beranda', $r->header('Location'));
-        $this->assertSame('', trim(strip_tags($r->body)), 'akar tidak memuat isi apa pun');
+        $this->assertSame(200, $r->status);
+        $this->assertSame($bersih($sebelum->body), $bersih($r->body), 'halaman depan berubah setelah data dibuat');
+        foreach (['superadmin', 'pengampuX', 'pengampuY', 'pengajarA', 'pengajarB', 'mhsA'] as $p) {
+            $this->assertStringNotContainsString($d[$p]['nama'], $r->body, $p);
+            $this->assertStringNotContainsString($d[$p]['nomor_induk'], $r->body, $p);
+        }
+        foreach ($this->db->query('SELECT code AS t FROM courses UNION SELECT name FROM courses UNION SELECT slug FROM problems')->fetch_all(MYSQLI_ASSOC) as $b) {
+            $this->assertStringNotContainsString($b['t'], $r->body);
+        }
     }
 
     public function testTanpaSesiSemuaRuteDitolak(): void

@@ -54,4 +54,11 @@ return [
         'cadanganPeringatan' => 'Kode ini hanya ditampilkan sekarang. Catat atau cetak, lalu simpan di tempat yang aman.',
         'sudahDisimpan'      => 'Sudah saya simpan, lanjutkan',
     ],
+    'dataSaya'           => [
+        'Data akun: nomor induk, nama, surel, peran, status, bahasa dan pengaturan akun.',
+        'Aplikasi yang boleh Anda masuki.',
+        'Sesi Anda: waktu, alamat IP dan peramban.',
+        'Percobaan masuk dengan nomor induk Anda, yang berhasil maupun yang gagal.',
+        'Riwayat tindakan atas akun Anda: waktu, jenis tindakan dan aplikasinya.',
+    ],
 ];

@@ -26,6 +26,9 @@ $routes->group('', ['filter' => 'sesi'], static function (RouteCollection $route
     $routes->post('keluar', 'Logout::keluar');
     $routes->post('sesi/perpanjang', 'Akun::perpanjang');
     $routes->post('preferensi', 'Akun::preferensi');
+    // Ekspor data sendiri (KONTRAK.md §14).
+    $routes->get('data-saya', 'DataSaya::index');
+    $routes->post('data-saya/unduh', 'DataSaya::unduh');
 });
 
 // Superadmin saja (SPEC.md §3). Peran diperiksa oleh filter, bukan oleh tampilan.

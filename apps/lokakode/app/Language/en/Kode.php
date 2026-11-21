@@ -261,4 +261,12 @@ return [
         'batal'  => 'Cancel',
         'ubah'   => 'Edit',
     ],
+    'dataSaya' => [
+        'The classes you are in or teach, and the courses you are in charge of.',
+        'Your scores per meeting and per problem.',
+        'All your submissions with their source code, judging result and score.',
+        'Automatically saved drafts.',
+        'Integrity events recorded under your name: time and kind.',
+        'The panel sizes of the problem page that you saved.',
+    ],
 ];

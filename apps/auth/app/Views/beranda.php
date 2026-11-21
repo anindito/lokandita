@@ -13,6 +13,7 @@
             <a class="tombol tombol-sekunder" href="/admin/audit"><?= lang('Admin.audit.judul') ?></a>
         <?php endif ?>
         <a class="tombol tombol-sekunder" href="/ganti-password"><?= lang('Auth.gantiSandi') ?></a>
+        <a class="tombol tombol-sekunder" href="/data-saya"><?= lang('Lokandita.dataSaya.judul') ?></a>
         <a class="tombol tombol-sekunder" href="<?= esc((string) getenv('PORTAL_URL')) ?>"><?= lang('Lokandita.kePortal') ?></a>
     </div>
 </div>

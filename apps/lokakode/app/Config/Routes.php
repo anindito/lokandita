@@ -14,15 +14,19 @@ RuteBersama::akun($routes);
 // Setiap rute baru WAJIB didaftarkan juga di tests/Policy/MatriksAksesTest.php;
 // tes itu gagal bila ada rute di sini yang tidak ada di matriksnya.
 
-// Tanpa sesi: akar hanya mengalihkan ke beranda. Halaman depan publik LokaKode
-// (SPEC.md §15) dibangun di tahap 11.
-$routes->get('/', 'Beranda::akar');
+// Tanpa sesi (KONTRAK.md §4 "Public routes"): halaman depan publik LokaKode (SPEC.md §15)
+// dan pilihan bahasa. Tidak ada soal, kelas atau data mahasiswa di sini.
+$routes->get('/', 'Depan::index');
+RuteBersama::publik($routes);
 
 // Semua pengguna yang masuk.
 $routes->group('', ['filter' => 'masuk'], static function (RouteCollection $routes): void {
     $routes->get('beranda', 'Beranda::index');
     // Hasil dan kemajuan pekerjaan judge milik pengguna itu sendiri (KONTRAK.md §6).
     $routes->get('api/executions/(:segment)', 'Eksekusi::lihat/$1');
+    // Ekspor data sendiri (KONTRAK.md §14): selalu milik pengguna sesi ini.
+    $routes->get('data-saya', 'DataSaya::index');
+    $routes->post('data-saya/unduh', 'DataSaya::unduh');
 });
 
 // Mahasiswa saja (SPEC.md §11): ruang latihan. Lingkupnya — pertemuan kelasnya sendiri,

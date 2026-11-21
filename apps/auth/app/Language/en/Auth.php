@@ -53,4 +53,11 @@ return [
         'cadanganPeringatan' => 'These codes are shown only now. Write them down or print them, and keep them somewhere safe.',
         'sudahDisimpan'      => 'I have saved them, continue',
     ],
+    'dataSaya'           => [
+        'Account data: ID number, name, e-mail, role, status, language and account settings.',
+        'The applications you may enter.',
+        'Your sessions: time, IP address and browser.',
+        'Sign-in attempts with your ID number, successful and failed.',
+        'The history of actions on your account: time, kind of action and application.',
+    ],
 ];

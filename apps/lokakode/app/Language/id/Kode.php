@@ -261,4 +261,12 @@ return [
         'batal'  => 'Batal',
         'ubah'   => 'Ubah',
     ],
+    'dataSaya' => [
+        'Kelas yang Anda ikuti atau ajar, dan mata kuliah yang Anda ampu.',
+        'Nilai Anda per pertemuan dan per soal.',
+        'Semua kiriman Anda beserta kode sumbernya, hasil penilaian dan nilainya.',
+        'Draf yang tersimpan otomatis.',
+        'Peristiwa integritas yang tercatat atas nama Anda: waktu dan jenisnya.',
+        'Ukuran panel halaman soal yang Anda simpan.',
+    ],
 ];
