@@ -1,6 +1,6 @@
 # Progress
 
-**Stage 11c — public pages redesigned, replaceable hero photo, logout to the Portal, Kontak merged into Tentang — deployed 2026-11-21 at `6dde6b7`; smoke 29 lulus. Not yet seen by the owner in a browser; see "Stage 11c" at the end of this file. No tag (owner's decision).**
+**Stage 11c — public pages redesigned, replaceable hero photo, logout to the Portal, Kontak merged into Tentang — deployed 2026-11-21, running `a6637c0`; smoke 29 lulus. Checked by the owner in a browser the same day, first production upload works, restore test passed with real photo files; see "Stage 11c" at the end of this file. No tag (owner's decision).**
 
 **Stage 11 — Portal and public pages (`SPEC.md` §15) — finished 2026-11-21, tag `tahap-11`, on the owner's report that the gate passed; see "Gate result for stage 11" at the end of this file.** All three hosts are open. **Next: stage 10 — SEB and integrity, communication (`SPEC.md` §13, §14), not started**; it begins in a new session with a plan for the owner's approval. Stage 13 (problem production) follows.
 
@@ -925,4 +925,9 @@ The owner's report, in his words: "all no 1 to 4 done" and, asked about the uplo
 
 Still open: "publish an earlier photo again" and "back to default" have not been done in production (container tests only); the uploaded photo's AVIF at 1200 px is 127 kB against 22 kB for the default, so Lighthouse numbers measured with the default photo no longer describe the live page exactly; the remaining points of "Still not verified after the deploy" except the two closed above.
 
-The commit that holds these lines differs from the deployed `0a6d9cd` only in this file and **has not been deployed**: `infra/smoke.sh` check 0 and the worker heartbeat line fail until `infra/deploy.sh` is run for the four components. Nothing that runs has changed.
+Deploy of `a6637c0` (the commit that holds the lines above), 2026-11-21, at the owner's word ("deploy"); output in the session:
+
+- `infra/cek-env.sh` → `cek-env: LULUS`; `infra/deploy.sh portal`, `auth`, `lokakode`, `judge` → each `LULUS` on `a6637c0`; `infra/smoke.sh` → `smoke: 29 lulus, 0 gagal, 0 belum aktif` / `smoke: LULUS`.
+- **The uploaded photo survived the redeploy**: the landing still serves `/media/hero/<the same random name>-1200.jpg`, and smoke check 9 got `200 image/avif` for its 480 px file. First proof in production that the volume `lokandita_portal_media` outlives a deploy.
+
+The commit that holds *this* deploy record differs from the running `a6637c0` only in this file and is **not deployed**: `infra/smoke.sh` check 0 and the worker heartbeat line report a mismatch until the next `infra/deploy.sh` of the four components. Nothing that runs has changed.
