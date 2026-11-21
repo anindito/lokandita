@@ -11,7 +11,7 @@ return [
         'altBawaan' => 'A row of computers and keyboards on a long desk in a computer lab.',
     ],
     'nav' => [
-        'tentang'   => 'About & contact',
+        'tentang'   => 'About',
         'privasi'   => 'Privacy',
         'ketentuan' => 'Terms',
     ],

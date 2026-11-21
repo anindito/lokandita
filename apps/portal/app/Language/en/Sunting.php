@@ -3,7 +3,7 @@
 // Editing the texts of the Portal's public pages by a superadmin (KONTRAK.md §15).
 return [
     'judul'       => 'Public page texts',
-    'kartu'       => 'Change the wording of the landing, About & contact, Privacy and Terms pages.',
+    'kartu'       => 'Change the wording of the landing, About, Privacy and Terms pages.',
     'pengantar'   => 'Here you change the wording of the Portal\'s public pages, per page and per language. A page that was never changed uses the default text.',
     'catatan'     => 'Translations are not made automatically: after changing the Indonesian text, update the English and Arabic texts too. Navigation labels and the pages behind sign-in cannot be changed here.',
     'kolomHalaman' => 'Page',
@@ -14,7 +14,7 @@ return [
     'halaman'     => [
         'depan'     => 'Landing page',
         'aplikasi'  => 'Application card descriptions',
-        'tentang'   => 'About & contact',
+        'tentang'   => 'About',
         'privasi'   => 'Privacy policy',
         'ketentuan' => 'Terms of use',
         'foto'      => 'Hero photo',

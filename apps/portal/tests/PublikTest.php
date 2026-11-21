@@ -77,8 +77,8 @@ final class PublikTest extends PortalCase
         $surel = (string) getenv('CONTACT_EMAIL');
         $this->assertStringContainsString('dihubungi lewat surel: <a href="mailto:' . $surel . '">' . $surel . '</a>', $r->body);
         // Navigasi: satu butir; halaman depan menaut ke halaman itu.
-        $this->assertStringContainsString('<a href="/tentang" aria-current="page">Tentang &amp; kontak</a>', $r->body);
-        $this->assertStringContainsString('<a href="/tentang">Tentang &amp; kontak</a>.', $this->tamu()->get('/')->body);
+        $this->assertStringContainsString('<a href="/tentang" aria-current="page">Tentang</a>', $r->body);
+        $this->assertStringContainsString('<a href="/tentang">Tentang</a>.', $this->tamu()->get('/')->body);
         foreach (['en' => ['Contact', 'Forgotten password'], 'ar' => ['اتصل بنا', 'نسيت كلمة المرور']] as $b => $judul) {
             $tamu = $this->tamu();
             $tamu->get('/bahasa/' . $b);

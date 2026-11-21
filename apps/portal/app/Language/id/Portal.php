@@ -11,7 +11,7 @@ return [
         'altBawaan' => 'Deretan komputer dan papan ketik di atas meja panjang sebuah laboratorium komputer.',
     ],
     'nav' => [
-        'tentang'   => 'Tentang & kontak',
+        'tentang'   => 'Tentang',
         'privasi'   => 'Privasi',
         'ketentuan' => 'Ketentuan',
     ],

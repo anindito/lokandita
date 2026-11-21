@@ -3,7 +3,7 @@
 // Penyuntingan teks halaman publik Portal oleh superadmin (KONTRAK.md §15).
 return [
     'judul'       => 'Teks halaman publik',
-    'kartu'       => 'Ubah susunan kata halaman depan, Tentang & kontak, Privasi dan Ketentuan.',
+    'kartu'       => 'Ubah susunan kata halaman depan, Tentang, Privasi dan Ketentuan.',
     'pengantar'   => 'Di sini Anda mengubah susunan kata halaman publik Portal, per halaman dan per bahasa. Halaman yang belum pernah diubah memakai teks bawaan.',
     'catatan'     => 'Terjemahan tidak dibuat otomatis: sesudah mengubah teks Indonesia, perbarui juga teks Inggris dan Arabnya. Label navigasi dan halaman sesudah masuk tidak bisa diubah di sini.',
     'kolomHalaman' => 'Halaman',
@@ -14,7 +14,7 @@ return [
     'halaman'     => [
         'depan'     => 'Halaman depan',
         'aplikasi'  => 'Keterangan kartu aplikasi',
-        'tentang'   => 'Tentang & kontak',
+        'tentang'   => 'Tentang',
         'privasi'   => 'Kebijakan privasi',
         'ketentuan' => 'Ketentuan penggunaan',
         'foto'      => 'Foto pembuka',
