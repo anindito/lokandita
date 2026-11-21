@@ -41,6 +41,16 @@ final class LoginGuard
     }
 
     /**
+     * @param array<string, mixed> $user
+     */
+    public static function sandiAwalKedaluwarsa(array $user): bool
+    {
+        $batas = $user['initial_password_expires_at'] ?? null;
+
+        return (int) $user['must_change_password'] === 1 && $batas !== null && Clock::toUnix((string) $batas) <= time();
+    }
+
+    /**
      * @return array{ok: bool, reason: string, user: array<string, mixed>|null}
      */
     private static function decide(string $nomorInduk, string $password, string $ip): array
@@ -68,6 +78,11 @@ final class LoginGuard
             self::recordFailure($user);
 
             return ['ok' => false, 'reason' => 'wrong_password', 'user' => $user];
+        }
+        // Kata sandi awal yang tidak diganti sampai batasnya tidak berlaku lagi (KONTRAK.md §13).
+        // Bukan percobaan yang salah, jadi tidak menambah hitungan kunci; jalan keluarnya reset.
+        if (self::sandiAwalKedaluwarsa($user)) {
+            return ['ok' => false, 'reason' => 'initial_password_expired', 'user' => $user];
         }
 
         return ['ok' => true, 'reason' => 'ok', 'user' => $user];

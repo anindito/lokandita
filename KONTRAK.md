@@ -52,6 +52,7 @@ users
   id CHAR(36) PK (UUID v4)        nomor_induk VARCHAR(40) UNIQUE NOT NULL
   email VARCHAR(190) UNIQUE NULL  nama VARCHAR(190) NOT NULL
   password_hash VARCHAR(255)      must_change_password TINYINT(1) DEFAULT 1
+  initial_password_expires_at DATETIME NULL   -- §13, deadline for the initial password
   global_role ENUM('superadmin','dosen','mahasiswa')
   status ENUM('active','suspended','disabled') DEFAULT 'active'
   mfa_enabled TINYINT(1) DEFAULT 0   mfa_secret_enc VARBINARY(255) NULL
@@ -541,6 +542,15 @@ Everything in this section is a `spark` command that previews by default and wri
 - The shared initial password is read from the environment variable `SANDI_AWAL` (passed by name with `docker exec -e SANDI_AWAL`, never as an argument), must pass the password policy, and is never printed or audited. Every account is created with `must_change_password = 1`.
 - Any bad row refuses the whole write, so that the number of accounts can equal the file. An account that already exists is left untouched, password included.
 - Output holds counts, line numbers and reason codes only — no name and no nomor induk. Audit: `user.created` per account (`via: import`) and one `user.imported` with the counts and `lewat: cli`.
+
+### Deadline for the initial password
+
+`docker exec auth php spark akun:batas-sandi-awal --oleh <nomor induk> --sampai <YYYY-MM-DD> [--jalankan]`
+
+- Sets `users.initial_password_expires_at` (UTC, nullable; not part of the views for client apps) to the end of that date in Asia/Jakarta, for every active mahasiswa who must still change the password and has had no other password since the account was created (exactly one row in `password_history`). It can be repeated with another date. A date already past is refused.
+- At login (`LoginGuard`), a correct password of an account with `must_change_password = 1` whose deadline has passed is refused with reason `initial_password_expired`: the same screen text as a wrong password, audit `login.failed` with that reason, no increase of `failed_attempts`. A session that already exists is not ended.
+- Any new password — the user's own change, a reset from LokaAuth or from a client app (`POST /internal/password-reset`) — sets the column back to `NULL`. A reset is the only way back in after the deadline.
+- Output holds counts and the deadline only. Audit: one `password.initial_deadline` with `until`, `accounts`, `changed` and `lewat: cli`.
 
 ### Source files in `/srv/lokandita-data/`
 

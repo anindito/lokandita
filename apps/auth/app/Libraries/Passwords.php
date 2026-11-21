@@ -88,6 +88,7 @@ final class Passwords
         $db->table('users')->where('id', $userId)->update([
             'password_hash'        => $hash,
             'must_change_password' => $mustChange ? 1 : 0,
+            'initial_password_expires_at' => null, // kata sandi baru, batas kata sandi awal tidak berlaku lagi
             'failed_attempts'      => 0,
             'locked_until'         => null,
             'updated_at'           => Clock::now(),
@@ -118,6 +119,7 @@ final class Passwords
         $db->table('users')->where('id', $userId)->update([
             'password_hash'        => $hash,
             'must_change_password' => 1,
+            'initial_password_expires_at' => null,
             'failed_attempts'      => 0,
             'locked_until'         => null,
             'updated_at'           => Clock::now(),

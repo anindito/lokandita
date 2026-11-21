@@ -46,7 +46,7 @@ final class IdentitySchemaTest extends TestCase
     {
         $kolom = array_column($this->db->query('SHOW COLUMNS FROM users')->fetch_all(MYSQLI_ASSOC), 'Field');
         $this->assertSame([
-            'id', 'nomor_induk', 'email', 'nama', 'password_hash', 'must_change_password', 'global_role', 'status',
+            'id', 'nomor_induk', 'email', 'nama', 'password_hash', 'must_change_password', 'initial_password_expires_at', 'global_role', 'status',
             'mfa_enabled', 'mfa_secret_enc', 'failed_attempts', 'locked_until', 'idle_logout', 'locale',
             'paste_allowed', 'last_login_at', 'created_by', 'created_at', 'updated_at',
         ], $kolom);
