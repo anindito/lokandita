@@ -99,7 +99,7 @@ Implemented once in `packages/lokandita-auth`; apps do not reimplement it.
 1. Read cookie `lokandita_sid`. Absent → redirect to `AUTH_LOGIN_URL?next=<current absolute URL>`.
 2. `SELECT * FROM session_identity WHERE token_hash = SHA2(cookie, 256)` through `IDENTITY_READER_DSN`. No row → redirect as above.
 3. `must_change_password = 1` → redirect to `AUTH_PUBLIC_URL/ganti-password?next=…`.
-4. Check `app_access` for this app with `enabled = 1`. Missing → 403 page with a link to the Portal.
+4. Check `app_access` for this app with `enabled = 1`. Missing → 403 page with a link to the Portal. **The Portal itself skips this step** (since stage 11): every live session may open the Portal, which then shows only the apps that `app_access` allows. The value `portal` stays in the schema and blocks nothing.
 5. If `last_seen_at` is older than 5 minutes, call `POST /internal/session/touch` (§5). A failure here is logged and does **not** fail the request.
 
 `next` is honoured by LokaAuth only when the scheme is `https` and the host is exactly one of `ALLOWED_HOSTS`.
@@ -120,7 +120,20 @@ Every app, LokaAuth included, answers these three routes; in client apps they ar
 
 The CSRF token is not regenerated after use and lives 12 hours, so a page that stays open, a second tab, and the background `/sesi/perpanjang` call do not invalidate each other.
 
-`GET /` and `GET /beranda` in the Portal are temporary pages of stage 5 (`Lokandita\Auth\Routes::sementara()`), replaced in stage 11. LokaKode has its own `/beranda` since stage 6; its `GET /` needs no session and only redirects to `/beranda` until the public landing of stage 11.
+### Public routes (since stage 11, `SPEC.md` §15)
+
+Routes that need no session. They never read the session, the identity database or the app's own database, and their content is the same for everybody:
+
+| App | Routes |
+|---|---|
+| Portal | `/`, `/tentang`, `/kontak`, `/privasi`, `/ketentuan`, `/sitemap.xml`, `/robots.txt` |
+| LokaKode | `/` (public landing), `/robots.txt` |
+| every app | `/healthz`, `GET /bahasa/{id\|en\|ar}` |
+
+- `GET /` in the Portal and in LokaKode looks only at whether a `lokandita_sid` cookie **is present**: with one it redirects to `/beranda` (where §4 decides whether the session is alive), without one it shows the landing page. The value of the cookie is not read.
+- `GET /bahasa/{locale}?kembali=<local path>` (`Lokandita\Auth\Controllers\Bahasa`, registered by `Lokandita\Auth\Routes::publik()`; LokaAuth uses the same controller) sets `__Host-bahasa` (§2) for one year and redirects to `kembali`, which is honoured only as a path on the same host (`Akun::kembali`); otherwise `/`. An unknown locale sets nothing. For a user with a session the language of the account wins (§3 `locale`).
+- Public pages are indexable; every page behind a session carries `noindex, nofollow` and `Cache-Control: no-store`. The "Masuk" button of a public page is a link to `/beranda` of the same app.
+- `GET /beranda` in the Portal (session, any role) shows name, role and one card per app in `app_access` with `enabled = 1`: an app that is built (`lokakode`, address from `LOKAKODE_URL`) as a link, one that is not built yet (`lokaujian`, `lokasiber`) as "segera" without a link. `portal` itself is not a card.
 
 Client apps read names and nomor induk from `user_directory`, and app access from `app_access`, through `Lokandita\Auth\UserDirectory` (same `identity_reader` connection as the session check, `Lokandita\Auth\ReaderDb`). They do not copy this data into their own schema; a `user_id` stored by a client app is `users.id`.
 
@@ -439,6 +452,7 @@ Each app validates its required variables at start and exits naming the missing 
 | `COOKIE_DOMAIN` (`.lokandita.com`) | ✔ | ✔ | ✔ | |
 | `ALLOWED_HOSTS` (comma list) | ✔ | | | |
 | `PORTAL_URL` | ✔ | ✔ | ✔ | |
+| `LOKAKODE_URL` (address of LokaKode for links from the Portal) | | | ✔ | |
 | `DB_DSN` (own schema) | ✔ | ✔ | ✔ | ✔ |
 | `IDENTITY_READER_DSN` | | ✔ | ✔ | |
 | `REDIS_URL` | ✔ | ✔ | ✔ | ✔ |
@@ -505,6 +519,7 @@ Values are written without quotes.
   5. `identity_reader` can select from `session_identity` and cannot select from `users`;
   6. the judge worker is running and a trivial `RUN` job completes.
   7. the judge validates a small built-in problem: one `VALIDATE` job through LokaKode (`php spark judge:coba --validasi`) answers `ok` after 240 tests; nothing is stored in the problem bank.
+  8. public pages and the way in (stage 11), asked from the Caddy container directly at the app containers so that it also works while a host is in maintenance: `GET /` of `portal` and of `lokakode` without a cookie answers `200` with an indexable page; `GET /beranda` of both without a cookie redirects to `AUTH_LOGIN_URL` with `next` equal to that app's own `/beranda`; `GET /privasi` of `portal` answers `200`.
 - `smoke.sh` additionally checks (as check 0) that every app container reports the current `HEAD` at `/healthz`.
 - In check 1 a host in maintenance must answer `503`, an open host `2xx`/`3xx`, and `www` a `301` to the apex; the certificate must validate.
 - Checks 3–5 become active in stage 5, check 6 in stage 7 and check 7 in stage 8, by a switch at the top of `smoke.sh`. Until then each prints `BELUM AKTIF`, is counted separately, and is not reported as passed.
@@ -584,3 +599,29 @@ So a leftover test class, account or enrollment makes the check fail until it is
 Output of all these commands holds counts, class names, line numbers and reason codes only — no name and no nomor induk.
 
 The same holds for the terminal's stderr: an audit row written from a `spark` command is not mirrored as a structured log line (`Audit::log` in LokaAuth, `Audit::catat` in LokaKode), because there stderr is the operator's terminal, not the container log. From the web the mirror line is still written to the container log, and in LokaAuth it never carries `nomor_induk`, `nama`, `name` or `email` from the audit detail (`Audit::untukLog`); a person appears in a log line by id only. The audit row in the database keeps the full detail.
+
+## 14. Export of a user's own data (`SPEC.md` §16)
+
+Each app exports only what it stores itself; there is no internal API for it and no app reads another app's tables for it. LokaAuth and LokaKode both answer:
+
+| Route | Does |
+|---|---|
+| `GET /data-saya` | session; a page that says what the file holds, with the download button |
+| `POST /data-saya/unduh` | session, CSRF field `csrf`; answers the file |
+
+The Portal's `GET /data-saya` (session) only links to those two pages (LokaKode when the user has `lokakode` access).
+
+- The file is JSON, `Content-Disposition: attachment; filename="lokandita-<app>-data-saya.json"`, `Cache-Control: no-store`.
+- Every query is bound to `user_id` of the session. No route takes an id, so nobody — a superadmin included — can export somebody else's data this way.
+- At most one download per user per 60 seconds per app (Redis key `ekspor:<user id>` in the app's own Redis DB); sooner → `429` and a page that says so. When Redis cannot be reached the download is allowed and the failure is logged.
+- Every download writes `data.diekspor` to that app's `audit_log` (actor and target are the user).
+- Lists are newest first and hold at most 5000 rows each; a list that was cut is named in `terpotong`.
+
+Common top level: `{ "aplikasi": "auth|lokakode", "dibuat": "<ISO 8601 UTC>", "pengguna": "<users.id>", "terpotong": ["<list name>"], … }`. Times are UTC.
+
+| App | Keys |
+|---|---|
+| LokaAuth | `akun` (`id, nomor_induk, nama, email, global_role, status, locale, idle_logout, paste_allowed, mfa_enabled, must_change_password, created_at, last_login_at`), `akses_aplikasi[]` (`app, enabled, granted_at`), `sesi[]` (`created_at, last_seen_at, expires_at, revoked_at, ip, user_agent`), `percobaan_masuk[]` (`created_at, ip, success`, by the user's nomor induk), `riwayat[]` (`created_at, action, app, sebagai` = `pelaku` or `sasaran`; rows of `audit_log` where the user is actor or target) |
+| LokaKode | `pendaftaran[]` (`mata_kuliah, kelas, tahun_ajaran, status`), `mengajar[]` (`mata_kuliah, kelas, tahun_ajaran`), `mengampu[]` (`mata_kuliah`), `nilai_pertemuan[]`, `nilai_soal[]`, `kiriman[]` (with the user's own `source`, verdict and score), `draf[]`, `peristiwa_integritas[]` (`created_at, kind`), `preferensi_tampilan` |
+
+Never in any export: `password_hash`, `password_history`, `mfa_secret_enc`, backup codes, `token_hash` or any session value, the `detail` of an audit row, `problem_instances.tests` or anything else of hidden tests, generators and reference solutions, and any row that belongs to another person.
