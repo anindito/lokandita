@@ -11,11 +11,13 @@ use PHPUnit\Framework\TestCase;
  * Tata letak halaman publik ketiga aplikasi dalam bahasa Arab (kanan-ke-kiri), di
  * peramban sungguhan (Chromium tanpa layar lewat caddy-tes, seperti produksi).
  *
- * Aturannya (pemilik, 2026-11-21): halaman Arab adalah CERMIN halaman Indonesia —
- *   - kepala mulai dari tepi kanan: merek di kanan, tombol dan bahasa di kiri;
- *   - judul pembuka, paragraf, tombol dan catatannya rata kanan dan mulai di tepi kanan
- *     kolom isi, sebagaimana versi Indonesia mulai di tepi kiri;
- *   - kolom isi sama lebar dan sama letaknya, dicerminkan.
+ * Aturannya (pemilik, 2026-11-21):
+ *   - kepala Arab mulai dari tepi kanan: merek di kanan, tombol dan bahasa di kiri — cermin
+ *     kepala Indonesia;
+ *   - kolom isi sama lebar dan sama letaknya, dicerminkan;
+ *   - pembuka Arab (judul, paragraf, tombol, catatan) rata kanan dan mulai di tepi kanan kolom
+ *     isi; pembuka Indonesia dan Inggris tetap DIPUSATKAN;
+ *   - kolom teks Arab mulai di tepi kanan kolom isi; kolom teks Indonesia di tengah.
  *
  * Tes ini mengukur kotak elemen yang benar-benar digambar peramban; ia tidak menilai
  * mutu bahasa Arabnya. Dengan TANGKAPAN_DIR terisi (infra/tes.sh, variabel TANGKAPAN),
@@ -99,7 +101,7 @@ final class ArabPublikTest extends TestCase
     /**
      * @dataProvider halaman
      */
-    public function testHalamanArabAdalahCerminHalamanIndonesia(string $asal, string $jalur): void
+    public function testTataLetakArabDanIndonesia(string $asal, string $jalur): void
     {
         $nama = (string) $this->dataName();
         $p    = new Peramban($asal);
@@ -135,18 +137,17 @@ final class ArabPublikTest extends TestCase
             $this->assertContains($k['rata'], ['right', 'start'], "{$apa} harus rata kanan, ternyata {$k['rata']}");
             $this->assertSame('rtl', $k['arah'], $apa);
             $this->assertDekat($ar['isi']['isiKanan'], $k['kanan'], "{$apa} harus mulai di tepi KANAN kolom isi");
-            // Cermin versi Indonesia: sama lebar, dan jaraknya dari tepi sama.
-            $this->assertContains($id['pembuka'][$i]['rata'], ['left', 'start'], "{$apa} (id) rata kiri");
-            $this->assertDekat($id['isi']['isiKiri'], $id['pembuka'][$i]['kiri'], "{$apa} (id) mulai di tepi kiri kolom isi");
-            $this->assertDekat($id['pembuka'][$i]['kiri'], $L - $k['kanan'], "{$apa}: cermin versi Indonesia");
+            // Versi Indonesia (dan Inggris) dipusatkan: teksnya rata tengah dan kotaknya di tengah kolom isi.
+            $t = $id['pembuka'][$i];
+            $this->assertSame('center', $t['rata'], "{$apa} (id) harus rata tengah");
+            $this->assertDekat(($id['isi']['isiKiri'] + $id['isi']['isiKanan']) / 2, ($t['kiri'] + $t['kanan']) / 2, "{$apa} (id) harus di tengah kolom isi");
         }
 
         // Halaman teks: kolom prosa dicerminkan dan isinya rata kanan dari tepi kanannya.
         if ($ar['prosa'] !== null) {
             $this->assertDekat($id['prosa']['lebar'], $ar['prosa']['lebar'], "{$nama}: lebar kolom teks");
-            $this->assertDekat($Lid - $id['prosa']['kanan'], $ar['prosa']['kiri'], "{$nama}: letak kolom teks (cermin)");
             $this->assertDekat($ar['isi']['isiKanan'], $ar['prosa']['kanan'], "{$nama}: kolom teks harus mulai di tepi KANAN kolom isi");
-            $this->assertDekat($id['isi']['isiKiri'], $id['prosa']['kiri'], "{$nama}: (id) kolom teks mulai di tepi kiri kolom isi");
+            $this->assertDekat(($id['isi']['isiKiri'] + $id['isi']['isiKanan']) / 2, ($id['prosa']['kiri'] + $id['prosa']['kanan']) / 2, "{$nama}: (id) kolom teks di tengah kolom isi");
             $this->assertNotSame([], $ar['prosaAnak']);
             foreach ($ar['prosaAnak'] as $i => $k) {
                 $this->assertContains($k['rata'], ['right', 'start'], "{$nama}: teks ke-" . ($i + 1) . ' rata kanan');
@@ -156,6 +157,21 @@ final class ArabPublikTest extends TestCase
         // Kartu login LokaAuth: di tengah pada kedua bahasa, jadi cerminnya adalah dirinya sendiri.
         if ($ar['kartu'] !== null) {
             $this->assertDekat($Lid - $id['kartu']['kanan'], $ar['kartu']['kiri'], "{$nama}: letak kartu (cermin)");
+        }
+    }
+
+    /**
+     * Bahasa Inggris mengikuti Indonesia: pembuka dipusatkan.
+     */
+    public function testPembukaInggrisDipusatkan(): void
+    {
+        foreach ([[self::PORTAL, 'portal-depan-en'], [self::KODE, 'lokakode-depan-en']] as [$asal, $nama]) {
+            $en = $this->ukur(new Peramban($asal), 'en', '/', 1280, $nama);
+            $this->assertGreaterThanOrEqual(4, count($en['pembuka']), $nama);
+            foreach ($en['pembuka'] as $i => $t) {
+                $this->assertSame('center', $t['rata'], "{$nama}: pembuka anak ke-" . ($i + 1));
+                $this->assertDekat(($en['isi']['isiKiri'] + $en['isi']['isiKanan']) / 2, ($t['kiri'] + $t['kanan']) / 2, "{$nama}: pembuka anak ke-" . ($i + 1) . ' di tengah kolom isi');
+            }
         }
     }
 

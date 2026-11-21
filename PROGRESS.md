@@ -782,3 +782,13 @@ Carried into the next stages:
 - Stage 10: SEB enforcement, `.seb` download and instructions page; then update the SEB section of the LokaKode landing and the terms. Integrity pages, similarity, communication.
 - Portal artwork when the owner supplies it; an Open Graph image for the Portal.
 - All three hosts are open. 233 student accounts carry the initial-password deadline of 1 December 2026.
+
+After the tag, 2026-11-21 — hero centred again for Indonesian and English (the owner's correction: "I still want the English and Indonesian to be centre aligned but Arabic right aligned"):
+
+- The hero (`.pembuka`) and the text column (`.prosa`) are centred as they were when the gate was run; for Arabic only (`[dir=rtl]`) they are right-aligned and start at the right edge of the content column. The sentence above that the Indonesian and English hero moved to the left edge no longer holds.
+- `ArabPublikTest` asserts both sides: for `id` (seven pages) and `en` (the two landings) every hero child is `text-align: center` with its box centred in the content column, and the text column is centred; for `ar` the assertions of the fix are unchanged. `infra/tes.sh portal` → `OK (54 tests, 1778 assertions)`; `infra/tes.sh auth` → `OK (105 tests, 986 assertions)`.
+- **`infra/tes.sh lokakode` was not rerun for this change** when this entry was written (stylesheet rules for two public-page classes and a Portal test only); its last result is the `OK (236 tests, 10014 assertions)` above.
+- The owner confirmed the Arabic pages of the first fix in his browser ("No 1. is okay"), which also settles the top-bar report.
+- The screenshots in `docs/tangkapan/tahap-11/` were replaced by those of this version; `portal-depan-en.png` added.
+- The tag `tahap-11` stays on `0bb9f79`; this change is one commit after it. Deploy and smoke results of that commit are in the next entry.
+
