@@ -1,5 +1,7 @@
 # Progress
 
+**Stage 11c (visual follow-up, replaceable hero photo, logout to the Portal, Kontak merged into Tentang) is committed at `4ce836d` and pushed but NOT DEPLOYED — the agent's deploy was refused by its permission system on 2026-11-21; production still runs `70b3f0e`. See "Stage 11c" at the end of this file for the commands the owner must run.**
+
 **Stage 11 — Portal and public pages (`SPEC.md` §15) — finished 2026-11-21, tag `tahap-11`, on the owner's report that the gate passed; see "Gate result for stage 11" at the end of this file.** All three hosts are open. **Next: stage 10 — SEB and integrity, communication (`SPEC.md` §13, §14), not started**; it begins in a new session with a plan for the owner's approval. Stage 13 (problem production) follows.
 
 Stage 12 — production data — finished 2026-11-20, tag `tahap-12`, done ahead of stages 10 and 11 by the owner's decision; see "Stage 12" at the end of this file. Work done after the tag (class names, the log fix, the deadline for the initial password) is listed there too.
@@ -826,3 +828,58 @@ Deploy of stage 11b, 2026-11-21, at `002d4bf` (output in the session):
 - **Nothing has been edited in production**, so a real save, the preview and the history have run only in the test containers. The owner's check: log in as superadmin at `https://lokandita.com`, open *Teks halaman publik*, change one sentence of Tentang, press Pratinjau, then Simpan, look at `https://lokandita.com/tentang` in a private window, then *Kembalikan ke teks bawaan*.
 - No new tag: `tahap-11` stays on `0bb9f79`. The commit that holds these lines differs from `002d4bf` only in this file and was deployed after it so that `/healthz` reports `HEAD`; that output is in the session.
 
+## Stage 11c — public pages redesigned, replaceable hero photo, logout to the Portal, Kontak merged into Tentang (2026-11-21, after stage 11b, before stage 10)
+
+Asked for by the owner on 2026-11-21; plan presented and approved the same day ("approve all"). During the work he added: "redirect all logout to the portal lokandita.com", "combine Tentang and Kontak page", then "remove kontak and just put it contents in Tentang". Decisions: `DECISIONS.md`, 2026-11-21. Contract: `KONTRAK.md` §2, §4, §9, §11, §15, new §16. Commits: `e62b6e2` (logout), `4ce836d` (everything else). No tag, by the owner's decision.
+
+**NOT DEPLOYED.** `infra/deploy.sh` was refused by the agent's permission system ("Production Deploy") and was not worked around. Production runs `70b3f0e`. Everything below marked "after deploy" has therefore not been done.
+
+Built:
+
+- **Logout**: LokaAuth's own Keluar and `/keluar-selesai` (where the other apps send the browser) end on `PORTAL_URL/`. The login page no longer says "you have logged out".
+- **Hero**: split layout on both landings — text at the start edge, image on the other side, mirrored for Arabic, stacked on a phone; never text over the photo. Portal: `<picture>` with AVIF / WebP / JPEG at 480, 768, 1200 and 1600 px, `width` and `height`, alt text in three languages, credit "Foto: Josh Sorenson / Pexels" in the footer. LokaKode: the same layout with `lokakode/logo.png` from the branding archive.
+- **Icons**: Lucide 1.77.0 (ISC), 24 SVG files in `packages/lokandita-auth/ikon/`, inline, one size and stroke width; app cards, features, steps, contact, footer links. Decorative ones `aria-hidden`; arrows, log-in/out, send and external-link flip in Arabic. The footer of every page of the three apps now has icons (one shared partial).
+- **Polish**: spacing scale, one card style, hover and focus states, underlined links inside sentences, "Segera" badge with readable contrast. Existing colour tokens only.
+- **Replaceable hero photo** in the existing editor: `/admin/teks/foto` — upload (alt text id/en/ar, source, licence, tick box), preview on the real landing partial in Indonesian and Arabic, publish, publish an earlier one again, back to default. Tables `portal.foto` and `portal.foto_tayang`; actions in `portal.audit_log` and on `/admin/teks/riwayat`.
+- **Upload pipeline** (`App\Libraries\Gambar`, GD rebuilt with JPEG / WebP / AVIF, plus `exif`): type from content, 10 MB, 30 megapixels read from the header, at least 1600 × 900, re-encoded into twelve files with random names, original discarded. The default photo's files are made by the same code at image build.
+- **Operations**: volume `lokandita_portal_media` at `/srv/media` in `portal`; Apache serves `/media/` with PHP off and only server-made names; `infra/backup.sh` adds `media.tar.gz`; `infra/uji-restore.sh` unpacks and verifies it; `infra/tes-infra.sh` section A2; `infra/smoke.sh` check 9; `docs/RESTORE.md`.
+- **Brand**: used `lokakode/logo.png` (LokaKode hero) and the icons already placed in stage 11. Not placed: `lokaauth/logo.png`, `lokaauth/og-image.png`, the `icon-512` and `icon-16` files (no page of this scope needs them). The archive holds nothing for the Portal: it keeps the LokaAuth icon, and its Open Graph image is a 1200 × 630 crop of the hero photo.
+- **Kontak**: the page is gone. Its content is the last four sections of the Tentang text ("Kontak", "Lupa kata sandi", "Belum punya akun", "Melaporkan masalah"), in three languages; one editor entry; `/kontak` answers 301 to `/tentang`; navigation entry "Tentang & kontak"; sitemap without `/kontak`. A stored override whose shape no longer matches the default is not shown (`teks.bentuk_usang`).
+- `docs/branding/LISENSI.md`: photo (source, licence, download date) and icon set.
+
+Verified by the agent, in test containers (output in the session):
+
+- `infra/tes.sh portal` → `OK (85 tests, 6159 assertions)`; `infra/tes.sh lokakode` → `OK (236 tests, 10018 assertions)`; `infra/tes.sh auth` → `OK (105 tests, 986 assertions)`. Real MySQL, Redis, HTTP between containers, real GD, real Chromium. `infra/tes.sh judge` not run (the worker did not change).
+- `FotoAdminTest` (7 tests): a PHP file named `.jpg`, a JPEG header followed by PHP, GIF, SVG and text are refused; a valid JPEG with PHP appended is accepted and none of its twelve served files contains the appended bytes; a JPEG with real EXIF (camera make, GPS latitude and longitude — checked to be present in the fixture) comes out without them in AVIF, WebP and JPEG; dosen and mahasiswa get 403 on every page and endpoint, also with a valid photo, and nothing is stored; no CSRF → 403; too small, too many pixels (a PNG whose header claims 20000 × 20000), over 10 MB, truncated, missing fields and missing tick box each refused with their reason; upload does not change the public page, publish does, publishing B then A again brings A back, back to default restores the exact default page; six audit rows in order; with `foto_tayang` renamed away the landing shows the default; `/media/` answers only server-made names, with `nosniff`, `immutable` and no cookie.
+- `PembukaTest` (16 cases: 2 sites × id/ar × light/dark × 1280/390 px): image loaded as AVIF or WebP from the same origin; a small file on the phone; photo box 4:3; text beside the image on desktop (mirrored in Arabic) and above it on the phone; layout shift below 0.01; every text of hero, cards, steps, header and footer at 4.5 : 1 or better in both modes; every icon 20 × 20 with stroke 2, hidden or labelled, directional ones mirrored only in Arabic; no CSP violation.
+- `ArabPublikTest` rewritten for the split hero: Arabic is the mirror of Indonesian, image included.
+- Lighthouse 12.8.2, mobile, `https://lokandita.com/`, **before** (production at `70b3f0e`), three runs: performance 97 / 97 / 100, accessibility 91 / 91 / 91, best practices 100 / 100 / 100; FCP 0.83–0.95 s, LCP 1.16–1.24 s, CLS 0.000–0.001. The accessibility failures were the gold "Segera" text (2.03 : 1), grey text on the 80 %-transparent cards (4.13 : 1) and a link told apart by colour only; all three are changed in this stage.
+- Screenshots from the test containers: `docs/tangkapan/tahap-11c/` — the 16 combinations as `<site>-<id|ar>-<terang|gelap>-<desktop|ponsel>.png`, plus `portal-tentang-id.png` and `-ar.png`.
+- `infra/cek-env.sh` → `cek-env: LULUS`. No environment variable was added.
+
+Went wrong:
+
+- **The deploy did not happen** (above).
+- A first version of the Kontak change kept two texts joined on one page; the owner's second message replaced it before it was committed.
+- A JPEG cut off after 700 bytes was at first accepted, because GD by default opens a damaged JPEG as far as it can. Found by the test; `gd.jpeg_ignore_warning = 0` now refuses it.
+- The browser test once measured a layout shift of 0.017. What moved was the header and the main column, pushed by the page scrollbar appearing — not the photo. `scrollbar-gutter: stable` fixed it but broke the Arabic mirror, so it was withdrawn; the test hides scrollbars instead. **On a desktop browser with classic scrollbars that small shift can still happen, as it could before.**
+
+Not verified, or weaker than it looks:
+
+- **Nothing of this stage runs in production.** Not done: the Portal migration (`foto`, `foto_tayang`) on the real schema, creation of the volume, `infra/backup.sh` and `infra/uji-restore.sh` with the photo archive, `infra/tes-infra.sh`, `infra/smoke.sh` (expected: 29 lulus — the 27 old lines plus the 2 of check 9), the CSP header from the live site, and **Lighthouse after**. The claim "no slower first paint" is therefore unproven; only the test-container measurements above exist.
+- The CSP code (`SecurityHeaders::policy`) is untouched and the browser tests saw no violation, but the response header has not been shown from production after the change.
+- `infra/uji-restore.sh` and the new part of `infra/backup.sh` have **never been run**; they passed `bash -n` only.
+- No real photo from a phone or camera has been uploaded; the tests use generated images. Memory was measured only with the 18-megapixel default photo (146 MB peak).
+- GD ignores colour profiles; AVIF support in very old browsers falls back to WebP or JPEG and was tested in Chromium 158 only.
+- English and Arabic texts of the photo editor, the alt text of the default photo and the navigation label were written by the agent and not reviewed.
+- The download date in `LISENSI.md` (2026-11-21) is the day the file reached the server, not confirmed by the owner.
+- The editor pages and the upload form have not been seen in a browser by anyone.
+- Production has one text override (`depan` / `id`, saved 2026-11-21); it has the unchanged shape and is expected to show on the new landing — not seen.
+
+For the owner, in this order (or allow the agent to deploy and it will do them and report):
+
+1. `infra/deploy.sh portal`, then `auth`, `lokakode`, `judge` — each must end `LULUS` on the current commit.
+2. `infra/backup.sh`, then `infra/uji-restore.sh` — expect `uji-restore: LULUS` with the new tables and "0 foto".
+3. `infra/tes-infra.sh` and `infra/smoke.sh` (expect `29 lulus, 0 gagal, 0 belum aktif`).
+4. `curl -sI https://lokandita.com/ | grep -i content-security-policy` — must equal the header of before.
+5. Browser: `https://lokandita.com` in three languages and dark mode; **Keluar** from LokaKode lands on the Portal; `/kontak` lands on Tentang; as superadmin *Teks halaman publik* → *Kelola foto pembuka* → upload a photo, preview, publish, then *Kembali ke foto bawaan*.
