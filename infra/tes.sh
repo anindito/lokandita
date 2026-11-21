@@ -86,6 +86,7 @@ jalan() {
 		-e AUTH_TES_URL=http://auth-tes:8080 -e AUTH_TES_SKEMA="$skema_auth" -e APP_TES_URL="http://$app-tes:8080" \
 		-e LOKAKODE_TES_URL=http://lokakode-tes:8080 \
 		-e PERAMBAN_TES_URL="$url_peramban" \
+		${TANGKAPAN:+-v "$TANGKAPAN:/tangkapan" -e TANGKAPAN_DIR=/tangkapan} \
 		--entrypoint "$1" "lokandita/$a:tes" "${@:2}" > /dev/null
 	docker network connect internal tes-jalan
 	if [ -n "$url_peramban" ]; then docker network connect tes-peramban tes-jalan; fi
@@ -181,25 +182,34 @@ url_peramban=""
 #                 dipetakan ke caddy-tes dan SEMUA nama lain dibuat tidak dikenal,
 #                 sehingga tes tidak mungkin menyentuh situs produksi.
 # PHPUnit mengendalikannya lewat Chrome DevTools Protocol (tests/_support/Peramban.php).
+# Argumen: pasangan <host>=<kontainer tes>. Untuk tes Portal ketiga host dipetakan
+# (lokandita.com, lokakode.lokandita.com, auth.lokandita.com), karena halaman publik
+# ketiga aplikasi diperiksa di sana.
 peramban_tes() {
 	docker network inspect tes-peramban > /dev/null 2>&1 || docker network create tes-peramban > /dev/null
-	printf '{\n\tadmin off\n\tauto_https disable_redirects\n}\nhttps://lokakode.lokandita.com {\n\ttls internal\n\treverse_proxy lokakode-tes:8080\n}\n' > "$tmp/Caddyfile"
+	local pasangan host_pertama="${1%%=*}" alias_jaringan=() aturan=""
+	printf '{\n\tadmin off\n\tauto_https disable_redirects\n}\n' > "$tmp/Caddyfile"
+	for pasangan in "$@"; do
+		printf 'https://%s {\n\ttls internal\n\treverse_proxy %s:8080\n}\n' "${pasangan%%=*}" "${pasangan#*=}" >> "$tmp/Caddyfile"
+		alias_jaringan+=(--alias "${pasangan%%=*}")
+	done
 	chmod 644 "$tmp/Caddyfile"
 	chmod 711 "$tmp"
 	docker run -d --name caddy-tes --network data -v "$tmp/Caddyfile:/etc/caddy/Caddyfile:ro" caddy:2.11.9-alpine > /dev/null
-	docker network connect --alias lokakode.lokandita.com tes-peramban caddy-tes
+	docker network connect "${alias_jaringan[@]}" tes-peramban caddy-tes
 	local ip_caddy
 	ip_caddy="$(docker inspect -f '{{(index .NetworkSettings.Networks "tes-peramban").IPAddress}}' caddy-tes)"
 	[ -n "$ip_caddy" ] || gagal "caddy-tes tidak mendapat alamat di jaringan tes-peramban"
+	for pasangan in "$@"; do aturan+="MAP ${pasangan%%=*} $ip_caddy, "; done
 	docker run -d --name peramban-tes --network tes-peramban --shm-size 512m --entrypoint /bin/bash "$PERAMBAN_IMAGE" -c \
-		"socat TCP4-LISTEN:9222,fork TCP4:127.0.0.1:9223 & exec /headless-shell/headless-shell --no-sandbox --use-gl=angle --use-angle=swiftshader --remote-debugging-port=9223 --ignore-certificate-errors --disable-background-networking --lang=id '--host-resolver-rules=MAP lokakode.lokandita.com $ip_caddy, MAP * ~NOTFOUND' about:blank" > /dev/null
+		"socat TCP4-LISTEN:9222,fork TCP4:127.0.0.1:9223 & exec /headless-shell/headless-shell --no-sandbox --use-gl=angle --use-angle=swiftshader --remote-debugging-port=9223 --ignore-certificate-errors --disable-background-networking --lang=id '--host-resolver-rules=${aturan}MAP * ~NOTFOUND' about:blank" > /dev/null
 	local ip_peramban i
 	ip_peramban="$(docker inspect -f '{{(index .NetworkSettings.Networks "tes-peramban").IPAddress}}' peramban-tes)"
 	for ((i = 1; i <= 40; i++)); do
 		if docker exec peramban-tes bash -c 'exec 3<>/dev/tcp/127.0.0.1/9223' 2> /dev/null \
-			&& docker exec caddy-tes wget -q -O /dev/null --no-check-certificate https://lokakode.lokandita.com/healthz 2> /dev/null; then
+			&& docker exec caddy-tes wget -q -O /dev/null --no-check-certificate "https://$host_pertama/healthz" 2> /dev/null; then
 			url_peramban="http://$ip_peramban:9222"
-			echo "peramban-tes berjalan (Chromium tanpa layar; hanya mengenal lokakode.lokandita.com -> caddy-tes -> lokakode-tes)"
+			echo "peramban-tes berjalan (Chromium tanpa layar; hanya mengenal: $*)"
 			return 0
 		fi
 		sleep 0.5
@@ -264,7 +274,7 @@ if [ "$app" != "auth" ]; then
 	layani "$app" "$app-tes"
 	if [ "$app" = "lokakode" ]; then
 		worker_tes
-		peramban_tes
+		peramban_tes lokakode.lokandita.com=lokakode-tes
 	fi
 	# Gerbang tahap 11 (SPEC.md §18): "login dari Portal sampai ke LokaKode tanpa login
 	# kedua" hanya bisa dibuktikan dengan ketiga aplikasi berjalan sungguhan. Untuk
@@ -276,6 +286,8 @@ if [ "$app" != "auth" ]; then
 		buat_ulang_skema lokakode_test
 		migrasi lokakode lokakode_test
 		layani lokakode lokakode-tes
+		# Tata letak halaman publik (kanan-ke-kiri) hanya bisa dibuktikan di peramban.
+		peramban_tes lokandita.com=portal-tes lokakode.lokandita.com=lokakode-tes auth.lokandita.com=auth-tes
 	fi
 fi
 

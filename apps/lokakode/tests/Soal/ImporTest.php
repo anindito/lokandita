@@ -78,9 +78,14 @@ final class ImporTest extends KodeCase
         $data = json_decode($ekspor, true, 16, JSON_THROW_ON_ERROR);
         $this->assertSame(['UJX101', 1, 'cpp'], [$data['course'], $data['meeting'], $data['language']]);
         // jumlah-dua adalah soal bawaan dunia uji (disisipkan tanpa judge); ia ikut diekspor.
-        $this->assertSame(['jumlah-dua', 'dua-bilangan', 'jumlah'], array_column($data['problems'], 'slug'));
-        $this->assertSame('Pernyataan yang diperbaiki.', $data['problems'][1]['translations']['id']['statement']);
-        $data['problems'] = array_slice($data['problems'], 1);
+        // Urutan ekspor mengikuti id soal, dan id dua soal impor mengikuti pekerjaan VALIDATE mana yang
+        // selesai lebih dulu di judge — jadi yang diperiksa isinya, bukan urutannya.
+        $perSlug = array_column($data['problems'], null, 'slug');
+        $slug    = array_keys($perSlug);
+        sort($slug);
+        $this->assertSame(['dua-bilangan', 'jumlah', 'jumlah-dua'], $slug);
+        $this->assertSame('Pernyataan yang diperbaiki.', $perSlug['dua-bilangan']['translations']['id']['statement']);
+        $data['problems'] = array_values(array_filter($data['problems'], static fn (array $soal): bool => $soal['slug'] !== 'jumlah-dua'));
         $ekspor = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         [$kode, $keluar] = $this->impor($ekspor, $d['superadmin']);
         $this->assertSame(0, $kode, $keluar);

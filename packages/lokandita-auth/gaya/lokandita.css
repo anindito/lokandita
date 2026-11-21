@@ -86,10 +86,13 @@
   .nav-publik { display: flex; flex-wrap: wrap; gap: 1rem; font-size: .95rem; }
   .nav-publik a { color: var(--teks); text-decoration: none; }
   .nav-publik a:hover, .nav-publik a[aria-current] { text-decoration: underline; }
-  .bahasa-kepala { margin-top: 0; }
-  .pembuka { padding: 2.5rem 0 1.5rem; text-align: center; }
+  /* Pembuka halaman depan. Semuanya mulai di tepi AWAL kolom isi — kiri untuk Indonesia dan
+     Inggris, kanan untuk Arab — supaya halaman Arab adalah cermin halaman Indonesia. Jangan
+     dipusatkan: teks terpusat di dalam kolom yang mulai dari tepi tidak sejajar dengan apa pun
+     (tests/Peramban/ArabPublikTest.php di Portal mengukurnya di peramban). */
+  .pembuka { padding: 2.5rem 0 1.5rem; text-align: start; }
   .pembuka h1 { font-size: 2.1rem; line-height: 1.2; margin: 0 0 .75rem; }
-  .pembuka p { max-width: 42rem; margin: 0 auto 1.25rem; font-size: 1.1rem; color: var(--teks-redup); }
+  .pembuka p { max-width: 42rem; margin: 0 0 1.25rem; font-size: 1.1rem; color: var(--teks-redup); }
   .petak { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); margin: 1rem 0 2rem; padding: 0; list-style: none; }
   .petak > li, .petak > div { margin: 0; }
   .kartu-aplikasi { display: flex; flex-direction: column; gap: .35rem; height: 100%; padding: 1.1rem 1.25rem; background: var(--kartu); border: 1px solid var(--garis); border-radius: .75rem; color: var(--teks); text-decoration: none; }
@@ -98,7 +101,8 @@
   .kartu-aplikasi span { color: var(--teks-redup); font-size: .95rem; }
   .kartu-aplikasi .lencana { align-self: flex-start; color: var(--emas); border-color: var(--emas); }
   .kartu-aplikasi-segera { opacity: .8; }
-  .prosa { max-width: 46rem; margin: 0 auto; }
+  /* Kolom teks: dibatasi lebarnya supaya enak dibaca, dan mulai di tepi awal kolom isi seperti pembuka. */
+  .prosa { max-width: 46rem; margin: 0; text-align: start; }
   .prosa h1 { font-size: 1.75rem; margin: 1rem 0 .5rem; }
   .prosa h2 { font-size: 1.2rem; margin: 1.75rem 0 .35rem; }
   .tanya summary { cursor: pointer; font-weight: 600; padding: .5rem 0; }
@@ -128,6 +132,8 @@
 
   .bahasa { display: flex; gap: .75rem; justify-content: center; margin-top: 1.25rem; font-size: .875rem; }
   .bahasa [aria-current] { font-weight: 700; text-decoration: none; color: var(--teks); }
+  /* Di kepala halaman publik pilihan bahasa sebaris dengan tombol Masuk. */
+  .kepala-publik .bahasa { margin-top: 0; }
 
   /* Toast: di pojok, bisa ditutup, hilang sendiri (lokandita.js). */
   .toast-wadah { position: fixed; top: 4.25rem; inset-inline-end: 1rem; z-index: 40; display: flex; flex-direction: column; gap: .5rem; max-width: min(26rem, calc(100vw - 2rem)); }
