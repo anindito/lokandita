@@ -1,6 +1,6 @@
 # Progress
 
-**Stage 13 — problem production — in progress since 2026-11-23, no tag yet. The table under "Stage 13" at the end of this file says which meetings are built, imported, reviewed and approved; a new session continues from the first row that is not imported. Nothing is approved or published by the agent.**
+**Stage 13 — problem production — all eleven meetings of the task (DDP101 4–7, PBO301 1–7) are built and imported since 2026-11-23: 352 problems, all `PENDING_REVIEW`, no meeting published. Waiting for the owner's review; review sheets in `docs/soal/tinjauan/`. No tag yet: the stage closes when the owner has reviewed. Nothing is approved or published by the agent. See the table under "Stage 13" at the end of this file.**
 
 **Brand scheme and step cards — not a numbered stage, no tag — deployed 2026-11-22, running `ea483b6`; smoke 44 lulus, 0 gagal. New logos and icons on the three sites, "LokaAuth" shown to users as "Akun Lokandita", the Portal's app list is data (six cards), step numbers sit on the line of their text. Not seen by the owner in a browser yet; see "Brand scheme" at the end of this file. Next: stage 13 (problem production), not started.**
 
@@ -1176,7 +1176,7 @@ How one meeting is made (the next session repeats this for the next row):
 | PBO301 | 4 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-4.md` | no | no |
 | PBO301 | 5 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-5.md` | no | no |
 | PBO301 | 6 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-6.md` | no | no |
-| PBO301 | 7 | no | no | — | no | no |
+| PBO301 | 7 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-7.md` | no | no |
 
 Before any problem was written (read-only queries, output in the session): the eleven meetings are all `cpp`, enabled, target 60, minimum 8 / 8 / 6 / 6 / 4, unpublished, without problems. Their added concepts equal `docs/PETA-KONSEP.md` **except DDP101 meeting 6, which has `FUNGSI, PARAMETER_REF` and no `REFERENSI`** (the "BEDA" of stage 12); meeting 7 inherits the gap. Reported to the owner, who approved going on; it was still unticked when meeting 4 was imported. PBO301's base concepts are the 21 of the 2026-11-19 decision.
 
@@ -1326,4 +1326,20 @@ Twelve probe programs were run through `kotak.analisis` (the judge's own analyse
   - Several statements dictate a design that a careful programmer would question (a `Kubus` deriving from `Persegi`, `protected` data everywhere). They follow the syllabus examples; the owner may want different ones.
   - `roda-kendaraan` and `tanpa-virtual` have only two kinds of input (apart from the name), so a student's tests repeat.
   - `CONCEPT_NOT_MET` has still not been exercised with a real student submission.
+  - Read by nobody but the agent; English and Arabic by the agent.
+
+### PBO301 meeting 7 — Polymorphism and Virtual Functions (2026-11-23)
+
+- 32 problems, 8 / 8 / 6 / 6 / 4, 232 points. All 32 require `CLASS_OBJECT`, `INHERITANCE` and `POLYMORPHISM` in the student's code (stored so in production); every statement names the classes and members and states the requirement.
+- Covered, each made visible in the output: a call through a base pointer or reference reaching the derived method; virtual against ordinary methods through the same pointer; **virtual destructors and their order** on `delete` through a base pointer; object slicing (by-value parameter, array of base objects against array of base pointers); a virtual call inside a base constructor; `Base::method()` from an override; overriding only some methods over three levels; `final`; `dynamic_cast`; and designs that rest on polymorphism (template method, factory function, undoable commands, filter chain, composite file tree, expression tree, board pieces, scheduler).
+- **No pure virtual function** (`= 0`, `ABSTRACT_CLASS`, meeting 9): every base class has default behaviour. **No STL container** (meeting 13): polymorphic objects live in arrays of base pointers with `new` / `delete`; every `new` has its `delete`, and every base deleted through a base pointer has a virtual destructor.
+- `periksa.py` with the 29 allowed concepts → first run **31 of 32**: `virtual-atau-biasa` read only a kind word, so every seed produced the same input (the judge's warning `generator_ignores_seed`). The problem now also reads a unit name and prints it. Second run, whole file → `32 dari 32 soal lulus` (240 judge tests per problem, no warning; 36 generated tests per problem equal to a separate Python calculation without classes or virtual calls; 43 quoted examples equal). `dynamic_cast` is accepted by the analyser without a concept outside the list.
+- `spark soal:impor` → `32 diterima, 0 ditolak, 0 tidak berubah`. Production shows 32 versions `PENDING_REVIEW` (8 / 8 / 6 / 6 / 4), the three required concepts on all 32, meeting not published.
+- Skipped from the syllabus of this meeting: UML notation; how the vtable works and what a virtual call costs; the cases whose substance is "this does not compile" (`override` without a base method, overriding a `final` method).
+- Weaker than it looks:
+  - **The requirement is "a base clause exists and some member is `virtual` / `override` / `final`".** Whether the call really goes through a base pointer is not checked. Most of these outputs can be produced with `if` on the kind word; an unused two-class hierarchy with one `virtual` then earns full marks.
+  - **Without pure virtual functions some base classes are artificial**: `Bentuk::luas()` returns 0, `Operasi::hitung()` returns 0, `Bidak::huruf()` returns `?`. At meeting 9 these become abstract; here they are defaults nobody should call.
+  - `final` and `dynamic_cast` cannot be seen in the output: `sensor-final` and `hitung-kucing` ask for them in the statement only.
+  - `pohon-ekspresi` accepts single-digit operands only, and `papan-bidak` has no capturing; both are simplifications to keep the statements short.
+  - `CONCEPT_NOT_MET` has still not been exercised with a real student submission, in any of the eleven meetings.
   - Read by nobody but the agent; English and Arabic by the agent.
