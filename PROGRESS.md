@@ -1174,7 +1174,7 @@ How one meeting is made (the next session repeats this for the next row):
 | PBO301 | 2 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-2.md` | no | no |
 | PBO301 | 3 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-3.md` | no | no |
 | PBO301 | 4 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-4.md` | no | no |
-| PBO301 | 5 | no | no | — | no | no |
+| PBO301 | 5 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-5.md` | no | no |
 | PBO301 | 6 | no | no | — | no | no |
 | PBO301 | 7 | no | no | — | no | no |
 
@@ -1295,5 +1295,19 @@ Twelve probe programs were run through `kotak.analisis` (the judge's own analyse
 - Skipped from the syllabus of this meeting: UML visibility notation and `{readOnly}`; the cases whose substance is "this does not compile" (access to a private member, a non-const method on a const object).
 - Weaker than it looks:
   - **The requirement is "some `private:` / `protected:` section or non-public data member exists".** Whether the data is really protected is not checked: a class with one unused private field next to public data passes. The refusals in the output can be produced by plain `if` statements outside any class.
+  - `CONCEPT_NOT_MET` has still not been exercised with a real student submission.
+  - Read by nobody but the agent; English and Arabic by the agent.
+
+### PBO301 meeting 5 — Relations between Objects, Object Diagram (2026-11-23)
+
+- 32 problems, 8 / 8 / 6 / 6 / 4, 232 points. All 32 require `CLASS_OBJECT` and `KOMPOSISI_AGREGASI` in the student's code (stored so in production); every statement names the classes and members and states the requirement.
+- The three relations of the syllabus and how the output shows them: **composition** — a member object, with the constructor / destructor order of part and whole printed; **aggregation** — a pointer to an object owned elsewhere: the part outlives the whole, and a change to the part is seen by everyone who refers to it; **association** — a pointer that may be empty (0..1), many (1..*), or two-way.
+- Every reference solution keeps the relation as a **data member** of another class type, because that is what the detector recognises. No STL container (plain arrays and pointers).
+- `periksa.py` with the 27 allowed concepts → `32 dari 32 soal lulus` (240 judge tests per problem, no warning; 36 generated tests per problem equal to a separate procedural Python calculation; 35 quoted examples equal). Before that run the quoted example of `kamar-hotel` lacked one output line (`Kamar 5: Citra`); the comparison of the examples with the separate calculation caught it and it was corrected in the three languages.
+- `spark soal:impor` → `32 diterima, 0 ditolak, 0 tidak berubah`. Production shows 32 versions `PENDING_REVIEW` (8 / 8 / 6 / 6 / 4), `["CLASS_OBJECT", "KOMPOSISI_AGREGASI"]` on all 32, meeting not published.
+- Skipped from the syllabus of this meeting: UML notation for the relations and object diagrams (not judgeable from output).
+- Weaker than it looks:
+  - **The detector does not tell the three relations apart.** Any data member of another user class type satisfies the requirement; a student who uses composition where the statement asks for aggregation passes whenever the output happens to agree.
+  - **An association held only through a method parameter is not detected** and would give `CONCEPT_NOT_MET` (half marks) although it is legitimate design. The statements therefore ask for the relation as a member.
   - `CONCEPT_NOT_MET` has still not been exercised with a real student submission.
   - Read by nobody but the agent; English and Arabic by the agent.
