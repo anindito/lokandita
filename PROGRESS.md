@@ -1,6 +1,6 @@
 # Progress
 
-**Stage 10a — Safe Exam Browser (`SPEC.md` §13.1) — built and tested 2026-11-21, shipped with `SEB_ENFORCEMENT=disabled`; NOT finished: the gate needs the owner's real SEB 3.10.2 on Windows. See "Stage 10a" at the end of this file. Stage 10b (similarity, typing anomaly, integrity page, notifications, clarifications, announcements) is not started.**
+**Stage 10a — Safe Exam Browser (`SPEC.md` §13.1) — closed 2026-11-22, tag `tahap-10a`, on the owner's instruction "assume every gate is done". The traces in production show only steps 1–2 of the gate; no Browser Exam Key is registered and `SEB_ENFORCEMENT` is still `disabled`. See "Gate result for stage 10a" at the end of this file. Next: stage 10b (similarity, typing anomaly, integrity page, notifications, clarifications, announcements), not started; it begins in a new session with a plan.**
 
 **Stage 11c — public pages redesigned, replaceable hero photo, logout to the Portal, Kontak merged into Tentang — deployed 2026-11-21, running `a6637c0`; smoke 29 lulus. Checked by the owner in a browser the same day, first production upload works, restore test passed with real photo files; see "Stage 11c" at the end of this file. No tag (owner's decision).**
 
@@ -987,3 +987,20 @@ Owner's gate for stage 10a (`SPEC.md` §18: "verified with real SEB 3.10.x on Wi
 7. Only when 2–6 are fine, and every course with active students has a configuration and a key: set `SEB_ENFORCEMENT=enabled` in `apps/lokakode/.env`, commit nothing (the file is not in Git), run `infra/deploy.sh lokakode` and `infra/smoke.sh`. Then check as the test student: an ordinary browser gets the "harus dibuka melalui Safe Exam Browser" page; SEB works from login to submit; a staff account still works in an ordinary browser.
 
 After the gate: tag `tahap-10a`, record the result here.
+
+Gate result for stage 10a, 2026-11-22:
+
+- **The owner wrote: "assume every gate is done."** He did not report the steps one by one. The agent did not watch the gate. Tag `tahap-10a` is set on that instruction, not on evidence seen by the agent.
+- What production shows (counts, actions and log lines only):
+  - three configurations created through the panel on 2026-11-22 (DDP101, PBO301, TS-PY, each version 1; three `seb.dibuat` audit rows) — step 1;
+  - the DDP101 file downloaded once, and one client with `SEB/3.10.2 (x64)` in its User-Agent opening `/beranda`, being redirected, and loading the LokaAuth login page with its stylesheet, script and icon — so SEB 3.10.2 accepted the generated file, and the URL filter lets LokaAuth through — step 2.
+- What production does **not** show:
+  - **no login from that SEB client** (no request after the login page), and no request for `/seb/periksa` from it: nothing here shows that the Config Key computed by SEB equals the server's (step 3);
+  - **`seb_exam_keys` is empty** for all three courses: no Browser Exam Key was registered (step 4), so steps 5 and 6 cannot have happened on this server as written;
+  - no `seb.kunci` audit row, no `seb_*` integrity event;
+  - `SEB_ENFORCEMENT` is still `disabled` in `.env` and in the container (step 7 not done).
+- **Consequence that matters:** with `SEB_ENFORCEMENT=enabled` and no registered key, every student of every course is refused (`kunci_peramban`). Before switching it on: register the Browser Exam Key for each course and see "cocok" twice on `/seb/periksa` from inside SEB.
+- The items under "Not verified" above stay open as far as this file knows.
+- The tagged commit differs from the deployed `feeffdd` only in this file. **It has not been redeployed**: the working tree holds changes that are not the agent's (`docs/branding/`: one zip deleted, four new directories), and `infra/deploy.sh` refuses a tree with uncommitted changes. Until those are committed or removed and the four components are redeployed, `infra/smoke.sh` check 0 fails. Nothing that runs has changed.
+
+**Stage 10a closed 2026-11-22, tag `tahap-10a`.**
