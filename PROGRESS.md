@@ -1,5 +1,7 @@
 # Progress
 
+**Stage 13 — problem production — in progress since 2026-11-23, no tag yet. The table under "Stage 13" at the end of this file says which meetings are built, imported, reviewed and approved; a new session continues from the first row that is not imported. Nothing is approved or published by the agent.**
+
 **Brand scheme and step cards — not a numbered stage, no tag — deployed 2026-11-22, running `ea483b6`; smoke 44 lulus, 0 gagal. New logos and icons on the three sites, "LokaAuth" shown to users as "Akun Lokandita", the Portal's app list is data (six cards), step numbers sit on the line of their text. Not seen by the owner in a browser yet; see "Brand scheme" at the end of this file. Next: stage 13 (problem production), not started.**
 
 **Stage 10b — integrity and communication (`SPEC.md` §13.2, §14) — finished 2026-11-22, tag `tahap-10b`, on the owner's word "gate passed"; the production database shows no trace of the gate steps (see "Gate result for stage 10b" at the end of this file). Running `0ebd1a1`. Code similarity was dropped by the owner's decision. Next: stage 13 (problem production), not started.**
@@ -1150,4 +1152,45 @@ Owner's check:
 1. Open the three sites in a normal browser, light and dark: tab icon, header logo, the six cards, the step cards; then the same in Arabic.
 2. Read the changed sentences on `lokandita.com/tentang` and `/privasi` in three languages.
 3. As superadmin: the card "Akun Lokandita" on the Portal's beranda; in LokaKode, enroll a nomor induk that does not exist and read the message.
+
+## Stage 13 — problem production (from 2026-11-23)
+
+Task from the owner: DDP101 meetings 4–7, then PBO301 meetings 1–7; 8 / 8 / 6 / 6 / 4 per meeting in `id`, `en`, `ar`; left `PENDING_REVIEW`; no approval, publishing or class window by the agent; TS-PY untouched. Plan and the owner's decisions of 2026-11-23: `DECISIONS.md`.
+
+How one meeting is made (the next session repeats this for the next row):
+
+1. `docs/soal/buat-<course>-pertemuan-<n>.py` (problems) and `docs/soal/cek-<course>-pertemuan-<n>.py` (separate Python calculation per problem, and every example quoted in a statement); `python3 docs/soal/buat-….py` writes the JSON.
+2. `judge/.venv/bin/python docs/soal/periksa.py docs/soal/<file>.json <allowed concepts of the meeting, read from production>` — must end with "32 dari 32 soal lulus".
+3. `docker exec -i lokakode php spark soal:impor --oleh <superadmin> --nama <file>.json < docs/soal/<file>.json` — must end with `32 diterima, 0 ditolak`.
+4. `python3 docs/soal/lembar-tinjauan.py docs/soal/<file>.json` writes the review sheet; one commit per meeting; update the table.
+
+| Course | Meeting | Built | Imported | Review sheet | Reviewed by owner | Approved |
+|---|---|---|---|---|---|---|
+| DDP101 | 4 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-4.md` | no | no |
+| DDP101 | 5 | no | no | — | no | no |
+| DDP101 | 6 | no | no | — | no | no |
+| DDP101 | 7 | no | no | — | no | no |
+| PBO301 | 1 | no | no | — | no | no |
+| PBO301 | 2 | no | no | — | no | no |
+| PBO301 | 3 | no | no | — | no | no |
+| PBO301 | 4 | no | no | — | no | no |
+| PBO301 | 5 | no | no | — | no | no |
+| PBO301 | 6 | no | no | — | no | no |
+| PBO301 | 7 | no | no | — | no | no |
+
+Before any problem was written (read-only queries, output in the session): the eleven meetings are all `cpp`, enabled, target 60, minimum 8 / 8 / 6 / 6 / 4, unpublished, without problems. Their added concepts equal `docs/PETA-KONSEP.md` **except DDP101 meeting 6, which has `FUNGSI, PARAMETER_REF` and no `REFERENSI`** (the "BEDA" of stage 12); meeting 7 inherits the gap. Reported to the owner, who approved going on; it was still unticked when meeting 4 was imported. PBO301's base concepts are the 21 of the 2026-11-19 decision.
+
+### DDP101 meeting 4 — Struktur Kontrol: Percabangan (2026-11-23)
+
+- 32 problems, 8 / 8 / 6 / 6 / 4, 232 points against 120 needed. Reference solutions add only `if`, `switch` and the logical operators to what meetings 1–3 allow; no loop, array or own function.
+- `periksa.py` with the seven allowed concepts → `32 dari 32 soal lulus`: each problem 240 tests through the judge's `soal.validasi` with no warning; reference output equal to the separate Python calculation on 36 generated tests each; 72 examples quoted in statements equal to the reference output.
+- `spark soal:impor` under the superadmin account → `32 diterima, 0 ditolak, 0 tidak berubah`. Production shows 32 versions `PENDING_REVIEW` (8 / 8 / 6 / 6 / 4), 0 problems attached to the meeting, meeting not published, one `soal.impor` audit row.
+- Weaker than it looks:
+  - **Nobody but the agent has read these statements in any language.** English and Arabic were written by the agent and carry the machine-translation badge.
+  - The words a program must print (`positif`, `LULUS`, `sama kaki`, `bentrok … menit`, …) are Indonesian in all three language versions; the English and Arabic statements explain each word once.
+  - The "separate calculation" was written by the same agent as the reference solution. It is a second implementation in another language and style, not a second person.
+  - Student code is never restricted: "without loops and without arrays" in the four hard problems is advice, not a rule.
+  - `kategori-imt` prints a decimal; inputs within 0.001 of a category limit or of a rounding half are never generated, so answers do not depend on the order of the floating-point operations.
+  - Difficulty labels are the agent's judgement until calibration data exists.
+  - The statements were changed from tables to lists **after** the judge check and before the import; solutions and generators were not touched, and the importer validated the final file itself.
 

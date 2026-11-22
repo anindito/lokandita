@@ -29,10 +29,11 @@ def _teks(t, mesin: bool) -> dict:
     return hasil
 
 
-def soal(slug, tingkat, mode, gen, ref, id, en, ar, waktu_ms=2000):
+def soal(slug, tingkat, mode, gen, ref, id, en, ar, waktu_ms=2000, wajib=()):
+    """wajib: konsep yang harus ada di kode mahasiswa (required_concepts_in_submission)."""
     SOAL.append({
         "slug": slug, "difficulty": tingkat, "comparison_mode": mode, "time_limit_ms": waktu_ms,
-        "samples_count": 2, "hidden_count": 10, "required_concepts_in_submission": [],
+        "samples_count": 2, "hidden_count": 10, "required_concepts_in_submission": list(wajib),
         "translations": {"id": _teks(id, False), "en": _teks(en, True), "ar": _teks(ar, True)},
         "generator": AWAL + gen, "reference_solution": ref,
     })
