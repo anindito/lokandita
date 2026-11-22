@@ -61,6 +61,8 @@ $routes->group('', ['filter' => ['masuk:mahasiswa', 'seb']], static function (Ro
     $routes->post('api/soal/(:num)/klarifikasi', 'RuangLatihan::tanya/$1');
     $routes->post('api/integritas', 'RuangLatihan::integritas');
     // Pemberitahuan milik sendiri (SPEC.md §14, KONTRAK.md §17): tidak ada rute yang menerima id.
+    // Pengumuman kelasnya sendiri (SPEC.md §14); kelasnya dari pendaftaran, tidak dari URL.
+    $routes->get('pengumuman', 'Pengumuman::saya');
     $routes->get('notifikasi', 'Notifikasi::index');
     $routes->post('notifikasi/baca', 'Notifikasi::baca');
     $routes->post('api/panel', 'RuangLatihan::panel');
@@ -125,6 +127,10 @@ $routes->group('', ['filter' => 'masuk:superadmin,dosen'], static function (Rout
     // Klarifikasi soal per kelas (SPEC.md §14, KONTRAK.md §17): siapa pun yang melihat kelas itu membaca dan menjawab.
     $routes->get('kelas/(:num)/klarifikasi', 'Klarifikasi::index/$1');
     $routes->post('kelas/(:num)/klarifikasi/(:num)/jawab', 'Klarifikasi::jawab/$1/$2');
+    // Pengumuman kelas (SPEC.md §14, KONTRAK.md §17): siapa pun yang melihat kelas itu menulis dan menarik.
+    $routes->get('kelas/(:num)/pengumuman', 'Pengumuman::index/$1');
+    $routes->post('kelas/(:num)/pengumuman', 'Pengumuman::simpan/$1');
+    $routes->post('kelas/(:num)/pengumuman/(:num)/tarik', 'Pengumuman::tarik/$1/$2');
     // Konfigurasi SEB mata kuliah (SPEC.md §13.1): superadmin dan pengampu; pengajar 403.
     $routes->get('mata-kuliah/(:num)/seb', 'SebKelola::lihat/$1');
     $routes->post('mata-kuliah/(:num)/seb', 'SebKelola::simpan/$1');

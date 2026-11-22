@@ -162,6 +162,12 @@ final class Kelas extends BaseController
         if ($daftar > 0 || $riwayat > 0) {
             return $this->tampil($kelas, [['jenis' => 'galat', 'teks' => lang('Kode.galat.kelasBerisi', [$daftar, $riwayat])]], 409);
         }
+        // Pengumuman dan pertanyaan klarifikasi kelas ini tidak ikut dihapus (KONTRAK.md §17): kelasnya diarsipkan saja.
+        $umum  = (int) $db->query('SELECT COUNT(*) AS n FROM announcements WHERE class_id = ?', [$id])->getRow()->n;
+        $tanya = (int) $db->query('SELECT COUNT(*) AS n FROM clarifications WHERE class_id = ?', [$id])->getRow()->n;
+        if ($umum > 0 || $tanya > 0) {
+            return $this->tampil($kelas, [['jenis' => 'galat', 'teks' => lang('Komunikasi.pengumuman.kelasBerisi', [$umum, $tanya])]], 409);
+        }
         if ((string) $this->request->getPost('yakin') !== '1') {
             return $this->tampil($kelas, [['jenis' => 'galat', 'teks' => lang('Kode.galat.belumYakin')]], 422);
         }

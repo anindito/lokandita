@@ -146,6 +146,11 @@ final class MatriksAksesTest extends KodeCase
             'GET kelas/{n}/klarifikasi'             => ['/kelas/' . $d['kelasXA'] . '/klarifikasi', $lihatXA],
             'POST kelas/{n}/klarifikasi/{n}/jawab'  => ['/kelas/' . $d['kelasXA'] . '/klarifikasi/' . $d['klarA'] . '/jawab', $lihatXA],
 
+            // Pengumuman kelas XA (SPEC.md §14): siapa pun yang melihat kelas XA menulis dan menarik.
+            'GET kelas/{n}/pengumuman'             => ['/kelas/' . $d['kelasXA'] . '/pengumuman', $lihatXA],
+            'POST kelas/{n}/pengumuman'            => ['/kelas/' . $d['kelasXA'] . '/pengumuman', $lihatXA],
+            'POST kelas/{n}/pengumuman/{n}/tarik'  => ['/kelas/' . $d['kelasXA'] . '/pengumuman/' . $d['umumA'] . '/tarik', $lihatXA],
+
             // Bank soal mata kuliah X: sama dengan pertemuannya.
             'GET soal/{n}'             => ['/soal/' . $d['soalX'], ['pengajarB' => 403] + $kelolaXA],
             'POST soal/{n}/setujui'    => ['/soal/' . $d['soalX'] . '/setujui', ['pengajarB' => 403] + $kelolaXA],
@@ -177,6 +182,8 @@ final class MatriksAksesTest extends KodeCase
             'POST api/soal/{n}/klarifikasi'  => ['/api/soal/' . $d['mpA'] . '/klarifikasi', $mhs],
             'POST api/integritas'            => ['/api/integritas', $mhs],
             'POST api/panel'                 => ['/api/panel', $mhs],
+            // Pengumuman kelasnya sendiri (tests/Komunikasi/PengumumanTest.php).
+            'GET pengumuman'                 => ['/pengumuman', $mhs],
             // Pemberitahuan milik sendiri (tests/Komunikasi/NotifikasiTest.php).
             'GET notifikasi'                 => ['/notifikasi', $mhs],
             'POST notifikasi/baca'           => ['/notifikasi/baca', $mhs],
@@ -206,6 +213,12 @@ final class MatriksAksesTest extends KodeCase
             'question' => 'PERTANYAAN-RAHASIA', 'created_at' => gmdate('Y-m-d H:i:s'),
         ]);
         $d['klarA'] = (int) $this->db->insert_id;
+        // Satu pengumuman kelas XA yang masih tayang (tahap 10b). Menarik yang sudah ditarik bukan galat,
+        // jadi ketiga pelaku yang berhak boleh mencobanya berturut-turut.
+        \Lokandita\Auth\Testing\Fixtures::insert($this->db, 'announcements', [
+            'class_id' => $d['kelasXA'], 'author_id' => $d['pengajarA']['id'], 'title' => 'PENGUMUMAN-RAHASIA', 'body' => 'Isi.', 'created_at' => gmdate('Y-m-d H:i:s'),
+        ]);
+        $d['umumA'] = (int) $this->db->insert_id;
 
         return $d;
     }
@@ -325,6 +338,7 @@ final class MatriksAksesTest extends KodeCase
             'POST api/panel'             => ['kiri' => '30', 'atas' => '50'],
             'POST api/soal/{n}/klarifikasi'         => ['pertanyaan' => 'DIBAJAK'],
             'POST kelas/{n}/klarifikasi/{n}/jawab'  => ['jawaban' => 'DIBAJAK', 'tampil' => 'kelas'],
+            'POST kelas/{n}/pengumuman'             => ['judul' => 'DIBAJAK', 'isi' => 'DIBAJAK'],
             'POST soal/{n}/setujui'    => ['versi_id' => (string) $d['versiX']],
             'POST soal/{n}/tolak'      => ['versi_id' => (string) $d['versiX'], 'catatan' => 'Dibajak'],
             'POST soal/{n}/terjemahan' => ['versi_id' => (string) $d['versiX'], 'bahasa' => 'en'],

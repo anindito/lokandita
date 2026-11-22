@@ -18,6 +18,7 @@
 <?php elseif ($akses->mahasiswa()): ?>
 <nav class="nav-mahasiswa" aria-label="<?= lang('Kode.navigasi') ?>" data-nav-mahasiswa>
     <a href="/beranda"><?= lang('Kode.nav.beranda') ?></a>
+    <a href="/pengumuman"><?= lang('Komunikasi.pengumuman.judul') ?></a>
     <a href="/notifikasi" data-notif-belum="<?= (int) ($notifBelum ?? 0) ?>"><?= lang('Komunikasi.notifikasi.judul') ?><?php if (($notifBelum ?? 0) > 0): ?>
         <span class="lencana lencana-galat" aria-label="<?= esc(lang('Komunikasi.notifikasi.belumDibaca', [(int) $notifBelum])) ?>"><?= (int) $notifBelum ?></span><?php endif ?></a>
 </nav>

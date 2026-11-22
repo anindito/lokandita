@@ -8,6 +8,12 @@
         <a href="/seb/periksa" data-seb-periksa-tautan><?= lang('Seb.periksa.judul') ?></a></p>
 <?php endif ?>
 
+<?php if ($pengumuman !== []): ?>
+    <h2><?= lang('Komunikasi.pengumuman.terbaru') ?></h2>
+    <?= view('_pengumuman', ['daftar' => $pengumuman, 'orang' => $penulis]) ?>
+    <p><a href="/pengumuman"><?= lang('Komunikasi.pengumuman.semua') ?></a></p>
+<?php endif ?>
+
 <h2><?= lang('Latihan.saya.judul') ?></h2>
 <?php if ($pertemuan === []): ?>
     <div class="kartu"><p><?= lang('Latihan.saya.kosong') ?></p></div>

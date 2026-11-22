@@ -861,7 +861,7 @@ announcements (id, class_id, author_id, title VARCHAR(150), body, created_at, wi
 |---|---|
 | `GET /kelas/{id}/pengumuman` | staff: all announcements of the class, withdrawn ones marked, and the form |
 | `POST /kelas/{id}/pengumuman` | staff: fields `judul`, `isi`. Audit `pengumuman.dibuat` |
-| `POST /kelas/{id}/pengumuman/{aid}/tarik` | staff: withdraws it. Audit `pengumuman.ditarik` |
+| `POST /kelas/{id}/pengumuman/{aid}/tarik` | staff: withdraws it. Audit `pengumuman.ditarik`. Withdrawing one that is already withdrawn changes nothing and writes no audit row; an id that is not an announcement of that class gets `404` |
 | `GET /pengumuman` | mahasiswa: own classes' announcements, newest first, at most 100; the newest three are also on `/beranda` |
 
 In an archived academic year a dosen can read these pages but not answer, post or withdraw (`403`), like every other change to a class.

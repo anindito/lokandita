@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Libraries\Pengumuman;
 use App\Libraries\Penilaian;
 use App\Libraries\Ruang;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -21,8 +22,13 @@ final class Beranda extends BaseController
         if (! $this->akses()->staf()) {
             Penilaian::selesaikan($this->akses()->identitas()->userId);
 
+            // Tiga pengumuman terbaru kelasnya (SPEC.md §14); selebihnya di /pengumuman.
+            $pengumuman = (new Pengumuman($this->akses()))->untukSaya(3);
+
             return $this->halaman('beranda_mahasiswa', [
                 'judul'     => lang('Lokandita.beranda'),
+                'pengumuman' => $pengumuman,
+                'penulis'    => $pengumuman === [] ? [] : UserDirectory::byIds(array_values(array_unique(array_column($pengumuman, 'author_id')))),
                 'kelas'     => $akademik->kelasSaya(),
                 'pertemuan' => (new Ruang($this->akses()))->daftarPertemuan(),
             ]);
