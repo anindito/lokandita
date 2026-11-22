@@ -1173,7 +1173,7 @@ How one meeting is made (the next session repeats this for the next row):
 | PBO301 | 1 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-1.md` | no | no |
 | PBO301 | 2 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-2.md` | no | no |
 | PBO301 | 3 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-3.md` | no | no |
-| PBO301 | 4 | no | no | — | no | no |
+| PBO301 | 4 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-4.md` | no | no |
 | PBO301 | 5 | no | no | — | no | no |
 | PBO301 | 6 | no | no | — | no | no |
 | PBO301 | 7 | no | no | — | no | no |
@@ -1274,7 +1274,7 @@ Twelve probe programs were run through `kotak.analisis` (the judge's own analyse
 ### PBO301 meeting 3 — Constructor, Destructor, Copy Semantics (2026-11-23)
 
 - 32 problems, 8 / 8 / 6 / 6 / 4, 232 points. All 32 require `CLASS_OBJECT` and `CONSTRUCTOR_DESTRUCTOR` in the student's code; the 14 copying problems also require `COPY_SEMANTICS` (stored so in production). Every statement names the class and members and states the requirement.
-- **Order is observable, as asked.** In 20 problems the constructors and destructors themselves print a line, and the input decides names, counts and scopes: reverse destruction of locals, blocks, loop bodies, `new` / `delete` in a chosen order, `new[]` / `delete[]`, temporaries, by-value parameters, delegating constructors, global / `static` local / local lifetimes, early `return` (RAII). The other problems make copying observable instead: deep versus shallow copy shown by changing a copy, counted copies and assignments, chained assignment.
+- **Order is observable, as asked.** In 18 problems the constructors and destructors themselves print a line (in one more the assignment operator does), and the input decides names, counts and scopes: reverse destruction of locals, blocks, loop bodies, `new` / `delete` in a chosen order, `new[]` / `delete[]`, temporaries, by-value parameters, delegating constructors, global / `static` local / local lifetimes, early `return` (RAII). The other problems make copying observable instead: deep versus shallow copy shown by changing a copy, counted copies and assignments, chained assignment.
 - `periksa.py` with the 25 allowed concepts → first run **31 of 32**: `simulasi-cakupan` could generate an input with no object in it, so the expected output was empty (the judge's warning `reference_empty_output`); the generator now always creates at least one object and the constraint says so. Second run, whole file → `32 dari 32 soal lulus` (240 judge tests per problem, no warning; 36 generated tests per problem equal to a separate Python simulation that derives the order from the language rules without any object mechanism; 38 quoted examples equal).
 - `spark soal:impor` → `32 diterima, 0 ditolak, 0 tidak berubah`. Production shows 32 versions `PENDING_REVIEW` (8 / 8 / 6 / 6 / 4), meeting not published.
 - Skipped from the syllabus of this meeting: the debugger demonstration of a double free; `explicit`, `= delete` and other points whose substance is "this does not compile".
@@ -1286,3 +1286,14 @@ Twelve probe programs were run through `kotak.analisis` (the judge's own analyse
   - `objek-statis` has only six possible inputs (n from 0 to 5) and `barisan-prajurit` ten; a student's twelve tests repeat.
   - Read by nobody but the agent; English and Arabic by the agent.
 
+### PBO301 meeting 4 — Encapsulation and Access Control (2026-11-23)
+
+- 32 problems, 8 / 8 / 6 / 6 / 4, 232 points. All 32 require `CLASS_OBJECT` and `ENCAPSULATION` in the student's code (stored so in production); every statement names the class and members and states the requirement. The problems are built around **invariants**: data under `private:`, validating setters, read-only getters, `const` methods, `mutable`, `friend` functions and a `friend` class, private static members, private helper methods; the output shows each illegal change being refused.
+- Reference solutions hold no object of another class (meeting 5) and use no STL container.
+- `periksa.py` with the 26 allowed concepts → `32 dari 32 soal lulus` (240 judge tests per problem, no warning; 36 generated tests per problem equal to a separate Python calculation; 39 quoted examples equal). `kartu-atm` had dead code in its generator, removed before the run.
+- `spark soal:impor` → `32 diterima, 0 ditolak, 0 tidak berubah`. Production shows 32 versions `PENDING_REVIEW` (8 / 8 / 6 / 6 / 4), `["CLASS_OBJECT", "ENCAPSULATION"]` on all 32, meeting not published.
+- Skipped from the syllabus of this meeting: UML visibility notation and `{readOnly}`; the cases whose substance is "this does not compile" (access to a private member, a non-const method on a const object).
+- Weaker than it looks:
+  - **The requirement is "some `private:` / `protected:` section or non-public data member exists".** Whether the data is really protected is not checked: a class with one unused private field next to public data passes. The refusals in the output can be produced by plain `if` statements outside any class.
+  - `CONCEPT_NOT_MET` has still not been exercised with a real student submission.
+  - Read by nobody but the agent; English and Arabic by the agent.
