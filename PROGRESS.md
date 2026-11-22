@@ -1,5 +1,7 @@
 # Progress
 
+**Brand scheme and step cards — not a numbered stage, no tag — deployed 2026-11-22, running `ea483b6`; smoke 44 lulus, 0 gagal. New logos and icons on the three sites, "LokaAuth" shown to users as "Akun Lokandita", the Portal's app list is data (six cards), step numbers sit on the line of their text. Not seen by the owner in a browser yet; see "Brand scheme" at the end of this file. Next: stage 13 (problem production), not started.**
+
 **Stage 10b — integrity and communication (`SPEC.md` §13.2, §14) — finished 2026-11-22, tag `tahap-10b`, on the owner's word "gate passed"; the production database shows no trace of the gate steps (see "Gate result for stage 10b" at the end of this file). Running `0ebd1a1`. Code similarity was dropped by the owner's decision. Next: stage 13 (problem production), not started.**
 
 **Stage 10a — Safe Exam Browser (`SPEC.md` §13.1) — closed 2026-11-22, tag `tahap-10a`; the owner reported gate steps 1–6 passed for every course; **enforcement is ON in production since 2026-11-22 (`SEB_ENFORCEMENT=enabled`)**. The owner reported that a student is refused without SEB and staff are not; and that a student can log in and work inside SEB under enforcement (confirmed by the server log); Run, Submit and the heartbeat from real SEB under enforcement are not in the log yet. See "Stage 10a after the tag" at the end of this file. Next: stage 10b (similarity, typing anomaly, integrity page, notifications, clarifications, announcements), not started; it begins in a new session with a plan.**
@@ -1099,4 +1101,53 @@ Owner's gate for stage 10b (after deploy):
 - The tagged commit differs from the deployed `0ebd1a1` only in this file; not redeployed, so `infra/smoke.sh` check 0 fails until the next deploy.
 
 **Stage 10b finished 2026-11-22, tag `tahap-10b`.**
+
+## Brand scheme and step cards (2026-11-22, after `tahap-10b`; the owner's two tasks of that day)
+
+Owner's decisions: plan approved; TOTP issuer becomes "Lokandita"; `docs/branding/baru/` is committed; the site palette stays; **the Portal's Open Graph image stays the hero photo crop**; "Segera" icons in greyscale; `lokakode` may restart at once.
+
+Built (commit `ea483b6`; contract in `KONTRAK.md` §11 check 12, §15, §16 "Brand files" and "App list"; choices in `DECISIONS.md`):
+
+- `docs/branding/newbranding.zip` extracted as it is to `docs/branding/baru/` (172 files: 7 brands × 24, two previews, a README, a manifest). Every image was measured; all are transparent PNG/WebP or ICO, every brand has logo and icon. Nothing from the archive was run.
+- `infra/buat-merek.sh` + `infra/merek/buat-merek.php`: derived files for each site under `apps/<app>/public/`; `--periksa` compares them with what the originals produce.
+- Shared layout: brand logo in the header (light/dark), icon links, manifest, `theme-color`. LokaKode landing: new hero logo.
+- Portal: `app/Config/Aplikasi.php` — LokaKode (Tersedia, link), LokaUjian, LokaKelas, LokaSiber, LokaRetas, LokaData (Segera, not links); neutral ring for an app without an icon.
+- "LokaAuth" → "Akun Lokandita" in 13 texts × 3 languages (`Auth.php` 1, `Kode.php` 7 keys, `Portal.php` 2, plus the upcoming-apps sentence and six app descriptions), the identity site's title, the admin card and the data link on the Portal's `/beranda` and `/data-saya`, and the TOTP issuer.
+- Step cards ("Cara memulai" on the Portal, "Cara kerjanya" on LokaKode): CSS only. The number starts the text on the same line, bold in the accent colour; five cards are laid out three and two centred. The card markup exists twice (`apps/portal/app/Views/publik/_depan.php`, `apps/lokakode/app/Views/depan.php`) and was **not** merged; both use the one set of CSS rules.
+- Removed as superseded: `merek/apple-touch-icon.png` in the three apps, `merek/logo.png` and `logo.webp` in LokaKode. Replaced in place: `favicon.ico`, `icon-32.png`, `icon-192.png`, LokaKode's `og-image.png`.
+
+Verified by the agent (output shown in the session):
+
+- `infra/tes.sh portal` → **89 tests, 9048 assertions, pass**, at the final code. In headless Chromium, for both landings in id/ar × light/dark × 1280/390: header logo loaded, right variant, 40 px, not squeezed, on the start side; six cards in order, icons 56 × 56, right variant, name beside icon, status under name, only LokaKode a link, "Segera" icons grey; step number on the line of its text, second line under the number, icon in place, rows 4 / 3 + 2 / 1 and centred; contrast ≥ 4.5 : 1; CLS < 0.01. This test caught two real defects before deploy: the header logo was squeezed at phone width, and app names broke inside a word when name and status shared a line.
+- `infra/tes.sh auth` → 109 tests, 1642 assertions, pass. `infra/tes.sh lokakode` → 285 tests, **284 pass, 1 failed**: the new brand test found the LokaKode header logo file 235 px wide where the page says 117 × 2. Fixed in the generator (even widths). **The full `lokakode` and `auth` suites were not run again after that fix and after the step-card CSS**; run again were `infra/tes.sh lokakode tests/Publik` (10 tests pass), `infra/tes.sh auth tests/Login/MerekTest.php` (4 tests pass) and the whole Portal suite (which measures the LokaKode landing too).
+- `infra/buat-merek.sh --periksa` → LULUS. `infra/cek-env.sh` → LULUS; no environment variable was added. `infra/backup.sh` → `backup SELESAI`.
+- `infra/deploy.sh auth`, `portal`, `lokakode`, `judge` → each verified at `ea483b6` (`/healthz`; the worker by its heartbeat). `infra/smoke.sh` → **44 lulus, 0 gagal, 0 belum aktif**, check 12 included.
+- CSP header of `https://lokandita.com/`, `https://auth.lokandita.com/login` and `https://lokakode.lokandita.com/` after deploy: character for character what was captured before the change, apart from the nonce. The tests compare it with those strings too.
+- Lighthouse 12.8.2, mobile, `https://lokandita.com/`, three runs each:
+
+  | | performance | accessibility | best practices | FCP | LCP | CLS | page weight | requests |
+  |---|---|---|---|---|---|---|---|---|
+  | before (`0ebd1a1`) | 99 / 95 / 98 | 100 | 100 | 0.8–1.2 s | 1.1–1.4 s | 0 | 117 kB | 6 |
+  | after (`ea483b6`) | 96 / 99 / 100 | 100 | 100 | 0.8–0.9 s | 1.1 s | 0 | 101 kB | 13 |
+
+  More requests (six card icons and the logo, 4 kB each, the cards lazily) and less weight (the old header icon was a 44 kB file shown at 36 px).
+- Screenshots: `docs/tangkapan/merek/` — 24 from production (`portal-depan-`, `login-`, `lokakode-depan-` × id/ar × terang/gelap × desktop/ponsel), the step sections from the test containers (`langkah-*.png`), the tab icons on light and dark tab colours (`ikon-tab.png`), the logos on the site's colours (`logo-di-atas-warna-situs.png`).
+
+**Not verified, or weaker than it looks:**
+
+- **No person has looked at the deployed pages.** The tab icon in a real browser tab, the icon on an iPhone home screen, and how a shared link looks in WhatsApp or Telegram (Open Graph) were not seen; link previews are cached by those services for days.
+- The 16 px icon is not recognisable (it is the original, unchanged). Safari ignores the dark variant of the tab icon.
+- English and Arabic renderings of "Akun Lokandita" and the six app descriptions were written by the agent; the Arabic was not read by an Arabic speaker.
+- The neutral ring for an app without an icon is tested as a view partial and as served CSS; no live page shows it, because all seven brands have icons.
+- Pages behind a session (the `/beranda` of the Portal with the renamed admin card, the LokaKode staff pages with the renamed texts, the TOTP enrolment page) were tested in containers, not opened in production.
+- Existing TOTP entries on phones are still labelled "LokaAuth".
+- `/admin/teks` → *aplikasi* now has six fields; an override of that page saved before this deploy would have the old shape and be ignored (`teks.bentuk_usang`). Production had none.
+- At widths between 640 and 1024 px five step cards are 2 + 2 + 1; the "none alone" layout holds from 1024 px.
+- The commit that holds these lines and the screenshots differs from the deployed `ea483b6` only in `PROGRESS.md` and `docs/tangkapan/`; it was **not** redeployed, so `infra/smoke.sh` check 0 fails until the next deploy.
+
+Owner's check:
+
+1. Open the three sites in a normal browser, light and dark: tab icon, header logo, the six cards, the step cards; then the same in Arabic.
+2. Read the changed sentences on `lokandita.com/tentang` and `/privasi` in three languages.
+3. As superadmin: the card "Akun Lokandita" on the Portal's beranda; in LokaKode, enroll a nomor induk that does not exist and read the message.
 
