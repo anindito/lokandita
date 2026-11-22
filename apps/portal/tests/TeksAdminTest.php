@@ -206,7 +206,7 @@ final class TeksAdminTest extends PortalCase
         $this->assertSame(0, $this->jumlah('teks'));
         $publik = $this->tamu()->get('/ketentuan')->body;
         $this->assertStringContainsString('<h1>Ketentuan penggunaan</h1>', $publik);
-        $this->assertStringContainsString('Terakhir diperbarui: 21 November 2026', $publik, 'tanggal bawaan dari berkas bahasa');
+        $this->assertStringContainsString('Terakhir diperbarui: 22 November 2026', $publik, 'tanggal bawaan dari berkas bahasa');
         // Sekali lagi: tidak ada yang dikembalikan, tidak ada baris audit baru.
         $this->assertSame('https://lokandita.com/admin/teks?pesan=sudah-bawaan', $admin->post('/admin/teks/ketentuan/id/bawaan', ['csrf' => $csrf])->header('Location'));
         $this->assertStringNotContainsString('/bawaan"', $admin->get('/admin/teks/ketentuan/id')->body);

@@ -89,6 +89,32 @@ final class PublikTest extends PortalCase
         }
     }
 
+    /**
+     * Tahap 10b: ketentuan dan privasi menyebut pencatatan ketikan tak wajar dalam tiga bahasa,
+     * dan TIDAK menyebut pemeriksaan kemiripan kode — itu tidak dibangun (keputusan pemilik).
+     */
+    public function testKetentuanDanPrivasiMenyebutKetikanTakWajarDanTidakMenyebutKemiripan(): void
+    {
+        $harap = [
+            'id' => ['/ketentuan' => 'jauh lebih cepat daripada ketikan orang', '/privasi' => 'dengan laju 150 karakter per detik atau lebih', 'tanggal' => 'Terakhir diperbarui: 22 November 2026'],
+            'en' => ['/ketentuan' => 'far faster than a person can type', '/privasi' => 'at 150 characters per second or faster', 'tanggal' => 'Last updated: 22 November 2026'],
+            'ar' => ['/ketentuan' => 'أسرع بكثير مما يكتبه إنسان', '/privasi' => 'بسرعة 150 حرفًا في الثانية أو أكثر', 'tanggal' => 'آخر تحديث: 22 نوفمبر 2026'],
+        ];
+        foreach ($harap as $bahasa => $h) {
+            $tamu = $this->tamu();
+            $tamu->get('/bahasa/' . $bahasa . '?kembali=' . rawurlencode('/'));
+            foreach (['/ketentuan', '/privasi'] as $jalur) {
+                $r = $tamu->get($jalur);
+                $this->assertSame(200, $r->status, "{$bahasa} {$jalur}");
+                $this->assertStringContainsString($h[$jalur], $r->body, "{$bahasa} {$jalur}");
+                $this->assertStringContainsString($h['tanggal'], $r->body, "{$bahasa} {$jalur}");
+                foreach (['kemiripan', 'similarity', 'plagiar', 'تشابه'] as $bukan) {
+                    $this->assertStringNotContainsString($bukan, mb_strtolower($r->body), "{$bahasa} {$jalur}: {$bukan}");
+                }
+            }
+        }
+    }
+
     public function testTigaBahasa(): void
     {
         $harap = [

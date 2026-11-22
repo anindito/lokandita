@@ -112,7 +112,7 @@ return [
     'privasi' => [
         'judul'      => 'Kebijakan privasi',
         'deskripsi'  => 'Data pribadi apa yang disimpan Lokandita, untuk apa, siapa yang dapat melihatnya, dan apa hak Anda.',
-        'diperbarui' => 'Terakhir diperbarui: 21 November 2026',
+        'diperbarui' => 'Terakhir diperbarui: 22 November 2026',
         'pembuka'    => [
             'Halaman ini menjelaskan data pribadi yang diproses Lokandita (LokaAuth, LokaKode dan Portal ini), dengan mengacu pada Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi.',
             'Data dikelola oleh pengelola Lokandita, yang dapat dihubungi di {email}.',
@@ -127,6 +127,7 @@ return [
                     'Catatan masuk dan sesi: waktu, alamat IP, dan jenis peramban setiap kali Anda masuk atau gagal masuk.',
                     'Data belajar di LokaKode: kelas yang Anda ikuti, kode program yang Anda kirim, draf yang tersimpan otomatis, hasil penilaian dan nilai.',
                     'Catatan integritas di LokaKode, misalnya upaya menempel teks ke editor.',
+                    'Ketikan tak wajar di LokaKode: bila 300 karakter atau lebih masuk ke editor dengan laju 150 karakter per detik atau lebih, yang dicatat adalah waktu, soal, jumlah karakter, lamanya dan alamat IP Anda — bukan isi ketikan Anda.',
                     'Log audit: tindakan penting atas akun Anda, seperti pembuatan akun dan pengaturan ulang kata sandi.',
                 ],
             ],
@@ -189,7 +190,7 @@ return [
     'ketentuan' => [
         'judul'      => 'Ketentuan penggunaan',
         'deskripsi'  => 'Aturan memakai akun dan aplikasi Lokandita.',
-        'diperbarui' => 'Terakhir diperbarui: 21 November 2026',
+        'diperbarui' => 'Terakhir diperbarui: 22 November 2026',
         'pembuka'    => [
             'Dengan memakai akun Lokandita, Anda menyetujui ketentuan berikut.',
         ],
@@ -209,6 +210,7 @@ return [
                 'butir' => [
                     'Kiriman Anda harus hasil kerja Anda sendiri, kecuali dosen menyatakan lain.',
                     'Sistem mencatat kejadian tertentu, misalnya upaya menempel teks ke editor. Catatan itu adalah bahan bagi dosen; keputusannya tetap pada dosen.',
+                    'Teks yang masuk ke editor jauh lebih cepat daripada ketikan orang — 300 karakter atau lebih hampir sekaligus — juga dicatat sebagai peristiwa integritas untuk dosen Anda.',
                 ],
             ],
             [

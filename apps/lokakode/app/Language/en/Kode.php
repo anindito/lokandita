@@ -267,6 +267,7 @@ return [
         'All your submissions with their source code, judging result and score.',
         'Automatically saved drafts.',
         'Integrity events recorded under your name: time and kind.',
+        'Your notifications, your clarification questions with their answers, and the clarification answers and announcements you wrote.',
         'The panel sizes of the problem page that you saved.',
     ],
 ];

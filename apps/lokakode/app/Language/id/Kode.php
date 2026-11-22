@@ -267,6 +267,7 @@ return [
         'Semua kiriman Anda beserta kode sumbernya, hasil penilaian dan nilainya.',
         'Draf yang tersimpan otomatis.',
         'Peristiwa integritas yang tercatat atas nama Anda: waktu dan jenisnya.',
+        'Pemberitahuan Anda, pertanyaan klarifikasi Anda beserta jawabannya, dan jawaban klarifikasi serta pengumuman yang Anda tulis.',
         'Ukuran panel halaman soal yang Anda simpan.',
     ],
 ];

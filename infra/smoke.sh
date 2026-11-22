@@ -215,6 +215,24 @@ else
 	tidak "SEB_ENFORCEMENT di kontainer ('$seb_jalan') berbeda dari apps/lokakode/.env ('$seb_env'): deploy ulang lokakode"
 fi
 
+echo "11. integritas dan komunikasi (tahap 10b, KONTRAK.md §17)"
+# Tabelnya ada di skema yang sungguhan (migrasi sudah berjalan), rute barunya terdaftar di kode yang
+# BERJALAN (tanpa cookie: dialihkan ke login, bukan 404), dan halaman ketentuan memuat kalimat barunya.
+tabel="$(docker exec mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = '"'"'lokakode'"'"' AND table_name IN ('"'"'notifications'"'"', '"'"'clarifications'"'"', '"'"'announcements'"'"')"' 2>/dev/null || true)"
+if [ "$tabel" = "3" ]; then ok "skema lokakode punya notifications, clarifications, announcements"; else tidak "skema lokakode: $tabel dari 3 tabel tahap 10b ada (migrasi belum berjalan?)"; fi
+url_kode="$(nilai_env "$AKAR/apps/lokakode/.env" APP_URL)"
+for jalur in /notifikasi /pengumuman /kelas/1/integritas /kelas/1/klarifikasi /kelas/1/pengumuman; do
+	j="$(tanya portal lokakode "$jalur")"
+	harap="302 $login_url?next=$(jq -rn --arg u "$url_kode$jalur" '$u|@uri')"
+	if [ "$j" = "$harap" ]; then ok "lokakode GET $jalur tanpa cookie -> 302 ke login"; else tidak "lokakode GET $jalur tanpa cookie -> '$j' (seharusnya '$harap')"; fi
+done
+j="$(tanya lokakode portal /ketentuan)"
+if [ "$j" = "200 " ] && isi lokakode | grep -q 'jauh lebih cepat daripada ketikan orang'; then
+	ok "portal GET /ketentuan -> 200, memuat kalimat tentang ketikan tak wajar"
+else
+	tidak "portal GET /ketentuan -> '$j' atau tidak memuat kalimat tentang ketikan tak wajar (bila teksnya diubah lewat /admin/teks, tambahkan kalimat itu di sana)"
+fi
+
 echo
 echo "smoke: $lulus lulus, $gagal_n gagal, $tunda belum aktif"
 if [ "$gagal_n" -gt 0 ]; then

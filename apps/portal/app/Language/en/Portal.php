@@ -112,7 +112,7 @@ return [
     'privasi' => [
         'judul'      => 'Privacy policy',
         'deskripsi'  => 'Which personal data Lokandita stores, what for, who can see it, and what your rights are.',
-        'diperbarui' => 'Last updated: 21 November 2026',
+        'diperbarui' => 'Last updated: 22 November 2026',
         'pembuka'    => [
             'This page describes the personal data processed by Lokandita (LokaAuth, LokaKode and this Portal), with reference to Indonesian Law Number 27 of 2022 on Personal Data Protection.',
             'The data is managed by the Lokandita administrator, who can be reached at {email}.',
@@ -127,6 +127,7 @@ return [
                     'Sign-in and session records: time, IP address and browser type each time you sign in or fail to.',
                     'Learning data in LokaKode: the classes you are in, the program code you submit, automatically saved drafts, judging results and scores.',
                     'Integrity records in LokaKode, for example attempts to paste text into the editor.',
+                    'Unusual typing in LokaKode: when 300 characters or more enter the editor at 150 characters per second or faster, what is recorded is the time, the problem, the number of characters, the duration and your IP address — not what you typed.',
                     'Audit log: important actions on your account, such as its creation and password resets.',
                 ],
             ],
@@ -189,7 +190,7 @@ return [
     'ketentuan' => [
         'judul'      => 'Terms of use',
         'deskripsi'  => 'The rules for using a Lokandita account and its applications.',
-        'diperbarui' => 'Last updated: 21 November 2026',
+        'diperbarui' => 'Last updated: 22 November 2026',
         'pembuka'    => [
             'By using a Lokandita account you agree to the following terms.',
         ],
@@ -209,6 +210,7 @@ return [
                 'butir' => [
                     'Your submissions must be your own work, unless your lecturer says otherwise.',
                     'The system records certain events, for example attempts to paste text into the editor. These records are material for the lecturer; the decision remains the lecturer\'s.',
+                    'Text that enters the editor far faster than a person can type — 300 characters or more almost at once — is also recorded as an integrity event for your lecturer.',
                 ],
             ],
             [

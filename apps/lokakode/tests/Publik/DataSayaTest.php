@@ -30,6 +30,16 @@ final class DataSayaTest extends KodeCase
             $this->db->query("INSERT INTO drafts (user_id, meeting_problem_id, source, updated_at) VALUES ('{$id}', {$soal['mp']}, 'DRAF_{$tanda}', UTC_TIMESTAMP())");
             $this->db->query("INSERT INTO integrity_events (user_id, kind, meeting_problem_id, detail, ip, created_at) VALUES ('{$id}', 'paste', {$soal['mp']}, '{\"rahasia\":\"DETAIL_{$tanda}\"}', '203.0.113.9', UTC_TIMESTAMP())");
         }
+        // Tahap 10b: pemberitahuan, klarifikasi dan pengumuman kedua mahasiswa dan dosennya.
+        foreach (['mhsA' => 'ANI', 'mhsB' => 'BUDI'] as $siapa => $tanda) {
+            $id    = $d[$siapa]['id'];
+            $kelas = $siapa === 'mhsA' ? $d['kelasXA'] : $d['kelasXB'];
+            $dosen = $siapa === 'mhsA' ? $d['pengajarA']['id'] : $d['pengajarB']['id'];
+            $this->db->query("INSERT INTO notifications (user_id, kind, ref, data, created_at) VALUES ('{$id}', 'sandi_direset', '1', '{\"oleh\":\"{$dosen}\",\"kelas\":\"KELAS_{$tanda}\"}', UTC_TIMESTAMP())");
+            $this->db->query("INSERT INTO clarifications (meeting_problem_id, class_id, user_id, question, created_at, answer, answered_by, answered_at, visibility, published_at)
+                VALUES ({$soal['mp']}, {$kelas}, '{$id}', 'TANYA_{$tanda}', UTC_TIMESTAMP(), 'JAWAB_UNTUK_{$tanda}', '{$dosen}', UTC_TIMESTAMP(), 'class', UTC_TIMESTAMP())");
+            $this->db->query("INSERT INTO announcements (class_id, author_id, title, body, created_at) VALUES ({$kelas}, '{$dosen}', 'UMUM_{$tanda}', 'ISI_UMUM_{$tanda}', UTC_TIMESTAMP())");
+        }
         $d['soal'] = $soal;
 
         return $d;
@@ -73,6 +83,24 @@ final class DataSayaTest extends KodeCase
         $this->assertSame('AKTIF', $data['pendaftaran'][0]['status']);
         $this->assertSame([], $data['mengajar']);
 
+        // Tahap 10b: pemberitahuannya (tanpa rincian), pertanyaannya sendiri dengan jawaban untuknya.
+        foreach (['notifikasi', 'klarifikasi', 'jawaban_klarifikasi', 'pengumuman'] as $kunci) {
+            $this->assertArrayHasKey($kunci, $data);
+        }
+        // (Memuat beranda untuk token CSRF juga membuat pemberitahuan "pertemuan dibuka" miliknya.)
+        $this->assertEqualsCanonicalizing(['sandi_direset', 'pertemuan_dibuka'], array_column($data['notifikasi'], 'kind'));
+        $this->assertNull($data['notifikasi'][0]['read_at']);
+        $this->assertSame(['created_at', 'kind', 'read_at'], array_keys($data['notifikasi'][0]));
+        $this->assertCount(1, $data['klarifikasi']);
+        $this->assertSame(['UJX101', 2, 'soal-ekspor', 'TANYA_ANI', 'JAWAB_UNTUK_ANI', true],
+            [$data['klarifikasi'][0]['mata_kuliah'], (int) $data['klarifikasi'][0]['pertemuan'], $data['klarifikasi'][0]['soal'], $data['klarifikasi'][0]['pertanyaan'], $data['klarifikasi'][0]['jawaban'], $data['klarifikasi'][0]['terbit_ke_kelas']]);
+        $this->assertMatchesRegularExpression('/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/', $data['klarifikasi'][0]['answered_at']);
+        $this->assertSame([[], []], [$data['jawaban_klarifikasi'], $data['pengumuman']]);
+        // Pengumuman kelasnya ditulis dosen, bukan miliknya; pertanyaan dan pengumuman kelas lain apalagi.
+        foreach (['UMUM_ANI', 'TANYA_BUDI', 'JAWAB_UNTUK_BUDI', 'UMUM_BUDI', 'KELAS_ANI'] as $asing) {
+            $this->assertStringNotContainsString($asing, $r->body, "bukan data mahasiswa A: {$asing}");
+        }
+
         // Milik orang lain tidak ada — kasus IDOR ekspor ini.
         foreach (['KODE_RAHASIA_BUDI', $d['mhsB']['id'], $d['mhsB']['nomor_induk'], $d['mhsB']['nama'], $d['pengajarA']['id'], $d['pengampuX']['id']] as $asing) {
             $this->assertStringNotContainsString($asing, $r->body, "data orang lain di berkas: {$asing}");
@@ -88,6 +116,16 @@ final class DataSayaTest extends KodeCase
         // Dicatat di log audit LokaKode.
         $audit = $this->row("SELECT actor_id, target_tipe, target_id FROM audit_log WHERE action = 'data.diekspor'");
         $this->assertSame([$d['mhsA']['id'], 'user', $d['mhsA']['id']], array_values((array) $audit));
+
+        // Pengajar A: jawaban dan pengumuman yang IA tulis — tanpa pertanyaan mahasiswanya dan tanpa milik pengajar B.
+        [$rp, $pa] = $this->unduh($d['pengajarA']);
+        $this->assertSame(['JAWAB_UNTUK_ANI'], array_column($pa['jawaban_klarifikasi'], 'jawaban'));
+        $this->assertSame(['UMUM_ANI'], array_column($pa['pengumuman'], 'judul'));
+        $this->assertSame(['ISI_UMUM_ANI', 'XA', null], [$pa['pengumuman'][0]['isi'], $pa['pengumuman'][0]['kelas'], $pa['pengumuman'][0]['withdrawn_at']]);
+        $this->assertSame([], $pa['klarifikasi']);
+        foreach (['TANYA_ANI', 'TANYA_BUDI', 'JAWAB_UNTUK_BUDI', 'UMUM_BUDI', $d['mhsA']['id'], $d['mhsA']['nama']] as $asing) {
+            $this->assertStringNotContainsString($asing, $rp->body, "bukan data pengajar A: {$asing}");
+        }
     }
 
     public function testTidakAdaCaraMemintaDataOrangLain(): void

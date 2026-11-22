@@ -73,6 +73,27 @@ final class DataSaya
              WHERE x.user_id = ? ORDER BY x.id DESC LIMIT {$ambil}",
             [$userId],
         )->getResultArray();
+        // Tahap 10b (KONTRAK.md §17). `data` pemberitahuan tidak diambil: ia memuat id dosen yang mereset kata sandi.
+        $notifikasi = $db->query("SELECT created_at, kind, read_at FROM notifications WHERE user_id = ? ORDER BY id DESC LIMIT {$ambil}", [$userId])->getResultArray();
+        // Pertanyaan klarifikasinya sendiri beserta jawaban untuknya; penjawabnya tidak disebut.
+        $klarifikasi = $db->query(
+            "SELECT x.created_at, c.code AS mata_kuliah, m.number AS pertemuan, p.slug AS soal, x.question AS pertanyaan, x.answer AS jawaban,
+                    x.answered_at, (x.visibility = 'class') AS terbit_ke_kelas
+             FROM clarifications x " . self::SOAL . " WHERE x.user_id = ? ORDER BY x.id DESC LIMIT {$ambil}",
+            [$userId],
+        )->getResultArray();
+        // Jawaban yang ia tulis sebagai dosen: jawabannya saja — pertanyaannya milik orang lain.
+        $jawaban = $db->query(
+            "SELECT x.answered_at, c.code AS mata_kuliah, m.number AS pertemuan, p.slug AS soal, x.answer AS jawaban, (x.visibility = 'class') AS terbit_ke_kelas
+             FROM clarifications x " . self::SOAL . " WHERE x.answered_by = ? ORDER BY x.id DESC LIMIT {$ambil}",
+            [$userId],
+        )->getResultArray();
+        $pengumuman = $db->query(
+            "SELECT x.created_at, c.code AS mata_kuliah, k.name AS kelas, x.title AS judul, x.body AS isi, x.withdrawn_at
+             FROM announcements x JOIN classes k ON k.id = x.class_id JOIN courses c ON c.id = k.course_id
+             WHERE x.author_id = ? ORDER BY x.id DESC LIMIT {$ambil}",
+            [$userId],
+        )->getResultArray();
         $panel = $db->query('SELECT panels FROM ui_prefs WHERE user_id = ?', [$userId])->getRowArray();
 
         $isi = [
@@ -84,6 +105,10 @@ final class DataSaya
             'kiriman'              => Ekspor::potong('kiriman', $kiriman, $terpotong),
             'draf'                 => Ekspor::potong('draf', $draf, $terpotong),
             'peristiwa_integritas' => Ekspor::potong('peristiwa_integritas', $integritas, $terpotong),
+            'notifikasi'           => Ekspor::potong('notifikasi', $notifikasi, $terpotong),
+            'klarifikasi'          => Ekspor::potong('klarifikasi', array_map(self::bool('terbit_ke_kelas'), $klarifikasi), $terpotong),
+            'jawaban_klarifikasi'  => Ekspor::potong('jawaban_klarifikasi', array_map(self::bool('terbit_ke_kelas'), $jawaban), $terpotong),
+            'pengumuman'           => Ekspor::potong('pengumuman', $pengumuman, $terpotong),
             'preferensi_tampilan'  => $panel === null ? null : json_decode((string) $panel['panels'], true),
         ];
         // Waktu ke ISO 8601 UTC; tanggal (graduated_on) dibiarkan.
@@ -92,7 +117,7 @@ final class DataSaya
                 continue;
             }
             foreach ($daftar as $i => $baris) {
-                foreach (['created_at', 'updated_at', 'judged_at', 'reached_at', 'assigned_at'] as $k) {
+                foreach (['created_at', 'updated_at', 'judged_at', 'reached_at', 'assigned_at', 'read_at', 'answered_at', 'withdrawn_at'] as $k) {
                     if (array_key_exists($k, $baris)) {
                         $isi[$nama][$i][$k] = Ekspor::waktu($baris[$k]);
                     }
@@ -101,5 +126,19 @@ final class DataSaya
         }
 
         return [$isi, $terpotong];
+    }
+
+    /**
+     * Kolom 0/1 dari MySQL menjadi true/false di berkas.
+     *
+     * @return \Closure(array<string, mixed>): array<string, mixed>
+     */
+    private static function bool(string $kolom): \Closure
+    {
+        return static function (array $baris) use ($kolom): array {
+            $baris[$kolom] = (int) $baris[$kolom] === 1;
+
+            return $baris;
+        };
     }
 }
