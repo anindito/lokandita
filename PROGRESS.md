@@ -1,6 +1,6 @@
 # Progress
 
-**Stage 10b — integrity and communication (`SPEC.md` §13.2, §14) — deployed 2026-11-22 at `0ebd1a1`; smoke 39 lulus. NOT tagged: the owner's gate has not been reported. Code similarity was dropped by the owner's decision. See "Stage 10b" and "Deploy of stage 10b" at the end of this file.**
+**Stage 10b — integrity and communication (`SPEC.md` §13.2, §14) — finished 2026-11-22, tag `tahap-10b`, on the owner's word "gate passed"; the production database shows no trace of the gate steps (see "Gate result for stage 10b" at the end of this file). Running `0ebd1a1`. Code similarity was dropped by the owner's decision. Next: stage 13 (problem production), not started.**
 
 **Stage 10a — Safe Exam Browser (`SPEC.md` §13.1) — closed 2026-11-22, tag `tahap-10a`; the owner reported gate steps 1–6 passed for every course; **enforcement is ON in production since 2026-11-22 (`SEB_ENFORCEMENT=enabled`)**. The owner reported that a student is refused without SEB and staff are not; and that a student can log in and work inside SEB under enforcement (confirmed by the server log); Run, Submit and the heartbeat from real SEB under enforcement are not in the log yet. See "Stage 10a after the tag" at the end of this file. Next: stage 10b (similarity, typing anomaly, integrity page, notifications, clarifications, announcements), not started; it begins in a new session with a plan.**
 
@@ -1089,4 +1089,14 @@ Owner's gate for stage 10b (after deploy):
 - **Not verified by the agent: any page behind a session in production** — the new student navigation, the Klarifikasi tab, the staff pages, the exports with real data, and the typing event from real SEB. That is the owner's gate (steps above).
 - The commit that holds these lines differs from the deployed `0ebd1a1` only in this file and was **not** redeployed, so as not to restart the containers under students a second time; `infra/smoke.sh` check 0 fails until the next deploy.
 - After the gate: tag `tahap-10b`.
+
+### Gate result for stage 10b — 2026-11-22
+
+- **The owner wrote: "gate passed."** He did not report the steps one by one. The agent did not watch the gate. Tag `tahap-10b` is set on that instruction, not on evidence seen by the agent.
+- **What production shows right after that message (counts only): nothing of the gate.** `clarifications` 0 rows; `announcements` 0 rows; `notifications` 0 rows; in the last 24 hours no audit row `klarifikasi.*`, `pengumuman.*`, `integritas.diekspor` or `sandi.direset`, and one integrity event (`seb_rejected`), no `paste_blocked` and no `typing_anomaly`.
+- So on this server, since the deploy: no student has loaded a LokaKode page with an open meeting (that alone would have written a notification), no question was asked or answered, no announcement posted, no integrity export downloaded, and no password reset made through LokaKode. Gate steps 1, 2, 3 and 5 as written leave rows; none exist. Steps 4 and 6 leave none and may well have been done.
+- Everything listed under "Not verified" for this stage therefore stays open as far as this file knows: the pages behind a session in production, the typing event in real SEB, dark mode, Arabic.
+- The tagged commit differs from the deployed `0ebd1a1` only in this file; not redeployed, so `infra/smoke.sh` check 0 fails until the next deploy.
+
+**Stage 10b finished 2026-11-22, tag `tahap-10b`.**
 
