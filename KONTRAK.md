@@ -334,6 +334,7 @@ ui_prefs              (user_id PK, panels JSON, updated_at)
 - `late_policy = 'reject'` stores `late_until = NULL`. A submission has `late = 1` exactly when `late_factor` is set, and is never both late and practice (check constraints).
 - `problem_scores` and `meeting_scores` are derived from `submissions` and are always recomputed in full for one student and one meeting; they are never adjusted incrementally. `points` is 3 / 5 / 8 / 10 / 15 by `difficulty` of the version the student's instance was made from.
 - `submissions.tests` is the worker's per-test list `{ index, verdict, duration_ms }`; nothing in these tables holds test input or expected output.
+- `integrity_events.kind` and what writes each kind: §17.
 - The judge worker has no right on any of these tables.
 - **Leaderboard** (`App\Libraries\Papan`): per meeting per class, and per meeting per course within one academic year; only `AKTIF` enrollments that have a `meeting_scores` row; order `score` desc, `surplus` desc, `reached_at` asc, `submissions` asc, equal on all four → equal rank. The ordered rows (user ids and numbers, never names) are cached in Redis DB 0 under `lokakode:papan:<meeting>:kelas:<class>` and `lokakode:papan:<meeting>:tahun:<year>` for at most 300 s; the keys of a meeting are deleted whenever a score of that meeting is recomputed, and all of them whenever an enrollment changes (enrol, withdraw, graduate, class move). Without Redis the board is computed from MySQL.
 - Analytics and exports store nothing: they are computed from `enrollments`, `meeting_scores`, `problem_scores` and `submissions` as they are now, so a class move needs no recompute.
@@ -682,7 +683,7 @@ Common top level: `{ "aplikasi": "auth|lokakode", "dibuat": "<ISO 8601 UTC>", "p
 | App | Keys |
 |---|---|
 | LokaAuth | `akun` (`id, nomor_induk, nama, email, global_role, status, locale, idle_logout, paste_allowed, mfa_enabled, must_change_password, created_at, last_login_at`), `akses_aplikasi[]` (`app, enabled, granted_at`), `sesi[]` (`created_at, last_seen_at, expires_at, revoked_at, ip, user_agent`), `percobaan_masuk[]` (`created_at, ip, success`, by the user's nomor induk), `riwayat[]` (`created_at, action, app, sebagai` = `pelaku` or `sasaran`; rows of `audit_log` where the user is actor or target) |
-| LokaKode | `pendaftaran[]` (`mata_kuliah, kelas, tahun_ajaran, status`), `mengajar[]` (`mata_kuliah, kelas, tahun_ajaran`), `mengampu[]` (`mata_kuliah`), `nilai_pertemuan[]`, `nilai_soal[]`, `kiriman[]` (with the user's own `source`, verdict and score), `draf[]`, `peristiwa_integritas[]` (`created_at, kind`), `preferensi_tampilan` |
+| LokaKode | `pendaftaran[]` (`mata_kuliah, kelas, tahun_ajaran, status`), `mengajar[]` (`mata_kuliah, kelas, tahun_ajaran`), `mengampu[]` (`mata_kuliah`), `nilai_pertemuan[]`, `nilai_soal[]`, `kiriman[]` (with the user's own `source`, verdict and score), `draf[]`, `peristiwa_integritas[]` (`created_at, kind`), `preferensi_tampilan`; since stage 10b (§17) `notifikasi[]` (`created_at, kind, read_at`), `klarifikasi[]` (the user's own questions: `created_at, soal, pertanyaan, jawaban, answered_at, terbit_ke_kelas`), `jawaban_klarifikasi[]` (answers the user wrote as staff: `answered_at, soal, jawaban, terbit_ke_kelas` — never the question, which is another person's) and `pengumuman[]` (announcements the user wrote: `created_at, kelas, judul, isi, withdrawn_at`) |
 
 Never in any export: `password_hash`, `password_history`, `mfa_secret_enc`, backup codes, `token_hash` or any session value, the `detail` of an audit row, `problem_instances.tests` or anything else of hidden tests, generators and reference solutions, and any row that belongs to another person.
 
@@ -778,3 +779,89 @@ In the route group of §15: behind `masuk:superadmin` (any other role `403`, no 
 ### Icons
 
 Icons on the public pages are Lucide SVG files in `packages/lokandita-auth/ikon/` (`docs/branding/LISENSI.md`), written inline by `Lokandita\Auth\Ikon::svg()`: `aria-hidden="true"` unless a label is given, class `ikon-arah` for icons that are mirrored under `dir="rtl"`. The footer of every page of the three apps uses them.
+
+## 17. Integrity events and communication (stage 10b, `SPEC.md` §13.2, §14)
+
+All of this is LokaKode's own: no other component reads these tables, and the judge worker has no right on them. Nothing here adds an environment variable.
+
+**Code similarity (`SPEC.md` §13.2) is not built** — the owner's decision of 2026-11-22. There is no table, job kind or route for it.
+
+Staff routes below are open to whoever may see the class (`App\Policy\Akses::lihatKelas`, in the query): superadmin, the pengampu of the course, a pengajar of that class. Another pengajar or pengampu gets `404`, a mahasiswa `403`. Student routes are behind `masuk:mahasiswa` and `seb` (§8). Every `POST` carries the CSRF field `csrf`.
+
+### Integrity events
+
+`integrity_events.kind` is one of:
+
+| `kind` | Written by | `detail` |
+|---|---|---|
+| `paste_blocked` | `POST /api/integritas` (stage 9a) | `{ jalur }` — `paste`, `keyboard`, `shift_insert`, `middle_click`, `drop` |
+| `typing_anomaly` | `POST /api/integritas` with `jenis=ketik` | `{ karakter, ms, cps, sebab }` |
+| `seb_rejected`, `seb_terminated` | filter `seb` (§8) | `{ alasan, jalur }` |
+
+`POST /api/integritas` (mahasiswa): fields `mp` (a problem the student may open) and either `jalur` (as before; `jenis` absent or `tempel`) or `jenis=ketik` with `karakter` (integer, characters added in one burst), `ms` (integer ≥ 0, length of the burst) and `sebab` (`ketik` or `undo`). The server stores a `typing_anomaly` only when **`karakter` ≥ 300 and `karakter` × 1000 ≥ 150 × `ms`** (`SPEC.md` §13.2: ≥ 300 characters at ≥ 150 characters per second), otherwise `422`; `cps` is computed by the server (for `ms` = 0 it equals `karakter`). A user with `paste_allowed` gets `{ "ok": true }` and nothing is stored. At most one event per user per second, as before. The measurement itself is the browser's (`public/js/soal.js`): a burst is a run of insertions less than one second apart; Reset to the starter template and restoring the draft are not counted.
+
+| Route | Does |
+|---|---|
+| `GET /kelas/{id}/integritas` | events of the students enrolled in that class (`AKTIF` or `LULUS`) on problems of that course, and their events without a problem (SEB); newest first, 100 per page (`halaman`). Filters: `jenis`, `mahasiswa` (user id), `pertemuan` (meeting id), `dari`, `sampai` (dates, Asia/Jakarta) |
+| `GET /kelas/{id}/integritas/ekspor/{csv\|xlsx}` | the same rows under the same filters, at most 20,000; columns time (Asia/Jakarta), nomor induk, name, kind, meeting, problem, detail, IP address, user agent. Writes `integritas.diekspor` (`{ format, baris }`) to `audit_log` |
+
+An event follows its student: after a class move it is listed in the new class.
+
+### Notifications
+
+```
+notifications (id, user_id, kind, ref VARCHAR(80), data JSON, created_at, read_at NULL)      UNIQUE(user_id, kind, ref)
+```
+
+| `kind` | For | Created | `ref` | `data` |
+|---|---|---|---|---|
+| `pertemuan_dibuka` | a student `AKTIF` in the class | lazily, see below, while the class window of a published practice meeting is open (§6) | `<window id>:<open_at>`, or `<window id>:manual` when it is open by `override = 'open'` | `{ pertemuan, nomor, judul, matkul, tutup }` |
+| `tutup_24jam` | same | lazily, while that window is open with `override = 'none'` and `close_at` is at most 24 hours ahead | `<window id>:<close_at>` | same |
+| `sandi_direset` | the student whose password was reset | by `POST /kelas/{id}/reset-sandi` after LokaAuth answered `200` (§5) | id of the `sandi.direset` row in `audit_log` | `{ oleh: <user id>, kelas }` |
+
+- There is no background process on the web side. `App\Libraries\Notifikasi::segarkan` runs when a mahasiswa loads `/beranda`, `/notifikasi` or a practice page, at most once per 60 s per user (Redis key `lokakode:notif:<user id>`; without Redis it runs every time), and inserts the missing rows with `INSERT IGNORE`. So a notification appears at the first page load after its moment, never without a page load, and never twice. A window whose times change notifies again, because the time is part of `ref`.
+- A reset done inside LokaAuth by a superadmin is **not** notified: LokaKode does not learn of it.
+- `created_at` is the moment the row was written, not the moment the window opened.
+
+| Route | Does |
+|---|---|
+| `GET /notifikasi` | mahasiswa: own notifications, newest first, at most 100 |
+| `POST /notifikasi/baca` | mahasiswa: sets `read_at` on all own unread rows; redirects to `/notifikasi` |
+
+The number of unread rows is shown in LokaKode's own navigation on every student page, read when the page is rendered. The shared account menu (§4) is unchanged.
+
+### Clarifications
+
+```
+clarifications (id, meeting_problem_id, class_id, user_id, question, created_at,
+                answer NULL, answered_by NULL, answered_at NULL, visibility 'private'|'class', published_at NULL)
+```
+
+- `class_id` is the class in which the asker was `AKTIF` when asking. `visibility = 'class'` exactly when `published_at` is set, and only with an answer (check constraints).
+- A student sees: own questions with their answers; and questions with `visibility = 'class'` of the class in which the student is `AKTIF` **now**, with the asker's name (the owner's decision). A private answer is seen by the asker and by staff only.
+- Texts are plain text, shown escaped; question and answer 1–2,000 characters each. No notification is sent.
+
+| Route | Does |
+|---|---|
+| `GET /api/soal/{mp}/klarifikasi` | mahasiswa, a problem the student may open: `{ "daftar": [{ id, pertanyaan, waktu, milikSaya, penanya, jawaban, dijawab, kelas }] }` — `penanya` is a name, `kelas` true when published to the class, `jawaban` `null` while unanswered |
+| `POST /api/soal/{mp}/klarifikasi` | field `pertanyaan`; at most one per user per 60 s (`429`); answers `{ "ok": true, "id" }` |
+| `GET /kelas/{id}/klarifikasi` | staff: the questions of that class, unanswered first; filter `pertemuan` |
+| `POST /kelas/{id}/klarifikasi/{kid}/jawab` | staff: fields `jawaban` and `tampil` (`pribadi` or `kelas`); answers, or changes the answer or its visibility. Audit `klarifikasi.dijawab` (first answer or changed text) and `klarifikasi.diterbitkan` / `klarifikasi.ditarik` (visibility changed) |
+
+### Announcements
+
+```
+announcements (id, class_id, author_id, title VARCHAR(150), body, created_at, withdrawn_at NULL, withdrawn_by NULL)
+```
+
+- For one class. Plain text, shown escaped with line breaks kept; title 1–150 characters, body 1–5,000. No edit and no delete: *Tarik* sets `withdrawn_at`, after which students no longer see it. A class that has an announcement or a clarification cannot be deleted.
+- A student sees the announcements that are not withdrawn of the classes in which the student is `AKTIF` or `LULUS`.
+
+| Route | Does |
+|---|---|
+| `GET /kelas/{id}/pengumuman` | staff: all announcements of the class, withdrawn ones marked, and the form |
+| `POST /kelas/{id}/pengumuman` | staff: fields `judul`, `isi`. Audit `pengumuman.dibuat` |
+| `POST /kelas/{id}/pengumuman/{aid}/tarik` | staff: withdraws it. Audit `pengumuman.ditarik` |
+| `GET /pengumuman` | mahasiswa: own classes' announcements, newest first, at most 100; the newest three are also on `/beranda` |
+
+In an archived academic year a dosen can read these pages but not answer, post or withdraw (`403`), like every other change to a class.

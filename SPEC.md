@@ -298,6 +298,7 @@ Acceptance tests (automated, and run by the owner on this host):
 
 ### 13.2 Other signals
 - Code similarity per problem version within a class: winnowing over tokens with identifiers normalised, comments ignored; side-by-side view; pairs ≥ 30 % listed. It reports; lecturers decide.
+  **Not built: dropped by the owner's decision of 2026-11-22 (stage 10b, `DECISIONS.md`).** The terms page therefore does not mention it.
 - Typing anomaly: ≥ 300 characters added at ≥ 150 characters per second.
 - Integrity events per class, viewable and exportable by pengajar and pengampu.
 

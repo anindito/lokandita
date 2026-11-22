@@ -19,7 +19,7 @@ final class SkemaLatihanTest extends TestCase
     {
         $this->db = TestSchema::connect((string) getenv('DB_DSN'));
         // Urutan mengikuti kunci asing. Hanya skema *_test (dijaga TestSchema).
-        foreach (['ui_prefs', 'integrity_events', 'drafts', 'meeting_scores', 'problem_scores', 'submissions', 'meeting_class_windows',
+        foreach (['announcements', 'clarifications', 'notifications', 'ui_prefs', 'integrity_events', 'drafts', 'meeting_scores', 'problem_scores', 'submissions', 'meeting_class_windows',
             'problem_instances', 'meeting_problems', 'import_items', 'imports', 'problem_versions', 'problems',
             'meeting_concepts', 'course_base_concepts', 'meetings', 'enrollment_moves', 'enrollments', 'class_teachers', 'classes', 'courses', 'academic_years'] as $tabel) {
             $this->db->query("DELETE FROM {$tabel}");
@@ -153,5 +153,68 @@ final class SkemaLatihanTest extends TestCase
 
         $this->db->query("INSERT INTO ui_prefs (user_id, panels, updated_at) VALUES ('mhs-1', '{\"kiri\":40}', UTC_TIMESTAMP())");
         $this->assertSame(1062, $this->ditolak(fn () => $this->db->query("INSERT INTO ui_prefs (user_id, panels, updated_at) VALUES ('mhs-1', '{}', UTC_TIMESTAMP())")));
+    }
+
+    // ---- tahap 10b: KONTRAK.md §17 ----------------------------------------------------
+
+    public function testPemberitahuanSatuPerPenggunaJenisDanRujukanDanHanyaTigaJenis(): void
+    {
+        $satu = fn (string $jenis = 'pertemuan_dibuka', string $ref = '7:2026-11-20 01:00:00', string $siapa = 'mhs-1') => $this->db->query(
+            "INSERT INTO notifications (user_id, kind, ref, data, created_at) VALUES ('{$siapa}', '{$jenis}', '{$ref}', '{}', UTC_TIMESTAMP())"
+        );
+        $satu();
+        $this->assertSame(1062, $this->ditolak($satu), 'pemberitahuan yang sama tidak dibuat dua kali');
+        $satu('pertemuan_dibuka', '7:2026-11-21 01:00:00'); // jendela dijadwalkan ulang: rujukan lain
+        $satu('tutup_24jam');
+        $satu('sandi_direset', '15');
+        $satu('pertemuan_dibuka', '7:2026-11-20 01:00:00', 'mhs-2');
+        $this->assertSame(3819, $this->ditolak(fn () => $satu('klarifikasi_dijawab')), 'jenis di luar SPEC.md §14');
+        // INSERT IGNORE — cara Notifikasi::segarkan — tidak menambah baris dan tidak gagal.
+        $this->db->query("INSERT IGNORE INTO notifications (user_id, kind, ref, created_at) VALUES ('mhs-1', 'tutup_24jam', '7:2026-11-20 01:00:00', UTC_TIMESTAMP())");
+        $this->assertSame('5', $this->db->query('SELECT COUNT(*) FROM notifications')->fetch_row()[0]);
+        $this->assertNull($this->db->query('SELECT read_at FROM notifications LIMIT 1')->fetch_row()[0]);
+    }
+
+    public function testKlarifikasiJawabanUtuhDanTerbitHanyaBilaBerjawab(): void
+    {
+        $d = $this->dunia();
+        $k = $this->id("INSERT INTO clarifications (meeting_problem_id, class_id, user_id, question, created_at) VALUES ({$d['mp']}, {$d['kelas_a']}, 'mhs-1', 'Apakah n bisa nol?', UTC_TIMESTAMP())");
+        $b = $this->db->query("SELECT answer, visibility, published_at FROM clarifications WHERE id = {$k}")->fetch_assoc();
+        $this->assertSame(['answer' => null, 'visibility' => 'private', 'published_at' => null], $b);
+
+        // Belum dijawab: tidak bisa diterbitkan; jawaban tanpa penjawab atau tanpa waktu ditolak.
+        $this->assertSame(3819, $this->ditolak(fn () => $this->db->query("UPDATE clarifications SET visibility = 'class', published_at = UTC_TIMESTAMP() WHERE id = {$k}")));
+        $this->assertSame(3819, $this->ditolak(fn () => $this->db->query("UPDATE clarifications SET answer = 'Ya' WHERE id = {$k}")));
+        $this->assertSame(3819, $this->ditolak(fn () => $this->db->query("UPDATE clarifications SET answer = 'Ya', answered_by = 'dosen' WHERE id = {$k}")));
+        $this->db->query("UPDATE clarifications SET answer = 'Ya', answered_by = 'dosen', answered_at = UTC_TIMESTAMP() WHERE id = {$k}");
+        // Terbit ke kelas harus bersama waktu terbitnya, dan sebaliknya.
+        $this->assertSame(3819, $this->ditolak(fn () => $this->db->query("UPDATE clarifications SET visibility = 'class' WHERE id = {$k}")));
+        $this->assertSame(3819, $this->ditolak(fn () => $this->db->query("UPDATE clarifications SET published_at = UTC_TIMESTAMP() WHERE id = {$k}")));
+        $this->db->query("UPDATE clarifications SET visibility = 'class', published_at = UTC_TIMESTAMP() WHERE id = {$k}");
+        $this->assertSame(1265, $this->ditolak(fn () => $this->db->query("UPDATE clarifications SET visibility = 'semua' WHERE id = {$k}")));
+
+        $this->assertSame(1452, $this->ditolak(fn () => $this->db->query("INSERT INTO clarifications (meeting_problem_id, class_id, user_id, question, created_at) VALUES (999999, {$d['kelas_a']}, 'mhs-1', 'x', UTC_TIMESTAMP())")));
+        $this->assertSame(1452, $this->ditolak(fn () => $this->db->query("INSERT INTO clarifications (meeting_problem_id, class_id, user_id, question, created_at) VALUES ({$d['mp']}, 999999, 'mhs-1', 'x', UTC_TIMESTAMP())")));
+        $this->assertSame(1451, $this->ditolak(fn () => $this->db->query("DELETE FROM classes WHERE id = {$d['kelas_a']}")), 'kelas yang punya klarifikasi tidak bisa dihapus');
+    }
+
+    public function testPengumumanDitarikDenganPenarikDanMenahanPenghapusanKelas(): void
+    {
+        $d = $this->dunia();
+        $p = $this->id("INSERT INTO announcements (class_id, author_id, title, body, created_at) VALUES ({$d['kelas_a']}, 'dosen', 'Kuis', 'Kuis diundur.', UTC_TIMESTAMP())");
+        $this->assertSame(3819, $this->ditolak(fn () => $this->db->query("UPDATE announcements SET withdrawn_at = UTC_TIMESTAMP() WHERE id = {$p}")));
+        $this->assertSame(3819, $this->ditolak(fn () => $this->db->query("UPDATE announcements SET withdrawn_by = 'dosen' WHERE id = {$p}")));
+        $this->db->query("UPDATE announcements SET withdrawn_at = UTC_TIMESTAMP(), withdrawn_by = 'dosen' WHERE id = {$p}");
+        $this->assertSame(1452, $this->ditolak(fn () => $this->db->query("INSERT INTO announcements (class_id, author_id, title, body, created_at) VALUES (999999, 'dosen', 'x', 'x', UTC_TIMESTAMP())")));
+        $this->assertSame(1451, $this->ditolak(fn () => $this->db->query("DELETE FROM classes WHERE id = {$d['kelas_a']}")), 'kelas yang punya pengumuman tidak bisa dihapus');
+    }
+
+    public function testPeristiwaKetikanTakWajarDisimpanSebagaiJenisBaru(): void
+    {
+        $d = $this->dunia();
+        $this->db->query("INSERT INTO integrity_events (user_id, kind, meeting_problem_id, detail, created_at)
+            VALUES ('mhs-1', 'typing_anomaly', {$d['mp']}, '{\"karakter\":420,\"ms\":900,\"cps\":466,\"sebab\":\"ketik\"}', UTC_TIMESTAMP())");
+        $b = $this->db->query("SELECT JSON_EXTRACT(detail, '$.karakter') FROM integrity_events WHERE kind = 'typing_anomaly'")->fetch_row();
+        $this->assertSame('420', $b[0]);
     }
 }
