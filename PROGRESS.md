@@ -1,6 +1,6 @@
 # Progress
 
-**Stage 13 — problem production — all eleven meetings of the task (DDP101 4–7, PBO301 1–7) are built and imported since 2026-11-23: 352 problems, all `PENDING_REVIEW`, no meeting published. Waiting for the owner's review; review sheets in `docs/soal/tinjauan/`. No tag yet: the stage closes when the owner has reviewed. Nothing is approved or published by the agent. See the table under "Stage 13" at the end of this file.**
+**Stage 13 — problem production — all eleven meetings of the task (DDP101 4–7, PBO301 1–7) are built, imported and, on the owner's word of 2026-11-23 ("setujui semua soal yang sudah dibuat"), approved: 352 problems `APPROVED`. No meeting of the eleven is published and no class window is open — that is the owner's to do. No tag yet. See "Stage 13" at the end of this file.**
 
 **Brand scheme and step cards — not a numbered stage, no tag — deployed 2026-11-22, running `ea483b6`; smoke 44 lulus, 0 gagal. New logos and icons on the three sites, "LokaAuth" shown to users as "Akun Lokandita", the Portal's app list is data (six cards), step numbers sit on the line of their text. Not seen by the owner in a browser yet; see "Brand scheme" at the end of this file. Next: stage 13 (problem production), not started.**
 
@@ -1166,17 +1166,17 @@ How one meeting is made (the next session repeats this for the next row):
 
 | Course | Meeting | Built | Imported | Review sheet | Reviewed by owner | Approved |
 |---|---|---|---|---|---|---|
-| DDP101 | 4 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-4.md` | no | no |
-| DDP101 | 5 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-5.md` | no | no |
-| DDP101 | 6 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-6.md` | no | no |
-| DDP101 | 7 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-7.md` | no | no |
-| PBO301 | 1 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-1.md` | no | no |
-| PBO301 | 2 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-2.md` | no | no |
-| PBO301 | 3 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-3.md` | no | no |
-| PBO301 | 4 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-4.md` | no | no |
-| PBO301 | 5 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-5.md` | no | no |
-| PBO301 | 6 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-6.md` | no | no |
-| PBO301 | 7 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-7.md` | no | no |
+| DDP101 | 4 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-4.md` | no | yes, 2026-11-23 |
+| DDP101 | 5 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-5.md` | no | yes, 2026-11-23 |
+| DDP101 | 6 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-6.md` | no | yes, 2026-11-23 |
+| DDP101 | 7 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-7.md` | no | yes, 2026-11-23 |
+| PBO301 | 1 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-1.md` | no | yes, 2026-11-23 |
+| PBO301 | 2 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-2.md` | no | yes, 2026-11-23 |
+| PBO301 | 3 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-3.md` | no | yes, 2026-11-23 |
+| PBO301 | 4 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-4.md` | no | yes, 2026-11-23 |
+| PBO301 | 5 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-5.md` | no | yes, 2026-11-23 |
+| PBO301 | 6 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-6.md` | no | yes, 2026-11-23 |
+| PBO301 | 7 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-7.md` | no | yes, 2026-11-23 |
 
 Before any problem was written (read-only queries, output in the session): the eleven meetings are all `cpp`, enabled, target 60, minimum 8 / 8 / 6 / 6 / 4, unpublished, without problems. Their added concepts equal `docs/PETA-KONSEP.md` **except DDP101 meeting 6, which has `FUNGSI, PARAMETER_REF` and no `REFERENSI`** (the "BEDA" of stage 12); meeting 7 inherits the gap. Reported to the owner, who approved going on; it was still unticked when meeting 4 was imported. PBO301's base concepts are the 21 of the 2026-11-19 decision.
 
@@ -1343,3 +1343,11 @@ Twelve probe programs were run through `kotak.analisis` (the judge's own analyse
   - `pohon-ekspresi` accepts single-digit operands only, and `papan-bidak` has no capturing; both are simplifications to keep the statements short.
   - `CONCEPT_NOT_MET` has still not been exercised with a real student submission, in any of the eleven meetings.
   - Read by nobody but the agent; English and Arabic by the agent.
+
+### Approval of the eleven meetings (2026-11-23)
+
+- The owner wrote "setujui semua soal yang sudah dibuat tinggal diterbitkan saja". Approved with `php spark soal:setujui <course> <meeting> --oleh <superadmin>` for each of the eleven meetings (`KONTRAK.md` §7; the same `Tinjau::setujui` as the web action, audit rows `lewat: cli`). No table was written directly.
+- Output: 32 approved in nine meetings; **DDP101 meeting 4: 21 approved, 11 skipped; PBO301 meeting 1: 31 approved, 1 skipped.** The twelve skipped were already `APPROVED`: their `reviewed_at` is 22:46–22:49 UTC, a few minutes before the command ran (22:50–22:51), by one reviewer — approved in the web panel, not by the agent.
+- Read back from production: DDP101 4–7 and PBO301 1–7 each show 32 versions `APPROVED` and 32 rows in `meeting_problems`; `published_at` is NULL for all eleven.
+- The "reviewed" column of the table stays "no": the owner approved without the agent knowing which statements were read. The weaknesses listed per meeting above still hold.
+- Not done by the agent, by instruction: publishing the meetings and opening class windows.
