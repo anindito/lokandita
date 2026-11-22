@@ -816,10 +816,10 @@ notifications (id, user_id, kind, ref VARCHAR(80), data JSON, created_at, read_a
 | `kind` | For | Created | `ref` | `data` |
 |---|---|---|---|---|
 | `pertemuan_dibuka` | a student `AKTIF` in the class | lazily, see below, while the class window of a published practice meeting is open (§6) | `<window id>:<open_at>`, or `<window id>:manual` when it is open by `override = 'open'` | `{ pertemuan, nomor, judul, matkul, tutup }` |
-| `tutup_24jam` | same | lazily, while that window is open with `override = 'none'` and `close_at` is at most 24 hours ahead | `<window id>:<close_at>` | same |
+| `tutup_24jam` | same | lazily, while that window is open with `override = 'none'` and `close_at` is at most 24 hours ahead — but only for a window that is longer than 24 hours from `open_at` to `close_at`; a shorter one has its close time in `pertemuan_dibuka` already | `<window id>:<close_at>` | same |
 | `sandi_direset` | the student whose password was reset | by `POST /kelas/{id}/reset-sandi` after LokaAuth answered `200` (§5) | id of the `sandi.direset` row in `audit_log` | `{ oleh: <user id>, kelas }` |
 
-- There is no background process on the web side. `App\Libraries\Notifikasi::segarkan` runs when a mahasiswa loads `/beranda`, `/notifikasi` or a practice page, at most once per 60 s per user (Redis key `lokakode:notif:<user id>`; without Redis it runs every time), and inserts the missing rows with `INSERT IGNORE`. So a notification appears at the first page load after its moment, never without a page load, and never twice. A window whose times change notifies again, because the time is part of `ref`.
+- There is no background process on the web side. `App\Libraries\Notifikasi::segarkan` runs whenever LokaKode renders a page for a mahasiswa (`BaseController::halaman`), at most once per 60 s per user (Redis key `lokakode:laju:notif:<user id>`; without Redis it runs every time), and always on `GET /notifikasi`; it inserts the missing rows with `INSERT IGNORE`. So a notification appears at the first page load after its moment, never without a page load, and never twice. A window whose times change notifies again, because the time is part of `ref`.
 - A reset done inside LokaAuth by a superadmin is **not** notified: LokaKode does not learn of it.
 - `created_at` is the moment the row was written, not the moment the window opened.
 
@@ -828,7 +828,7 @@ notifications (id, user_id, kind, ref VARCHAR(80), data JSON, created_at, read_a
 | `GET /notifikasi` | mahasiswa: own notifications, newest first, at most 100 |
 | `POST /notifikasi/baca` | mahasiswa: sets `read_at` on all own unread rows; redirects to `/notifikasi` |
 
-The number of unread rows is shown in LokaKode's own navigation on every student page, read when the page is rendered. The shared account menu (§4) is unchanged.
+The number of unread rows is shown in LokaKode's own navigation (`app/Views/_nav.php`) on the student's home, meeting, leaderboard, notification and announcement pages, read when the page is rendered; the problem page has no navigation bar. The shared account menu (§4) is unchanged.
 
 ### Clarifications
 

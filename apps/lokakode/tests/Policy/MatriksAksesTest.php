@@ -169,6 +169,9 @@ final class MatriksAksesTest extends KodeCase
             'GET api/soal/{n}/riwayat/{n}'   => ['/api/soal/' . $d['mpA'] . '/riwayat/' . $d['kirimanA'], $mhs],
             'POST api/integritas'            => ['/api/integritas', $mhs],
             'POST api/panel'                 => ['/api/panel', $mhs],
+            // Pemberitahuan milik sendiri (tests/Komunikasi/NotifikasiTest.php).
+            'GET notifikasi'                 => ['/notifikasi', $mhs],
+            'POST notifikasi/baca'           => ['/notifikasi/baca', $mhs],
 
             // Gerbang tahap 6: pengajar B tidak bisa membuka kelas XA milik pengajar A.
             'GET kelas/{n}' => ['/kelas/' . $d['kelasXA'], ['pengampuY' => 404, 'pengajarB' => 404] + $staf],

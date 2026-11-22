@@ -57,6 +57,9 @@ $routes->group('', ['filter' => ['masuk:mahasiswa', 'seb']], static function (Ro
     $routes->get('api/soal/(:num)/riwayat', 'RuangLatihan::riwayat/$1');
     $routes->get('api/soal/(:num)/riwayat/(:num)', 'RuangLatihan::kiriman/$1/$2');
     $routes->post('api/integritas', 'RuangLatihan::integritas');
+    // Pemberitahuan milik sendiri (SPEC.md §14, KONTRAK.md §17): tidak ada rute yang menerima id.
+    $routes->get('notifikasi', 'Notifikasi::index');
+    $routes->post('notifikasi/baca', 'Notifikasi::baca');
     $routes->post('api/panel', 'RuangLatihan::panel');
 });
 

@@ -11,6 +11,7 @@ $mode = $p['mode'];
 // Hitung mundur hanya bila pertemuan terbuka MENURUT JADWAL; buka manual tidak punya waktu tutup.
 $tutupIso = $p['jenis'] === 'biasa' && $p['override'] === 'none' && $p['close_at'] !== null ? str_replace(' ', 'T', $p['close_at']) . 'Z' : null;
 ?>
+<?= view('_nav', ['akses' => $akses, 'notifBelum' => $notifBelum ?? 0]) ?>
 <p><a href="/beranda"><span class="panah-balik" aria-hidden="true"></span> <?= lang('Latihan.ruang.kembali') ?></a></p>
 <h1><span class="ltr"><?= esc($p['matkul_kode']) ?></span> — <?= lang('Soal.pertemuan.ke', [(int) $p['number']]) ?>: <?= esc($p['title']) ?></h1>
 <p class="redup">

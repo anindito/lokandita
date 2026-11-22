@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Libraries\Akademik;
+use App\Libraries\Notifikasi;
 use App\Policy\Akses;
 use CodeIgniter\Controller;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -46,6 +47,13 @@ abstract class BaseController extends Controller
     {
         $data['akses'] = $this->akses();
         $data['pesan'] ??= [];
+        // Pemberitahuan mahasiswa (KONTRAK.md §17) dibuat dan dihitung saat halaman dimuat:
+        // tidak ada proses latar. Jumlahnya ditampilkan App\Views\_nav.
+        if ($this->akses()->mahasiswa()) {
+            $saya = $this->akses()->identitas()->userId;
+            Notifikasi::segarkan($saya);
+            $data['notifBelum'] = Notifikasi::belumDibaca($saya);
+        }
 
         return $this->response->setStatusCode($status)->setBody(view($view, $data));
     }

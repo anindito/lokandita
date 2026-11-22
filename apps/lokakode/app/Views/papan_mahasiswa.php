@@ -13,6 +13,7 @@ foreach ($papan as $b) {
     }
 }
 ?>
+<?= view('_nav', ['akses' => $akses, 'notifBelum' => $notifBelum ?? 0]) ?>
 <p><a href="/latihan/<?= (int) $p['pertemuan_id'] ?>"><span class="panah-balik" aria-hidden="true"></span> <?= lang('Soal.pertemuan.ke', [(int) $p['number']]) ?>: <?= esc($p['title']) ?></a></p>
 <h1><?= lang('Papan.judul') ?></h1>
 <p class="redup"><span class="ltr"><?= esc($p['matkul_kode']) ?></span> — <?= lang('Soal.pertemuan.ke', [(int) $p['number']]) ?> · <?= lang('Papan.kelasSaya', [esc($p['kelas_nama'])]) ?></p>

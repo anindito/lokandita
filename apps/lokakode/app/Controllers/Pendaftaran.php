@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Libraries\Audit;
+use App\Libraries\Notifikasi;
 use App\Libraries\Papan;
 use App\Libraries\Pendaftaran as Layanan;
 use App\Libraries\Waktu;
@@ -242,6 +243,8 @@ final class Pendaftaran extends BaseController
         }
 
         Audit::catat('sandi.direset', 'user', $userId, ['kelas' => $kelas['name']], (int) $kelas['course_id'], $kelasId);
+        // Mahasiswa itu diberi tahu di LokaKode siapa yang mereset dan kapan (SPEC.md §14, KONTRAK.md §17).
+        Notifikasi::sandiDireset($userId, $pelaku, $kelas['matkul_kode'] . ' ' . $kelas['name'], (int) db_connect()->insertID());
 
         return $this->halaman('sandi_sementara', ['judul' => lang('Kode.sandi.judul'), 'kelas' => $kelas, 'mhs' => $mhs, 'sandi' => $sandi]);
     }

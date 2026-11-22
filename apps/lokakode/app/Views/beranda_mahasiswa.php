@@ -1,5 +1,6 @@
 <?= $this->extend('Lokandita\Auth\Views\tata_letak') ?>
 <?= $this->section('isi') ?>
+<?= view('_nav', ['akses' => $akses, 'notifBelum' => $notifBelum ?? 0]) ?>
 <h1><?= lang('Lokandita.halo', [esc($akses->identitas()->nama)]) ?></h1>
 <?php if (service('request')->getHeaderLine(\App\Libraries\Seb\Seb::HEADER_KONFIG) !== ''): ?>
     <?php // Hanya di dalam SEB: membuka alamat ini menutup SEB (quitURL konfigurasi). ?>
