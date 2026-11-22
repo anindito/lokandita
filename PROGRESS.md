@@ -1175,7 +1175,7 @@ How one meeting is made (the next session repeats this for the next row):
 | PBO301 | 3 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-3.md` | no | no |
 | PBO301 | 4 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-4.md` | no | no |
 | PBO301 | 5 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-5.md` | no | no |
-| PBO301 | 6 | no | no | — | no | no |
+| PBO301 | 6 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-6.md` | no | no |
 | PBO301 | 7 | no | no | — | no | no |
 
 Before any problem was written (read-only queries, output in the session): the eleven meetings are all `cpp`, enabled, target 60, minimum 8 / 8 / 6 / 6 / 4, unpublished, without problems. Their added concepts equal `docs/PETA-KONSEP.md` **except DDP101 meeting 6, which has `FUNGSI, PARAMETER_REF` and no `REFERENSI`** (the "BEDA" of stage 12); meeting 7 inherits the gap. Reported to the owner, who approved going on; it was still unticked when meeting 4 was imported. PBO301's base concepts are the 21 of the 2026-11-19 decision.
@@ -1309,5 +1309,21 @@ Twelve probe programs were run through `kotak.analisis` (the judge's own analyse
 - Weaker than it looks:
   - **The detector does not tell the three relations apart.** Any data member of another user class type satisfies the requirement; a student who uses composition where the statement asks for aggregation passes whenever the output happens to agree.
   - **An association held only through a method parameter is not detected** and would give `CONCEPT_NOT_MET` (half marks) although it is legitimate design. The statements therefore ask for the relation as a member.
+  - `CONCEPT_NOT_MET` has still not been exercised with a real student submission.
+  - Read by nobody but the agent; English and Arabic by the agent.
+
+### PBO301 meeting 6 — Inheritance (2026-11-23)
+
+- 32 problems, 8 / 8 / 6 / 6 / 4, 232 points. All 32 require `CLASS_OBJECT` and `INHERITANCE` in the student's code (stored so in production); every statement names the classes and members and states the requirement.
+- Covered, each made visible in the output: inherited members used by the derived class, `protected`, passing arguments to the base constructor, **constructor / destructor order in a hierarchy** (base first, derived first on destruction; bases, then members, then body; multilevel), calling `Base::method()`, name hiding and `using Base::name;`, multilevel, multiple, private and **virtual inheritance** (the diamond, with the bottom class naming the virtual base itself).
+- **No `virtual` member function anywhere** (`POLYMORPHISM` arrives at meeting 7): every call is static, a derived method hides the base one, and objects are used through their own type. `tanpa-virtual` shows the base version being called through `const Hewan &` on purpose, as the lead-in to meeting 7.
+- `periksa.py` with the 28 allowed concepts → `32 dari 32 soal lulus` on the first run (240 judge tests per problem, no warning; 36 generated tests per problem equal to a separate procedural Python calculation; 34 quoted examples equal). So the analyser does accept `class B : virtual public A` and `using Base::name;` without reporting a concept outside the list.
+- `spark soal:impor` → `32 diterima, 0 ditolak, 0 tidak berubah`. Production shows 32 versions `PENDING_REVIEW` (8 / 8 / 6 / 6 / 4), `["CLASS_OBJECT", "INHERITANCE"]` on all 32, meeting not published.
+- Skipped from the syllabus of this meeting: UML generalisation notation; the effects of `protected` / `private` inheritance that are compile errors; "when to prefer composition" as prose.
+- Weaker than it looks:
+  - **The requirement is "some class has a base clause".** The hierarchy named in the statement is not checked; one empty derived class next to flat code passes. Constructor-order lines can be printed with plain `cout`.
+  - **Changed while writing:** `duel-ksatria-penyihir` first said "at most 20 rounds", under which a draw could never happen (the knight always wins or loses within 10). It is now 6 rounds and every third test is built to end in a draw.
+  - Several statements dictate a design that a careful programmer would question (a `Kubus` deriving from `Persegi`, `protected` data everywhere). They follow the syllabus examples; the owner may want different ones.
+  - `roda-kendaraan` and `tanpa-virtual` have only two kinds of input (apart from the name), so a student's tests repeat.
   - `CONCEPT_NOT_MET` has still not been exercised with a real student submission.
   - Read by nobody but the agent; English and Arabic by the agent.
