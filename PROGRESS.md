@@ -1,5 +1,7 @@
 # Progress
 
+**Stage 10b — integrity and communication (`SPEC.md` §13.2, §14) — code finished and pushed 2026-11-22, NOT deployed and NOT tagged.** Deploy waits for the owner's word on two things: the uncommitted `docs/branding/` changes (not the agent's) and when `lokakode` may restart under students. The owner's gate has not been run. See "Stage 10b" at the end of this file.
+
 **Stage 10a — Safe Exam Browser (`SPEC.md` §13.1) — closed 2026-11-22, tag `tahap-10a`; the owner reported gate steps 1–6 passed for every course; **enforcement is ON in production since 2026-11-22 (`SEB_ENFORCEMENT=enabled`)**. The owner reported that a student is refused without SEB and staff are not; and that a student can log in and work inside SEB under enforcement (confirmed by the server log); Run, Submit and the heartbeat from real SEB under enforcement are not in the log yet. See "Stage 10a after the tag" at the end of this file. Next: stage 10b (similarity, typing anomaly, integrity page, notifications, clarifications, announcements), not started; it begins in a new session with a plan.**
 
 **Stage 11c — public pages redesigned, replaceable hero photo, logout to the Portal, Kontak merged into Tentang — deployed 2026-11-21, running `a6637c0`; smoke 29 lulus. Checked by the owner in a browser the same day, first production upload works, restore test passed with real photo files; see "Stage 11c" at the end of this file. No tag (owner's decision).**
@@ -1022,3 +1024,54 @@ Stage 10a after the tag, 2026-11-22:
 - **Owner's decision, 2026-11-22: "skip it and tag 10a"** — Run, Submit and the heartbeat from a real SEB under enforcement are not waited for. They stay unconfirmed in this file. The tag `tahap-10a` was already set on `579bfa9` and stays there (as with `tahap-11`, a pushed tag is not moved); everything after it changes only this file and `docs/branding/`. The code that runs is the tagged code.
 
 **Stage 10a finished 2026-11-22, tag `tahap-10a`. Enforcement is on.**
+
+## Stage 10b — integrity and communication (2026-11-22)
+
+Plan approved by the owner in the session. His decisions (`DECISIONS.md`): **code similarity is not built**; the terms and the privacy page get a sentence on typing events instead; notifications are only the three of `SPEC.md` §14; a clarification published to the class shows who asked. `SPEC.md` §13.2 carries a note that similarity was dropped.
+
+Built (LokaKode unless noted; contract in `KONTRAK.md` §17):
+
+- Migration `000007`: tables `notifications`, `clarifications`, `announcements`.
+- **Typing anomaly**: `public/js/soal.js` measures what was added to the editor during the last two seconds; at ≥ 300 characters and ≥ 150 per second it reports once to `POST /api/integritas` (`jenis=ketik`), and the server checks both thresholds again and stores `typing_anomaly`. Reset and draft restore are not counted; undo/redo is counted and labelled; `paste_allowed` users are never recorded.
+- **Integrity page per class** `GET /kelas/{id}/integritas` with filters and paging, and export `…/ekspor/{csv|xlsx}` (audited as `integritas.diekspor`). Linked from the class page.
+- **Notifications** (`pertemuan_dibuka`, `tutup_24jam`, `sandi_direset`): created when the student loads a page, never twice; `GET /notifikasi`, `POST /notifikasi/baca`; unread count in a new student navigation bar (home, meeting, leaderboard, notification and announcement pages).
+- **Clarifications**: a tab *Klarifikasi* on the problem page (`GET`/`POST /api/soal/{mp}/klarifikasi`); staff page `GET /kelas/{id}/klarifikasi` and `POST …/{kid}/jawab` (private, or to the class with the asker's name); unanswered count on the class page.
+- **Announcements**: `GET`/`POST /kelas/{id}/pengumuman`, `POST …/{aid}/tarik`; students read them on `/beranda` (newest three) and `/pengumuman`. A class that has an announcement or a clarification can no longer be deleted (it says how many).
+- Own-data export gains `notifikasi`, `klarifikasi`, `jawaban_klarifikasi`, `pengumuman` (`KONTRAK.md` §14).
+- Portal: one sentence on unusual typing in the terms and in the privacy page, `id`, `en`, `ar`; "last updated" is now 22 November 2026.
+- `infra/smoke.sh` check 11. No new environment variable. The judge worker and its grants are untouched.
+
+Things that differ from the approved plan, all recorded in `DECISIONS.md` or `KONTRAK.md` §17:
+
+- `clarifications` has no `course_id` column.
+- No `tutup_24jam` for a window that is 24 hours long or shorter (its close time is already in "opened").
+- Withdrawing an announcement twice is not an error.
+- The problem page has no navigation bar, so the unread count is not shown there.
+
+Verified by the agent, 2026-11-22 (output shown in the session):
+
+- `infra/tes.sh lokakode` → **282 tests, 12230 assertions, pass** (252 before this stage). New: schema (4), `tests/Integritas` (7), `tests/Komunikasi` (15: notifications 5, clarifications 5, announcements 5), browser tests `KetikanTest` (3) and `KlarifikasiTabTest` (1) in headless Chromium, and every new route in `MatriksAksesTest` with the cross-class cases (pengajar of another class and pengampu of another course `404`, student `403`). On the SEB-enforced test container the new student routes answer `403` to an ordinary browser.
+- `infra/tes.sh auth` → 105 tests pass. `infra/tes.sh portal` → 86 tests, 6221 assertions pass.
+- `infra/tes.sh judge` → **257 passed, 1 failed** in the full run: `test_submit_benar_semua_tes_tersembunyi_lulus_dan_hasil_tidak_memuat_tes`. The test searches the worker log for each expected output as bare text; this time the output `784` matched four digits inside a random job id (`…14ab8784d0a3`). Run alone it failed once more and then passed three times in a row. It is a chance match in the test, not a leak, and the judge code has not changed since `tahap-10a` (`git diff --stat tahap-10a HEAD -- judge` is empty). **The test was not changed** (the judge is outside this stage); it will fail by chance again until it compares whole values.
+- Production, read only: `portal.teks` holds one override, `depan`/`id`. None for `ketentuan` or `privasi`, so the new sentences will show after deploy.
+
+**Not done and not verified:**
+
+- **Nothing of this stage is deployed.** Migration `000007` has not run on the real `lokakode` schema; `infra/smoke.sh` has not been run with check 11; no real request has been made to a new route in production.
+- The typing measurement has been seen only in headless Chromium, never in Safe Exam Browser. It is the browser's measurement; a student who can change the page's script can suppress it.
+- The new pages were not looked at by a person, not in dark mode and not in Arabic (RTL); the Arabic texts of `Integritas.php`, `Komunikasi.php`, the new `Latihan.php` keys and the two Portal sentences were written by the agent and not read by an Arabic speaker.
+- A password reset made inside LokaAuth by a superadmin produces no notification (by design, stated in `KONTRAK.md` §17).
+- The privacy page does not yet say that a classmate sees a student's **name** next to a question whose answer a lecturer publishes to the class. The student is told this on the form itself. Whether the privacy page should say it is the owner's decision.
+
+Before deploy the owner must say: (1) what to do with the uncommitted changes under `docs/branding/` (12 PNG deleted, `LOKANDITA-BRAND.md` and `newbranding.zip` new) — `infra/deploy.sh` refuses a dirty tree; (2) when `lokakode` may restart: enforcement is on, and a student typing at that moment loses what was typed since the last autosave (at most 5 s) and gets an error until the container is back.
+
+Owner's gate for stage 10b (after deploy):
+
+1. As a test student in SEB: paste is still blocked; open a problem, tab **Klarifikasi**, ask a question; after a meeting is opened for the class the navigation shows **Pemberitahuan** with a count.
+2. As pengajar of that class, on the class page: **Klarifikasi soal** — answer once *Hanya penanya* and once *Seluruh kelas*; **Pengumuman** — post one; **Integritas** — look at the list and download CSV and XLSX.
+3. As a second student of the class: the published answer (with the asker's name) and the announcement are visible, the private answer is not.
+4. As pengajar of another class: `/kelas/<id of the first class>/integritas`, `/klarifikasi` and `/pengumuman` answer "tidak ditemukan".
+5. Reset the test student's password from the class page; after the forced change the student sees the notification naming who reset it.
+6. Read the new sentence on `lokandita.com/ketentuan` and `/privasi` in the three languages.
+7. Optional, inside SEB: with an editor tool that inserts a long block at once (or undo of a large deletion), check that **Ketikan tak wajar** appears on the Integritas page.
+
