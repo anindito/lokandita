@@ -224,6 +224,10 @@ return [
         'tabTes'        => 'Test Cases',
         'tabKustom'     => 'Custom Input',
         'tabRiwayat'    => 'History',
+        'tabKlarifikasi' => 'Clarifications',
+        'klarLabel' => 'Your question about this problem',
+        'klarInfo' => 'Only you and the lecturers see this question, unless a lecturer publishes the answer to the whole class; your name is then shown with it. Do not write solution code.',
+        'klarKirim' => 'Send question',
         'panelSoal'     => 'Problem',
         'panelEditor'   => 'Editor',
         'panelHasil'    => 'Results',
@@ -241,6 +245,13 @@ return [
 
     // Texts used by the problem page script (public/js/soal.js).
     'js' => [
+        'klarKosong' => 'No questions for this problem yet.',
+        'klarSaya' => 'Your question',
+        'klarDari' => 'Question from {0}',
+        'klarBelum' => 'Not answered yet',
+        'klarJawaban' => 'Lecturer\'s answer',
+        'klarKelas' => 'For the whole class',
+        'klarTerkirim' => 'Question sent. The answer will appear in this tab.',
         'tempelDiblokir'  => 'Pasting into the editor is not allowed. Type your own code.',
         'salinDiblokir'   => 'The problem cannot be copied.',
         'menyimpan'       => 'Saving…',
@@ -313,6 +324,7 @@ return [
         'terlalu_cepat' => 'Wait {0} seconds before trying again.',
         'masih_dinilai' => 'Your previous submission for this problem is still being judged.',
         'isian_salah'   => 'The input was not recognised.',
+        'pertanyaan_salah' => 'Write a question of at most 2,000 characters.',
     ],
 
     'telat' => [

@@ -7,6 +7,7 @@ namespace App\Controllers;
 use App\Libraries\Antrean;
 use App\Libraries\Instans;
 use App\Libraries\Integritas;
+use App\Libraries\Klarifikasi;
 use App\Libraries\Latihan;
 use App\Libraries\Papan;
 use App\Libraries\Penilaian;
@@ -16,6 +17,7 @@ use App\Libraries\Waktu;
 use CodeIgniter\HTTP\ResponseInterface;
 use Lokandita\Auth\Filters\SecurityHeaders;
 use Lokandita\Auth\Log;
+use Lokandita\Auth\UserDirectory;
 
 /**
  * Halaman dan titik akhir mahasiswa (SPEC.md §11): halaman pertemuan, halaman
@@ -448,6 +450,59 @@ final class RuangLatihan extends BaseController
         }
 
         return $this->json(['ok' => true]);
+    }
+
+    // ---- klarifikasi soal (SPEC.md §14, KONTRAK.md §17) ---------------------------------
+
+    /**
+     * Soal yang halamannya boleh dibuka mahasiswa ini, atau 404.
+     *
+     * @return array<string, mixed>|ResponseInterface
+     */
+    private function soalTerlihat(int $mpId): array|ResponseInterface
+    {
+        $soal = $this->ruang()->soal($mpId);
+
+        return $soal === null || ! in_array($soal['mode'], ['kerja', 'baca'], true) ? $this->galat(404, 'tidak_ada') : $soal;
+    }
+
+    /**
+     * Pertanyaannya sendiri, dan pertanyaan yang jawabannya diterbitkan ke kelasnya (dengan nama penanya).
+     */
+    public function klarifikasi(int $mpId): ResponseInterface
+    {
+        $soal = $this->soalTerlihat($mpId);
+        if ($soal instanceof ResponseInterface) {
+            return $soal;
+        }
+        $baris = (new Klarifikasi($this->akses()))->untukMahasiswa($soal);
+        $orang = UserDirectory::byIds(array_values(array_unique(array_column($baris, 'user_id'))));
+
+        return $this->json(['daftar' => array_map(fn (array $q): array => [
+            'id' => (int) $q['id'], 'pertanyaan' => $q['question'], 'waktu' => Waktu::lokal($q['created_at']),
+            'milikSaya' => $q['user_id'] === $this->pengguna(), 'penanya' => $orang[$q['user_id']]['nama'] ?? '',
+            'jawaban' => $q['answer'], 'dijawab' => $q['answered_at'] === null ? null : Waktu::lokal($q['answered_at']),
+            'kelas' => $q['visibility'] === 'class',
+        ], $baris)]);
+    }
+
+    public function tanya(int $mpId): ResponseInterface
+    {
+        $soal = $this->soalTerlihat($mpId);
+        if ($soal instanceof ResponseInterface) {
+            return $soal;
+        }
+        $teks = Klarifikasi::teks((string) $this->request->getPost('pertanyaan'));
+        if ($teks === null) {
+            return $this->galat(422, 'pertanyaan_salah');
+        }
+        // Satu pertanyaan per menit per pengguna.
+        $tunggu = $this->tunggu('lokakode:laju:tanya:' . $this->pengguna(), 60000);
+        if ($tunggu > 0) {
+            return $this->galat(429, 'terlalu_cepat', ['retry_after' => $tunggu]);
+        }
+
+        return $this->json(['ok' => true, 'id' => (new Klarifikasi($this->akses()))->tanya($soal, $teks)]);
     }
 
     /**

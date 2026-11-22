@@ -43,7 +43,9 @@ $aktif = count(array_filter($pendaftaran, static fn ($p) => $p['status'] === 'AK
     </dl>
     <p><a class="tombol tombol-sekunder" href="/kelas/<?= (int) $kelas['id'] ?>/pertemuan"><?= lang('Latihan.jendela.judul') ?></a>
         <a class="tombol tombol-sekunder" href="/kelas/<?= (int) $kelas['id'] ?>/analitik"><?= lang('Papan.analitik.judul') ?></a>
-        <a class="tombol tombol-sekunder" href="/kelas/<?= (int) $kelas['id'] ?>/integritas"><?= lang('Integritas.judul') ?></a></p>
+        <a class="tombol tombol-sekunder" href="/kelas/<?= (int) $kelas['id'] ?>/integritas"><?= lang('Integritas.judul') ?></a>
+        <a class="tombol tombol-sekunder" href="/kelas/<?= (int) $kelas['id'] ?>/klarifikasi" data-klarifikasi-belum="<?= (int) $klarifikasiBelum ?>"><?= lang('Komunikasi.klarifikasi.judul') ?><?php if ($klarifikasiBelum > 0): ?>
+            <span class="lencana lencana-galat"><?= lang('Komunikasi.klarifikasi.belumJumlah', [(int) $klarifikasiBelum]) ?></span><?php endif ?></a></p>
     <?php if ((int) $kelas['boleh_kelola'] !== 1): ?>
         <p class="petunjuk"><?= lang('Kode.kelas.hanyaLihat') ?></p>
     <?php elseif (! $bolehUbah): ?>

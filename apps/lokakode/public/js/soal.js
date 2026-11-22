@@ -222,6 +222,7 @@
       if (aktif && fokus) { t.focus(); }
     });
     if (id === 'tab-riwayat') { muatRiwayat(); }
+    if (id === 'tab-klarifikasi') { muatKlarifikasi(); }
   };
   tab.forEach(function (t, i) {
     t.addEventListener('click', function () { bukaTab(t.id, false); });
@@ -542,6 +543,48 @@
       riwayat.appendChild(tabel);
     });
   };
+
+  // ---- klarifikasi soal (SPEC.md §14) ------------------------------------------------------
+  // Pertanyaan sendiri dan jawaban yang diterbitkan dosen ke kelas. Semua teks ditulis dengan textContent.
+
+  var klarDaftar = document.querySelector('[data-klarifikasi-daftar]');
+  var klarForm = document.querySelector('[data-klarifikasi-form]');
+  var klarIsian = document.querySelector('[data-klarifikasi-isian]');
+  var muatKlarifikasi = function () {
+    minta('GET', api + '/klarifikasi').then(function (j) {
+      if (j.status !== 200) { gagalMinta(j); return; }
+      kosongkan(klarDaftar);
+      if (!j.data.daftar.length) { klarDaftar.appendChild(el('p', 'redup', T.klarKosong)); return; }
+      j.data.daftar.forEach(function (q) {
+        var kartu = el('div', 'hasil-blok klarifikasi');
+        kartu.dataset.klarifikasi = q.id;
+        var kepala = el('p', 'redup', (q.milikSaya ? T.klarSaya : isi(T.klarDari, q.penanya)) + ' · ' + q.waktu);
+        if (q.kelas) { kepala.appendChild(document.createTextNode(' ')); kepala.appendChild(el('span', 'lencana', T.klarKelas)); }
+        kartu.appendChild(kepala);
+        kartu.appendChild(el('p', 'kabar-isi', q.pertanyaan));
+        if (q.jawaban === null) {
+          kartu.appendChild(el('p', 'redup', T.klarBelum));
+        } else {
+          kartu.appendChild(el('p', 'redup', T.klarJawaban + ' · ' + q.dijawab));
+          kartu.appendChild(el('p', 'kabar-isi klarifikasi-jawaban', q.jawaban));
+        }
+        klarDaftar.appendChild(kartu);
+      });
+    });
+  };
+  if (klarForm) {
+    klarForm.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var teks = klarIsian.value.trim();
+      if (!teks) { return; }
+      minta('POST', api + '/klarifikasi', { pertanyaan: teks }).then(function (j) {
+        if (j.status !== 200) { gagalMinta(j); return; }
+        klarIsian.value = '';
+        toast(T.klarTerkirim, 'sukses');
+        muatKlarifikasi();
+      });
+    });
+  }
 
   // ---- panel yang bisa diubah ukurannya; ukurannya disimpan per pengguna ------------------
 

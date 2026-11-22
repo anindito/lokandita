@@ -113,6 +113,7 @@ $tanda   = $akses->identitas()->nomorInduk . ' · ' . $akses->identitas()->nama 
                     <button type="button" role="tab" id="tab-kustom" aria-controls="isi-kustom" aria-selected="false" tabindex="-1"><?= lang('Latihan.soal.tabKustom') ?></button>
                 <?php endif ?>
                 <button type="button" role="tab" id="tab-riwayat" aria-controls="isi-riwayat" aria-selected="false" tabindex="-1"><?= lang('Latihan.soal.tabRiwayat') ?></button>
+                <button type="button" role="tab" id="tab-klarifikasi" aria-controls="isi-klarifikasi" aria-selected="false" tabindex="-1"><?= lang('Latihan.soal.tabKlarifikasi') ?></button>
             </div>
 
             <div class="tab-isi" role="tabpanel" id="isi-keluaran" aria-labelledby="tab-keluaran" tabindex="0">
@@ -147,6 +148,17 @@ $tanda   = $akses->identitas()->nomorInduk . ' · ' . $akses->identitas()->nama 
 
             <div class="tab-isi" role="tabpanel" id="isi-riwayat" aria-labelledby="tab-riwayat" tabindex="0" hidden>
                 <div data-riwayat><p class="redup"><?= lang('Latihan.soal.riwayatKosong') ?></p></div>
+            </div>
+
+            <?php // Klarifikasi soal (SPEC.md §14): daftar diisi public/js/soal.js saat tab dibuka. ?>
+            <div class="tab-isi" role="tabpanel" id="isi-klarifikasi" aria-labelledby="tab-klarifikasi" tabindex="0" hidden>
+                <form data-klarifikasi-form>
+                    <label for="pertanyaan-klarifikasi"><?= lang('Latihan.soal.klarLabel') ?></label>
+                    <textarea id="pertanyaan-klarifikasi" rows="3" maxlength="2000" required data-klarifikasi-isian></textarea>
+                    <p class="petunjuk"><?= lang('Latihan.soal.klarInfo') ?></p>
+                    <div class="baris-tombol"><button type="submit" class="tombol tombol-sekunder"><?= lang('Latihan.soal.klarKirim') ?></button></div>
+                </form>
+                <div data-klarifikasi-daftar></div>
             </div>
         </section>
     </div>

@@ -285,6 +285,7 @@ final class Kelas extends BaseController
             'orang'         => $orang,
             'berakses'      => UserDirectory::withAccess($idMahasiswa, Aplikasi::kode()),
             'nomorPengajar' => $nomorPengajar,
+            'klarifikasiBelum' => (new \App\Libraries\Klarifikasi($this->akses()))->belumDijawab($id),
             // Tujuan pindah kelas: kelas lain mata kuliah dan tahun yang sama, yang boleh dikelola dan tidak diarsipkan.
             'tujuanPindah'  => array_values(array_filter(
                 $akademik->daftarKelas((int) $kelas['academic_year_id'], (int) $kelas['course_id']),

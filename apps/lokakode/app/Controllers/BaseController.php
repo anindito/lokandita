@@ -130,6 +130,17 @@ abstract class BaseController extends Controller
     }
 
     /**
+     * Klarifikasi dan pengumuman kelas (KONTRAK.md §17): siapa pun yang melihat kelas itu boleh
+     * menulis, kecuali dosen di tahun ajaran yang sudah diarsipkan (hanya baca).
+     *
+     * @param array<string, mixed> $kelas baris dari Akademik::kelas()
+     */
+    protected function bolehMenulis(array $kelas): bool
+    {
+        return $kelas['tahun_status'] === 'active' || $this->akses()->superadmin();
+    }
+
+    /**
      * Peran ini tidak pernah boleh melakukan tindakan ini.
      */
     protected function terlarang(string $kunciTeks = 'Lokandita.tidakBerhak'): ResponseInterface

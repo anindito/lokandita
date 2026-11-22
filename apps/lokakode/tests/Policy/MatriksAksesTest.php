@@ -141,6 +141,11 @@ final class MatriksAksesTest extends KodeCase
             'GET kelas/{n}/integritas'                 => ['/kelas/' . $d['kelasXA'] . '/integritas', $lihatXA],
             'GET kelas/{n}/integritas/ekspor/([^/]+)'  => ['/kelas/' . $d['kelasXA'] . '/integritas/ekspor/csv', $lihatXA],
 
+            // Klarifikasi soal kelas XA (SPEC.md §14): siapa pun yang melihat kelas XA membaca dan menjawab.
+            // Pertanyaannya milik mahasiswa A di kelas XA; rinciannya di tests/Komunikasi/KlarifikasiTest.php.
+            'GET kelas/{n}/klarifikasi'             => ['/kelas/' . $d['kelasXA'] . '/klarifikasi', $lihatXA],
+            'POST kelas/{n}/klarifikasi/{n}/jawab'  => ['/kelas/' . $d['kelasXA'] . '/klarifikasi/' . $d['klarA'] . '/jawab', $lihatXA],
+
             // Bank soal mata kuliah X: sama dengan pertemuannya.
             'GET soal/{n}'             => ['/soal/' . $d['soalX'], ['pengajarB' => 403] + $kelolaXA],
             'POST soal/{n}/setujui'    => ['/soal/' . $d['soalX'] . '/setujui', ['pengajarB' => 403] + $kelolaXA],
@@ -167,6 +172,9 @@ final class MatriksAksesTest extends KodeCase
             'POST api/soal/{n}/kirim'        => ['/api/soal/' . $d['mpA'] . '/kirim', $mhs],
             'GET api/soal/{n}/riwayat'       => ['/api/soal/' . $d['mpA'] . '/riwayat', $mhs],
             'GET api/soal/{n}/riwayat/{n}'   => ['/api/soal/' . $d['mpA'] . '/riwayat/' . $d['kirimanA'], $mhs],
+            // Klarifikasi soal: bertanya dan membaca (tests/Komunikasi/KlarifikasiTest.php).
+            'GET api/soal/{n}/klarifikasi'   => ['/api/soal/' . $d['mpA'] . '/klarifikasi', $mhs],
+            'POST api/soal/{n}/klarifikasi'  => ['/api/soal/' . $d['mpA'] . '/klarifikasi', $mhs],
             'POST api/integritas'            => ['/api/integritas', $mhs],
             'POST api/panel'                 => ['/api/panel', $mhs],
             // Pemberitahuan milik sendiri (tests/Komunikasi/NotifikasiTest.php).
@@ -192,6 +200,12 @@ final class MatriksAksesTest extends KodeCase
         $this->jendela($d['pertemuanX2'], $d['kelasXA']);
         $d['mpA']      = $soal['mp'];
         $d['kirimanA'] = $this->kirimanDinilai($d['mhsA'], $soal, $this->instans($d['mhsA'], $soal), 7);
+        // Satu pertanyaan klarifikasi mahasiswa A pada soal itu (tahap 10b).
+        \Lokandita\Auth\Testing\Fixtures::insert($this->db, 'clarifications', [
+            'meeting_problem_id' => $soal['mp'], 'class_id' => $d['kelasXA'], 'user_id' => $d['mhsA']['id'],
+            'question' => 'PERTANYAAN-RAHASIA', 'created_at' => gmdate('Y-m-d H:i:s'),
+        ]);
+        $d['klarA'] = (int) $this->db->insert_id;
 
         return $d;
     }
@@ -274,6 +288,9 @@ final class MatriksAksesTest extends KodeCase
             $this->db->query('SELECT id FROM judge_jobs ORDER BY id')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT id, course_id, version, config_key, retired_at FROM seb_configs ORDER BY id')->fetch_all(MYSQLI_ASSOC),
             $this->db->query('SELECT seb_config_id, exam_key FROM seb_exam_keys ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+            // Tahap 10b. Tabel notifications tidak dipotret: barisnya dibuat sistem saat mahasiswa A memuat halaman.
+            $this->db->query('SELECT * FROM clarifications ORDER BY id')->fetch_all(MYSQLI_ASSOC),
+            $this->db->query('SELECT * FROM announcements ORDER BY id')->fetch_all(MYSQLI_ASSOC),
         ];
         $awal = $potret();
 
@@ -306,6 +323,8 @@ final class MatriksAksesTest extends KodeCase
             'POST api/soal/{n}/kirim'    => ['source' => 'int main(){return 1;}'],
             'POST api/integritas'        => ['mp' => (string) $d['mpA'], 'jalur' => 'paste'],
             'POST api/panel'             => ['kiri' => '30', 'atas' => '50'],
+            'POST api/soal/{n}/klarifikasi'         => ['pertanyaan' => 'DIBAJAK'],
+            'POST kelas/{n}/klarifikasi/{n}/jawab'  => ['jawaban' => 'DIBAJAK', 'tampil' => 'kelas'],
             'POST soal/{n}/setujui'    => ['versi_id' => (string) $d['versiX']],
             'POST soal/{n}/tolak'      => ['versi_id' => (string) $d['versiX'], 'catatan' => 'Dibajak'],
             'POST soal/{n}/terjemahan' => ['versi_id' => (string) $d['versiX'], 'bahasa' => 'en'],

@@ -295,7 +295,7 @@
   .sesi-peringatan[hidden] { display: none; }
 
   /* Halaman pengelolaan. */
-  .admin-nav { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; padding-bottom: .75rem; border-bottom: 1px solid var(--garis); }
+  .admin-nav, .nav-mahasiswa { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; padding-bottom: .75rem; border-bottom: 1px solid var(--garis); }
   .massal { margin-top: 1rem; }
 
   /* Pemberitahuan, pengumuman dan klarifikasi LokaKode (tahap 10b): daftar kartu tanpa butir. */

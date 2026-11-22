@@ -224,6 +224,10 @@ return [
         'tabTes'        => 'Test Cases',
         'tabKustom'     => 'Input Kustom',
         'tabRiwayat'    => 'Riwayat',
+        'tabKlarifikasi' => 'Klarifikasi',
+        'klarLabel' => 'Pertanyaan Anda tentang soal ini',
+        'klarInfo' => 'Hanya Anda dan dosen yang melihat pertanyaan ini, kecuali dosen menerbitkan jawabannya untuk seluruh kelas; saat itu nama Anda ikut tampil. Jangan menuliskan kode jawaban.',
+        'klarKirim' => 'Kirim pertanyaan',
         'panelSoal'     => 'Soal',
         'panelEditor'   => 'Editor',
         'panelHasil'    => 'Hasil',
@@ -241,6 +245,13 @@ return [
 
     // Teks yang dipakai skrip halaman soal (public/js/soal.js).
     'js' => [
+        'klarKosong' => 'Belum ada pertanyaan untuk soal ini.',
+        'klarSaya' => 'Pertanyaan Anda',
+        'klarDari' => 'Pertanyaan {0}',
+        'klarBelum' => 'Belum dijawab',
+        'klarJawaban' => 'Jawaban dosen',
+        'klarKelas' => 'Untuk seluruh kelas',
+        'klarTerkirim' => 'Pertanyaan terkirim. Jawabannya akan muncul di tab ini.',
         'tempelDiblokir'  => 'Menempel ke editor tidak diizinkan. Ketik kode Anda sendiri.',
         'salinDiblokir'   => 'Soal tidak bisa disalin.',
         'menyimpan'       => 'Menyimpan…',
@@ -313,6 +324,7 @@ return [
         'terlalu_cepat' => 'Tunggu {0} detik sebelum mencoba lagi.',
         'masih_dinilai' => 'Kiriman Anda sebelumnya untuk soal ini masih dinilai.',
         'isian_salah'   => 'Isian tidak dikenali.',
+        'pertanyaan_salah' => 'Pertanyaan harus diisi, paling banyak 2.000 karakter.',
     ],
 
     'telat' => [
