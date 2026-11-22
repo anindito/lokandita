@@ -113,6 +113,9 @@ $routes->group('', ['filter' => 'masuk:superadmin,dosen'], static function (Rout
     $routes->get('kelas/(:num)/ekspor/(:segment)', 'Analitik::eksporKelas/$1/$2');
     $routes->get('mata-kuliah/(:num)/analitik', 'Analitik::matkul/$1');
     $routes->get('mata-kuliah/(:num)/ekspor/(:segment)', 'Analitik::eksporMatkul/$1/$2');
+    // Peristiwa integritas per kelas dan ekspornya (SPEC.md §13.2, KONTRAK.md §17): siapa pun yang melihat kelas itu.
+    $routes->get('kelas/(:num)/integritas', 'Integritas::index/$1');
+    $routes->get('kelas/(:num)/integritas/ekspor/(:segment)', 'Integritas::ekspor/$1/$2');
     // Konfigurasi SEB mata kuliah (SPEC.md §13.1): superadmin dan pengampu; pengajar 403.
     $routes->get('mata-kuliah/(:num)/seb', 'SebKelola::lihat/$1');
     $routes->post('mata-kuliah/(:num)/seb', 'SebKelola::simpan/$1');

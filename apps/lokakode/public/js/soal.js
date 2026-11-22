@@ -83,7 +83,7 @@
 
   var ambil = function () { return monacoEditor ? monacoEditor.getValue() : cadangan.value; };
   var pasang = function (teks) {
-    if (monacoEditor) { monacoEditor.setValue(teks); } else { cadangan.value = teks; }
+    if (monacoEditor) { monacoEditor.setValue(teks); } else { cadangan.value = teks; panjangCadangan = teks.length; }
   };
 
   // ---- blokir tempel (SPEC.md §11) --------------------------------------------------
@@ -125,6 +125,48 @@
     // Menu konteks peramban punya butir "Tempel"; menu Monaco dimatikan di opsinya.
     wadahEditor.addEventListener('contextmenu', function (e) { e.preventDefault(); e.stopPropagation(); }, true);
   }
+
+  // ---- ketikan tak wajar (SPEC.md §13.2, KONTRAK.md §17) -------------------------------
+  // Tambahan karakter dalam dua detik terakhir. Bila jumlahnya ≥ 300 dan lajunya ≥ 150
+  // karakter per detik, satu peristiwa dikirim; server memeriksa ulang kedua ambang itu.
+  // Reset ke templat dan pemulihan draf tidak lewat sini (teks itu kami sendiri yang memasang).
+
+  var KETIK_KARAKTER = 300;
+  var KETIK_PER_DETIK = 150;
+  var KETIK_JENDELA_MS = 2000;
+  var KETIK_TUNDA_MS = 400;
+  var tambahan = [];
+  var laporKetik = null;
+  var jumlahTambahan = function () {
+    var total = 0;
+    var undo = false;
+    tambahan.forEach(function (x) { total += x.n; undo = undo || x.sebab === 'undo'; });
+    return { total: total, ms: tambahan[tambahan.length - 1].t - tambahan[0].t, undo: undo };
+  };
+  var catatTambahan = function (jumlah, sebab) {
+    if (!kerja || D.bolehTempel || jumlah <= 0) { return; }
+    var kini = Date.now();
+    tambahan.push({ t: kini, n: jumlah, sebab: sebab });
+    if (laporKetik !== null) { return; }   // sedang menunggu sisa semburan yang sama
+    while (kini - tambahan[0].t > KETIK_JENDELA_MS) { tambahan.shift(); }
+    var j = jumlahTambahan();
+    if (j.total >= KETIK_KARAKTER && j.total * 1000 >= KETIK_PER_DETIK * j.ms) {
+      // Ambang terlewati. Sisa semburan yang sama ditunggu sebentar, supaya jumlah yang
+      // dilaporkan adalah seluruh teks yang masuk, bukan hanya 300 karakter pertamanya.
+      laporKetik = window.setTimeout(function () {
+        var akhir = jumlahTambahan();
+        tambahan = [];
+        laporKetik = null;
+        minta('POST', '/api/integritas', { mp: D.mp, jenis: 'ketik', karakter: akhir.total, ms: akhir.ms, sebab: akhir.undo ? 'undo' : 'ketik' });
+      }, KETIK_TUNDA_MS);
+    }
+  };
+  // Editor cadangan (tanpa Monaco): selisih panjang teks pada setiap masukan.
+  var panjangCadangan = cadangan.value.length;
+  cadangan.addEventListener('input', function () {
+    catatTambahan(cadangan.value.length - panjangCadangan, 'ketik');
+    panjangCadangan = cadangan.value.length;
+  });
 
   // ---- simpan draf otomatis tiap 5 detik --------------------------------------------
 
@@ -666,6 +708,14 @@
         tempelDiblokir('paste');
       });
     }
+    // Ketikan tak wajar: karakter yang bertambah pada setiap perubahan. isFlush = setValue
+    // kami sendiri (Reset), tidak dihitung; undo dan redo dihitung dan ditandai.
+    monacoEditor.onDidChangeModelContent(function (e) {
+      if (e.isFlush) { return; }
+      var bertambah = 0;
+      e.changes.forEach(function (c) { bertambah += c.text.length - c.rangeLength; });
+      catatTambahan(bertambah, e.isUndoing || e.isRedoing ? 'undo' : 'ketik');
+    });
     window.lokakodeEditor = monacoEditor; // dipakai tes peramban
     document.documentElement.dataset.editorSiap = '1';
   }, function () {

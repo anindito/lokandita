@@ -136,6 +136,11 @@ final class MatriksAksesTest extends KodeCase
             'GET mata-kuliah/{n}/analitik'         => ['/mata-kuliah/' . $d['matkulX'] . '/analitik', ['pengajarB' => 403] + $kelolaXA],
             'GET mata-kuliah/{n}/ekspor/([^/]+)'   => ['/mata-kuliah/' . $d['matkulX'] . '/ekspor/csv', ['pengajarB' => 403] + $kelolaXA],
 
+            // Peristiwa integritas kelas XA dan ekspornya (SPEC.md §13.2): siapa pun yang melihat kelas XA;
+            // isi dan saringannya diuji di tests/Integritas/IntegritasTest.php.
+            'GET kelas/{n}/integritas'                 => ['/kelas/' . $d['kelasXA'] . '/integritas', $lihatXA],
+            'GET kelas/{n}/integritas/ekspor/([^/]+)'  => ['/kelas/' . $d['kelasXA'] . '/integritas/ekspor/csv', $lihatXA],
+
             // Bank soal mata kuliah X: sama dengan pertemuannya.
             'GET soal/{n}'             => ['/soal/' . $d['soalX'], ['pengajarB' => 403] + $kelolaXA],
             'POST soal/{n}/setujui'    => ['/soal/' . $d['soalX'] . '/setujui', ['pengajarB' => 403] + $kelolaXA],

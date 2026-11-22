@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Libraries\Antrean;
 use App\Libraries\Instans;
+use App\Libraries\Integritas;
 use App\Libraries\Latihan;
 use App\Libraries\Papan;
 use App\Libraries\Penilaian;
@@ -418,18 +419,30 @@ final class RuangLatihan extends BaseController
     public function integritas(): ResponseInterface
     {
         $mpId  = (int) $this->request->getPost('mp');
+        $ketik = (string) $this->request->getPost('jenis') === 'ketik';
         $jalur = (string) $this->request->getPost('jalur');
-        if (! in_array($jalur, self::JALUR_TEMPEL, true)) {
+        // Ketikan tak wajar (SPEC.md §13.2, KONTRAK.md §17): peramban yang mengukur, server memeriksa ulang kedua ambang.
+        $karakter = (int) $this->request->getPost('karakter');
+        $ms       = (int) $this->request->getPost('ms');
+        if ($ketik ? ! Integritas::ketikanTakWajar($karakter, $ms) : ! in_array($jalur, self::JALUR_TEMPEL, true)) {
             return $this->galat(422, 'isian_salah');
         }
         if ($this->ruang()->soal($mpId) === null) {
             return $this->galat(404, 'tidak_ada');
         }
+        // Pengguna yang diizinkan menempel (alat bantu) memang memasukkan teks sekaligus: tidak dicatat.
+        if ($ketik && $this->akses()->identitas()->pasteAllowed) {
+            return $this->json(['ok' => true]);
+        }
+        $detail = ! $ketik ? ['jalur' => $jalur] : [
+            'karakter' => $karakter, 'ms' => $ms, 'cps' => $ms === 0 ? $karakter : (int) round($karakter * 1000 / $ms),
+            'sebab'    => (string) $this->request->getPost('sebab') === 'undo' ? 'undo' : 'ketik',
+        ];
         // Satu peristiwa per detik per pengguna: menahan tombol tempel tidak membanjiri tabel.
         if ($this->tunggu('lokakode:laju:integritas:' . $this->pengguna(), 1000) === 0) {
             db_connect()->table('integrity_events')->insert([
-                'user_id' => $this->pengguna(), 'kind' => 'paste_blocked', 'meeting_problem_id' => $mpId,
-                'detail' => json_encode(['jalur' => $jalur]), 'ip' => $this->request->getIPAddress(),
+                'user_id' => $this->pengguna(), 'kind' => $ketik ? 'typing_anomaly' : 'paste_blocked', 'meeting_problem_id' => $mpId,
+                'detail' => json_encode($detail), 'ip' => $this->request->getIPAddress(),
                 'user_agent' => substr((string) $this->request->getUserAgent(), 0, 255), 'created_at' => Waktu::kini(),
             ]);
         }
