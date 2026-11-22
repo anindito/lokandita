@@ -1,0 +1,1223 @@
+{
+  "course": "PBO301",
+  "meeting": 2,
+  "language": "cpp",
+  "problems": [
+    {
+      "slug": "kelas-persegi",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Class Persegi",
+          "statement": "Sebuah class menyatukan **data** (atribut) dan **fungsi yang mengolah data itu** (method).\n\nBuat class `Persegi` dengan:\n\n- atribut `int sisi`;\n- method `int luas()`;\n- method `int keliling()`.\n\nDi `main`, buat satu objek `Persegi`, isi `sisi`-nya dari masukan, lalu cetak luas dan kelilingnya dengan memanggil kedua method.\n\nSemua anggota ditulis di bagian `public:`.\n\nUntuk sisi 5 keluarannya `25 20`.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Satu bilangan bulat: panjang sisi.",
+          "output_format": "Satu baris: luas, lalu keliling.",
+          "constraints": "1 ≤ sisi ≤ 1000"
+        },
+        "en": {
+          "title": "The Persegi Class",
+          "statement": "A class brings together **data** (attributes) and **the functions that work on that data** (methods).\n\nMake a class `Persegi` (square) with:\n\n- an attribute `int sisi` (side);\n- a method `int luas()` (area);\n- a method `int keliling()` (perimeter).\n\nIn `main`, create one `Persegi` object, fill its `sisi` from the input, then print the area and the perimeter by calling the two methods.\n\nAll members go in the `public:` section.\n\nFor a side of 5 the output is `25 20`.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "One integer: the side length.",
+          "output_format": "One line: the area, then the perimeter.",
+          "constraints": "1 ≤ side ≤ 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "الصنف Persegi",
+          "statement": "الصنف يجمع **البيانات** (الخصائص) و**الدوال التي تعالج تلك البيانات** (الطرائق).\n\nأنشئ صنفًا `Persegi` (مربع) فيه:\n\n- خاصية `int sisi` (الضلع)؛\n- طريقة `int luas()` (المساحة)؛\n- طريقة `int keliling()` (المحيط).\n\nفي `main` أنشئ كائنًا واحدًا من `Persegi` واملأ `sisi` من المدخل ثم اطبع المساحة والمحيط باستدعاء الطريقتين.\n\nتُكتب كل الأعضاء في القسم `public:`.\n\nلضلع طوله 5 يكون المخرج `25 20`.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "عدد صحيح واحد: طول الضلع.",
+          "output_format": "سطر واحد: المساحة ثم المحيط.",
+          "constraints": "1 ≤ الضلع ≤ 1000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 1, 3: 1000}.get(i, r.randint(2, 500) if i % 2 == 0 else r.randint(501, 999)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nclass Persegi {\npublic:\n    int sisi;\n\n    int luas() {\n        return sisi * sisi;\n    }\n\n    int keliling() {\n        return 4 * sisi;\n    }\n};\n\nint main() {\n    Persegi p;\n    cin >> p.sisi;\n    cout << p.luas() << \" \" << p.keliling() << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "kelas-balok",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Class Balok",
+          "statement": "Buat class `Balok` dengan atribut `int panjang`, `int lebar`, `int tinggi`, serta method:\n\n- `int volume()` — panjang × lebar × tinggi;\n- `int luasPermukaan()` — 2 × (panjang × lebar + panjang × tinggi + lebar × tinggi).\n\nBaca ukuran sebuah balok ke dalam satu objek, lalu cetak volume dan luas permukaannya.\n\nUntuk `2 3 4` keluarannya `24 52`.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Satu baris berisi panjang, lebar, dan tinggi.",
+          "output_format": "Satu baris: volume, lalu luas permukaan.",
+          "constraints": "Tiap ukuran antara 1 dan 100."
+        },
+        "en": {
+          "title": "The Balok Class",
+          "statement": "Make a class `Balok` (box) with the attributes `int panjang`, `int lebar`, `int tinggi` (length, width, height) and the methods:\n\n- `int volume()` — length × width × height;\n- `int luasPermukaan()` — the surface area, 2 × (length × width + length × height + width × height).\n\nRead the sizes of a box into one object, then print its volume and surface area.\n\nFor `2 3 4` the output is `24 52`.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "One line with the length, the width and the height.",
+          "output_format": "One line: the volume, then the surface area.",
+          "constraints": "Each size is between 1 and 100.",
+          "machine": true
+        },
+        "ar": {
+          "title": "الصنف Balok",
+          "statement": "أنشئ صنفًا `Balok` (متوازي مستطيلات) خصائصه `int panjang` و `int lebar` و `int tinggi` (الطول والعرض والارتفاع) وطرائقه:\n\n- `int volume()` — الطول × العرض × الارتفاع؛\n- `int luasPermukaan()` — المساحة السطحية: 2 × (الطول × العرض + الطول × الارتفاع + العرض × الارتفاع).\n\nاقرأ قياسات جسم في كائن واحد ثم اطبع حجمه ومساحته السطحية.\n\nعند `2 3 4` يكون المخرج `24 52`.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "سطر واحد فيه الطول والعرض والارتفاع.",
+          "output_format": "سطر واحد: الحجم ثم المساحة السطحية.",
+          "constraints": "كل قياس بين 1 و 100.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 100), r.randint(1, 100), r.randint(1, 100))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nclass Balok {\npublic:\n    int panjang;\n    int lebar;\n    int tinggi;\n\n    int volume() {\n        return panjang * lebar * tinggi;\n    }\n\n    int luasPermukaan() {\n        return 2 * (panjang * lebar + panjang * tinggi + lebar * tinggi);\n    }\n};\n\nint main() {\n    Balok b;\n    cin >> b.panjang >> b.lebar >> b.tinggi;\n    cout << b.volume() << \" \" << b.luasPermukaan() << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "perkenalan",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Perkenalan",
+          "statement": "Buat class `Mahasiswa` dengan atribut `string nama` dan `int angkatan`, serta method `void perkenalan()` yang mencetak satu baris:\n\n`Halo, saya <nama> angkatan <angkatan>.`\n\nMethod memakai atribut objeknya sendiri tanpa perlu diberi parameter. Baca nama dan angkatan ke dalam sebuah objek, lalu panggil `perkenalan()`.\n\nUntuk `Citra 2025` keluarannya `Halo, saya Citra angkatan 2025.`\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Satu baris berisi nama (satu kata) dan angkatan.",
+          "output_format": "Satu baris perkenalan.",
+          "constraints": "2020 ≤ angkatan ≤ 2026"
+        },
+        "en": {
+          "title": "Introduction",
+          "statement": "Make a class `Mahasiswa` (student) with the attributes `string nama` (name) and `int angkatan` (year of entry), and a method `void perkenalan()` that prints one line:\n\n`Halo, saya <nama> angkatan <angkatan>.`\n\nA method uses the attributes of its own object without needing parameters. Read the name and the year into an object, then call `perkenalan()`.\n\nFor `Citra 2025` the output is `Halo, saya Citra angkatan 2025.`\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "One line with the name (one word) and the year of entry.",
+          "output_format": "One line of introduction.",
+          "constraints": "2020 ≤ year ≤ 2026",
+          "machine": true
+        },
+        "ar": {
+          "title": "التعريف بالنفس",
+          "statement": "أنشئ صنفًا `Mahasiswa` (طالب) خاصيتاه `string nama` (الاسم) و `int angkatan` (سنة الالتحاق)، وطريقة `void perkenalan()` تطبع سطرًا واحدًا:\n\n`Halo, saya <nama> angkatan <angkatan>.`\n\nالطريقة تستعمل خصائص كائنها دون حاجة إلى وسائط. اقرأ الاسم والسنة في كائن ثم استدعِ `perkenalan()`.\n\nعند `Citra 2025` يكون المخرج `Halo, saya Citra angkatan 2025.`\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "سطر واحد فيه الاسم (كلمة واحدة) وسنة الالتحاق.",
+          "output_format": "سطر التعريف.",
+          "constraints": "2020 ≤ السنة ≤ 2026",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nNAMA = ['Andi', 'Budi', 'Citra', 'Dewi', 'Eko', 'Fajar', 'Gita', 'Hadi', 'Indah', 'Joko', 'Kartika', 'Lina', 'Made', 'Nanda', 'Putri', 'Rudi', 'Sari', 'Tono', 'Wulan', 'Yoga', 'Zahra', 'Bayu', 'Ayu', 'Rina', 'Dimas', 'Laras', 'Agus', 'Maya', 'Iwan', 'Tari']\nprint(r.choice(NAMA), r.randint(2020, 2026))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass Mahasiswa {\npublic:\n    string nama;\n    int angkatan;\n\n    void perkenalan() {\n        cout << \"Halo, saya \" << nama << \" angkatan \" << angkatan << \".\" << endl;\n    }\n};\n\nint main() {\n    Mahasiswa m;\n    cin >> m.nama >> m.angkatan;\n    m.perkenalan();\n    return 0;\n}\n"
+    },
+    {
+      "slug": "penghitung",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Penghitung",
+          "statement": "Buat class `Penghitung` dengan atribut `int nilai` yang mula-mula 0, dan dua method: `void naik()` menambah nilai satu, `void turun()` menguranginya satu.\n\nMasukan berupa deretan tombol yang ditekan: `+` berarti naik, `-` berarti turun. Jalankan semuanya pada satu objek, lalu cetak nilai akhirnya.\n\nUntuk `++-+` jawabannya 2.\n\nObjek **mengingat keadaannya** di antara pemanggilan method.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Satu baris: deretan karakter `+` dan `-` tanpa spasi.",
+          "output_format": "Satu bilangan bulat: nilai akhir penghitung.",
+          "constraints": "Panjang deretan 1 sampai 50."
+        },
+        "en": {
+          "title": "Counter",
+          "statement": "Make a class `Penghitung` (counter) with an attribute `int nilai` (value) that starts at 0, and two methods: `void naik()` adds one, `void turun()` takes one away.\n\nThe input is a run of buttons pressed: `+` means up, `-` means down. Apply them all to one object, then print the final value.\n\nFor `++-+` the answer is 2.\n\nAn object **remembers its state** between method calls.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "One line: a run of `+` and `-` characters without spaces.",
+          "output_format": "One integer: the final value of the counter.",
+          "constraints": "The run is 1 to 50 characters long.",
+          "machine": true
+        },
+        "ar": {
+          "title": "العدّاد",
+          "statement": "أنشئ صنفًا `Penghitung` (عدّاد) فيه خاصية `int nilai` (القيمة) تبدأ من 0، وطريقتان: `void naik()` تزيد واحدًا و `void turun()` تنقص واحدًا.\n\nالمدخل سلسلة أزرار مضغوطة: `+` تعني زيادة و `-` تعني نقصانًا. طبِّقها كلها على كائن واحد ثم اطبع القيمة النهائية.\n\nعند `++-+` الجواب 2.\n\nالكائن **يتذكر حالته** بين استدعاءات الطرائق.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "سطر واحد: سلسلة من المحرفين `+` و `-` بلا مسافات.",
+          "output_format": "عدد صحيح واحد: القيمة النهائية للعدّاد.",
+          "constraints": "طول السلسلة من 1 إلى 50.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = {2: 1}.get(i, r.randint(2, 50))\np = {3: 1.0, 4: 0.0}.get(i, 0.6)\nprint(''.join('+' if r.random() < p else '-' for _ in range(n)))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass Penghitung {\npublic:\n    int nilai = 0;\n\n    void naik() {\n        nilai++;\n    }\n\n    void turun() {\n        nilai--;\n    }\n};\n\nint main() {\n    string tombol;\n    cin >> tombol;\n    Penghitung p;\n    for (auto t : tombol) {\n        if (t == '+') {\n            p.naik();\n        } else {\n            p.turun();\n        }\n    }\n    cout << p.nilai << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "kelas-suhu",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Class Suhu",
+          "statement": "Buat class `Suhu` yang menyimpan suhu dalam derajat Celsius (`int celsius`) dan punya dua method:\n\n- `int fahrenheit()` — celsius × 9 / 5 + 32;\n- `int kelvin()` — celsius + 273.\n\nObjek hanya menyimpan satu data; satuan lain **dihitung** saat diminta. Baca sebuah suhu, lalu cetak nilainya dalam Fahrenheit dan Kelvin.\n\nUntuk 25 keluarannya `77 298`.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Satu bilangan bulat: suhu dalam Celsius, selalu kelipatan 5.",
+          "output_format": "Satu baris: suhu dalam Fahrenheit, lalu dalam Kelvin.",
+          "constraints": "−50 ≤ celsius ≤ 150"
+        },
+        "en": {
+          "title": "The Suhu Class",
+          "statement": "Make a class `Suhu` (temperature) that stores a temperature in degrees Celsius (`int celsius`) and has two methods:\n\n- `int fahrenheit()` — celsius × 9 / 5 + 32;\n- `int kelvin()` — celsius + 273.\n\nThe object stores one piece of data only; other units are **computed** on request. Read a temperature, then print it in Fahrenheit and in Kelvin.\n\nFor 25 the output is `77 298`.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "One integer: the temperature in Celsius, always a multiple of 5.",
+          "output_format": "One line: the temperature in Fahrenheit, then in Kelvin.",
+          "constraints": "−50 ≤ celsius ≤ 150",
+          "machine": true
+        },
+        "ar": {
+          "title": "الصنف Suhu",
+          "statement": "أنشئ صنفًا `Suhu` (درجة حرارة) يخزّن الحرارة بالدرجات المئوية (`int celsius`) وله طريقتان:\n\n- `int fahrenheit()` — celsius × 9 / 5 + 32؛\n- `int kelvin()` — celsius + 273.\n\nالكائن يخزّن معلومة واحدة فقط؛ والوحدات الأخرى **تُحسب** عند الطلب. اقرأ درجة حرارة ثم اطبعها بالفهرنهايت وبالكلفن.\n\nللدرجة 25 يكون المخرج `77 298`.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "عدد صحيح واحد: الحرارة بالمئوية، وهي دائمًا من مضاعفات 5.",
+          "output_format": "سطر واحد: الحرارة بالفهرنهايت ثم بالكلفن.",
+          "constraints": "−50 ≤ celsius ≤ 150",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(5 * ({2: 0, 3: -10, 4: 30}.get(i, r.randint(-10, 30))))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nclass Suhu {\npublic:\n    int celsius;\n\n    int fahrenheit() {\n        return celsius * 9 / 5 + 32;\n    }\n\n    int kelvin() {\n        return celsius + 273;\n    }\n};\n\nint main() {\n    Suhu s;\n    cin >> s.celsius;\n    cout << s.fahrenheit() << \" \" << s.kelvin() << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "jarak-manhattan",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Jarak Manhattan",
+          "statement": "Di kota yang jalannya berpetak-petak, orang hanya bisa berjalan mendatar atau tegak. Jarak sebuah titik (x, y) dari titik asal (0, 0) lalu disebut *jarak Manhattan*: |x| + |y|.\n\nBuat class `Titik` dengan atribut `int x`, `int y` dan method `int jarakManhattan()`. Baca sebuah titik dan cetak jaraknya.\n\nUntuk titik (3, −4) jawabannya 7.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Satu baris berisi x dan y.",
+          "output_format": "Satu bilangan bulat: jarak Manhattan dari titik asal.",
+          "constraints": "−1001 ≤ x, y ≤ 1000"
+        },
+        "en": {
+          "title": "Manhattan Distance",
+          "statement": "In a city laid out as a grid one can only walk horizontally or vertically. The distance of a point (x, y) from the origin (0, 0) is then called the *Manhattan distance*: |x| + |y|.\n\nMake a class `Titik` (point) with the attributes `int x`, `int y` and a method `int jarakManhattan()`. Read a point and print its distance.\n\nFor the point (3, −4) the answer is 7.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "One line with x and y.",
+          "output_format": "One integer: the Manhattan distance from the origin.",
+          "constraints": "−1001 ≤ x, y ≤ 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "مسافة مانهاتن",
+          "statement": "في مدينة شوارعها شبكة لا يمكن السير إلا أفقيًا أو رأسيًا. تسمى مسافة النقطة (x, y) عن نقطة الأصل (0, 0) عندئذ *مسافة مانهاتن*: |x| + |y|.\n\nأنشئ صنفًا `Titik` (نقطة) خاصيتاه `int x` و `int y` وطريقته `int jarakManhattan()`. اقرأ نقطة واطبع مسافتها.\n\nللنقطة (3, −4) الجواب 7.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "سطر واحد فيه x و y.",
+          "output_format": "عدد صحيح واحد: مسافة مانهاتن عن نقطة الأصل.",
+          "constraints": "−1001 ≤ x, y ≤ 1000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nx, y = r.randint(-1000, 1000), r.randint(-1000, 1000)\nif i == 2:\n    x, y = 0, 0\nif i == 3:\n    x, y = -abs(x) - 1, -abs(y) - 1\nprint(x, y)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nclass Titik {\npublic:\n    int x;\n    int y;\n\n    int jarakManhattan() {\n        int dx = x;\n        int dy = y;\n        if (dx < 0) dx = -dx;\n        if (dy < 0) dy = -dy;\n        return dx + dy;\n    }\n};\n\nint main() {\n    Titik t;\n    cin >> t.x >> t.y;\n    cout << t.jarakManhattan() << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "saklar-lampu",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Saklar Lampu",
+          "statement": "Buat class `Lampu` dengan atribut `bool menyala` yang mula-mula `false`, method `void tekan()` yang membalik keadaannya, dan method `string status()` yang mengembalikan `menyala` atau `padam`.\n\nBaca n, tekan saklar sebuah lampu sebanyak n kali, lalu cetak statusnya.\n\nUntuk n = 3 keluarannya `menyala`; untuk n = 0 keluarannya `padam`.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Satu bilangan bulat n: banyak penekanan saklar.",
+          "output_format": "`menyala` atau `padam`.",
+          "constraints": "0 ≤ n ≤ 1000"
+        },
+        "en": {
+          "title": "Light Switch",
+          "statement": "Make a class `Lampu` (lamp) with an attribute `bool menyala` (is on) that starts `false`, a method `void tekan()` (press) that flips the state, and a method `string status()` that returns `menyala` (on) or `padam` (off).\n\nRead n, press the switch of one lamp n times, then print its status.\n\nFor n = 3 the output is `menyala`; for n = 0 it is `padam`.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "One integer n: the number of presses.",
+          "output_format": "`menyala` or `padam`.",
+          "constraints": "0 ≤ n ≤ 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "مفتاح المصباح",
+          "statement": "أنشئ صنفًا `Lampu` (مصباح) فيه خاصية `bool menyala` (مضيء) تبدأ `false`، وطريقة `void tekan()` (اضغط) تعكس الحالة، وطريقة `string status()` تُرجع `menyala` (مضيء) أو `padam` (مطفأ).\n\nاقرأ n واضغط مفتاح مصباح واحد n مرة ثم اطبع حالته.\n\nعند n = 3 يكون المخرج `menyala`، وعند n = 0 يكون `padam`.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "عدد صحيح واحد n: عدد الضغطات.",
+          "output_format": "`menyala` أو `padam`.",
+          "constraints": "0 ≤ n ≤ 1000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 0, 3: 1, 4: 1000}.get(i, 2 * r.randint(1, 499) + i % 2))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass Lampu {\npublic:\n    bool menyala = false;\n\n    void tekan() {\n        menyala = !menyala;\n    }\n\n    string status() {\n        if (menyala) {\n            return \"menyala\";\n        }\n        return \"padam\";\n    }\n};\n\nint main() {\n    int n;\n    cin >> n;\n    Lampu lampu;\n    for (int k = 0; k < n; k++) {\n        lampu.tekan();\n    }\n    cout << lampu.status() << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "persegi-atau-bukan",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Persegi atau Bukan",
+          "statement": "Buat class `PersegiPanjang` dengan atribut `int panjang`, `int lebar`, method `bool persegi()` yang benar bila panjang sama dengan lebar, dan method `int luas()`.\n\nBaca sebuah persegi panjang, lalu cetak `persegi` atau `bukan persegi`, diikuti luasnya.\n\nContoh: `5 5` → `persegi 25`; `4 6` → `bukan persegi 24`.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Satu baris berisi panjang dan lebar.",
+          "output_format": "`persegi` atau `bukan persegi`, satu spasi, lalu luasnya.",
+          "constraints": "1 ≤ panjang, lebar ≤ 100"
+        },
+        "en": {
+          "title": "Square or Not",
+          "statement": "Make a class `PersegiPanjang` (rectangle) with the attributes `int panjang`, `int lebar`, a method `bool persegi()` that is true when length equals width, and a method `int luas()` (area).\n\nRead a rectangle, then print `persegi` (square) or `bukan persegi` (not a square), followed by its area.\n\nExamples: `5 5` → `persegi 25`; `4 6` → `bukan persegi 24`.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "One line with the length and the width.",
+          "output_format": "`persegi` or `bukan persegi`, one space, then the area.",
+          "constraints": "1 ≤ length, width ≤ 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "مربع أم لا",
+          "statement": "أنشئ صنفًا `PersegiPanjang` (مستطيل) خاصيتاه `int panjang` و `int lebar`، وطريقة `bool persegi()` تكون صحيحة إذا تساوى الطول والعرض، وطريقة `int luas()` (المساحة).\n\nاقرأ مستطيلًا ثم اطبع `persegi` (مربع) أو `bukan persegi` (ليس مربعًا) تليها مساحته.\n\nأمثلة: `5 5` ← `persegi 25`؛ `4 6` ← `bukan persegi 24`.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "سطر واحد فيه الطول والعرض.",
+          "output_format": "`persegi` أو `bukan persegi` ثم مسافة ثم المساحة.",
+          "constraints": "1 ≤ الطول، العرض ≤ 100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\np, l = r.randint(1, 100), r.randint(1, 100)\nif i % 2 == 0:\n    l = p\nprint(p, l)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nclass PersegiPanjang {\npublic:\n    int panjang;\n    int lebar;\n\n    bool persegi() {\n        return panjang == lebar;\n    }\n\n    int luas() {\n        return panjang * lebar;\n    }\n};\n\nint main() {\n    PersegiPanjang pp;\n    cin >> pp.panjang >> pp.lebar;\n    if (pp.persegi()) {\n        cout << \"persegi \" << pp.luas() << endl;\n    } else {\n        cout << \"bukan persegi \" << pp.luas() << endl;\n    }\n    return 0;\n}\n"
+    },
+    {
+      "slug": "tangki-air",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Tangki Air",
+          "statement": "Buat class `Tangki` dengan atribut `int kapasitas` dan `int isi` (mula-mula 0), serta dua method yang **mengembalikan banyak liter yang benar-benar berpindah**:\n\n- `int tuang(int liter)` — mengisi tangki, tetapi tidak pernah melebihi kapasitas; kelebihannya terbuang;\n- `int pakai(int liter)` — mengambil air, tetapi tidak lebih dari yang ada.\n\nMasukan: kapasitas, banyak perintah n, lalu n perintah `isi x` atau `pakai x`. Untuk tiap perintah cetak nilai kembalian method. Di akhir cetak `Sisa: k`.\n\nContoh: kapasitas 100; `isi 70` → 70; `isi 50` → 30; `pakai 120` → 100; `pakai 5` → 0; lalu `Sisa: 0`.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Baris pertama: kapasitas. Baris kedua: n. Lalu n baris perintah.",
+          "output_format": "n baris berisi liter yang berpindah, lalu satu baris `Sisa: k`.",
+          "constraints": "50 ≤ kapasitas ≤ 500; 1 ≤ n ≤ 15; 1 ≤ x ≤ 500"
+        },
+        "en": {
+          "title": "Water Tank",
+          "statement": "Make a class `Tangki` (tank) with the attributes `int kapasitas` (capacity) and `int isi` (content, starting at 0), and two methods that **return the number of litres actually moved**:\n\n- `int tuang(int liter)` — fills the tank but never beyond its capacity; the excess is lost;\n- `int pakai(int liter)` — takes water out, but no more than there is.\n\nInput: the capacity, the number of commands n, then n commands `isi x` (fill) or `pakai x` (use). For each command print the method's return value. At the end print `Sisa: k` (remaining).\n\nExample: capacity 100; `isi 70` → 70; `isi 50` → 30; `pakai 120` → 100; `pakai 5` → 0; then `Sisa: 0`.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "First line: the capacity. Second line: n. Then n command lines.",
+          "output_format": "n lines with the litres moved, then one line `Sisa: k`.",
+          "constraints": "50 ≤ capacity ≤ 500; 1 ≤ n ≤ 15; 1 ≤ x ≤ 500",
+          "machine": true
+        },
+        "ar": {
+          "title": "خزان الماء",
+          "statement": "أنشئ صنفًا `Tangki` (خزان) خاصيتاه `int kapasitas` (السعة) و `int isi` (المحتوى، ويبدأ من 0)، وطريقتان **تُرجعان عدد اللترات التي انتقلت فعلًا**:\n\n- `int tuang(int liter)` — تملأ الخزان دون تجاوز سعته أبدًا؛ والزائد يضيع؛\n- `int pakai(int liter)` — تأخذ ماءً لا يزيد على الموجود.\n\nالمدخل: السعة ثم عدد الأوامر n ثم n أمرًا `isi x` (املأ) أو `pakai x` (استعمل). لكل أمر اطبع القيمة التي تُرجعها الطريقة. في النهاية اطبع `Sisa: k` (الباقي).\n\nمثال: السعة 100؛ `isi 70` ← 70؛ `isi 50` ← 30؛ `pakai 120` ← 100؛ `pakai 5` ← 0؛ ثم `Sisa: 0`.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "السطر الأول: السعة. السطر الثاني: n. ثم n سطر أوامر.",
+          "output_format": "n سطرًا فيها اللترات المنتقلة ثم سطر `Sisa: k`.",
+          "constraints": "50 ≤ السعة ≤ 500؛ 1 ≤ n ≤ 15؛ 1 ≤ x ≤ 500",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nkap = r.randint(5, 50) * 10\nprint(kap)\nn = r.randint(1, 15)\nprint(n)\nfor k in range(n):\n    if k == 0 or r.random() < 0.55:\n        print('isi', r.randint(1, kap))\n    else:\n        print('pakai', r.randint(1, kap))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass Tangki {\npublic:\n    int kapasitas;\n    int isi = 0;\n\n    int tuang(int liter) {\n        int ruang = kapasitas - isi;\n        if (liter > ruang) {\n            liter = ruang;\n        }\n        isi += liter;\n        return liter;\n    }\n\n    int pakai(int liter) {\n        if (liter > isi) {\n            liter = isi;\n        }\n        isi -= liter;\n        return liter;\n    }\n};\n\nint main() {\n    Tangki t;\n    int n;\n    cin >> t.kapasitas >> n;\n    for (int k = 0; k < n; k++) {\n        string perintah;\n        int liter;\n        cin >> perintah >> liter;\n        if (perintah == \"isi\") {\n            cout << t.tuang(liter) << endl;\n        } else {\n            cout << t.pakai(liter) << endl;\n        }\n    }\n    cout << \"Sisa: \" << t.isi << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "jarak-dua-titik",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Jarak Dua Titik",
+          "statement": "Buat class `Titik` dengan atribut `int x`, `int y` dan dua method:\n\n- `void geser(int dx, int dy)` — memindahkan titik itu;\n- `int jarakKe(Titik lain)` — jarak Manhattan ke titik lain: |x − lain.x| + |y − lain.y|.\n\nSebuah method bisa menerima **objek lain dari class yang sama** sebagai parameter.\n\nBaca titik A, titik B, dan sebuah pergeseran (dx, dy). Cetak jarak A ke B, lalu geser A dan cetak jaraknya ke B sekali lagi.\n\nContoh: A = (1, 2), B = (4, 6), pergeseran (3, 0) → `7 4`.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Baris pertama: x dan y titik A. Baris kedua: x dan y titik B. Baris ketiga: dx dan dy.",
+          "output_format": "Satu baris: jarak sebelum dan sesudah A digeser.",
+          "constraints": "Koordinat antara −100 dan 100; dx, dy antara −50 dan 50"
+        },
+        "en": {
+          "title": "Distance between Two Points",
+          "statement": "Make a class `Titik` (point) with the attributes `int x`, `int y` and two methods:\n\n- `void geser(int dx, int dy)` — moves the point;\n- `int jarakKe(Titik lain)` — the Manhattan distance to another point: |x − lain.x| + |y − lain.y|.\n\nA method can take **another object of the same class** as a parameter.\n\nRead point A, point B and a shift (dx, dy). Print the distance from A to B, then move A and print its distance to B once more.\n\nExample: A = (1, 2), B = (4, 6), shift (3, 0) → `7 4`.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "First line: x and y of A. Second line: x and y of B. Third line: dx and dy.",
+          "output_format": "One line: the distance before and after A is moved.",
+          "constraints": "Coordinates are between −100 and 100; dx, dy between −50 and 50",
+          "machine": true
+        },
+        "ar": {
+          "title": "المسافة بين نقطتين",
+          "statement": "أنشئ صنفًا `Titik` (نقطة) خاصيتاه `int x` و `int y` وطريقتان:\n\n- `void geser(int dx, int dy)` — تحرّك النقطة؛\n- `int jarakKe(Titik lain)` — مسافة مانهاتن إلى نقطة أخرى: |x − lain.x| + |y − lain.y|.\n\nيمكن أن تأخذ الطريقة **كائنًا آخر من الصنف نفسه** وسيطًا.\n\nاقرأ النقطة A والنقطة B وإزاحة (dx, dy). اطبع المسافة من A إلى B ثم حرِّك A واطبع مسافتها إلى B مرة أخرى.\n\nمثال: A = (1, 2) و B = (4, 6) والإزاحة (3, 0) ← `7 4`.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "السطر الأول: x و y للنقطة A. السطر الثاني: x و y للنقطة B. السطر الثالث: dx و dy.",
+          "output_format": "سطر واحد: المسافة قبل تحريك A وبعده.",
+          "constraints": "الإحداثيات بين −100 و 100؛ dx و dy بين −50 و 50",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(-100, 100), r.randint(-100, 100))\nprint(r.randint(-100, 100), r.randint(-100, 100))\nprint(r.randint(-50, 50), r.randint(-50, 50))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nclass Titik {\npublic:\n    int x;\n    int y;\n\n    void geser(int dx, int dy) {\n        x += dx;\n        y += dy;\n    }\n\n    int jarakKe(Titik lain) {\n        int dx = x - lain.x;\n        int dy = y - lain.y;\n        if (dx < 0) dx = -dx;\n        if (dy < 0) dy = -dy;\n        return dx + dy;\n    }\n};\n\nint main() {\n    Titik a, b;\n    int dx, dy;\n    cin >> a.x >> a.y;\n    cin >> b.x >> b.y;\n    cin >> dx >> dy;\n    cout << a.jarakKe(b) << \" \";\n    a.geser(dx, dy);\n    cout << a.jarakKe(b) << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "waktu-tambah-menit",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Tambah Menit",
+          "statement": "Buat class `Waktu` dengan atribut `int jam`, `int menit` dan dua method:\n\n- `void tambahMenit(int n)` — memajukan waktu n menit; setelah 23:59 waktu kembali ke 00:00;\n- `void cetak()` — mencetak waktu sebagai `JJ:MM`, masing-masing dua digit.\n\nBaca sebuah waktu dan n, majukan, lalu cetak.\n\nContoh: `9 45 30` → `10:15`; `23 50 20` → `00:10`.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Satu baris berisi jam, menit, dan n.",
+          "output_format": "Waktu yang baru dalam bentuk `JJ:MM`.",
+          "constraints": "0 ≤ jam ≤ 23; 0 ≤ menit ≤ 59; 0 ≤ n ≤ 10000"
+        },
+        "en": {
+          "title": "Add Minutes",
+          "statement": "Make a class `Waktu` (time) with the attributes `int jam`, `int menit` (hour, minute) and two methods:\n\n- `void tambahMenit(int n)` — moves the time forward by n minutes; after 23:59 it wraps to 00:00;\n- `void cetak()` — prints the time as `HH:MM`, two digits each.\n\nRead a time and n, move it forward, then print it.\n\nExamples: `9 45 30` → `10:15`; `23 50 20` → `00:10`.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "One line with the hour, the minute and n.",
+          "output_format": "The new time in the form `HH:MM`.",
+          "constraints": "0 ≤ hour ≤ 23; 0 ≤ minute ≤ 59; 0 ≤ n ≤ 10000",
+          "machine": true
+        },
+        "ar": {
+          "title": "إضافة دقائق",
+          "statement": "أنشئ صنفًا `Waktu` (وقت) خاصيتاه `int jam` و `int menit` (الساعة والدقيقة) وطريقتان:\n\n- `void tambahMenit(int n)` — تقدّم الوقت n دقيقة؛ وبعد 23:59 يعود إلى 00:00؛\n- `void cetak()` — تطبع الوقت على الصورة `HH:MM` برقمين لكل جزء.\n\nاقرأ وقتًا و n وقدِّمه ثم اطبعه.\n\nأمثلة: `9 45 30` ← `10:15`؛ `23 50 20` ← `00:10`.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "سطر واحد فيه الساعة والدقيقة و n.",
+          "output_format": "الوقت الجديد على الصورة `HH:MM`.",
+          "constraints": "0 ≤ الساعة ≤ 23؛ 0 ≤ الدقيقة ≤ 59؛ 0 ≤ n ≤ 10000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nj, m, n = r.randint(0, 23), r.randint(0, 59), r.randint(0, 10000)\nif i == 2:\n    j, m, n = 23, 59, 1\nif i == 3:\n    n = 0\nif i == 4:\n    n = 1440\nprint(j, m, n)\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nclass Waktu {\npublic:\n    int jam;\n    int menit;\n\n    void tambahMenit(int n) {\n        int total = (jam * 60 + menit + n) % 1440;\n        jam = total / 60;\n        menit = total % 60;\n    }\n\n    void cetak() {\n        cout << setfill('0') << setw(2) << jam << \":\" << setw(2) << menit << endl;\n    }\n};\n\nint main() {\n    Waktu w;\n    int n;\n    cin >> w.jam >> w.menit >> n;\n    w.tambahMenit(n);\n    w.cetak();\n    return 0;\n}\n"
+    },
+    {
+      "slug": "kelas-pecahan",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Class Pecahan",
+          "statement": "Buat class `Pecahan` dengan atribut `int pembilang`, `int penyebut` dan dua method:\n\n- `void sederhanakan()` — membagi pembilang dan penyebut dengan faktor persekutuan terbesarnya, sehingga objek itu sendiri berubah;\n- `void cetak()` — mencetak `pembilang/penyebut`.\n\nBaca sebuah pecahan, sederhanakan, lalu cetak. Penyebut 1 tetap ditulis.\n\nContoh: `12 18` → `2/3`; `10 5` → `2/1`.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Satu baris berisi pembilang dan penyebut.",
+          "output_format": "Pecahan paling sederhana dalam bentuk `a/b`.",
+          "constraints": "1 ≤ pembilang, penyebut ≤ 10000"
+        },
+        "en": {
+          "title": "The Pecahan Class",
+          "statement": "Make a class `Pecahan` (fraction) with the attributes `int pembilang`, `int penyebut` (numerator, denominator) and two methods:\n\n- `void sederhanakan()` — divides numerator and denominator by their greatest common divisor, so the object itself changes;\n- `void cetak()` — prints `numerator/denominator`.\n\nRead a fraction, reduce it, then print it. A denominator of 1 is still written.\n\nExamples: `12 18` → `2/3`; `10 5` → `2/1`.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "One line with the numerator and the denominator.",
+          "output_format": "The fraction in lowest terms, in the form `a/b`.",
+          "constraints": "1 ≤ numerator, denominator ≤ 10000",
+          "machine": true
+        },
+        "ar": {
+          "title": "الصنف Pecahan",
+          "statement": "أنشئ صنفًا `Pecahan` (كسر) خاصيتاه `int pembilang` و `int penyebut` (البسط والمقام) وطريقتان:\n\n- `void sederhanakan()` — تقسم البسط والمقام على قاسمهما المشترك الأكبر فيتغير الكائن نفسه؛\n- `void cetak()` — تطبع `البسط/المقام`.\n\nاقرأ كسرًا وبسِّطه ثم اطبعه. المقام 1 يُكتب أيضًا.\n\nأمثلة: `12 18` ← `2/3`؛ `10 5` ← `2/1`.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "سطر واحد فيه البسط والمقام.",
+          "output_format": "الكسر في أبسط صورة على الشكل `a/b`.",
+          "constraints": "1 ≤ البسط، المقام ≤ 10000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ng = r.randint(1, 100)\na, b = g * r.randint(1, 100), g * r.randint(1, 100)\nif i == 2:\n    b = a\nif i == 3:\n    a, b = r.choice([(7, 13), (97, 89), (1, 1)])\nif i == 4:\n    b = 1\nprint(a, b)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nclass Pecahan {\npublic:\n    int pembilang;\n    int penyebut;\n\n    void sederhanakan() {\n        int a = pembilang;\n        int b = penyebut;\n        while (b != 0) {\n            int sisa = a % b;\n            a = b;\n            b = sisa;\n        }\n        pembilang /= a;\n        penyebut /= a;\n    }\n\n    void cetak() {\n        cout << pembilang << \"/\" << penyebut << endl;\n    }\n};\n\nint main() {\n    Pecahan p;\n    cin >> p.pembilang >> p.penyebut;\n    p.sederhanakan();\n    p.cetak();\n    return 0;\n}\n"
+    },
+    {
+      "slug": "prajurit",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Prajurit",
+          "statement": "Buat class `Prajurit` dengan atribut `string nama`, `int kesehatan` dan dua method:\n\n- `void terluka(int besar)` — mengurangi kesehatan, tetapi tidak pernah sampai di bawah 0;\n- `bool gugur()` — benar bila kesehatannya 0.\n\nSeorang prajurit menerima n serangan berturut-turut. Setelah tiap serangan cetak `Kesehatan: k`. **Begitu prajurit gugur, serangan sesudahnya diabaikan** dan tidak dicetak. Di akhir cetak `<nama> gugur` atau `<nama> selamat`.\n\nContoh: `Budi 50` dengan serangan `20 40 10` →\n\n```\nKesehatan: 30\nKesehatan: 0\nBudi gugur\n```\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Baris pertama: nama dan kesehatan awal. Baris kedua: n. Baris ketiga: n bilangan, besar tiap serangan.",
+          "output_format": "Satu baris per serangan yang diterima, lalu satu baris akhir.",
+          "constraints": "50 ≤ kesehatan ≤ 150; 1 ≤ n ≤ 10; 1 ≤ serangan ≤ 150"
+        },
+        "en": {
+          "title": "Soldier",
+          "statement": "Make a class `Prajurit` (soldier) with the attributes `string nama` (name), `int kesehatan` (health) and two methods:\n\n- `void terluka(int besar)` (wounded) — lowers the health, but never below 0;\n- `bool gugur()` (fallen) — true when the health is 0.\n\nA soldier takes n hits in a row. After each hit print `Kesehatan: k`. **Once the soldier has fallen, later hits are ignored** and not printed. At the end print `<name> gugur` (fallen) or `<name> selamat` (safe).\n\nExample: `Budi 50` with hits `20 40 10` →\n\n```\nKesehatan: 30\nKesehatan: 0\nBudi gugur\n```\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "First line: the name and the starting health. Second line: n. Third line: n numbers, the size of each hit.",
+          "output_format": "One line per hit taken, then one final line.",
+          "constraints": "50 ≤ health ≤ 150; 1 ≤ n ≤ 10; 1 ≤ hit ≤ 150",
+          "machine": true
+        },
+        "ar": {
+          "title": "الجندي",
+          "statement": "أنشئ صنفًا `Prajurit` (جندي) خاصيتاه `string nama` (الاسم) و `int kesehatan` (الصحة) وطريقتان:\n\n- `void terluka(int besar)` (جُرح) — تنقص الصحة دون أن تنزل عن 0 أبدًا؛\n- `bool gugur()` (سقط) — صحيحة إذا كانت الصحة 0.\n\nيتلقى جندي n ضربة متتالية. بعد كل ضربة اطبع `Kesehatan: k`. **متى سقط الجندي أُهملت الضربات التالية** ولم تُطبع. في النهاية اطبع `<الاسم> gugur` (سقط) أو `<الاسم> selamat` (نجا).\n\nمثال: `Budi 50` مع الضربات `20 40 10` ←\n\n```\nKesehatan: 30\nKesehatan: 0\nBudi gugur\n```\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "السطر الأول: الاسم والصحة الابتدائية. السطر الثاني: n. السطر الثالث: n عددًا هي مقادير الضربات.",
+          "output_format": "سطر لكل ضربة مُتلقّاة ثم سطر ختامي.",
+          "constraints": "50 ≤ الصحة ≤ 150؛ 1 ≤ n ≤ 10؛ 1 ≤ الضربة ≤ 150",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nNAMA = ['Andi', 'Budi', 'Citra', 'Dewi', 'Eko', 'Fajar', 'Gita', 'Hadi', 'Indah', 'Joko', 'Kartika', 'Lina', 'Made', 'Nanda', 'Putri', 'Rudi', 'Sari', 'Tono', 'Wulan', 'Yoga', 'Zahra', 'Bayu', 'Ayu', 'Rina', 'Dimas', 'Laras', 'Agus', 'Maya', 'Iwan', 'Tari']\nk = r.randint(50, 150)\nn = r.randint(1, 10)\nd = [r.randint(5, 60) for _ in range(n)]\nif i % 2 == 0:\n    d = [r.randint(1, max(1, k // (n + 1))) for _ in range(n)]\nif i == 3:\n    d = [k]\nprint(r.choice(NAMA), k)\nprint(len(d))\nprint(*d)\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass Prajurit {\npublic:\n    string nama;\n    int kesehatan;\n\n    void terluka(int besar) {\n        kesehatan -= besar;\n        if (kesehatan < 0) {\n            kesehatan = 0;\n        }\n    }\n\n    bool gugur() {\n        return kesehatan == 0;\n    }\n};\n\nint main() {\n    Prajurit p;\n    int n;\n    cin >> p.nama >> p.kesehatan;\n    cin >> n;\n    for (int k = 0; k < n; k++) {\n        int luka;\n        cin >> luka;\n        if (!p.gugur()) {\n            p.terluka(luka);\n            cout << \"Kesehatan: \" << p.kesehatan << endl;\n        }\n    }\n    if (p.gugur()) {\n        cout << p.nama << \" gugur\" << endl;\n    } else {\n        cout << p.nama << \" selamat\" << endl;\n    }\n    return 0;\n}\n"
+    },
+    {
+      "slug": "rantai-method",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Rantai Method",
+          "statement": "Di dalam method, `this` adalah penunjuk ke objek yang sedang dipakai. Bila sebuah method mengembalikan `*this` — objek itu sendiri — pemanggilan bisa **dirantai**: `ak.tambah(2).kali(3)`.\n\nBuat class `Akumulator` dengan atribut `int total` (mula-mula 0) dan dua method yang sama-sama mengembalikan `*this` sebagai `Akumulator &`:\n\n- `tambah(int x)` — menambahkan x ke total;\n- `kali(int x)` — mengalikan total dengan x.\n\nBaca a, b, c, d, lalu hitung dalam **satu pernyataan**: `ak.tambah(a).tambah(b).kali(c).tambah(d);` dan cetak totalnya.\n\nUntuk `2 3 4 1` jawabannya (2 + 3) × 4 + 1 = 21.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Satu baris berisi a, b, c, d.",
+          "output_format": "Satu bilangan bulat: (a + b) × c + d.",
+          "constraints": "−100 ≤ a, b, d ≤ 100; −20 ≤ c ≤ 20"
+        },
+        "en": {
+          "title": "Method Chaining",
+          "statement": "Inside a method, `this` is a pointer to the object being used. When a method returns `*this` — the object itself — calls can be **chained**: `ak.tambah(2).kali(3)`.\n\nMake a class `Akumulator` with an attribute `int total` (starting at 0) and two methods that both return `*this` as `Akumulator &`:\n\n- `tambah(int x)` — adds x to the total;\n- `kali(int x)` — multiplies the total by x.\n\nRead a, b, c, d, then compute in **one statement**: `ak.tambah(a).tambah(b).kali(c).tambah(d);` and print the total.\n\nFor `2 3 4 1` the answer is (2 + 3) × 4 + 1 = 21.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "One line with a, b, c, d.",
+          "output_format": "One integer: (a + b) × c + d.",
+          "constraints": "−100 ≤ a, b, d ≤ 100; −20 ≤ c ≤ 20",
+          "machine": true
+        },
+        "ar": {
+          "title": "تسلسل الطرائق",
+          "statement": "داخل الطريقة يكون `this` مؤشرًا إلى الكائن المستعمل. إذا أرجعت الطريقة `*this` — أي الكائن نفسه — أمكن **تسلسل** الاستدعاءات: `ak.tambah(2).kali(3)`.\n\nأنشئ صنفًا `Akumulator` فيه خاصية `int total` (تبدأ من 0) وطريقتان تُرجعان كلتاهما `*this` على أنه `Akumulator &`:\n\n- `tambah(int x)` — تضيف x إلى المجموع؛\n- `kali(int x)` — تضرب المجموع في x.\n\nاقرأ a و b و c و d ثم احسب في **تعليمة واحدة**: `ak.tambah(a).tambah(b).kali(c).tambah(d);` واطبع المجموع.\n\nعند `2 3 4 1` الجواب (2 + 3) × 4 + 1 = 21.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "سطر واحد فيه a و b و c و d.",
+          "output_format": "عدد صحيح واحد: (a + b) × c + d.",
+          "constraints": "−100 ≤ a, b, d ≤ 100؛ −20 ≤ c ≤ 20",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(-100, 100), r.randint(-100, 100), r.randint(-20, 20), r.randint(-100, 100))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nclass Akumulator {\npublic:\n    int total = 0;\n\n    Akumulator &tambah(int x) {\n        this->total += x;\n        return *this;\n    }\n\n    Akumulator &kali(int x) {\n        this->total *= x;\n        return *this;\n    }\n};\n\nint main() {\n    int a, b, c, d;\n    cin >> a >> b >> c >> d;\n    Akumulator ak;\n    ak.tambah(a).tambah(b).kali(c).tambah(d);\n    cout << ak.total << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "tiket-statis",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Tiket dan Anggota Statis",
+          "statement": "Atribut biasa dimiliki **tiap objek**. Atribut `static` dimiliki **class-nya**: hanya ada satu, dan semua objek melihat nilai yang sama.\n\nBuat class `Tiket` dengan:\n\n- atribut `static int terjual` — banyak tiket yang sudah dipesan, mula-mula 0;\n- atribut `string pemilik` dan `int nomor`;\n- method `void pesan(string nama)` — mencatat pemilik, menaikkan `terjual`, dan memberi tiket itu nomor urut berikutnya;\n- method `void cetak()` — mencetak `Tiket <nomor>: <pemilik>`;\n- method `static int banyakTerjual()`.\n\nAtribut statis didefinisikan sekali di luar class: `int Tiket::terjual = 0;`. Method statis dipanggil lewat nama class: `Tiket::banyakTerjual()`.\n\nBaca n nama pemesan. Pesan satu tiket untuk tiap nama, cetak semua tiket, lalu cetak `Terjual: n`.\n\nUntuk `Budi Citra`:\n\n```\nTiket 1: Budi\nTiket 2: Citra\nTerjual: 2\n```\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Baris pertama: n. Baris kedua: n nama, masing-masing satu kata.",
+          "output_format": "n baris tiket, lalu satu baris `Terjual: n`.",
+          "constraints": "1 ≤ n ≤ 15"
+        },
+        "en": {
+          "title": "Tickets and Static Members",
+          "statement": "An ordinary attribute belongs to **each object**. A `static` attribute belongs to **the class**: there is only one, and all objects see the same value.\n\nMake a class `Tiket` (ticket) with:\n\n- an attribute `static int terjual` — the number of tickets booked so far, starting at 0;\n- the attributes `string pemilik` (owner) and `int nomor` (number);\n- a method `void pesan(string nama)` (book) — records the owner, raises `terjual`, and gives the ticket the next number;\n- a method `void cetak()` — prints `Tiket <number>: <owner>`;\n- a method `static int banyakTerjual()`.\n\nA static attribute is defined once outside the class: `int Tiket::terjual = 0;`. A static method is called through the class name: `Tiket::banyakTerjual()`.\n\nRead n names. Book one ticket for each, print all tickets, then print `Terjual: n` (sold).\n\nFor `Budi Citra`:\n\n```\nTiket 1: Budi\nTiket 2: Citra\nTerjual: 2\n```\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "First line: n. Second line: n names, one word each.",
+          "output_format": "n ticket lines, then one line `Terjual: n`.",
+          "constraints": "1 ≤ n ≤ 15",
+          "machine": true
+        },
+        "ar": {
+          "title": "التذاكر والأعضاء الساكنة",
+          "statement": "الخاصية العادية يملكها **كل كائن**. أما الخاصية `static` فيملكها **الصنف**: منها واحدة فقط، وكل الكائنات ترى القيمة نفسها.\n\nأنشئ صنفًا `Tiket` (تذكرة) فيه:\n\n- خاصية `static int terjual` — عدد التذاكر المحجوزة حتى الآن، وتبدأ من 0؛\n- الخاصيتان `string pemilik` (المالك) و `int nomor` (الرقم)؛\n- طريقة `void pesan(string nama)` (احجز) — تسجّل المالك وتزيد `terjual` وتعطي التذكرة الرقم التالي؛\n- طريقة `void cetak()` — تطبع `Tiket <الرقم>: <المالك>`؛\n- طريقة `static int banyakTerjual()`.\n\nتُعرَّف الخاصية الساكنة مرة واحدة خارج الصنف: `int Tiket::terjual = 0;`. وتُستدعى الطريقة الساكنة باسم الصنف: `Tiket::banyakTerjual()`.\n\nاقرأ n اسمًا. احجز تذكرة لكل اسم واطبع كل التذاكر ثم اطبع `Terjual: n` (المباع).\n\nعند `Budi Citra`:\n\n```\nTiket 1: Budi\nTiket 2: Citra\nTerjual: 2\n```\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "السطر الأول: n. السطر الثاني: n اسمًا، كل اسم كلمة واحدة.",
+          "output_format": "n سطر تذاكر ثم سطر `Terjual: n`.",
+          "constraints": "1 ≤ n ≤ 15",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nNAMA = ['Andi', 'Budi', 'Citra', 'Dewi', 'Eko', 'Fajar', 'Gita', 'Hadi', 'Indah', 'Joko', 'Kartika', 'Lina', 'Made', 'Nanda', 'Putri', 'Rudi', 'Sari', 'Tono', 'Wulan', 'Yoga', 'Zahra', 'Bayu', 'Ayu', 'Rina', 'Dimas', 'Laras', 'Agus', 'Maya', 'Iwan', 'Tari']\nn = {2: 1}.get(i, r.randint(2, 15))\nprint(n)\nprint(*r.sample(NAMA, n))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass Tiket {\npublic:\n    static int terjual;\n    string pemilik;\n    int nomor;\n\n    void pesan(string nama) {\n        pemilik = nama;\n        terjual++;\n        nomor = terjual;\n    }\n\n    void cetak() {\n        cout << \"Tiket \" << nomor << \": \" << pemilik << endl;\n    }\n\n    static int banyakTerjual() {\n        return terjual;\n    }\n};\n\nint Tiket::terjual = 0;\n\nint main() {\n    int n;\n    cin >> n;\n    Tiket tiket[15];\n    for (int k = 0; k < n; k++) {\n        string nama;\n        cin >> nama;\n        tiket[k].pesan(nama);\n    }\n    for (int k = 0; k < n; k++) {\n        tiket[k].cetak();\n    }\n    cout << \"Terjual: \" << Tiket::banyakTerjual() << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "kendaraan-bensin",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Kendaraan dan Bensin",
+          "statement": "Buat class `Kendaraan` dengan atribut `int bensin` (dalam mililiter), `int konsumsi` (mililiter per kilometer), `int odometer` (kilometer yang sudah ditempuh, mula-mula 0), dan method:\n\n- `bool jalan(int km)` — bila bensinnya cukup untuk menempuh km kilometer, kurangi bensin, naikkan odometer, dan kembalikan `true`; bila tidak cukup, **jangan ubah apa pun** dan kembalikan `false`.\n\nKendaraan diminta menempuh n perjalanan berturut-turut. Untuk tiap perjalanan cetak `jalan` atau `bensin tidak cukup`. Di akhir cetak `Odometer: x km, bensin: y ml`.\n\nContoh: bensin 10000 ml, konsumsi 80 ml/km, perjalanan `50 100 60` →\n\n```\njalan\nbensin tidak cukup\njalan\nOdometer: 110 km, bensin: 1200 ml\n```\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Baris pertama: bensin dan konsumsi. Baris kedua: n. Baris ketiga: n bilangan, jarak tiap perjalanan.",
+          "output_format": "Satu baris per perjalanan, lalu satu baris ringkasan.",
+          "constraints": "5000 ≤ bensin ≤ 60000; 40 ≤ konsumsi ≤ 120; 1 ≤ n ≤ 8; 1 ≤ jarak ≤ 5000"
+        },
+        "en": {
+          "title": "Vehicle and Fuel",
+          "statement": "Make a class `Kendaraan` (vehicle) with the attributes `int bensin` (fuel, in millilitres), `int konsumsi` (millilitres per kilometre), `int odometer` (kilometres driven, starting at 0), and a method:\n\n- `bool jalan(int km)` (drive) — if there is enough fuel for km kilometres, lower the fuel, raise the odometer and return `true`; if not, **change nothing** and return `false`.\n\nThe vehicle is asked to make n trips in a row. For each trip print `jalan` (driven) or `bensin tidak cukup` (not enough fuel). At the end print `Odometer: x km, bensin: y ml`.\n\nExample: fuel 10000 ml, consumption 80 ml/km, trips `50 100 60` →\n\n```\njalan\nbensin tidak cukup\njalan\nOdometer: 110 km, bensin: 1200 ml\n```\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "First line: the fuel and the consumption. Second line: n. Third line: n numbers, the length of each trip.",
+          "output_format": "One line per trip, then one summary line.",
+          "constraints": "5000 ≤ fuel ≤ 60000; 40 ≤ consumption ≤ 120; 1 ≤ n ≤ 8; 1 ≤ trip ≤ 5000",
+          "machine": true
+        },
+        "ar": {
+          "title": "المركبة والوقود",
+          "statement": "أنشئ صنفًا `Kendaraan` (مركبة) خصائصه `int bensin` (الوقود بالمليلتر) و `int konsumsi` (مليلتر لكل كيلومتر) و `int odometer` (الكيلومترات المقطوعة، وتبدأ من 0)، وطريقة:\n\n- `bool jalan(int km)` (سِر) — إذا كفى الوقود لقطع km كيلومترًا فأنقص الوقود وزِد العدّاد وأرجع `true`؛ وإلا **فلا تغيّر شيئًا** وأرجع `false`.\n\nيُطلب من المركبة n رحلة متتالية. لكل رحلة اطبع `jalan` (سارت) أو `bensin tidak cukup` (الوقود لا يكفي). في النهاية اطبع `Odometer: x km, bensin: y ml`.\n\nمثال: الوقود 10000 مل والاستهلاك 80 مل/كم والرحلات `50 100 60` ←\n\n```\njalan\nbensin tidak cukup\njalan\nOdometer: 110 km, bensin: 1200 ml\n```\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "السطر الأول: الوقود والاستهلاك. السطر الثاني: n. السطر الثالث: n عددًا هي أطوال الرحلات.",
+          "output_format": "سطر لكل رحلة ثم سطر ملخص.",
+          "constraints": "5000 ≤ الوقود ≤ 60000؛ 40 ≤ الاستهلاك ≤ 120؛ 1 ≤ n ≤ 8؛ 1 ≤ الرحلة ≤ 5000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nb, k = r.randint(5, 60) * 1000, r.randint(40, 120)\nn = r.randint(1, 8)\nprint(b, k)\nprint(n)\nprint(*[r.randint(1, 3 * b // k // n + 1) for _ in range(n)])\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nclass Kendaraan {\npublic:\n    int bensin;\n    int konsumsi;\n    int odometer = 0;\n\n    bool jalan(int km) {\n        int perlu = km * konsumsi;\n        if (perlu > bensin) {\n            return false;\n        }\n        bensin -= perlu;\n        odometer += km;\n        return true;\n    }\n};\n\nint main() {\n    Kendaraan mobil;\n    int n;\n    cin >> mobil.bensin >> mobil.konsumsi;\n    cin >> n;\n    for (int k = 0; k < n; k++) {\n        int km;\n        cin >> km;\n        if (mobil.jalan(km)) {\n            cout << \"jalan\" << endl;\n        } else {\n            cout << \"bensin tidak cukup\" << endl;\n        }\n    }\n    cout << \"Odometer: \" << mobil.odometer << \" km, bensin: \" << mobil.bensin << \" ml\" << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "daftar-lulus",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Daftar Lulus",
+          "statement": "Buat class `Mahasiswa` dengan atribut `string nama`, `int tugas`, `int uts`, `int uas` dan dua method:\n\n- `int nilaiAkhir()` — (30 × tugas + 30 × uts + 40 × uas) / 100, dengan pembagian bulat;\n- `bool lulus()` — benar bila nilai akhirnya 60 atau lebih. Method ini **memanggil method lain** dari objek yang sama.\n\nSimpan n mahasiswa dalam **array of objects**. Cetak nama dan nilai akhir mahasiswa yang lulus, sesuai urutan masukan, lalu `Lulus: k dari n`.\n\nContoh: `Andi 80 70 60` dan `Budi 40 50 55` →\n\n```\nAndi 69\nLulus: 1 dari 2\n```\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Baris pertama: n. Lalu n baris, masing-masing berisi nama, nilai tugas, UTS, dan UAS.",
+          "output_format": "Satu baris `nama nilaiAkhir` untuk tiap mahasiswa yang lulus, lalu `Lulus: k dari n`.",
+          "constraints": "1 ≤ n ≤ 20; tiap nilai antara 0 dan 100"
+        },
+        "en": {
+          "title": "Pass List",
+          "statement": "Make a class `Mahasiswa` (student) with the attributes `string nama`, `int tugas`, `int uts`, `int uas` (name; assignment, mid-term and final marks) and two methods:\n\n- `int nilaiAkhir()` (final mark) — (30 × tugas + 30 × uts + 40 × uas) / 100, with integer division;\n- `bool lulus()` (passed) — true when the final mark is 60 or more. This method **calls another method** of the same object.\n\nKeep n students in an **array of objects**. Print the name and final mark of every student who passed, in input order, then `Lulus: k dari n` (k of n passed).\n\nExample: `Andi 80 70 60` and `Budi 40 50 55` →\n\n```\nAndi 69\nLulus: 1 dari 2\n```\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "First line: n. Then n lines, each with the name and the three marks.",
+          "output_format": "One line `name finalMark` for every student who passed, then `Lulus: k dari n`.",
+          "constraints": "1 ≤ n ≤ 20; each mark is between 0 and 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "قائمة الناجحين",
+          "statement": "أنشئ صنفًا `Mahasiswa` (طالب) خصائصه `string nama` و `int tugas` و `int uts` و `int uas` (الاسم ودرجات الواجبات ومنتصف الفصل والنهائي) وطريقتان:\n\n- `int nilaiAkhir()` (الدرجة النهائية) — (30 × tugas + 30 × uts + 40 × uas) / 100 بقسمة صحيحة؛\n- `bool lulus()` (ناجح) — صحيحة إذا كانت الدرجة النهائية 60 أو أكثر. هذه الطريقة **تستدعي طريقة أخرى** للكائن نفسه.\n\nاحفظ n طالبًا في **مصفوفة كائنات**. اطبع اسم كل ناجح ودرجته النهائية بترتيب المدخل ثم `Lulus: k dari n` (نجح k من n).\n\nمثال: `Andi 80 70 60` و `Budi 40 50 55` ←\n\n```\nAndi 69\nLulus: 1 dari 2\n```\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "السطر الأول: n. ثم n سطرًا في كل منها الاسم والدرجات الثلاث.",
+          "output_format": "سطر `الاسم الدرجة` لكل ناجح ثم `Lulus: k dari n`.",
+          "constraints": "1 ≤ n ≤ 20؛ كل درجة بين 0 و 100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nNAMA = ['Andi', 'Budi', 'Citra', 'Dewi', 'Eko', 'Fajar', 'Gita', 'Hadi', 'Indah', 'Joko', 'Kartika', 'Lina', 'Made', 'Nanda', 'Putri', 'Rudi', 'Sari', 'Tono', 'Wulan', 'Yoga', 'Zahra', 'Bayu', 'Ayu', 'Rina', 'Dimas', 'Laras', 'Agus', 'Maya', 'Iwan', 'Tari']\nn = {2: 1}.get(i, r.randint(2, 20))\nprint(n)\nfor nama in r.sample(NAMA, n):\n    a = r.randint(30, 100)\n    v = [min(100, max(0, a + r.randint(-25, 25))) for _ in range(3)]\n    if i == 3:\n        v = [r.randint(0, 50) for _ in range(3)]\n    if i == 4:\n        v = [60, 60, 60]\n    print(nama, *v)\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass Mahasiswa {\npublic:\n    string nama;\n    int tugas;\n    int uts;\n    int uas;\n\n    int nilaiAkhir() {\n        return (30 * tugas + 30 * uts + 40 * uas) / 100;\n    }\n\n    bool lulus() {\n        return nilaiAkhir() >= 60;\n    }\n};\n\nint main() {\n    int n;\n    cin >> n;\n    Mahasiswa daftar[20];\n    for (int k = 0; k < n; k++) {\n        cin >> daftar[k].nama >> daftar[k].tugas >> daftar[k].uts >> daftar[k].uas;\n    }\n    auto banyak = 0;\n    for (int k = 0; k < n; k++) {\n        if (daftar[k].lulus()) {\n            cout << daftar[k].nama << \" \" << daftar[k].nilaiAkhir() << endl;\n            banyak++;\n        }\n    }\n    cout << \"Lulus: \" << banyak << \" dari \" << n << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "persegi-panjang-terluas",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Persegi Panjang Terluas",
+          "statement": "Buat class `PersegiPanjang` dengan atribut `int panjang`, `int lebar` dan dua method:\n\n- `int luas()`;\n- `bool lebihLuasDari(PersegiPanjang lain)` — benar bila objek ini lebih luas daripada objek `lain`.\n\nBaca n persegi panjang ke dalam array of objects, lalu cetak **nomor urut** (mulai dari 1) persegi panjang yang terluas dan luasnya. Bila ada beberapa yang sama luas, pilih yang paling dulu.\n\nContoh: `4 6`, `3 9`, `5 5` → `2 27`.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Baris pertama: n. Lalu n baris, masing-masing berisi panjang dan lebar.",
+          "output_format": "Satu baris: nomor urut persegi panjang terluas, lalu luasnya.",
+          "constraints": "1 ≤ n ≤ 20; 1 ≤ panjang, lebar ≤ 50"
+        },
+        "en": {
+          "title": "Largest Rectangle",
+          "statement": "Make a class `PersegiPanjang` (rectangle) with the attributes `int panjang`, `int lebar` and two methods:\n\n- `int luas()` (area);\n- `bool lebihLuasDari(PersegiPanjang lain)` — true when this object is larger in area than the object `lain`.\n\nRead n rectangles into an array of objects, then print the **position** (counting from 1) of the largest one and its area. If several are equally large, choose the earliest.\n\nExample: `4 6`, `3 9`, `5 5` → `2 27`.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "First line: n. Then n lines, each with a length and a width.",
+          "output_format": "One line: the position of the largest rectangle, then its area.",
+          "constraints": "1 ≤ n ≤ 20; 1 ≤ length, width ≤ 50",
+          "machine": true
+        },
+        "ar": {
+          "title": "أوسع مستطيل",
+          "statement": "أنشئ صنفًا `PersegiPanjang` (مستطيل) خاصيتاه `int panjang` و `int lebar` وطريقتان:\n\n- `int luas()` (المساحة)؛\n- `bool lebihLuasDari(PersegiPanjang lain)` — صحيحة إذا كان هذا الكائن أوسع من الكائن `lain`.\n\nاقرأ n مستطيلًا في مصفوفة كائنات ثم اطبع **ترتيب** (بدءًا من 1) أوسعها ومساحته. إذا تساوت عدة مستطيلات فاختر أسبقها.\n\nمثال: `4 6` و `3 9` و `5 5` ← `2 27`.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "السطر الأول: n. ثم n سطرًا في كل منها طول وعرض.",
+          "output_format": "سطر واحد: ترتيب أوسع مستطيل ثم مساحته.",
+          "constraints": "1 ≤ n ≤ 20؛ 1 ≤ الطول، العرض ≤ 50",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = {2: 1}.get(i, r.randint(2, 20))\nv = [(r.randint(1, 50), r.randint(1, 50)) for _ in range(n)]\nif i == 3:\n    v = [(4, 6), (3, 8), (2, 12), (24, 1)]\nprint(len(v))\nfor p, l in v:\n    print(p, l)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nclass PersegiPanjang {\npublic:\n    int panjang;\n    int lebar;\n\n    int luas() {\n        return panjang * lebar;\n    }\n\n    bool lebihLuasDari(PersegiPanjang lain) {\n        return luas() > lain.luas();\n    }\n};\n\nint main() {\n    int n;\n    cin >> n;\n    PersegiPanjang daftar[20];\n    for (int k = 0; k < n; k++) {\n        cin >> daftar[k].panjang >> daftar[k].lebar;\n    }\n    auto terluas = 0;\n    for (int k = 1; k < n; k++) {\n        if (daftar[k].lebihLuasDari(daftar[terluas])) {\n            terluas = k;\n        }\n    }\n    cout << terluas + 1 << \" \" << daftar[terluas].luas() << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "senjata",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Senjata",
+          "statement": "Buat class `Senjata` dengan atribut `string nama`, `int kapasitas`, `int peluru` dan dua method:\n\n- `bool tembak()` — bila masih ada peluru, kurangi satu dan kembalikan `true`; bila habis, kembalikan `false`;\n- `void isiUlang()` — mengisi peluru sampai penuh.\n\nSenjata mula-mula terisi penuh. Masukan berisi deretan perintah: `T` berarti tembak, `R` berarti isi ulang. Untuk tiap perintah cetak satu baris:\n\n- tembakan berhasil: `Dor! sisa k`;\n- peluru habis: `Klik! peluru habis`;\n- isi ulang: `Isi ulang: k`.\n\nDi akhir cetak `<nama>: <peluru>/<kapasitas>`.\n\nContoh: `Pindad 2` dengan perintah `TTTRT` →\n\n```\nDor! sisa 1\nDor! sisa 0\nKlik! peluru habis\nIsi ulang: 2\nDor! sisa 1\nPindad: 1/2\n```\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Baris pertama: nama senjata (satu kata) dan kapasitasnya. Baris kedua: deretan huruf `T` dan `R`.",
+          "output_format": "Satu baris per perintah, lalu satu baris ringkasan.",
+          "constraints": "1 ≤ kapasitas ≤ 8; panjang deretan perintah 1 sampai 30"
+        },
+        "en": {
+          "title": "Weapon",
+          "statement": "Make a class `Senjata` (weapon) with the attributes `string nama`, `int kapasitas`, `int peluru` (name, capacity, rounds) and two methods:\n\n- `bool tembak()` (fire) — if a round is left, use one and return `true`; if empty, return `false`;\n- `void isiUlang()` (reload) — fills the weapon up.\n\nThe weapon starts full. The input holds a run of commands: `T` means fire, `R` means reload. For each command print one line:\n\n- a shot fired: `Dor! sisa k` (k left);\n- no rounds: `Klik! peluru habis`;\n- reload: `Isi ulang: k`.\n\nAt the end print `<name>: <rounds>/<capacity>`.\n\nExample: `Pindad 2` with the commands `TTTRT` →\n\n```\nDor! sisa 1\nDor! sisa 0\nKlik! peluru habis\nIsi ulang: 2\nDor! sisa 1\nPindad: 1/2\n```\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "First line: the weapon's name (one word) and its capacity. Second line: a run of the letters `T` and `R`.",
+          "output_format": "One line per command, then one summary line.",
+          "constraints": "1 ≤ capacity ≤ 8; the run of commands is 1 to 30 long",
+          "machine": true
+        },
+        "ar": {
+          "title": "السلاح",
+          "statement": "أنشئ صنفًا `Senjata` (سلاح) خصائصه `string nama` و `int kapasitas` و `int peluru` (الاسم والسعة والطلقات) وطريقتان:\n\n- `bool tembak()` (أطلق) — إذا بقيت طلقة فاستعمل واحدة وأرجع `true`؛ وإذا فرغ فأرجع `false`؛\n- `void isiUlang()` (أعد التعبئة) — تملأ السلاح.\n\nيبدأ السلاح ممتلئًا. في المدخل سلسلة أوامر: `T` تعني أطلق و `R` تعني أعد التعبئة. لكل أمر اطبع سطرًا:\n\n- طلقة ناجحة: `Dor! sisa k` (بقي k)؛\n- لا طلقات: `Klik! peluru habis`؛\n- إعادة تعبئة: `Isi ulang: k`.\n\nفي النهاية اطبع `<الاسم>: <الطلقات>/<السعة>`.\n\nمثال: `Pindad 2` مع الأوامر `TTTRT` ←\n\n```\nDor! sisa 1\nDor! sisa 0\nKlik! peluru habis\nIsi ulang: 2\nDor! sisa 1\nPindad: 1/2\n```\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "السطر الأول: اسم السلاح (كلمة واحدة) وسعته. السطر الثاني: سلسلة من الحرفين `T` و `R`.",
+          "output_format": "سطر لكل أمر ثم سطر ملخص.",
+          "constraints": "1 ≤ السعة ≤ 8؛ طول سلسلة الأوامر من 1 إلى 30",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nkap = r.randint(1, 8)\nn = r.randint(1, 30)\np = {2: 1.0, 3: 0.5}.get(i, 0.8)\nprint(r.choice(['Pindad', 'Senapan', 'Pistol', 'Karabin']), kap)\nprint(''.join('T' if r.random() < p else 'R' for _ in range(n)))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass Senjata {\npublic:\n    string nama;\n    int kapasitas;\n    int peluru;\n\n    bool tembak() {\n        if (peluru == 0) {\n            return false;\n        }\n        peluru--;\n        return true;\n    }\n\n    void isiUlang() {\n        peluru = kapasitas;\n    }\n};\n\nint main() {\n    Senjata s;\n    string perintah;\n    cin >> s.nama >> s.kapasitas;\n    cin >> perintah;\n    s.isiUlang();\n    for (auto p : perintah) {\n        if (p == 'T') {\n            if (s.tembak()) {\n                cout << \"Dor! sisa \" << s.peluru << endl;\n            } else {\n                cout << \"Klik! peluru habis\" << endl;\n            }\n        } else {\n            s.isiUlang();\n            cout << \"Isi ulang: \" << s.peluru << endl;\n        }\n    }\n    cout << s.nama << \": \" << s.peluru << \"/\" << s.kapasitas << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "operasi-vektor",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Operasi Vektor",
+          "statement": "Buat class `Vektor` dengan atribut `int x`, `int y` dan tiga method. Dua di antaranya **mengembalikan objek `Vektor` baru** tanpa mengubah objek asalnya:\n\n- `Vektor tambah(Vektor lain)` — jumlah dua vektor;\n- `Vektor kali(int k)` — vektor dikali bilangan k;\n- `int titik(Vektor lain)` — hasil kali titik: x × lain.x + y × lain.y.\n\nBaca vektor a, vektor b, dan bilangan k. Cetak vektor a + k·b di baris pertama, lalu hasil kali titik a dan b di baris kedua.\n\nContoh: a = (1, 2), b = (3, −1), k = 2 → `7 0` lalu `1`.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Baris pertama: x dan y vektor a. Baris kedua: x dan y vektor b. Baris ketiga: k.",
+          "output_format": "Baris pertama: komponen vektor a + k·b. Baris kedua: hasil kali titik a dan b.",
+          "constraints": "Tiap komponen antara −50 dan 50; −10 ≤ k ≤ 10"
+        },
+        "en": {
+          "title": "Vector Operations",
+          "statement": "Make a class `Vektor` with the attributes `int x`, `int y` and three methods. Two of them **return a new `Vektor` object** without changing the object they are called on:\n\n- `Vektor tambah(Vektor lain)` — the sum of two vectors;\n- `Vektor kali(int k)` — the vector times a number k;\n- `int titik(Vektor lain)` — the dot product: x × lain.x + y × lain.y.\n\nRead a vector a, a vector b and a number k. Print the vector a + k·b on the first line, then the dot product of a and b on the second.\n\nExample: a = (1, 2), b = (3, −1), k = 2 → `7 0` then `1`.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "First line: x and y of a. Second line: x and y of b. Third line: k.",
+          "output_format": "First line: the components of a + k·b. Second line: the dot product of a and b.",
+          "constraints": "Each component is between −50 and 50; −10 ≤ k ≤ 10",
+          "machine": true
+        },
+        "ar": {
+          "title": "عمليات المتجهات",
+          "statement": "أنشئ صنفًا `Vektor` خاصيتاه `int x` و `int y` وثلاث طرائق. اثنتان منها **تُرجعان كائن `Vektor` جديدًا** دون تغيير الكائن الأصلي:\n\n- `Vektor tambah(Vektor lain)` — مجموع متجهين؛\n- `Vektor kali(int k)` — المتجه مضروبًا في العدد k؛\n- `int titik(Vektor lain)` — الضرب النقطي: x × lain.x + y × lain.y.\n\nاقرأ المتجه a والمتجه b والعدد k. اطبع المتجه a + k·b في السطر الأول ثم الضرب النقطي للمتجهين a و b في السطر الثاني.\n\nمثال: a = (1, 2) و b = (3, −1) و k = 2 ← `7 0` ثم `1`.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "السطر الأول: x و y للمتجه a. السطر الثاني: x و y للمتجه b. السطر الثالث: k.",
+          "output_format": "السطر الأول: مركّبتا a + k·b. السطر الثاني: الضرب النقطي للمتجهين.",
+          "constraints": "كل مركّبة بين −50 و 50؛ −10 ≤ k ≤ 10",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(-50, 50), r.randint(-50, 50))\nprint(r.randint(-50, 50), r.randint(-50, 50))\nprint({2: 0, 3: -1}.get(i, r.randint(-10, 10)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nclass Vektor {\npublic:\n    int x;\n    int y;\n\n    Vektor tambah(Vektor lain) {\n        return Vektor{x + lain.x, y + lain.y};\n    }\n\n    Vektor kali(int k) {\n        return Vektor{x * k, y * k};\n    }\n\n    int titik(Vektor lain) {\n        return x * lain.x + y * lain.y;\n    }\n};\n\nint main() {\n    Vektor a{}, b{};\n    int k;\n    cin >> a.x >> a.y;\n    cin >> b.x >> b.y;\n    cin >> k;\n    auto c = a.tambah(b.kali(k));\n    cout << c.x << \" \" << c.y << endl;\n    cout << a.titik(b) << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "jam-berdetak",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Jam Berdetak",
+          "statement": "Buat class `Jam` dengan atribut `int jam`, `int menit`, `int detik` dan dua method:\n\n- `void detak()` — memajukan jam **satu detik**, lengkap dengan perpindahan menit, jam, dan tengah malam;\n- `void cetak()` — mencetak `JJ:MM:DD`, masing-masing dua digit.\n\nBaca waktu awal dan n, panggil `detak()` sebanyak n kali, lalu cetak waktunya.\n\nContoh: `9 59 58 3` → `10:00:01`; `23 59 59 1` → `00:00:00`.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Satu baris berisi jam, menit, detik, dan n.",
+          "output_format": "Waktu setelah n detik, dalam bentuk `JJ:MM:DD`.",
+          "constraints": "0 ≤ jam ≤ 23; 0 ≤ menit, detik ≤ 59; 0 ≤ n ≤ 100000"
+        },
+        "en": {
+          "title": "Ticking Clock",
+          "statement": "Make a class `Jam` (clock) with the attributes `int jam`, `int menit`, `int detik` (hour, minute, second) and two methods:\n\n- `void detak()` (tick) — moves the clock forward by **one second**, including the roll-over of minutes, hours and midnight;\n- `void cetak()` — prints `HH:MM:SS`, two digits each.\n\nRead the starting time and n, call `detak()` n times, then print the time.\n\nExamples: `9 59 58 3` → `10:00:01`; `23 59 59 1` → `00:00:00`.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "One line with the hour, the minute, the second and n.",
+          "output_format": "The time after n seconds, in the form `HH:MM:SS`.",
+          "constraints": "0 ≤ hour ≤ 23; 0 ≤ minute, second ≤ 59; 0 ≤ n ≤ 100000",
+          "machine": true
+        },
+        "ar": {
+          "title": "ساعة تدقّ",
+          "statement": "أنشئ صنفًا `Jam` (ساعة) خصائصه `int jam` و `int menit` و `int detik` (الساعة والدقيقة والثانية) وطريقتان:\n\n- `void detak()` (دقّة) — تقدّم الساعة **ثانية واحدة** مع انتقال الدقائق والساعات ومنتصف الليل؛\n- `void cetak()` — تطبع `HH:MM:SS` برقمين لكل جزء.\n\nاقرأ الوقت الابتدائي و n واستدعِ `detak()` n مرة ثم اطبع الوقت.\n\nأمثلة: `9 59 58 3` ← `10:00:01`؛ `23 59 59 1` ← `00:00:00`.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "سطر واحد فيه الساعة والدقيقة والثانية و n.",
+          "output_format": "الوقت بعد n ثانية على الصورة `HH:MM:SS`.",
+          "constraints": "0 ≤ الساعة ≤ 23؛ 0 ≤ الدقيقة، الثانية ≤ 59؛ 0 ≤ n ≤ 100000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nj, m, d, n = r.randint(0, 23), r.randint(0, 59), r.randint(0, 59), r.randint(0, 100000)\nif i == 2:\n    j, m, d, n = 23, 59, 59, 1\nif i == 3:\n    n = 86400\nif i == 4:\n    j, m, d, n = 9, 59, 58, 3\nprint(j, m, d, n)\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nclass Jam {\npublic:\n    int jam;\n    int menit;\n    int detik;\n\n    void detak() {\n        detik++;\n        if (detik == 60) {\n            detik = 0;\n            menit++;\n        }\n        if (menit == 60) {\n            menit = 0;\n            jam++;\n        }\n        if (jam == 24) {\n            jam = 0;\n        }\n    }\n\n    void cetak() {\n        cout << setfill('0') << setw(2) << jam << \":\" << setw(2) << menit << \":\" << setw(2) << detik << endl;\n    }\n};\n\nint main() {\n    Jam j;\n    int n;\n    cin >> j.jam >> j.menit >> j.detik >> n;\n    for (int k = 0; k < n; k++) {\n        j.detak();\n    }\n    j.cetak();\n    return 0;\n}\n"
+    },
+    {
+      "slug": "nilai-gudang",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Nilai Gudang",
+          "statement": "Buat class `Barang` dengan atribut `string nama`, `int harga`, `int stok` dan method `int nilai()` yang mengembalikan harga × stok.\n\nSebuah gudang menyimpan n jenis barang. Cetak dua baris:\n\n- `Total: T` — jumlah nilai semua barang;\n- `Terbesar: <nama>` — barang yang nilainya paling besar; bila ada yang sama, yang paling dulu di masukan.\n\nContoh: `Beras 12000 10`, `Gula 15000 4`, `Kopi 40000 3` →\n\n```\nTotal: 300000\nTerbesar: Beras\n```\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Baris pertama: n. Lalu n baris, masing-masing berisi nama (satu kata), harga, dan stok.",
+          "output_format": "Dua baris seperti contoh.",
+          "constraints": "1 ≤ n ≤ 20; 500 ≤ harga ≤ 50000; 0 ≤ stok ≤ 50"
+        },
+        "en": {
+          "title": "Warehouse Value",
+          "statement": "Make a class `Barang` (item) with the attributes `string nama`, `int harga`, `int stok` (name, price, stock) and a method `int nilai()` (value) that returns price × stock.\n\nA warehouse keeps n kinds of items. Print two lines:\n\n- `Total: T` — the summed value of all items;\n- `Terbesar: <name>` — the item with the largest value; on a tie, the earliest in the input.\n\nExample: `Beras 12000 10`, `Gula 15000 4`, `Kopi 40000 3` →\n\n```\nTotal: 300000\nTerbesar: Beras\n```\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "First line: n. Then n lines, each with a name (one word), a price and a stock.",
+          "output_format": "Two lines as in the example.",
+          "constraints": "1 ≤ n ≤ 20; 500 ≤ price ≤ 50000; 0 ≤ stock ≤ 50",
+          "machine": true
+        },
+        "ar": {
+          "title": "قيمة المستودع",
+          "statement": "أنشئ صنفًا `Barang` (سلعة) خصائصه `string nama` و `int harga` و `int stok` (الاسم والسعر والمخزون) وطريقة `int nilai()` (القيمة) تُرجع السعر × المخزون.\n\nفي مستودع n نوعًا من السلع. اطبع سطرين:\n\n- `Total: T` — مجموع قيم كل السلع؛\n- `Terbesar: <الاسم>` — السلعة ذات أكبر قيمة؛ وعند التساوي الأسبق في المدخل.\n\nمثال: `Beras 12000 10` و `Gula 15000 4` و `Kopi 40000 3` ←\n\n```\nTotal: 300000\nTerbesar: Beras\n```\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "السطر الأول: n. ثم n سطرًا في كل منها اسم (كلمة واحدة) وسعر ومخزون.",
+          "output_format": "سطران كما في المثال.",
+          "constraints": "1 ≤ n ≤ 20؛ 500 ≤ السعر ≤ 50000؛ 0 ≤ المخزون ≤ 50",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nBARANG = ['Beras', 'Gula', 'Kopi', 'Teh', 'Susu', 'Roti', 'Telur', 'Minyak', 'Garam', 'Sabun', 'Pensil', 'Buku', 'Kertas', 'Tinta', 'Lampu', 'Kabel', 'Baterai', 'Kursi', 'Meja', 'Rak']\nn = {2: 1}.get(i, r.randint(2, 20))\nprint(n)\nfor nama in r.sample(BARANG, n):\n    print(nama, r.randint(1, 100) * 500, r.randint(0, 50))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass Barang {\npublic:\n    string nama;\n    int harga;\n    int stok;\n\n    int nilai() {\n        return harga * stok;\n    }\n};\n\nint main() {\n    int n;\n    cin >> n;\n    Barang gudang[20];\n    auto total = 0;\n    auto termahal = 0;\n    for (int k = 0; k < n; k++) {\n        cin >> gudang[k].nama >> gudang[k].harga >> gudang[k].stok;\n        total += gudang[k].nilai();\n        if (gudang[k].nilai() > gudang[termahal].nilai()) {\n            termahal = k;\n        }\n    }\n    cout << \"Total: \" << total << endl;\n    cout << \"Terbesar: \" << gudang[termahal].nama << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "matriks-pangkat",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Pangkat Matriks 2 × 2",
+          "statement": "Buat class `Matriks2` yang mewakili matriks 2 × 2\n\n```\na b\nc d\n```\n\ndengan atribut `long long a, b, c, d` dan dua method:\n\n- `Matriks2 kali(Matriks2 lain)` — hasil kali matriks ini dengan `lain` (matriks ini di sebelah kiri), sebagai objek baru;\n- `long long determinan()` — a × d − b × c.\n\nHasil kali dua matriks 2 × 2:\n\n```\na·a' + b·c'   a·b' + b·d'\nc·a' + d·c'   c·b' + d·d'\n```\n\nBaca sebuah matriks M dan bilangan n. Cetak Mⁿ (M dikalikan dengan dirinya n kali) dalam dua baris, lalu determinannya di baris ketiga.\n\nContoh: M = `1 1` / `1 0` dan n = 5 →\n\n```\n8 5\n5 3\n-1\n```\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Baris pertama: a, b, c, d. Baris kedua: n.",
+          "output_format": "Dua baris isi Mⁿ, lalu satu baris determinannya.",
+          "constraints": "0 ≤ a, b, c, d ≤ 3; 1 ≤ n ≤ 10"
+        },
+        "en": {
+          "title": "Power of a 2 × 2 Matrix",
+          "statement": "Make a class `Matriks2` that stands for a 2 × 2 matrix\n\n```\na b\nc d\n```\n\nwith the attributes `long long a, b, c, d` and two methods:\n\n- `Matriks2 kali(Matriks2 lain)` — the product of this matrix and `lain` (this matrix on the left), as a new object;\n- `long long determinan()` — a × d − b × c.\n\nThe product of two 2 × 2 matrices:\n\n```\na·a' + b·c'   a·b' + b·d'\nc·a' + d·c'   c·b' + d·d'\n```\n\nRead a matrix M and a number n. Print Mⁿ (M multiplied by itself n times) on two lines, then its determinant on a third.\n\nExample: M = `1 1` / `1 0` and n = 5 →\n\n```\n8 5\n5 3\n-1\n```\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "First line: a, b, c, d. Second line: n.",
+          "output_format": "Two lines with Mⁿ, then one line with its determinant.",
+          "constraints": "0 ≤ a, b, c, d ≤ 3; 1 ≤ n ≤ 10",
+          "machine": true
+        },
+        "ar": {
+          "title": "قوة مصفوفة 2 × 2",
+          "statement": "أنشئ صنفًا `Matriks2` يمثّل مصفوفة 2 × 2\n\n```\na b\nc d\n```\n\nخصائصه `long long a, b, c, d` وطريقتان:\n\n- `Matriks2 kali(Matriks2 lain)` — حاصل ضرب هذه المصفوفة في `lain` (هذه المصفوفة على اليسار) كائنًا جديدًا؛\n- `long long determinan()` — a × d − b × c.\n\nحاصل ضرب مصفوفتين 2 × 2:\n\n```\na·a' + b·c'   a·b' + b·d'\nc·a' + d·c'   c·b' + d·d'\n```\n\nاقرأ مصفوفة M وعددًا n. اطبع Mⁿ (M مضروبة في نفسها n مرة) في سطرين ثم محدِّدها في سطر ثالث.\n\nمثال: M = `1 1` / `1 0` و n = 5 ←\n\n```\n8 5\n5 3\n-1\n```\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "السطر الأول: a و b و c و d. السطر الثاني: n.",
+          "output_format": "سطران فيهما Mⁿ ثم سطر فيه محدِّدها.",
+          "constraints": "0 ≤ a, b, c, d ≤ 3؛ 1 ≤ n ≤ 10",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nv = [r.randint(0, 3) for _ in range(4)]\nn = r.randint(1, 10)\nif i == 2:\n    v, n = [1, 1, 1, 0], 10\nif i == 3:\n    v, n = [3, 3, 3, 3], 10\nif i == 4:\n    n = 1\nprint(*v)\nprint(n)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nclass Matriks2 {\npublic:\n    long long a, b, c, d;\n\n    Matriks2 kali(Matriks2 lain) {\n        return Matriks2{a * lain.a + b * lain.c, a * lain.b + b * lain.d,\n                        c * lain.a + d * lain.c, c * lain.b + d * lain.d};\n    }\n\n    long long determinan() {\n        return a * d - b * c;\n    }\n};\n\nint main() {\n    Matriks2 m{};\n    int n;\n    cin >> m.a >> m.b >> m.c >> m.d;\n    cin >> n;\n    auto hasil = m;\n    for (int k = 1; k < n; k++) {\n        hasil = hasil.kali(m);\n    }\n    cout << hasil.a << \" \" << hasil.b << endl;\n    cout << hasil.c << \" \" << hasil.d << endl;\n    cout << hasil.determinan() << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "kelas-tumpukan",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Class Tumpukan",
+          "statement": "Tumpukan (*stack*) dari mata kuliah Struktur Data sekarang dibungkus menjadi class. Buat class `Tumpukan` dengan atribut `int data[100]` dan `int banyak` (mula-mula 0), serta method:\n\n- `void dorong(int x)` — menaruh x di puncak;\n- `int ambil()` — mengambil dan mengembalikan elemen puncak;\n- `int puncak()` — mengembalikan elemen puncak tanpa mengambilnya;\n- `bool kosong()`.\n\nPerintah datang satu per baris: `dorong x`, `ambil`, `puncak`, dan terakhir `selesai`. Untuk `ambil` dan `puncak` cetak nilainya, atau `kosong` bila tumpukannya kosong. Di akhir cetak `Isi: k`.\n\nContoh: `dorong 5`, `dorong 8`, `puncak`, `ambil`, `ambil`, `ambil`, `selesai` →\n\n```\n8\n8\n5\nkosong\nIsi: 0\n```\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Beberapa baris perintah, diakhiri `selesai`.",
+          "output_format": "Satu baris untuk tiap `ambil` dan `puncak`, lalu `Isi: k`.",
+          "constraints": "Paling banyak 40 perintah sebelum `selesai`; −99 ≤ x ≤ 99"
+        },
+        "en": {
+          "title": "The Tumpukan Class",
+          "statement": "The stack from the Data Structures course is now wrapped into a class. Make a class `Tumpukan` (stack) with the attributes `int data[100]` and `int banyak` (count, starting at 0), and the methods:\n\n- `void dorong(int x)` (push) — puts x on top;\n- `int ambil()` (pop) — removes and returns the top element;\n- `int puncak()` (top) — returns the top element without removing it;\n- `bool kosong()` (empty).\n\nCommands come one per line: `dorong x`, `ambil`, `puncak`, and finally `selesai`. For `ambil` and `puncak` print the value, or `kosong` when the stack is empty. At the end print `Isi: k` (contents).\n\nExample: `dorong 5`, `dorong 8`, `puncak`, `ambil`, `ambil`, `ambil`, `selesai` →\n\n```\n8\n8\n5\nkosong\nIsi: 0\n```\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "Several command lines, ending with `selesai`.",
+          "output_format": "One line for every `ambil` and `puncak`, then `Isi: k`.",
+          "constraints": "At most 40 commands before `selesai`; −99 ≤ x ≤ 99",
+          "machine": true
+        },
+        "ar": {
+          "title": "الصنف Tumpukan",
+          "statement": "المكدّس (*stack*) من مقرر هياكل البيانات يُغلَّف الآن في صنف. أنشئ صنفًا `Tumpukan` (مكدّس) خاصيتاه `int data[100]` و `int banyak` (العدد، ويبدأ من 0) وطرائقه:\n\n- `void dorong(int x)` (ادفع) — تضع x في القمة؛\n- `int ambil()` (اسحب) — تزيل عنصر القمة وتُرجعه؛\n- `int puncak()` (القمة) — تُرجع عنصر القمة دون إزالته؛\n- `bool kosong()` (فارغ).\n\nتأتي الأوامر أمرًا في كل سطر: `dorong x` و `ambil` و `puncak` وأخيرًا `selesai`. للأمرين `ambil` و `puncak` اطبع القيمة، أو `kosong` إذا كان المكدّس فارغًا. في النهاية اطبع `Isi: k` (المحتوى).\n\nمثال: `dorong 5` ثم `dorong 8` ثم `puncak` ثم `ambil` ثم `ambil` ثم `ambil` ثم `selesai` ←\n\n```\n8\n8\n5\nkosong\nIsi: 0\n```\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "عدة أسطر أوامر تنتهي بـ `selesai`.",
+          "output_format": "سطر لكل `ambil` و `puncak` ثم `Isi: k`.",
+          "constraints": "40 أمرًا على الأكثر قبل `selesai`؛ −99 ≤ x ≤ 99",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nm = r.randint(1, 40)\np = {2: 0.3, 3: 0.9}.get(i, 0.55)\nfor _ in range(m):\n    q = r.random()\n    if q < p:\n        print('dorong', r.randint(-99, 99))\n    elif q < p + (1 - p) * 0.6:\n        print('ambil')\n    else:\n        print('puncak')\nprint('selesai')\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass Tumpukan {\npublic:\n    int data[100];\n    int banyak = 0;\n\n    bool kosong() {\n        return banyak == 0;\n    }\n\n    void dorong(int x) {\n        data[banyak] = x;\n        banyak++;\n    }\n\n    int ambil() {\n        banyak--;\n        return data[banyak];\n    }\n\n    int puncak() {\n        return data[banyak - 1];\n    }\n};\n\nint main() {\n    Tumpukan t;\n    string perintah;\n    while (cin >> perintah) {\n        if (perintah == \"selesai\") {\n            break;\n        }\n        if (perintah == \"dorong\") {\n            int x;\n            cin >> x;\n            t.dorong(x);\n        } else if (t.kosong()) {\n            cout << \"kosong\" << endl;\n        } else if (perintah == \"ambil\") {\n            cout << t.ambil() << endl;\n        } else {\n            cout << t.puncak() << endl;\n        }\n    }\n    cout << \"Isi: \" << t.banyak << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "kelas-polinom",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Class Polinom",
+          "statement": "Sebuah polinom seperti 2x³ − x + 5 ditentukan oleh derajatnya dan koefisien-koefisiennya. Buat class `Polinom` dengan atribut `int derajat`, `int koef[10]` (`koef[k]` adalah koefisien xᵏ), dan dua method:\n\n- `long long nilai(int x)` — nilai polinom di x;\n- `Polinom turunan()` — polinom turunannya, sebagai objek baru. Turunan dari a·xᵏ adalah k·a·xᵏ⁻¹; turunan dari bilangan tetap adalah 0.\n\nMasukan: derajat d, lalu d + 1 koefisien **dari pangkat tertinggi ke terendah**, lalu x. Cetak P(x), lalu P′(x).\n\nContoh: derajat 3, koefisien `2 0 -1 5`, x = 2. P(2) = 16 − 2 + 5 = 19. Turunannya 6x² − 1, jadi P′(2) = 23. Keluarannya `19` lalu `23`.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Baris pertama: d. Baris kedua: d + 1 koefisien. Baris ketiga: x.",
+          "output_format": "Dua baris: P(x), lalu P′(x).",
+          "constraints": "0 ≤ d ≤ 8; tiap koefisien antara −9 dan 9; koefisien pertama bukan nol; −5 ≤ x ≤ 5"
+        },
+        "en": {
+          "title": "The Polinom Class",
+          "statement": "A polynomial such as 2x³ − x + 5 is fixed by its degree and its coefficients. Make a class `Polinom` with the attributes `int derajat` (degree), `int koef[10]` (`koef[k]` is the coefficient of xᵏ), and two methods:\n\n- `long long nilai(int x)` — the value of the polynomial at x;\n- `Polinom turunan()` — its derivative, as a new object. The derivative of a·xᵏ is k·a·xᵏ⁻¹; the derivative of a constant is 0.\n\nInput: the degree d, then d + 1 coefficients **from the highest power to the lowest**, then x. Print P(x), then P′(x).\n\nExample: degree 3, coefficients `2 0 -1 5`, x = 2. P(2) = 16 − 2 + 5 = 19. The derivative is 6x² − 1, so P′(2) = 23. The output is `19` then `23`.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "First line: d. Second line: d + 1 coefficients. Third line: x.",
+          "output_format": "Two lines: P(x), then P′(x).",
+          "constraints": "0 ≤ d ≤ 8; each coefficient is between −9 and 9; the first coefficient is not zero; −5 ≤ x ≤ 5",
+          "machine": true
+        },
+        "ar": {
+          "title": "الصنف Polinom",
+          "statement": "كثير حدود مثل 2x³ − x + 5 يتحدد بدرجته ومعاملاته. أنشئ صنفًا `Polinom` خاصيتاه `int derajat` (الدرجة) و `int koef[10]` (`koef[k]` معامل xᵏ) وطريقتان:\n\n- `long long nilai(int x)` — قيمة كثير الحدود عند x؛\n- `Polinom turunan()` — مشتقته كائنًا جديدًا. مشتقة a·xᵏ هي k·a·xᵏ⁻¹، ومشتقة الثابت 0.\n\nالمدخل: الدرجة d ثم d + 1 معاملًا **من أعلى أُسّ إلى أدناه** ثم x. اطبع P(x) ثم P′(x).\n\nمثال: الدرجة 3 والمعاملات `2 0 -1 5` و x = 2. P(2) = 16 − 2 + 5 = 19. المشتقة 6x² − 1، فيكون P′(2) = 23. المخرج `19` ثم `23`.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "السطر الأول: d. السطر الثاني: d + 1 معاملًا. السطر الثالث: x.",
+          "output_format": "سطران: P(x) ثم P′(x).",
+          "constraints": "0 ≤ d ≤ 8؛ كل معامل بين −9 و 9؛ المعامل الأول ليس صفرًا؛ −5 ≤ x ≤ 5",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nd = {2: 0, 3: 8}.get(i, r.randint(1, 8))\nk = [r.choice([-1, 1]) * r.randint(1, 9)] + [r.randint(-9, 9) for _ in range(d)]\nprint(d)\nprint(*k)\nprint({4: 0, 5: -5}.get(i, r.randint(-5, 5)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nclass Polinom {\npublic:\n    int derajat;\n    int koef[10];\n\n    long long nilai(int x) {\n        long long hasil = 0;\n        for (int k = derajat; k >= 0; k--) {\n            hasil = hasil * x + koef[k];\n        }\n        return hasil;\n    }\n\n    Polinom turunan() {\n        Polinom t;\n        t.derajat = derajat - 1;\n        if (t.derajat < 0) {\n            t.derajat = 0;\n            t.koef[0] = 0;\n        }\n        for (int k = 1; k <= derajat; k++) {\n            t.koef[k - 1] = k * koef[k];\n        }\n        return t;\n    }\n};\n\nint main() {\n    Polinom p;\n    int x;\n    cin >> p.derajat;\n    for (int k = p.derajat; k >= 0; k--) {\n        cin >> p.koef[k];\n    }\n    cin >> x;\n    cout << p.nilai(x) << endl;\n    cout << p.turunan().nilai(x) << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "nama-hari-tanggal",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Hari Apa?",
+          "statement": "Buat class `Tanggal` dengan atribut `int hari`, `int bulan`, `int tahun` dan method:\n\n- `static bool kabisat(int tahun)` — tahun kabisat: habis dibagi 400, atau habis dibagi 4 tetapi tidak habis dibagi 100;\n- `int hariKe()` — tanggal itu hari ke berapa dalam tahunnya (1 Januari adalah hari ke-1);\n- `string namaHari()` — nama harinya: `Senin`, `Selasa`, `Rabu`, `Kamis`, `Jumat`, `Sabtu`, atau `Minggu`.\n\nPegangan: **1 Januari 1900 jatuh pada hari Senin**. Hitung berapa hari sudah lewat sejak tanggal itu, lalu ambil sisa pembagiannya dengan 7.\n\nBaca sebuah tanggal dan cetak nama harinya.\n\nContoh: `17 8 1945` → `Jumat`; `1 1 2000` → `Sabtu`.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Satu baris berisi hari, bulan, dan tahun.",
+          "output_format": "Nama hari.",
+          "constraints": "Tanggal sah antara 1 Januari 1900 dan 31 Desember 2100."
+        },
+        "en": {
+          "title": "Which Day?",
+          "statement": "Make a class `Tanggal` (date) with the attributes `int hari`, `int bulan`, `int tahun` (day, month, year) and the methods:\n\n- `static bool kabisat(int tahun)` — leap year: divisible by 400, or divisible by 4 but not by 100;\n- `int hariKe()` — which day of its year the date is (1 January is day 1);\n- `string namaHari()` — the name of the weekday in Indonesian: `Senin`, `Selasa`, `Rabu`, `Kamis`, `Jumat`, `Sabtu` or `Minggu` (Monday to Sunday).\n\nThe anchor: **1 January 1900 was a Monday (Senin)**. Count how many days have passed since that date, then take the remainder modulo 7.\n\nRead a date and print the name of its weekday.\n\nExamples: `17 8 1945` → `Jumat`; `1 1 2000` → `Sabtu`.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "One line with the day, the month and the year.",
+          "output_format": "The name of the weekday.",
+          "constraints": "A valid date between 1 January 1900 and 31 December 2100.",
+          "machine": true
+        },
+        "ar": {
+          "title": "أي يوم؟",
+          "statement": "أنشئ صنفًا `Tanggal` (تاريخ) خصائصه `int hari` و `int bulan` و `int tahun` (اليوم والشهر والسنة) وطرائقه:\n\n- `static bool kabisat(int tahun)` — السنة الكبيسة: تقبل القسمة على 400، أو تقبل القسمة على 4 ولا تقبلها على 100؛\n- `int hariKe()` — ترتيب التاريخ بين أيام سنته (1 يناير هو اليوم الأول)؛\n- `string namaHari()` — اسم يوم الأسبوع بالإندونيسية: `Senin` أو `Selasa` أو `Rabu` أو `Kamis` أو `Jumat` أو `Sabtu` أو `Minggu` (من الاثنين إلى الأحد).\n\nالمرتكز: **1 يناير 1900 كان يوم اثنين (Senin)**. احسب عدد الأيام المنقضية منذ ذلك التاريخ ثم خذ باقي القسمة على 7.\n\nاقرأ تاريخًا واطبع اسم يومه.\n\nأمثلة: `17 8 1945` ← `Jumat`؛ `1 1 2000` ← `Sabtu`.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "سطر واحد فيه اليوم والشهر والسنة.",
+          "output_format": "اسم اليوم.",
+          "constraints": "تاريخ صحيح بين 1 يناير 1900 و 31 ديسمبر 2100.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nimport datetime\nt = datetime.date(1900, 1, 1) + datetime.timedelta(days=r.randint(0, 73413))\nif i == 2:\n    t = datetime.date(1900, 1, 1)\nif i == 3:\n    t = datetime.date(2024, 2, 29)\nif i == 4:\n    t = datetime.date(2100, 12, 31)\nif i == 5:\n    t = datetime.date(1945, 8, 17)\nprint(t.day, t.month, t.year)\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass Tanggal {\npublic:\n    int hari;\n    int bulan;\n    int tahun;\n\n    static bool kabisat(int t) {\n        return t % 400 == 0 || (t % 4 == 0 && t % 100 != 0);\n    }\n\n    int hariKe() {\n        int hariBulan[12]{31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};\n        if (kabisat(tahun)) {\n            hariBulan[1] = 29;\n        }\n        auto jumlah = hari;\n        for (int b = 0; b < bulan - 1; b++) {\n            jumlah += hariBulan[b];\n        }\n        return jumlah;\n    }\n\n    string namaHari() {\n        auto total = hariKe() - 1;\n        for (int t = 1900; t < tahun; t++) {\n            total += 365;\n            if (kabisat(t)) {\n                total++;\n            }\n        }\n        string nama[7]{\"Senin\", \"Selasa\", \"Rabu\", \"Kamis\", \"Jumat\", \"Sabtu\", \"Minggu\"};\n        return nama[total % 7];\n    }\n};\n\nint main() {\n    Tanggal t;\n    cin >> t.hari >> t.bulan >> t.tahun;\n    cout << t.namaHari() << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "bank-mini",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Bank Mini",
+          "statement": "Buat class `Rekening` dengan atribut `int saldo` dan tiga method:\n\n- `void setor(int jumlah)`;\n- `bool tarik(int jumlah)` — gagal (`false`, saldo tidak berubah) bila saldo kurang;\n- `bool transferKe(Rekening &tujuan, int jumlah)` — menarik dari rekening ini lalu menyetor ke `tujuan`; gagal bila saldo kurang. Parameternya **referensi**, supaya rekening tujuan yang asli ikut berubah, bukan salinannya.\n\nSebuah bank punya n rekening bernomor 1 sampai n. Masukan memberi saldo awalnya, lalu perintah satu per baris: `setor a x`, `tarik a x`, `transfer a b x` (dari a ke b), dan terakhir `selesai`.\n\nUntuk tiap perintah yang gagal cetak `Gagal`. Di akhir cetak saldo semua rekening, satu per baris: `Rekening k: saldo`.\n\nContoh: 2 rekening bersaldo `100000 50000`; `tarik 2 80000`, `transfer 1 2 30000`, `selesai` →\n\n```\nGagal\nRekening 1: 70000\nRekening 2: 80000\n```\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Baris pertama: n. Baris kedua: n saldo awal. Lalu perintah-perintah, diakhiri `selesai`.",
+          "output_format": "`Gagal` untuk tiap perintah yang gagal, lalu n baris saldo akhir.",
+          "constraints": "2 ≤ n ≤ 6; paling banyak 20 perintah; semua jumlah uang antara 0 dan 1000000"
+        },
+        "en": {
+          "title": "Mini Bank",
+          "statement": "Make a class `Rekening` (account) with an attribute `int saldo` (balance) and three methods:\n\n- `void setor(int jumlah)` (deposit);\n- `bool tarik(int jumlah)` (withdraw) — fails (`false`, balance unchanged) when the balance is too low;\n- `bool transferKe(Rekening &tujuan, int jumlah)` — withdraws from this account and deposits into `tujuan`; fails when the balance is too low. The parameter is a **reference**, so that the real target account changes and not a copy.\n\nA bank has n accounts numbered 1 to n. The input gives their opening balances, then commands one per line: `setor a x`, `tarik a x`, `transfer a b x` (from a to b), and finally `selesai`.\n\nFor every command that fails print `Gagal`. At the end print all balances, one per line: `Rekening k: balance`.\n\nExample: 2 accounts with balances `100000 50000`; `tarik 2 80000`, `transfer 1 2 30000`, `selesai` →\n\n```\nGagal\nRekening 1: 70000\nRekening 2: 80000\n```\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "First line: n. Second line: n opening balances. Then the commands, ending with `selesai`.",
+          "output_format": "`Gagal` for every failed command, then n lines of closing balances.",
+          "constraints": "2 ≤ n ≤ 6; at most 20 commands; all amounts are between 0 and 1000000",
+          "machine": true
+        },
+        "ar": {
+          "title": "مصرف صغير",
+          "statement": "أنشئ صنفًا `Rekening` (حساب) فيه خاصية `int saldo` (الرصيد) وثلاث طرائق:\n\n- `void setor(int jumlah)` (إيداع)؛\n- `bool tarik(int jumlah)` (سحب) — تفشل (`false` ولا يتغير الرصيد) إذا لم يكفِ الرصيد؛\n- `bool transferKe(Rekening &tujuan, int jumlah)` — تسحب من هذا الحساب وتودع في `tujuan`؛ وتفشل إذا لم يكفِ الرصيد. الوسيط **مرجع** ليتغير الحساب الهدف الحقيقي لا نسخة منه.\n\nفي مصرف n حسابًا مرقّمة من 1 إلى n. يعطي المدخل أرصدتها الابتدائية ثم أوامر، أمرًا في كل سطر: `setor a x` و `tarik a x` و `transfer a b x` (من a إلى b) وأخيرًا `selesai`.\n\nلكل أمر يفشل اطبع `Gagal`. في النهاية اطبع كل الأرصدة، رصيدًا في كل سطر: `Rekening k: الرصيد`.\n\nمثال: حسابان رصيداهما `100000 50000`؛ `tarik 2 80000` ثم `transfer 1 2 30000` ثم `selesai` ←\n\n```\nGagal\nRekening 1: 70000\nRekening 2: 80000\n```\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "السطر الأول: n. السطر الثاني: n رصيدًا ابتدائيًا. ثم الأوامر منتهيةً بـ `selesai`.",
+          "output_format": "`Gagal` لكل أمر فاشل ثم n سطرًا للأرصدة النهائية.",
+          "constraints": "2 ≤ n ≤ 6؛ 20 أمرًا على الأكثر؛ كل المبالغ بين 0 و 1000000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = r.randint(2, 6)\nprint(n)\nprint(*[r.randint(0, 20) * 50000 for _ in range(n)])\nfor _ in range(r.randint(1, 20)):\n    q = r.random()\n    a = r.randint(1, n)\n    if q < 0.3:\n        print('setor', a, r.randint(1, 20) * 10000)\n    elif q < 0.6:\n        print('tarik', a, r.randint(1, 30) * 20000)\n    else:\n        b = r.choice([x for x in range(1, n + 1) if x != a])\n        print('transfer', a, b, r.randint(1, 30) * 20000)\nprint('selesai')\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass Rekening {\npublic:\n    int saldo;\n\n    void setor(int jumlah) {\n        saldo += jumlah;\n    }\n\n    bool tarik(int jumlah) {\n        if (jumlah > saldo) {\n            return false;\n        }\n        saldo -= jumlah;\n        return true;\n    }\n\n    bool transferKe(Rekening &tujuan, int jumlah) {\n        if (!tarik(jumlah)) {\n            return false;\n        }\n        tujuan.setor(jumlah);\n        return true;\n    }\n};\n\nint main() {\n    int n;\n    cin >> n;\n    Rekening bank[6];\n    for (int k = 0; k < n; k++) {\n        cin >> bank[k].saldo;\n    }\n    string perintah;\n    while (cin >> perintah) {\n        if (perintah == \"selesai\") {\n            break;\n        }\n        int a, b, jumlah;\n        auto berhasil = true;\n        if (perintah == \"setor\") {\n            cin >> a >> jumlah;\n            bank[a - 1].setor(jumlah);\n        } else if (perintah == \"tarik\") {\n            cin >> a >> jumlah;\n            berhasil = bank[a - 1].tarik(jumlah);\n        } else {\n            cin >> a >> b >> jumlah;\n            berhasil = bank[a - 1].transferKe(bank[b - 1], jumlah);\n        }\n        if (!berhasil) {\n            cout << \"Gagal\" << endl;\n        }\n    }\n    for (int k = 0; k < n; k++) {\n        cout << \"Rekening \" << k + 1 << \": \" << bank[k].saldo << endl;\n    }\n    return 0;\n}\n"
+    },
+    {
+      "slug": "robot-penjelajah",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Robot Penjelajah",
+          "statement": "Sebuah robot berada di titik (0, 0) dan menghadap **utara** (arah y positif). Ia mengerti tiga perintah:\n\n- `M` — maju satu langkah ke arah yang dihadapinya;\n- `L` — berputar 90° ke kiri;\n- `R` — berputar 90° ke kanan.\n\nBuat class `Robot` dengan atribut `int x`, `int y`, `int arah` dan method `void maju()`, `void kiri()`, `void kanan()`, serta `string namaArah()` yang mengembalikan `utara`, `timur`, `selatan`, atau `barat`.\n\nBaca deretan perintah, jalankan, lalu cetak posisi akhir dan arah hadap robot.\n\nContoh: `MMRMLM` → `1 3 utara`. Contoh lain: `RRM` → `0 -1 selatan`.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Satu baris: deretan huruf `M`, `L`, `R` tanpa spasi.",
+          "output_format": "Satu baris: x, y, dan arah hadap.",
+          "constraints": "Panjang deretan 1 sampai 100."
+        },
+        "en": {
+          "title": "Rover",
+          "statement": "A robot stands at the point (0, 0) facing **north** (the positive y direction). It understands three commands:\n\n- `M` — move one step in the direction it faces;\n- `L` — turn 90° to the left;\n- `R` — turn 90° to the right.\n\nMake a class `Robot` with the attributes `int x`, `int y`, `int arah` (direction) and the methods `void maju()`, `void kiri()`, `void kanan()` (forward, left, right), and `string namaArah()` that returns `utara`, `timur`, `selatan` or `barat` (north, east, south, west).\n\nRead a run of commands, carry them out, then print the robot's final position and the direction it faces.\n\nExample: `MMRMLM` → `1 3 utara`. Another: `RRM` → `0 -1 selatan`.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "One line: a run of the letters `M`, `L`, `R` without spaces.",
+          "output_format": "One line: x, y and the direction faced.",
+          "constraints": "The run is 1 to 100 letters long.",
+          "machine": true
+        },
+        "ar": {
+          "title": "الروبوت المستكشف",
+          "statement": "يقف روبوت عند النقطة (0, 0) متجهًا نحو **الشمال** (اتجاه y الموجب). يفهم ثلاثة أوامر:\n\n- `M` — تقدَّم خطوة في الاتجاه الذي تواجهه؛\n- `L` — استدر 90° إلى اليسار؛\n- `R` — استدر 90° إلى اليمين.\n\nأنشئ صنفًا `Robot` خصائصه `int x` و `int y` و `int arah` (الاتجاه) وطرائقه `void maju()` و `void kiri()` و `void kanan()` (تقدَّم، يسار، يمين) و `string namaArah()` التي تُرجع `utara` أو `timur` أو `selatan` أو `barat` (شمال، شرق، جنوب، غرب).\n\nاقرأ سلسلة أوامر ونفِّذها ثم اطبع الموضع النهائي للروبوت والاتجاه الذي يواجهه.\n\nمثال: `MMRMLM` ← `1 3 utara`. ومثال آخر: `RRM` ← `0 -1 selatan`.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "سطر واحد: سلسلة من الحروف `M` و `L` و `R` بلا مسافات.",
+          "output_format": "سطر واحد: x و y والاتجاه.",
+          "constraints": "طول السلسلة من 1 إلى 100.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = {2: 1}.get(i, r.randint(2, 100))\nabjad = {3: 'M', 4: 'LR'}.get(i, 'MMMLR')\nprint(''.join(r.choice(abjad) for _ in range(n)))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass Robot {\npublic:\n    int x = 0;\n    int y = 0;\n    int arah = 0;\n\n    void kiri() {\n        arah = (arah + 3) % 4;\n    }\n\n    void kanan() {\n        arah = (arah + 1) % 4;\n    }\n\n    void maju() {\n        switch (arah) {\n            case 0: y++; break;\n            case 1: x++; break;\n            case 2: y--; break;\n            default: x--; break;\n        }\n    }\n\n    string namaArah() {\n        string nama[4]{\"utara\", \"timur\", \"selatan\", \"barat\"};\n        return nama[arah];\n    }\n};\n\nint main() {\n    string perintah;\n    cin >> perintah;\n    Robot robot;\n    for (auto p : perintah) {\n        if (p == 'M') {\n            robot.maju();\n        } else if (p == 'L') {\n            robot.kiri();\n        } else {\n            robot.kanan();\n        }\n    }\n    cout << robot.x << \" \" << robot.y << \" \" << robot.namaArah() << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "tangan-poker",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Tangan Poker",
+          "statement": "Lima kartu di tangan seorang pemain poker dinilai menurut susunannya. Tiap kartu punya **nilai** 2 sampai 14 (11 = Jack, 12 = Queen, 13 = King, 14 = As) dan **jenis** `S`, `H`, `D`, atau `C`.\n\nPeringkatnya, dari yang tertinggi; yang dipakai adalah yang pertama cocok:\n\n1. `straight flush` — lima nilai berurutan, semua sejenis;\n2. `four of a kind` — empat kartu bernilai sama;\n3. `full house` — tiga kartu bernilai sama dan sepasang;\n4. `flush` — semua sejenis;\n5. `straight` — lima nilai berurutan;\n6. `three of a kind` — tiga kartu bernilai sama;\n7. `two pair` — dua pasang;\n8. `one pair` — sepasang;\n9. `high card` — selain itu.\n\nAs hanya bernilai 14: `14 2 3 4 5` bukan urutan.\n\nBuat class `TanganPoker` dengan atribut `int nilai[5]`, `char jenis[5]` dan method `bool sewarna()`, `bool berurutan()`, `int banyakNilai(int n)` (berapa kartu bernilai n), serta `string peringkat()` yang memakai ketiganya.\n\nContoh: kartu `10 H`, `11 H`, `12 H`, `13 H`, `14 H` → `straight flush`. Kartu `5 S`, `5 D`, `9 C`, `9 H`, `2 S` → `two pair`.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Lima baris, masing-masing berisi nilai dan jenis satu kartu.",
+          "output_format": "Satu baris: peringkat tangan itu.",
+          "constraints": "2 ≤ nilai ≤ 14; jenis `S`, `H`, `D`, atau `C`; kelima kartu berbeda."
+        },
+        "en": {
+          "title": "Poker Hand",
+          "statement": "The five cards in a poker player's hand are ranked by their pattern. Each card has a **value** from 2 to 14 (11 = Jack, 12 = Queen, 13 = King, 14 = Ace) and a **suit** `S`, `H`, `D` or `C`.\n\nThe ranks, from the highest; the first one that fits is used:\n\n1. `straight flush` — five consecutive values, all of one suit;\n2. `four of a kind` — four cards of the same value;\n3. `full house` — three cards of one value and a pair;\n4. `flush` — all of one suit;\n5. `straight` — five consecutive values;\n6. `three of a kind` — three cards of the same value;\n7. `two pair`;\n8. `one pair`;\n9. `high card` — anything else.\n\nThe Ace only counts as 14: `14 2 3 4 5` is not a straight.\n\nMake a class `TanganPoker` with the attributes `int nilai[5]`, `char jenis[5]` and the methods `bool sewarna()` (one suit), `bool berurutan()` (consecutive), `int banyakNilai(int n)` (how many cards have value n), and `string peringkat()` (rank), which uses the other three.\n\nExample: the cards `10 H`, `11 H`, `12 H`, `13 H`, `14 H` → `straight flush`. The cards `5 S`, `5 D`, `9 C`, `9 H`, `2 S` → `two pair`.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "Five lines, each with the value and the suit of one card.",
+          "output_format": "One line: the rank of the hand.",
+          "constraints": "2 ≤ value ≤ 14; the suit is `S`, `H`, `D` or `C`; the five cards are different.",
+          "machine": true
+        },
+        "ar": {
+          "title": "يد البوكر",
+          "statement": "الأوراق الخمس في يد لاعب البوكر تُقيَّم بحسب تشكيلتها. لكل ورقة **قيمة** من 2 إلى 14 (11 = الولد، 12 = الملكة، 13 = الملك، 14 = الآس) و**نوع** `S` أو `H` أو `D` أو `C`.\n\nالمراتب من الأعلى؛ وتُعتمد أول مرتبة تنطبق:\n\n1. `straight flush` — خمس قيم متتالية كلها من نوع واحد؛\n2. `four of a kind` — أربع أوراق متساوية القيمة؛\n3. `full house` — ثلاث أوراق متساوية القيمة وزوج؛\n4. `flush` — كلها من نوع واحد؛\n5. `straight` — خمس قيم متتالية؛\n6. `three of a kind` — ثلاث أوراق متساوية القيمة؛\n7. `two pair` — زوجان؛\n8. `one pair` — زوج واحد؛\n9. `high card` — غير ذلك.\n\nالآس قيمته 14 فقط: `14 2 3 4 5` ليست متتالية.\n\nأنشئ صنفًا `TanganPoker` خاصيتاه `int nilai[5]` و `char jenis[5]` وطرائقه `bool sewarna()` (نوع واحد) و `bool berurutan()` (متتالية) و `int banyakNilai(int n)` (عدد الأوراق التي قيمتها n) و `string peringkat()` (المرتبة) التي تستعمل الثلاث الأخرى.\n\nمثال: الأوراق `10 H` و `11 H` و `12 H` و `13 H` و `14 H` ← `straight flush`. والأوراق `5 S` و `5 D` و `9 C` و `9 H` و `2 S` ← `two pair`.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "خمسة أسطر في كل منها قيمة ورقة ونوعها.",
+          "output_format": "سطر واحد: مرتبة اليد.",
+          "constraints": "2 ≤ القيمة ≤ 14؛ النوع `S` أو `H` أو `D` أو `C`؛ الأوراق الخمس مختلفة.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nJ = 'SHDC'\ndef kartu(nilai, jenis):\n    return list(zip(nilai, jenis))\nk = i % 9\nif k == 0:\n    a = r.randint(2, 10)\n    t = kartu(range(a, a + 5), [r.choice(J)] * 5)\nelif k == 1:\n    a, b = r.sample(range(2, 15), 2)\n    t = kartu([a] * 4 + [b], list(J) + [r.choice(J)])\nelif k == 2:\n    a, b = r.sample(range(2, 15), 2)\n    t = kartu([a] * 3 + [b] * 2, r.sample(J, 3) + r.sample(J, 2))\nelif k == 3:\n    while True:\n        v = sorted(r.sample(range(2, 15), 5))\n        if v[4] - v[0] != 4:\n            break\n    t = kartu(v, [r.choice(J)] * 5)\nelif k == 4:\n    a = r.randint(2, 10)\n    js = [r.choice(J) for _ in range(5)]\n    js[1] = [x for x in J if x != js[0]][0]\n    t = kartu(range(a, a + 5), js)\nelif k == 5:\n    a, b, c = r.sample(range(2, 15), 3)\n    t = kartu([a] * 3 + [b, c], r.sample(J, 3) + [r.choice(J), r.choice(J)])\nelif k == 6:\n    a, b, c = r.sample(range(2, 15), 3)\n    t = kartu([a] * 2 + [b] * 2 + [c], r.sample(J, 2) + r.sample(J, 2) + [r.choice(J)])\nelif k == 7:\n    a, b, c, d = r.sample(range(2, 15), 4)\n    t = kartu([a] * 2 + [b, c, d], r.sample(J, 2) + [r.choice(J) for _ in range(3)])\nelse:\n    while True:\n        v = sorted(r.sample(range(2, 15), 5))\n        if v[4] - v[0] != 4:\n            break\n    js = [r.choice(J) for _ in range(5)]\n    js[1] = [x for x in J if x != js[0]][0]\n    t = kartu(v, js)\nt = list(t)\nr.shuffle(t)\nfor n, j in t:\n    print(n, j)\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass TanganPoker {\npublic:\n    int nilai[5];\n    char jenis[5];\n\n    bool sewarna() {\n        for (int k = 1; k < 5; k++) {\n            if (jenis[k] != jenis[0]) {\n                return false;\n            }\n        }\n        return true;\n    }\n\n    int banyakNilai(int n) {\n        auto banyak = 0;\n        for (auto v : nilai) {\n            if (v == n) {\n                banyak++;\n            }\n        }\n        return banyak;\n    }\n\n    bool berurutan() {\n        auto kecil = nilai[0];\n        auto besar = nilai[0];\n        for (auto v : nilai) {\n            if (v < kecil) kecil = v;\n            if (v > besar) besar = v;\n            if (banyakNilai(v) != 1) {\n                return false;\n            }\n        }\n        return besar - kecil == 4;\n    }\n\n    string peringkat() {\n        auto empat = 0;\n        auto tiga = 0;\n        auto pasang = 0;\n        for (int n = 2; n <= 14; n++) {\n            auto b = banyakNilai(n);\n            if (b == 4) empat++;\n            if (b == 3) tiga++;\n            if (b == 2) pasang++;\n        }\n        if (berurutan() && sewarna()) return \"straight flush\";\n        if (empat == 1) return \"four of a kind\";\n        if (tiga == 1 && pasang == 1) return \"full house\";\n        if (sewarna()) return \"flush\";\n        if (berurutan()) return \"straight\";\n        if (tiga == 1) return \"three of a kind\";\n        if (pasang == 2) return \"two pair\";\n        if (pasang == 1) return \"one pair\";\n        return \"high card\";\n    }\n};\n\nint main() {\n    TanganPoker t;\n    for (int k = 0; k < 5; k++) {\n        cin >> t.nilai[k] >> t.jenis[k];\n    }\n    cout << t.peringkat() << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "penjadwal-bergilir",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Penjadwal Bergilir",
+          "statement": "Sistem operasi membagi waktu prosesor kepada beberapa proses secara **bergilir** (*round-robin*). Setiap proses punya lama kerja yang dibutuhkan. Dalam satu putaran, proses-proses didatangi menurut urutan masukan; setiap proses yang belum selesai mendapat jatah paling banyak q satuan waktu. Proses yang kebutuhannya habis langsung selesai; yang belum, menunggu putaran berikutnya. Jam berjalan terus tanpa jeda.\n\nBuat class `Penjadwal` dengan atribut `string nama[8]`, `int sisa[8]`, `int banyak`, `int waktu`, dan method:\n\n- `void tambah(string nama, int lama)` — mendaftarkan sebuah proses;\n- `bool masihAda()` — masih adakah proses yang belum selesai;\n- `void putaran(int kuantum)` — menjalankan satu putaran dan mencetak `<nama> <waktu>` untuk tiap proses yang selesai di putaran itu, dengan waktu saat ia selesai.\n\nCetak proses-proses menurut urutan selesainya.\n\nContoh: q = 3; proses `P1 5`, `P2 2`, `P3 4`. Putaran pertama: P1 bekerja 3 (waktu 3), P2 bekerja 2 dan selesai (waktu 5), P3 bekerja 3 (waktu 8). Putaran kedua: P1 bekerja 2 dan selesai (waktu 10), P3 bekerja 1 dan selesai (waktu 11).\n\n```\nP2 5\nP1 10\nP3 11\n```\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Baris pertama: banyak proses n dan jatah q. Lalu n baris, masing-masing berisi nama proses dan lama kerjanya.",
+          "output_format": "n baris: nama proses dan waktu selesainya, menurut urutan selesai.",
+          "constraints": "1 ≤ n ≤ 8; 1 ≤ q ≤ 100; 1 ≤ lama kerja ≤ 30"
+        },
+        "en": {
+          "title": "Round-Robin Scheduler",
+          "statement": "An operating system shares processor time among several processes **in turns** (round-robin). Every process needs a certain amount of work. In one round the processes are visited in input order; each unfinished process gets at most q time units. A process whose need is used up finishes at once; the others wait for the next round. The clock runs on without gaps.\n\nMake a class `Penjadwal` (scheduler) with the attributes `string nama[8]`, `int sisa[8]` (remaining), `int banyak` (count), `int waktu` (time), and the methods:\n\n- `void tambah(string nama, int lama)` — registers a process;\n- `bool masihAda()` — is any process still unfinished;\n- `void putaran(int kuantum)` — runs one round and prints `<name> <time>` for each process that finishes in it, with the time at which it finishes.\n\nPrint the processes in the order in which they finish.\n\nExample: q = 3; processes `P1 5`, `P2 2`, `P3 4`. First round: P1 works 3 (time 3), P2 works 2 and finishes (time 5), P3 works 3 (time 8). Second round: P1 works 2 and finishes (time 10), P3 works 1 and finishes (time 11).\n\n```\nP2 5\nP1 10\nP3 11\n```\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "First line: the number of processes n and the share q. Then n lines, each with a process name and its amount of work.",
+          "output_format": "n lines: the process name and its finishing time, in finishing order.",
+          "constraints": "1 ≤ n ≤ 8; 1 ≤ q ≤ 100; 1 ≤ work ≤ 30",
+          "machine": true
+        },
+        "ar": {
+          "title": "المجدول الدوري",
+          "statement": "يوزّع نظام التشغيل وقت المعالج على عدة عمليات **بالتناوب** (round-robin). لكل عملية مقدار عمل تحتاج إليه. في الدورة الواحدة تُزار العمليات بترتيب المدخل؛ وكل عملية لم تنتهِ تنال q وحدة زمن على الأكثر. العملية التي استنفدت حاجتها تنتهي فورًا، وغيرها ينتظر الدورة التالية. والساعة تمضي بلا توقف.\n\nأنشئ صنفًا `Penjadwal` (مجدول) خصائصه `string nama[8]` و `int sisa[8]` (الباقي) و `int banyak` (العدد) و `int waktu` (الزمن) وطرائقه:\n\n- `void tambah(string nama, int lama)` — تسجّل عملية؛\n- `bool masihAda()` — هل بقيت عملية لم تنتهِ؛\n- `void putaran(int kuantum)` — تنفّذ دورة واحدة وتطبع `<الاسم> <الزمن>` لكل عملية تنتهي فيها، مع زمن انتهائها.\n\nاطبع العمليات بترتيب انتهائها.\n\nمثال: q = 3؛ العمليات `P1 5` و `P2 2` و `P3 4`. الدورة الأولى: P1 تعمل 3 (الزمن 3)، P2 تعمل 2 وتنتهي (الزمن 5)، P3 تعمل 3 (الزمن 8). الدورة الثانية: P1 تعمل 2 وتنتهي (الزمن 10)، P3 تعمل 1 وتنتهي (الزمن 11).\n\n```\nP2 5\nP1 10\nP3 11\n```\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "السطر الأول: عدد العمليات n والحصة q. ثم n سطرًا في كل منها اسم عملية ومقدار عملها.",
+          "output_format": "n سطرًا: اسم العملية وزمن انتهائها، بترتيب الانتهاء.",
+          "constraints": "1 ≤ n ≤ 8؛ 1 ≤ q ≤ 100؛ 1 ≤ مقدار العمل ≤ 30",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = {2: 1}.get(i, r.randint(2, 8))\nq = {3: 1, 4: 100}.get(i, r.randint(1, 10))\nprint(n, q)\nfor k in range(n):\n    print('P' + str(k + 1), r.randint(1, 30))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass Penjadwal {\npublic:\n    string nama[8];\n    int sisa[8];\n    int banyak = 0;\n    int waktu = 0;\n\n    void tambah(string n, int lama) {\n        nama[banyak] = n;\n        sisa[banyak] = lama;\n        banyak++;\n    }\n\n    bool masihAda() {\n        for (int k = 0; k < banyak; k++) {\n            if (sisa[k] > 0) {\n                return true;\n            }\n        }\n        return false;\n    }\n\n    void putaran(int kuantum) {\n        for (int k = 0; k < banyak; k++) {\n            if (sisa[k] == 0) {\n                continue;\n            }\n            auto jatah = kuantum;\n            if (sisa[k] < jatah) {\n                jatah = sisa[k];\n            }\n            sisa[k] -= jatah;\n            waktu += jatah;\n            if (sisa[k] == 0) {\n                cout << nama[k] << \" \" << waktu << endl;\n            }\n        }\n    }\n};\n\nint main() {\n    int n, kuantum;\n    cin >> n >> kuantum;\n    Penjadwal p;\n    for (int k = 0; k < n; k++) {\n        string nama;\n        int lama;\n        cin >> nama >> lama;\n        p.tambah(nama, lama);\n    }\n    while (p.masihAda()) {\n        p.putaran(kuantum);\n    }\n    return 0;\n}\n"
+    },
+    {
+      "slug": "faktorial-besar",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Faktorial Besar",
+          "statement": "13! sudah tidak muat di `int`, dan 21! tidak muat di `long long`. Untuk menghitung 100! — bilangan dengan 158 digit — kita perlu tipe bilangan buatan sendiri.\n\nBuat class `BilanganBesar` yang menyimpan digit-digit sebuah bilangan dalam array (`int digit[200]`, dengan `digit[0]` digit satuan) dan banyak digitnya (`int panjang`), dengan method:\n\n- `void isi(int nilai)` — mengisi objek dengan sebuah bilangan biasa;\n- `void kali(int k)` — mengalikan bilangan itu dengan k, digit demi digit dengan simpanan, seperti perkalian bersusun;\n- `void cetak()` — mencetak bilangannya.\n\nBaca n dan cetak n! dengan tepat.\n\nContoh: 5 → `120`; 25 → `15511210043330985984000000`; 0 → `1`.\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Satu bilangan bulat n.",
+          "output_format": "Satu baris: n! tanpa nol di depan.",
+          "constraints": "0 ≤ n ≤ 100"
+        },
+        "en": {
+          "title": "Big Factorial",
+          "statement": "13! no longer fits in an `int`, and 21! does not fit in a `long long`. To compute 100! — a number of 158 digits — we need a number type of our own.\n\nMake a class `BilanganBesar` (big number) that keeps the digits of a number in an array (`int digit[200]`, with `digit[0]` the units digit) and the number of digits (`int panjang`), with the methods:\n\n- `void isi(int nilai)` — fills the object with an ordinary number;\n- `void kali(int k)` — multiplies the number by k, digit by digit with a carry, as in long multiplication;\n- `void cetak()` — prints the number.\n\nRead n and print n! exactly.\n\nExamples: 5 → `120`; 25 → `15511210043330985984000000`; 0 → `1`.\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "One integer n.",
+          "output_format": "One line: n! without leading zeros.",
+          "constraints": "0 ≤ n ≤ 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "المضروب الكبير",
+          "statement": "13! لا يسعه `int`، و 21! لا يسعه `long long`. لحساب 100! — وهو عدد من 158 رقمًا — نحتاج إلى نوع عددي من صنعنا.\n\nأنشئ صنفًا `BilanganBesar` (عدد كبير) يحفظ أرقام عدد في مصفوفة (`int digit[200]` حيث `digit[0]` رقم الآحاد) وعدد الأرقام (`int panjang`)، وطرائقه:\n\n- `void isi(int nilai)` — تملأ الكائن بعدد عادي؛\n- `void kali(int k)` — تضرب العدد في k رقمًا رقمًا مع رقم محمول، كالضرب العمودي؛\n- `void cetak()` — تطبع العدد.\n\nاقرأ n واطبع n! بدقة.\n\nأمثلة: 5 ← `120`؛ 25 ← `15511210043330985984000000`؛ 0 ← `1`.\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "عدد صحيح واحد n.",
+          "output_format": "سطر واحد: n! بلا أصفار في أوله.",
+          "constraints": "0 ≤ n ≤ 100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 0, 3: 100, 4: 1, 5: 25}.get(i, r.randint(13, 50) if i % 2 == 0 else r.randint(51, 99)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nclass BilanganBesar {\npublic:\n    int digit[200];\n    int panjang;\n\n    void isi(int nilai) {\n        panjang = 0;\n        if (nilai == 0) {\n            digit[0] = 0;\n            panjang = 1;\n        }\n        while (nilai > 0) {\n            digit[panjang] = nilai % 10;\n            panjang++;\n            nilai /= 10;\n        }\n    }\n\n    void kali(int k) {\n        auto simpan = 0;\n        for (int p = 0; p < panjang; p++) {\n            auto hasil = digit[p] * k + simpan;\n            digit[p] = hasil % 10;\n            simpan = hasil / 10;\n        }\n        while (simpan > 0) {\n            digit[panjang] = simpan % 10;\n            panjang++;\n            simpan /= 10;\n        }\n    }\n\n    void cetak() {\n        for (int p = panjang - 1; p >= 0; p--) {\n            cout << digit[p];\n        }\n        cout << endl;\n    }\n};\n\nint main() {\n    int n;\n    cin >> n;\n    BilanganBesar f;\n    f.isi(1);\n    for (int k = 2; k <= n; k++) {\n        f.kali(k);\n    }\n    f.cetak();\n    return 0;\n}\n"
+    },
+    {
+      "slug": "mesin-penjual",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [
+        "CLASS_OBJECT"
+      ],
+      "translations": {
+        "id": {
+          "title": "Mesin Penjual Otomatis",
+          "statement": "Tirukan sebuah mesin penjual otomatis dengan k slot barang. Tiap slot punya nama barang, harga, dan stok.\n\nBuat class `MesinPenjual` yang menyimpan semua slot (`string nama[5]`, `int harga[5]`, `int stok[5]`, `int banyak`), uang yang sedang dimasukkan pembeli (`int saldo`), dan `int pendapatan`, dengan method:\n\n- `void isiSlot(string nama, int harga, int stok)` — menambah satu slot;\n- `void masukkan(int uang)` — menambah saldo;\n- `void pilih(int nomor)` — pembeli memilih slot (nomor mulai dari 1). Diperiksa berurutan: bila stoknya 0, cetak `Habis`; bila saldo kurang dari harga, cetak `Uang kurang`; selain itu stok berkurang satu, saldo berkurang sebesar harga, pendapatan bertambah, dan dicetak `Keluar: <nama>`;\n- `void batal()` — mencetak `Kembali: <saldo>` lalu menolkan saldo.\n\nPerintah datang satu per baris: `uang x`, `pilih n`, `batal`, dan terakhir `selesai`. Di akhir cetak `Pendapatan: T`. Saldo yang masih tersisa saat `selesai` tidak dikembalikan dan tidak dihitung sebagai pendapatan.\n\nContoh: satu slot `Teh 3000 1`; perintah `uang 2000`, `pilih 1`, `uang 2000`, `pilih 1`, `pilih 1`, `batal`, `selesai` →\n\n```\nUang kurang\nKeluar: Teh\nHabis\nKembali: 1000\nPendapatan: 3000\n```\n\n**Kode harus memuat class**: keluaran yang benar tanpa class hanya mendapat setengah nilai.",
+          "input_format": "Baris pertama: k. Lalu k baris berisi nama (satu kata), harga, dan stok. Lalu perintah-perintah, diakhiri `selesai`.",
+          "output_format": "Satu baris untuk tiap `pilih` dan `batal`, lalu `Pendapatan: T`.",
+          "constraints": "1 ≤ k ≤ 5; paling banyak 25 perintah; harga kelipatan 1000 antara 1000 dan 10000; stok 0 sampai 3"
+        },
+        "en": {
+          "title": "Vending Machine",
+          "statement": "Imitate a vending machine with k slots. Each slot has an item name, a price and a stock.\n\nMake a class `MesinPenjual` that keeps all slots (`string nama[5]`, `int harga[5]`, `int stok[5]`, `int banyak`), the money the buyer has put in (`int saldo`) and `int pendapatan` (takings), with the methods:\n\n- `void isiSlot(string nama, int harga, int stok)` — adds one slot;\n- `void masukkan(int uang)` — adds to the balance;\n- `void pilih(int nomor)` — the buyer chooses a slot (numbered from 1). Checked in order: if its stock is 0, print `Habis` (sold out); if the balance is below the price, print `Uang kurang` (not enough money); otherwise the stock drops by one, the balance drops by the price, the takings grow, and `Keluar: <name>` is printed;\n- `void batal()` (cancel) — prints `Kembali: <balance>` (returned) and sets the balance to zero.\n\nCommands come one per line: `uang x`, `pilih n`, `batal`, and finally `selesai`. At the end print `Pendapatan: T`. A balance still left at `selesai` is not returned and does not count as takings.\n\nExample: one slot `Teh 3000 1`; commands `uang 2000`, `pilih 1`, `uang 2000`, `pilih 1`, `pilih 1`, `batal`, `selesai` →\n\n```\nUang kurang\nKeluar: Teh\nHabis\nKembali: 1000\nPendapatan: 3000\n```\n\n**The code must contain a class**: correct output without a class gets only half the marks.",
+          "input_format": "First line: k. Then k lines with a name (one word), a price and a stock. Then the commands, ending with `selesai`.",
+          "output_format": "One line for every `pilih` and `batal`, then `Pendapatan: T`.",
+          "constraints": "1 ≤ k ≤ 5; at most 25 commands; prices are multiples of 1000 between 1000 and 10000; stock 0 to 3",
+          "machine": true
+        },
+        "ar": {
+          "title": "آلة البيع",
+          "statement": "حاكِ آلة بيع فيها k خانة. لكل خانة اسم سلعة وسعر ومخزون.\n\nأنشئ صنفًا `MesinPenjual` يحفظ كل الخانات (`string nama[5]` و `int harga[5]` و `int stok[5]` و `int banyak`) والمال الذي أدخله المشتري (`int saldo`) و `int pendapatan` (الإيراد)، وطرائقه:\n\n- `void isiSlot(string nama, int harga, int stok)` — تضيف خانة؛\n- `void masukkan(int uang)` — تزيد الرصيد؛\n- `void pilih(int nomor)` — يختار المشتري خانة (الترقيم من 1). يُفحص بالترتيب: إذا كان المخزون 0 فاطبع `Habis` (نفد)؛ وإذا كان الرصيد أقل من السعر فاطبع `Uang kurang` (المال لا يكفي)؛ وإلا نقص المخزون واحدًا ونقص الرصيد بمقدار السعر وزاد الإيراد وطُبع `Keluar: <الاسم>`؛\n- `void batal()` (إلغاء) — تطبع `Kembali: <الرصيد>` (المُعاد) ثم تصفّر الرصيد.\n\nتأتي الأوامر أمرًا في كل سطر: `uang x` و `pilih n` و `batal` وأخيرًا `selesai`. في النهاية اطبع `Pendapatan: T`. الرصيد الباقي عند `selesai` لا يُعاد ولا يُحسب إيرادًا.\n\nمثال: خانة واحدة `Teh 3000 1`؛ الأوامر `uang 2000` ثم `pilih 1` ثم `uang 2000` ثم `pilih 1` ثم `pilih 1` ثم `batal` ثم `selesai` ←\n\n```\nUang kurang\nKeluar: Teh\nHabis\nKembali: 1000\nPendapatan: 3000\n```\n\n**يجب أن يحتوي الكود على صنف (class)**: المخرج الصحيح بلا صنف ينال نصف الدرجة فقط.",
+          "input_format": "السطر الأول: k. ثم k سطرًا فيها اسم (كلمة واحدة) وسعر ومخزون. ثم الأوامر منتهيةً بـ `selesai`.",
+          "output_format": "سطر لكل `pilih` و `batal` ثم `Pendapatan: T`.",
+          "constraints": "1 ≤ k ≤ 5؛ 25 أمرًا على الأكثر؛ الأسعار من مضاعفات 1000 بين 1000 و 10000؛ المخزون من 0 إلى 3",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nBARANG = ['Beras', 'Gula', 'Kopi', 'Teh', 'Susu', 'Roti', 'Telur', 'Minyak', 'Garam', 'Sabun', 'Pensil', 'Buku', 'Kertas', 'Tinta', 'Lampu', 'Kabel', 'Baterai', 'Kursi', 'Meja', 'Rak']\nk = r.randint(1, 5)\nprint(k)\nfor nama in r.sample(BARANG, k):\n    print(nama, r.randint(1, 10) * 1000, r.randint(0, 3))\nfor _ in range(r.randint(1, 25)):\n    q = r.random()\n    if q < 0.4:\n        print('uang', r.choice([1000, 2000, 5000, 10000]))\n    elif q < 0.9:\n        print('pilih', r.randint(1, k))\n    else:\n        print('batal')\nprint('selesai')\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nclass MesinPenjual {\npublic:\n    string nama[5];\n    int harga[5];\n    int stok[5];\n    int banyak = 0;\n    int saldo = 0;\n    int pendapatan = 0;\n\n    void isiSlot(string n, int h, int s) {\n        nama[banyak] = n;\n        harga[banyak] = h;\n        stok[banyak] = s;\n        banyak++;\n    }\n\n    void masukkan(int uang) {\n        saldo += uang;\n    }\n\n    void pilih(int nomor) {\n        auto k = nomor - 1;\n        if (stok[k] == 0) {\n            cout << \"Habis\" << endl;\n        } else if (saldo < harga[k]) {\n            cout << \"Uang kurang\" << endl;\n        } else {\n            stok[k]--;\n            saldo -= harga[k];\n            pendapatan += harga[k];\n            cout << \"Keluar: \" << nama[k] << endl;\n        }\n    }\n\n    void batal() {\n        cout << \"Kembali: \" << saldo << endl;\n        saldo = 0;\n    }\n};\n\nint main() {\n    int k;\n    cin >> k;\n    MesinPenjual mesin;\n    for (int s = 0; s < k; s++) {\n        string nama;\n        int harga, stok;\n        cin >> nama >> harga >> stok;\n        mesin.isiSlot(nama, harga, stok);\n    }\n    string perintah;\n    while (cin >> perintah) {\n        if (perintah == \"selesai\") {\n            break;\n        }\n        if (perintah == \"batal\") {\n            mesin.batal();\n        } else {\n            int x;\n            cin >> x;\n            if (perintah == \"uang\") {\n                mesin.masukkan(x);\n            } else {\n                mesin.pilih(x);\n            }\n        }\n    }\n    cout << \"Pendapatan: \" << mesin.pendapatan << endl;\n    return 0;\n}\n"
+    }
+  ]
+}

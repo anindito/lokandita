@@ -1171,7 +1171,7 @@ How one meeting is made (the next session repeats this for the next row):
 | DDP101 | 6 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-6.md` | no | no |
 | DDP101 | 7 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-7.md` | no | no |
 | PBO301 | 1 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-1.md` | no | no |
-| PBO301 | 2 | no | no | — | no | no |
+| PBO301 | 2 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-2.md` | no | no |
 | PBO301 | 3 | no | no | — | no | no |
 | PBO301 | 4 | no | no | — | no | no |
 | PBO301 | 5 | no | no | — | no | no |
@@ -1257,4 +1257,17 @@ Twelve probe programs were run through `kotak.analisis` (the judge's own analyse
   - These are in effect review problems on arrays, strings, structs and pointers (DDP101 meetings 9–12 and SDA), which is what a meeting "before classes" leaves to practise.
   - `std::vector` is not used anywhere although modern C++ practice would use it: `STL_CONTAINER` is not allowed until meeting 13. Students may use it; reference solutions may not.
   - Read by nobody but the agent; English and Arabic by the agent.
+
+### PBO301 meeting 2 — Class, Object, Class Diagram (2026-11-23)
+
+- 32 problems, 8 / 8 / 6 / 6 / 4, 232 points. **Every problem carries `required_concepts_in_submission: ["CLASS_OBJECT"]`** and its statement names the class, the attributes and the methods expected, and says that correct output without a class gets half the marks. Covered: attributes and methods, objects as parameters and return values, arrays of objects, `this` and chaining, static members, the syllabus examples `Prajurit` (Soldier), `Kendaraan` (Vehicle) and `Senjata` (Weapon).
+- Reference solutions keep every member under `public:`, have no constructor or destructor, and never hold an object of another class (those concepts arrive at meetings 4, 3 and 5). Objects are filled through public members, aggregate initialisation or default member values.
+- `periksa.py` with the 23 allowed concepts → `32 dari 32 soal lulus` (240 judge tests per problem, no warning; 36 generated tests per problem equal to a separate, class-free Python calculation; 44 quoted examples equal; `CLASS_OBJECT` present in every reference solution).
+- `spark soal:impor` → `32 diterima, 0 ditolak, 0 tidak berubah`. Production shows 32 versions `PENDING_REVIEW` (8 / 8 / 6 / 6 / 4), the requirement stored on all 32, meeting not published.
+- Skipped from the syllabus of this meeting: UML class diagrams and the mapping between diagram and code; the split into `.h` and `.cpp` with include guards (a submission is one file); `constexpr`.
+- Weaker than it looks:
+  - **The judge checks only that some class exists in the file.** It does not check the class name, the attributes or the methods named in the statement, nor that the class is used. `class X {};` above procedural code passes. Whether students really wrote the class asked for needs a look at their code.
+  - **Public data is taught here on purpose and untaught at meeting 4.** A student who already writes `private:` is not penalised (student code is never restricted), but the reference solutions and the statements show public attributes.
+  - `CONCEPT_NOT_MET` has not been exercised with a real student submission (same reason as DDP101 meeting 7).
+  - Read by nobody but the agent; English and Arabic by the agent; Indonesian output words in all three versions.
 
