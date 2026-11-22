@@ -108,6 +108,10 @@ final class PublikTest extends PortalCase
                 $this->assertSame(200, $r->status, "{$bahasa} {$jalur}");
                 $this->assertStringContainsString($h[$jalur], $r->body, "{$bahasa} {$jalur}");
                 $this->assertStringContainsString($h['tanggal'], $r->body, "{$bahasa} {$jalur}");
+                // Privasi juga mengatakan bahwa teman sekelas melihat nama penanya klarifikasi yang diterbitkan.
+                if ($jalur === '/privasi') {
+                    $this->assertStringContainsString(['id' => 'di samping pertanyaan klarifikasi Anda', 'en' => 'next to a clarification question you asked', 'ar' => 'بجانب سؤال الاستيضاح الذي طرحته'][$bahasa], $r->body, $bahasa);
+                }
                 foreach (['kemiripan', 'similarity', 'plagiar', 'تشابه'] as $bukan) {
                     $this->assertStringNotContainsString($bukan, mb_strtolower($r->body), "{$bahasa} {$jalur}: {$bukan}");
                 }

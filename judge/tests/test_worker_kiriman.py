@@ -38,6 +38,17 @@ def siap(mulai_worker, kirim, tunggu, versi_soal, db_app):  # noqa: F811
     return _siap
 
 
+def kata_teks(x) -> set[str]:
+    """Setiap kata (dipisah spasi atau baris baru) dari setiap nilai teks di dalam struktur JSON x."""
+    if isinstance(x, str):
+        return set(x.split())
+    if isinstance(x, dict):
+        x = list(x.values())
+    if isinstance(x, list):
+        return set().union(*[kata_teks(i) for i in x]) if x else set()
+    return set()
+
+
 def submit(kirim, tunggu, user, iid, sumber, **ganti):
     payload = {"language": "cpp", "source": sumber, "instance_id": iid, "submission_id": 1, **ganti}
     return tunggu(kirim(payload, kind="SUBMIT", pembuat=user), waktu=180)
@@ -60,8 +71,14 @@ def test_submit_benar_semua_tes_tersembunyi_lulus_dan_hasil_tidak_memuat_tes(sia
     assert set(h) == {"verdict", "compile_log", "tests", "passed", "total", "concepts", "missing"}
     # SPEC.md §10: masukan dan keluaran tes tersembunyi tidak pernah keluar dari worker.
     semua = json.dumps(b["result"]) + json.dumps(b["progress"]) + json.dumps(w.log())
+    # Keluaran yang diharapkan hanyalah bilangan pendek ("784"): mencarinya sebagai potongan teks bisa
+    # kebetulan cocok dengan id pekerjaan acak atau angka waktu. Ia dibandingkan sebagai NILAI UTUH
+    # terhadap setiap kata di dalam setiap teks hasil, kemajuan dan log. Masukan ("82 702") tetap dicari
+    # sebagai potongan teks: dua bilangan berspasi tidak muncul kebetulan.
+    kata = kata_teks([b["result"], b["progress"], w.log()])
     for t in tes:
-        assert t["in"].strip() not in semua and t["out"].strip() not in semua
+        assert t["in"].strip() not in semua, "masukan tes tersembunyi keluar dari worker"
+        assert t["out"].strip() not in kata, "keluaran tes tersembunyi keluar dari worker"
 
 
 def test_submit_sebagian_benar_menghitung_tes_yang_lulus(siap, kirim, tunggu):
@@ -169,3 +186,13 @@ def test_bendera_kompiler_pertemuan_dipakai_dan_yang_di_luar_daftar_ditolak(mula
                             (["-std=c++20"], "c"), (["-Wall"], "python"), (["-Wall"] * 9, "cpp"), ([7], "cpp")]:
         b = tunggu(kirim({"language": bahasa, "source": "int main(){}", "flags": bendera}))
         assert b["status"] == "FAILED" and b["result"]["error"] == "invalid_payload", (bendera, bahasa, b)
+
+
+def test_kata_teks_menemukan_nilai_utuh_dan_mengabaikan_potongan_id():
+    """Penjaga untuk pemeriksaan kebocoran di atas: nilai utuh ditemukan di mana pun ia berada
+    di dalam teks, sedangkan angka yang hanya bagian dari id acak atau angka waktu tidak."""
+    log = [{"job": "aeeb-14ab8784d0a3", "ms": 784, "stdout": "1486\n", "bersarang": {"pesan": ["harap 912 dapat 913"]}}]
+    kata = kata_teks(log)
+    assert "1486" in kata and "912" in kata and "913" in kata
+    assert "784" not in kata
+

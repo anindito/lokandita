@@ -148,6 +148,7 @@ return [
                     'Anda sendiri.',
                     'Dosen pengampu mata kuliah dan dosen pengajar kelas Anda: nama, nomor induk, kiriman, nilai dan catatan integritas Anda di kelas itu.',
                     'Teman sekelas: nama dan nilai Anda di papan peringkat kelas, kecuali bila dosen menganonimkannya.',
+                    'Teman sekelas juga melihat nama Anda di samping pertanyaan klarifikasi Anda tentang sebuah soal, bila dosen menerbitkan jawabannya untuk seluruh kelas. Pertanyaan yang dijawab secara pribadi hanya dilihat Anda dan dosen.',
                     'Superadmin: semua data di atas, untuk mengelola sistem.',
                 ],
             ],

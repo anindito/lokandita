@@ -148,6 +148,7 @@ return [
                     'You.',
                     'The lecturer in charge of your course and the lecturers of your class: your name, ID number, submissions, scores and integrity records in that class.',
                     'Your classmates: your name and score on the class leaderboard, unless the lecturer has anonymised it.',
+                    'Your classmates also see your name next to a clarification question you asked about a problem, when a lecturer publishes the answer to the whole class. A question answered privately is seen only by you and the lecturers.',
                     'Superadmin: all of the above, in order to run the system.',
                 ],
             ],
