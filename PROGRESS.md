@@ -1019,3 +1019,6 @@ Stage 10a after the tag, 2026-11-22:
 - The commit that records this report differs from the deployed `fe84365` only in this file and was **not** redeployed, to avoid restarting the containers under students for a note; `infra/smoke.sh` check 0 fails until the next deploy.
 - To switch back: `SEB_ENFORCEMENT=disabled` in `apps/lokakode/.env`, `infra/deploy.sh lokakode`, `infra/smoke.sh`.
 - The commit that holds these lines differs from `1b3bb15` only in this file and was deployed after it so that `/healthz` reports `HEAD`.
+- **Owner's decision, 2026-11-22: "skip it and tag 10a"** — Run, Submit and the heartbeat from a real SEB under enforcement are not waited for. They stay unconfirmed in this file. The tag `tahap-10a` was already set on `579bfa9` and stays there (as with `tahap-11`, a pushed tag is not moved); everything after it changes only this file and `docs/branding/`. The code that runs is the tagged code.
+
+**Stage 10a finished 2026-11-22, tag `tahap-10a`. Enforcement is on.**
