@@ -1,0 +1,1159 @@
+{
+  "course": "PBO301",
+  "meeting": 1,
+  "language": "cpp",
+  "problems": [
+    {
+      "slug": "terpanas-terdingin",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Terpanas dan Terdingin",
+          "statement": "Suhu sebuah kota dicatat selama tujuh hari. Baca ketujuh suhu itu, lalu cetak suhu tertinggi dan suhu terendah.\n\nSimpan datanya di array dan telusuri dengan *range-based for*: `for (auto s : suhu)` mengunjungi setiap elemen tanpa indeks. Untuk mengisi array, pakai `auto &s` supaya `s` merujuk ke elemennya, bukan salinannya.\n\nUntuk `30 28 33 25 31 29 27` keluarannya `33 25`.",
+          "input_format": "Satu baris berisi tujuh bilangan bulat.",
+          "output_format": "Satu baris: suhu tertinggi, lalu suhu terendah.",
+          "constraints": "Tiap suhu antara −10 dan 45."
+        },
+        "en": {
+          "title": "Hottest and Coldest",
+          "statement": "A city's temperature is recorded for seven days. Read the seven temperatures, then print the highest and the lowest.\n\nKeep the data in an array and walk through it with a *range-based for*: `for (auto s : suhu)` visits every element without an index. To fill the array use `auto &s`, so that `s` refers to the element and not to a copy.\n\nFor `30 28 33 25 31 29 27` the output is `33 25`.",
+          "input_format": "One line with seven integers.",
+          "output_format": "One line: the highest temperature, then the lowest.",
+          "constraints": "Each temperature is between −10 and 45.",
+          "machine": true
+        },
+        "ar": {
+          "title": "الأشد حرًّا والأشد بردًا",
+          "statement": "تُسجَّل درجة حرارة مدينة سبعة أيام. اقرأ الدرجات السبع ثم اطبع أعلاها وأدناها.\n\nاحفظ البيانات في مصفوفة واعبرها بحلقة *range-based for*: `for (auto s : suhu)` تزور كل عنصر بلا فهرس. لملء المصفوفة استخدم `auto &s` ليشير `s` إلى العنصر نفسه لا إلى نسخة منه.\n\nعند `30 28 33 25 31 29 27` يكون المخرج `33 25`.",
+          "input_format": "سطر واحد فيه سبعة أعداد صحيحة.",
+          "output_format": "سطر واحد: أعلى درجة ثم أدناها.",
+          "constraints": "كل درجة بين −10 و 45.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nv = [r.randint(-10, 45) for _ in range(7)]\nif i == 2:\n    v = [v[0]] * 7\nprint(*v)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int suhu[7]{};\n    for (auto &s : suhu) {\n        cin >> s;\n    }\n    auto panas = suhu[0];\n    auto dingin = suhu[0];\n    for (auto s : suhu) {\n        if (s > panas) panas = s;\n        if (s < dingin) dingin = s;\n    }\n    cout << panas << \" \" << dingin << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "hitung-huruf-besar",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Hitung Huruf Besar",
+          "statement": "Baca satu baris teks, lalu cetak berapa banyak huruf besarnya.\n\n*Range-based for* juga berlaku untuk `string`: `for (auto c : baris)` mengunjungi karakter demi karakter.\n\nUntuk `Belajar KODE di kampus` jawabannya 5.",
+          "input_format": "Satu baris teks.",
+          "output_format": "Satu bilangan bulat: banyak huruf besar.",
+          "constraints": "Teks terdiri dari huruf dan spasi, paling panjang 80 karakter."
+        },
+        "en": {
+          "title": "Count the Capitals",
+          "statement": "Read one line of text, then print how many capital letters it has.\n\nA *range-based for* works on a `string` too: `for (auto c : baris)` visits it character by character.\n\nFor `Belajar KODE di kampus` the answer is 5.",
+          "input_format": "One line of text.",
+          "output_format": "One integer: the number of capital letters.",
+          "constraints": "The text has letters and spaces, at most 80 characters.",
+          "machine": true
+        },
+        "ar": {
+          "title": "عدّ الحروف الكبيرة",
+          "statement": "اقرأ سطرًا واحدًا من النص ثم اطبع عدد الحروف الكبيرة فيه.\n\nحلقة *range-based for* تعمل على `string` أيضًا: `for (auto c : baris)` تزوره محرفًا محرفًا.\n\nللنص `Belajar KODE di kampus` الجواب 5.",
+          "input_format": "سطر واحد من النص.",
+          "output_format": "عدد صحيح واحد: عدد الحروف الكبيرة.",
+          "constraints": "النص حروف لاتينية ومسافات، 80 محرفًا على الأكثر.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nKATA = ['belajar', 'program', 'komputer', 'kampus', 'buku', 'meja', 'layar', 'kode', 'data', 'angka', 'huruf', 'kelas', 'tugas', 'ujian', 'pagi', 'malam', 'cepat', 'rapi', 'benar', 'coba', 'objek', 'fungsi', 'memori', 'kompilator']\nt = ' '.join(r.choice(KATA) for _ in range(r.randint(1, 6)))\np = 0 if i == 2 else r.random()\nprint(''.join(c.upper() if r.random() < p else c for c in t))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string baris;\n    getline(cin, baris);\n    auto banyak = 0;\n    for (auto c : baris) {\n        if (c >= 'A' && c <= 'Z') {\n            banyak++;\n        }\n    }\n    cout << banyak << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "kuadratkan-lima",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Kuadratkan dengan Lambda",
+          "statement": "Lambda adalah fungsi kecil tanpa nama yang ditulis langsung di tempat ia dipakai dan bisa disimpan dalam variabel:\n\n```\nauto kuadrat = [](int x) { return x * x; };\n```\n\nBaca lima bilangan bulat, lalu cetak kuadrat masing-masing dalam satu baris, dipisah spasi, dengan memanggil lambda itu.\n\nUntuk `1 -2 3 10 0` keluarannya `1 4 9 100 0`.",
+          "input_format": "Satu baris berisi lima bilangan bulat.",
+          "output_format": "Satu baris: kuadrat kelima bilangan itu, sesuai urutan.",
+          "constraints": "Tiap bilangan antara −100 dan 100."
+        },
+        "en": {
+          "title": "Square with a Lambda",
+          "statement": "A lambda is a small nameless function written right where it is used; it can be kept in a variable:\n\n```\nauto kuadrat = [](int x) { return x * x; };\n```\n\nRead five integers, then print the square of each on one line, separated by spaces, by calling that lambda.\n\nFor `1 -2 3 10 0` the output is `1 4 9 100 0`.",
+          "input_format": "One line with five integers.",
+          "output_format": "One line: the squares of the five numbers, in order.",
+          "constraints": "Each number is between −100 and 100.",
+          "machine": true
+        },
+        "ar": {
+          "title": "التربيع بدالة لامبدا",
+          "statement": "اللامبدا دالة صغيرة بلا اسم تُكتب حيث تُستعمل مباشرة، ويمكن حفظها في متغير:\n\n```\nauto kuadrat = [](int x) { return x * x; };\n```\n\nاقرأ خمسة أعداد صحيحة ثم اطبع مربع كل منها في سطر واحد تفصل بينها مسافات، باستدعاء تلك اللامبدا.\n\nعند `1 -2 3 10 0` يكون المخرج `1 4 9 100 0`.",
+          "input_format": "سطر واحد فيه خمسة أعداد صحيحة.",
+          "output_format": "سطر واحد: مربعات الأعداد الخمسة بالترتيب.",
+          "constraints": "كل عدد بين −100 و 100.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(*[r.randint(-100, 100) for _ in range(5)])\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    auto kuadrat = [](int x) { return x * x; };\n    int data[5]{};\n    for (auto &d : data) {\n        cin >> d;\n    }\n    for (auto d : data) {\n        cout << kuadrat(d) << \" \";\n    }\n    cout << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "rata-rata-sepuluh",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Rata-rata Sepuluh Nilai",
+          "statement": "Baca sepuluh nilai ujian, lalu cetak rata-ratanya dengan dua angka di belakang koma.\n\n`auto jumlah = 0;` membuat `jumlah` bertipe `int`, karena `0` adalah `int`. Supaya pembagiannya tidak dibulatkan, bagilah dengan `10.0`.\n\nUntuk `70 80 90 60 75 85 95 65 55 100` keluarannya `77.50`.",
+          "input_format": "Satu baris berisi sepuluh bilangan bulat.",
+          "output_format": "Rata-rata dengan dua angka di belakang koma.",
+          "constraints": "Tiap nilai antara 0 dan 100."
+        },
+        "en": {
+          "title": "Average of Ten Marks",
+          "statement": "Read ten exam marks, then print their average with two digits after the decimal point.\n\n`auto jumlah = 0;` makes `jumlah` an `int`, because `0` is an `int`. So that the division is not truncated, divide by `10.0`.\n\nFor `70 80 90 60 75 85 95 65 55 100` the output is `77.50`.",
+          "input_format": "One line with ten integers.",
+          "output_format": "The average with two digits after the decimal point.",
+          "constraints": "Each mark is between 0 and 100.",
+          "machine": true
+        },
+        "ar": {
+          "title": "متوسط عشر درجات",
+          "statement": "اقرأ عشر درجات امتحان ثم اطبع متوسطها برقمين بعد الفاصلة.\n\n`auto jumlah = 0;` تجعل `jumlah` من النوع `int` لأن `0` من النوع `int`. حتى لا تُبتر القسمة اقسم على `10.0`.\n\nعند `70 80 90 60 75 85 95 65 55 100` يكون المخرج `77.50`.",
+          "input_format": "سطر واحد فيه عشرة أعداد صحيحة.",
+          "output_format": "المتوسط برقمين بعد الفاصلة.",
+          "constraints": "كل درجة بين 0 و 100.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(*[r.randint(0, 100) for _ in range(10)])\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nint main() {\n    int nilai[10]{};\n    auto jumlah = 0;\n    for (auto &n : nilai) {\n        cin >> n;\n        jumlah += n;\n    }\n    cout << fixed << setprecision(2) << jumlah / 10.0 << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "ganti-spasi",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Ganti Spasi",
+          "statement": "Nama berkas sebaiknya tidak memuat spasi. Baca satu baris teks, lalu cetak teks itu dengan setiap spasi diganti garis bawah (`_`).\n\nUntuk **mengubah** isi `string` di dalam *range-based for*, variabelnya harus berupa referensi: `for (auto &c : baris)`.\n\nUntuk `laporan tugas akhir` keluarannya `laporan_tugas_akhir`.",
+          "input_format": "Satu baris teks.",
+          "output_format": "Teks yang sama dengan spasi diganti `_`.",
+          "constraints": "Teks terdiri dari huruf kecil dan spasi tunggal, paling panjang 80 karakter."
+        },
+        "en": {
+          "title": "Replace the Spaces",
+          "statement": "A file name had better not contain spaces. Read one line of text, then print it with every space replaced by an underscore (`_`).\n\nTo **change** a `string` inside a *range-based for*, the variable must be a reference: `for (auto &c : baris)`.\n\nFor `laporan tugas akhir` the output is `laporan_tugas_akhir`.",
+          "input_format": "One line of text.",
+          "output_format": "The same text with spaces replaced by `_`.",
+          "constraints": "The text has lowercase letters and single spaces, at most 80 characters.",
+          "machine": true
+        },
+        "ar": {
+          "title": "استبدال المسافات",
+          "statement": "يُستحسن ألّا يحتوي اسم الملف على مسافات. اقرأ سطرًا واحدًا من النص ثم اطبعه بعد استبدال شرطة سفلية (`_`) بكل مسافة.\n\n**لتغيير** محتوى `string` داخل حلقة *range-based for* يجب أن يكون المتغير مرجعًا: `for (auto &c : baris)`.\n\nعند `laporan tugas akhir` يكون المخرج `laporan_tugas_akhir`.",
+          "input_format": "سطر واحد من النص.",
+          "output_format": "النص نفسه بعد استبدال `_` بالمسافات.",
+          "constraints": "النص حروف لاتينية صغيرة ومسافات مفردة، 80 محرفًا على الأكثر.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nKATA = ['belajar', 'program', 'komputer', 'kampus', 'buku', 'meja', 'layar', 'kode', 'data', 'angka', 'huruf', 'kelas', 'tugas', 'ujian', 'pagi', 'malam', 'cepat', 'rapi', 'benar', 'coba', 'objek', 'fungsi', 'memori', 'kompilator']\nprint(' '.join(r.choice(KATA) for _ in range(1 if i == 2 else r.randint(2, 7))))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string baris;\n    getline(cin, baris);\n    for (auto &c : baris) {\n        if (c == ' ') {\n            c = '_';\n        }\n    }\n    cout << baris << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "lampu-berikutnya",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Lampu Berikutnya",
+          "statement": "Lampu lalu lintas menyala bergiliran: merah → hijau → kuning → merah → …\n\nBaca warna yang sedang menyala (`merah`, `kuning`, atau `hijau`), lalu cetak warna yang menyala sesudahnya.\n\nDi C++ modern, pilihan yang terbatas seperti ini ditulis sebagai `enum class`, misalnya `enum class Lampu { Merah, Kuning, Hijau };`. Nilainya ditulis `Lampu::Merah` dan tidak bisa tertukar dengan bilangan biasa.",
+          "input_format": "Satu kata: `merah`, `kuning`, atau `hijau`.",
+          "output_format": "Satu kata: warna berikutnya.",
+          "constraints": "Kata ditulis dengan huruf kecil."
+        },
+        "en": {
+          "title": "The Next Light",
+          "statement": "A traffic light cycles: red → green → yellow → red → … In Indonesian: `merah` → `hijau` → `kuning` → `merah`.\n\nRead the colour that is on now (`merah`, `kuning` or `hijau`), then print the colour that comes on next.\n\nIn modern C++ a small fixed choice like this is written as an `enum class`, for example `enum class Lampu { Merah, Kuning, Hijau };`. Its values are written `Lampu::Merah` and cannot be mixed up with plain numbers.",
+          "input_format": "One word: `merah`, `kuning` or `hijau`.",
+          "output_format": "One word: the next colour.",
+          "constraints": "The word is in lowercase.",
+          "machine": true
+        },
+        "ar": {
+          "title": "الضوء التالي",
+          "statement": "تتناوب إشارة المرور: أحمر ← أخضر ← أصفر ← أحمر ← … وبالإندونيسية: `merah` ← `hijau` ← `kuning` ← `merah`.\n\nاقرأ اللون المضيء الآن (`merah` أو `kuning` أو `hijau`) ثم اطبع اللون الذي يضيء بعده.\n\nفي ++C الحديثة يُكتب اختيار محدود كهذا على صورة `enum class`، مثل `enum class Lampu { Merah, Kuning, Hijau };`. تُكتب قيمه `Lampu::Merah` ولا تختلط بالأعداد العادية.",
+          "input_format": "كلمة واحدة: `merah` أو `kuning` أو `hijau`.",
+          "output_format": "كلمة واحدة: اللون التالي.",
+          "constraints": "الكلمة بحروف صغيرة.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(['merah', 'hijau', 'kuning'][(i + int(os.environ['SEED'])) % 3])\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nenum class Lampu { Merah, Kuning, Hijau };\n\nLampu berikutnya(Lampu sekarang) {\n    switch (sekarang) {\n        case Lampu::Merah: return Lampu::Hijau;\n        case Lampu::Hijau: return Lampu::Kuning;\n        default: return Lampu::Merah;\n    }\n}\n\nint main() {\n    string kata;\n    cin >> kata;\n    auto lampu = Lampu::Merah;\n    if (kata == \"kuning\") {\n        lampu = Lampu::Kuning;\n    } else if (kata == \"hijau\") {\n        lampu = Lampu::Hijau;\n    }\n    switch (berikutnya(lampu)) {\n        case Lampu::Merah: cout << \"merah\" << endl; break;\n        case Lampu::Kuning: cout << \"kuning\" << endl; break;\n        case Lampu::Hijau: cout << \"hijau\" << endl; break;\n    }\n    return 0;\n}\n"
+    },
+    {
+      "slug": "nolkan-negatif",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Nolkan yang Negatif",
+          "statement": "Sebuah sensor kadang mengirim nilai negatif yang tidak masuk akal. Baca delapan bilangan bulat, ganti setiap bilangan negatif dengan 0, lalu cetak kedelapan bilangan itu dalam satu baris.\n\nElemen array diubah lewat `for (auto &d : data)`.\n\nUntuk `5 -3 0 12 -7 8 -1 4` keluarannya `5 0 0 12 0 8 0 4`.",
+          "input_format": "Satu baris berisi delapan bilangan bulat.",
+          "output_format": "Satu baris: kedelapan bilangan setelah yang negatif dinolkan.",
+          "constraints": "Tiap bilangan antara −51 dan 50."
+        },
+        "en": {
+          "title": "Zero the Negatives",
+          "statement": "A sensor sometimes sends negative values that make no sense. Read eight integers, replace every negative one by 0, then print the eight numbers on one line.\n\nThe array elements are changed through `for (auto &d : data)`.\n\nFor `5 -3 0 12 -7 8 -1 4` the output is `5 0 0 12 0 8 0 4`.",
+          "input_format": "One line with eight integers.",
+          "output_format": "One line: the eight numbers after the negatives were set to zero.",
+          "constraints": "Each number is between −51 and 50.",
+          "machine": true
+        },
+        "ar": {
+          "title": "تصفير القيم السالبة",
+          "statement": "يرسل مستشعر أحيانًا قيمًا سالبة لا معنى لها. اقرأ ثمانية أعداد صحيحة واستبدل 0 بكل عدد سالب ثم اطبع الأعداد الثمانية في سطر واحد.\n\nتُغيَّر عناصر المصفوفة عبر `for (auto &d : data)`.\n\nعند `5 -3 0 12 -7 8 -1 4` يكون المخرج `5 0 0 12 0 8 0 4`.",
+          "input_format": "سطر واحد فيه ثمانية أعداد صحيحة.",
+          "output_format": "سطر واحد: الأعداد الثمانية بعد تصفير السالب منها.",
+          "constraints": "كل عدد بين −51 و 50.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nv = [r.randint(-50, 50) for _ in range(8)]\nif i == 2:\n    v = [-abs(x) - 1 for x in v]\nif i == 3:\n    v = [abs(x) for x in v]\nprint(*v)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int data[8]{};\n    for (auto &d : data) {\n        cin >> d;\n        if (d < 0) {\n            d = 0;\n        }\n    }\n    for (auto d : data) {\n        cout << d << \" \";\n    }\n    cout << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "jumlah-vektor",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Jumlah Dua Vektor",
+          "statement": "Sebuah vektor di bidang punya dua komponen, x dan y. Jumlah dua vektor diperoleh dengan menjumlahkan komponen yang bersesuaian.\n\nBuat `struct Vektor { int x; int y; };` dan fungsi `Vektor tambah(Vektor a, Vektor b)`. Dengan inisialisasi seragam, sebuah vektor bisa dibuat langsung: `Vektor{3, 4}`.\n\nBaca dua vektor dan cetak jumlahnya.\n\nContoh: (3, 4) + (−1, 6) = (2, 10), dicetak `2 10`.",
+          "input_format": "Dua baris, masing-masing berisi komponen x dan y sebuah vektor.",
+          "output_format": "Satu baris: komponen x dan y hasil penjumlahan.",
+          "constraints": "Tiap komponen antara −100 dan 100."
+        },
+        "en": {
+          "title": "Sum of Two Vectors",
+          "statement": "A vector in the plane has two components, x and y. Two vectors are added by adding the matching components.\n\nMake a `struct Vektor { int x; int y; };` and a function `Vektor tambah(Vektor a, Vektor b)`. With uniform initialisation a vector can be built directly: `Vektor{3, 4}`.\n\nRead two vectors and print their sum.\n\nExample: (3, 4) + (−1, 6) = (2, 10), printed as `2 10`.",
+          "input_format": "Two lines, each with the x and y components of a vector.",
+          "output_format": "One line: the x and y components of the sum.",
+          "constraints": "Each component is between −100 and 100.",
+          "machine": true
+        },
+        "ar": {
+          "title": "مجموع متجهين",
+          "statement": "للمتجه في المستوى مركّبتان x و y. يُجمع متجهان بجمع المركّبات المتقابلة.\n\nأنشئ `struct Vektor { int x; int y; };` ودالة `Vektor tambah(Vektor a, Vektor b)`. بالتهيئة الموحَّدة يمكن إنشاء متجه مباشرة: `Vektor{3, 4}`.\n\nاقرأ متجهين واطبع مجموعهما.\n\nمثال: (3, 4) + (−1, 6) = (2, 10)، ويُطبع `2 10`.",
+          "input_format": "سطران في كل منهما المركّبتان x و y لمتجه.",
+          "output_format": "سطر واحد: المركّبتان x و y للمجموع.",
+          "constraints": "كل مركّبة بين −100 و 100.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(-100, 100), r.randint(-100, 100))\nprint(r.randint(-100, 100), r.randint(-100, 100))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nstruct Vektor {\n    int x;\n    int y;\n};\n\nVektor tambah(Vektor a, Vektor b) {\n    return Vektor{a.x + b.x, a.y + b.y};\n}\n\nint main() {\n    Vektor a{}, b{};\n    cin >> a.x >> a.y;\n    cin >> b.x >> b.y;\n    auto c = tambah(a, b);\n    cout << c.x << \" \" << c.y << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "balik-array",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Balik Array",
+          "statement": "Baca n bilangan bulat, lalu cetak semuanya dalam urutan terbalik.\n\nBanyak datanya baru diketahui saat program berjalan, jadi arraynya dipesan dengan `new int[n]` dan dikembalikan dengan `delete[]`. Setelah itu penunjuknya diisi `nullptr`, penanda \"tidak menunjuk ke mana-mana\" di C++ modern (pengganti `NULL`).\n\nUntuk `3 8 -2 5` keluarannya `5 -2 8 3`.",
+          "input_format": "Baris pertama: n. Baris kedua: n bilangan bulat.",
+          "output_format": "Satu baris: bilangan-bilangan itu dalam urutan terbalik.",
+          "constraints": "1 ≤ n ≤ 100; tiap bilangan antara −1000 dan 1000"
+        },
+        "en": {
+          "title": "Reverse an Array",
+          "statement": "Read n integers, then print them all in reverse order.\n\nThe amount of data is known only while the program runs, so the array is requested with `new int[n]` and given back with `delete[]`. After that the pointer is set to `nullptr`, the modern C++ mark for \"points nowhere\" (it replaces `NULL`).\n\nFor `3 8 -2 5` the output is `5 -2 8 3`.",
+          "input_format": "First line: n. Second line: n integers.",
+          "output_format": "One line: the numbers in reverse order.",
+          "constraints": "1 ≤ n ≤ 100; each number is between −1000 and 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "عكس مصفوفة",
+          "statement": "اقرأ n عددًا صحيحًا ثم اطبعها كلها بترتيب معكوس.\n\nعدد البيانات لا يُعرف إلا أثناء تشغيل البرنامج، فتُطلب المصفوفة بـ `new int[n]` وتُعاد بـ `delete[]`. بعد ذلك يُعطى المؤشر القيمة `nullptr`، وهي علامة «لا يشير إلى شيء» في ++C الحديثة (بديل `NULL`).\n\nعند `3 8 -2 5` يكون المخرج `5 -2 8 3`.",
+          "input_format": "السطر الأول: n. السطر الثاني: n عددًا صحيحًا.",
+          "output_format": "سطر واحد: الأعداد بترتيب معكوس.",
+          "constraints": "1 ≤ n ≤ 100؛ كل عدد بين −1000 و 1000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = {2: 1, 3: 100}.get(i, r.randint(2, 40))\nprint(n)\nprint(*[r.randint(-1000, 1000) for _ in range(n)])\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    int *data = new int[n];\n    for (int k = 0; k < n; k++) {\n        cin >> data[k];\n    }\n    for (int k = n - 1; k >= 0; k--) {\n        cout << data[k] << \" \";\n    }\n    cout << endl;\n    delete[] data;\n    data = nullptr;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "frekuensi-digit",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Frekuensi Digit",
+          "statement": "Baca sederet digit (bisa sangat panjang, jadi dibaca sebagai `string`), lalu cetak berapa kali tiap digit muncul. Digit yang tidak muncul tidak dicetak. Urutkan dari digit terkecil.\n\nSediakan sepuluh penghitung dalam array yang langsung dinolkan: `int hitung[10]{};`.\n\nUntuk `2026202` keluarannya:\n\n```\n0: 2\n2: 4\n6: 1\n```",
+          "input_format": "Satu baris: deretan digit tanpa spasi.",
+          "output_format": "Untuk tiap digit yang muncul, satu baris `digit: banyak`, urut naik.",
+          "constraints": "Panjang deretan 1 sampai 50 digit."
+        },
+        "en": {
+          "title": "Digit Frequencies",
+          "statement": "Read a run of digits (it may be very long, so read it as a `string`), then print how often each digit occurs. Digits that do not occur are not printed. Order them from the smallest digit.\n\nKeep ten counters in an array that is zeroed at once: `int hitung[10]{};`.\n\nFor `2026202` the output is:\n\n```\n0: 2\n2: 4\n6: 1\n```",
+          "input_format": "One line: a run of digits without spaces.",
+          "output_format": "For every digit that occurs, one line `digit: count`, ascending.",
+          "constraints": "The run is 1 to 50 digits long.",
+          "machine": true
+        },
+        "ar": {
+          "title": "تكرار الأرقام",
+          "statement": "اقرأ سلسلة أرقام (قد تكون طويلة جدًّا فتُقرأ على أنها `string`) ثم اطبع عدد مرات ظهور كل رقم. الأرقام التي لا تظهر لا تُطبع. رتِّبها من أصغر رقم.\n\nضع عشرة عدّادات في مصفوفة تُصفَّر فورًا: `int hitung[10]{};`.\n\nعند `2026202` يكون المخرج:\n\n```\n0: 2\n2: 4\n6: 1\n```",
+          "input_format": "سطر واحد: سلسلة أرقام بلا مسافات.",
+          "output_format": "لكل رقم يظهر سطر واحد `الرقم: العدد`، تصاعديًا.",
+          "constraints": "طول السلسلة من 1 إلى 50 رقمًا.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = r.randint(1, 50)\nabjad = '0123456789' if i % 2 == 0 else ''.join(r.sample('0123456789', r.randint(1, 4)))\nprint(''.join(r.choice(abjad) for _ in range(n)))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string digit;\n    cin >> digit;\n    int hitung[10]{};\n    for (auto c : digit) {\n        hitung[c - '0']++;\n    }\n    for (int d = 0; d < 10; d++) {\n        if (hitung[d] > 0) {\n            cout << d << \": \" << hitung[d] << endl;\n        }\n    }\n    return 0;\n}\n"
+    },
+    {
+      "slug": "nilai-tertinggi",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Nilai Tertinggi",
+          "statement": "Data n mahasiswa terdiri dari nama dan nilai. Simpan dalam array of `struct Mahasiswa { string nama; int nilai; };`, lalu cetak **nama** mahasiswa dengan nilai tertinggi. Bila ada beberapa, cetak yang paling dulu muncul di masukan.\n\nContoh: `Andi 80`, `Citra 95`, `Eko 95` → `Citra`.",
+          "input_format": "Baris pertama: n. Lalu n baris, masing-masing berisi nama (satu kata) dan nilai.",
+          "output_format": "Satu kata: nama mahasiswa dengan nilai tertinggi.",
+          "constraints": "1 ≤ n ≤ 20; nilai antara 40 dan 100"
+        },
+        "en": {
+          "title": "Highest Mark",
+          "statement": "The data of n students consist of a name and a mark. Keep them in an array of `struct Mahasiswa { string nama; int nilai; };`, then print the **name** of the student with the highest mark. If there are several, print the one that comes first in the input.\n\nExample: `Andi 80`, `Citra 95`, `Eko 95` → `Citra`.",
+          "input_format": "First line: n. Then n lines, each with a name (one word) and a mark.",
+          "output_format": "One word: the name of the student with the highest mark.",
+          "constraints": "1 ≤ n ≤ 20; marks are between 40 and 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "أعلى درجة",
+          "statement": "بيانات n طالبًا هي الاسم والدرجة. احفظها في مصفوفة من `struct Mahasiswa { string nama; int nilai; };` ثم اطبع **اسم** الطالب صاحب أعلى درجة. إذا تعدّدوا فاطبع أولهم ظهورًا في المدخل.\n\nمثال: `Andi 80` و `Citra 95` و `Eko 95` ← `Citra`.",
+          "input_format": "السطر الأول: n. ثم n سطرًا في كل منها اسم (كلمة واحدة) ودرجة.",
+          "output_format": "كلمة واحدة: اسم صاحب أعلى درجة.",
+          "constraints": "1 ≤ n ≤ 20؛ الدرجات بين 40 و 100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nNAMA = ['Andi', 'Budi', 'Citra', 'Dewi', 'Eko', 'Fajar', 'Gita', 'Hadi', 'Indah', 'Joko', 'Kartika', 'Lina', 'Made', 'Nanda', 'Putri', 'Rudi', 'Sari', 'Tono', 'Wulan', 'Yoga', 'Zahra', 'Bayu', 'Ayu', 'Rina', 'Dimas', 'Laras', 'Agus', 'Maya', 'Iwan', 'Tari']\nn = {2: 1}.get(i, r.randint(2, 20))\nnama = r.sample(NAMA, n)\nnilai = [r.randint(40, 100) for _ in range(n)]\nif i == 3 and n > 2:\n    nilai[1] = nilai[n - 1] = 100\nprint(n)\nfor a, b in zip(nama, nilai):\n    print(a, b)\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nstruct Mahasiswa {\n    string nama;\n    int nilai;\n};\n\nint main() {\n    int n;\n    cin >> n;\n    Mahasiswa daftar[20]{};\n    for (int k = 0; k < n; k++) {\n        cin >> daftar[k].nama >> daftar[k].nilai;\n    }\n    auto terbaik = 0;\n    for (int k = 1; k < n; k++) {\n        if (daftar[k].nilai > daftar[terbaik].nilai) {\n            terbaik = k;\n        }\n    }\n    cout << daftar[terbaik].nama << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "di-atas-rata-rata",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Di Atas Rata-rata",
+          "statement": "Baca n nilai, lalu cetak berapa banyak nilai yang **lebih besar** daripada rata-rata semuanya.\n\nRata-rata baru diketahui setelah semua nilai dibaca, jadi nilainya harus disimpan dulu.\n\nUntuk `60 70 80 90` rata-ratanya 75, sehingga jawabannya 2.\n\nCatatan: membandingkan `nilai × n` dengan `jumlah` menghindari pembagian dan masalah pembulatan.",
+          "input_format": "Baris pertama: n. Baris kedua: n bilangan bulat.",
+          "output_format": "Satu bilangan bulat: banyak nilai di atas rata-rata.",
+          "constraints": "1 ≤ n ≤ 50; tiap nilai antara 0 dan 100"
+        },
+        "en": {
+          "title": "Above Average",
+          "statement": "Read n marks, then print how many of them are **greater** than the average of all.\n\nThe average is known only after all marks have been read, so they must be stored first.\n\nFor `60 70 80 90` the average is 75, so the answer is 2.\n\nNote: comparing `mark × n` with the sum avoids division and rounding trouble.",
+          "input_format": "First line: n. Second line: n integers.",
+          "output_format": "One integer: how many marks are above the average.",
+          "constraints": "1 ≤ n ≤ 50; each mark is between 0 and 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "فوق المتوسط",
+          "statement": "اقرأ n درجة ثم اطبع كم منها **أكبر** من متوسطها جميعًا.\n\nلا يُعرف المتوسط إلا بعد قراءة كل الدرجات، فيجب تخزينها أولًا.\n\nللدرجات `60 70 80 90` المتوسط 75، فالجواب 2.\n\nملاحظة: مقارنة `الدرجة × n` بالمجموع تُغني عن القسمة ومشكلات التقريب.",
+          "input_format": "السطر الأول: n. السطر الثاني: n عددًا صحيحًا.",
+          "output_format": "عدد صحيح واحد: عدد الدرجات فوق المتوسط.",
+          "constraints": "1 ≤ n ≤ 50؛ كل درجة بين 0 و 100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = {2: 1}.get(i, r.randint(2, 50))\nv = [r.randint(0, 100) for _ in range(n)]\nif i == 3:\n    v = [v[0]] * n\nif i == 4:\n    v = [50] * (n - 1) + [51]\nprint(n)\nprint(*v)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    int *nilai = new int[n];\n    auto jumlah = 0;\n    for (int k = 0; k < n; k++) {\n        cin >> nilai[k];\n        jumlah += nilai[k];\n    }\n    auto banyak = 0;\n    for (int k = 0; k < n; k++) {\n        if (nilai[k] * n > jumlah) {\n            banyak++;\n        }\n    }\n    cout << banyak << endl;\n    delete[] nilai;\n    nilai = nullptr;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "kata-terpanjang",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Kata Terpanjang",
+          "statement": "Baca satu baris kalimat, lalu cetak kata terpanjangnya. Bila ada beberapa kata yang sama panjang, cetak yang paling dulu muncul.\n\nUntuk `kode program komputer kampus` keluarannya `komputer`.",
+          "input_format": "Satu baris: kata-kata dipisah satu spasi.",
+          "output_format": "Satu kata: kata terpanjang.",
+          "constraints": "Kalimat terdiri dari huruf kecil dan spasi tunggal, paling panjang 90 karakter."
+        },
+        "en": {
+          "title": "Longest Word",
+          "statement": "Read one line holding a sentence, then print its longest word. If several words are equally long, print the one that comes first.\n\nFor `kode program komputer kampus` the output is `komputer`.",
+          "input_format": "One line: words separated by single spaces.",
+          "output_format": "One word: the longest word.",
+          "constraints": "The sentence has lowercase letters and single spaces, at most 90 characters.",
+          "machine": true
+        },
+        "ar": {
+          "title": "أطول كلمة",
+          "statement": "اقرأ سطرًا فيه جملة ثم اطبع أطول كلماتها. إذا تساوت عدة كلمات في الطول فاطبع أولها ظهورًا.\n\nعند `kode program komputer kampus` يكون المخرج `komputer`.",
+          "input_format": "سطر واحد: كلمات تفصل بينها مسافة واحدة.",
+          "output_format": "كلمة واحدة: أطول كلمة.",
+          "constraints": "الجملة حروف لاتينية صغيرة ومسافات مفردة، 90 محرفًا على الأكثر.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nKATA = ['belajar', 'program', 'komputer', 'kampus', 'buku', 'meja', 'layar', 'kode', 'data', 'angka', 'huruf', 'kelas', 'tugas', 'ujian', 'pagi', 'malam', 'cepat', 'rapi', 'benar', 'coba', 'objek', 'fungsi', 'memori', 'kompilator']\nprint(' '.join(r.choice(KATA) for _ in range(1 if i == 2 else r.randint(2, 8))))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string baris;\n    getline(cin, baris);\n    string terpanjang = \"\";\n    string kata = \"\";\n    baris += ' ';\n    for (auto c : baris) {\n        if (c == ' ') {\n            if (kata.size() > terpanjang.size()) {\n                terpanjang = kata;\n            }\n            kata = \"\";\n        } else {\n            kata += c;\n        }\n    }\n    cout << terpanjang << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "jumlah-diagonal",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Jumlah Diagonal",
+          "statement": "Baca sebuah matriks persegi berukuran n × n. Cetak jumlah **diagonal utama** (dari kiri atas ke kanan bawah), lalu jumlah **diagonal samping** (dari kanan atas ke kiri bawah).\n\nUntuk matriks\n\n```\n1 2 3\n4 5 6\n7 8 9\n```\n\nkeluarannya `15 15` (1 + 5 + 9 dan 3 + 5 + 7).",
+          "input_format": "Baris pertama: n. Lalu n baris, masing-masing berisi n bilangan bulat.",
+          "output_format": "Satu baris: jumlah diagonal utama, lalu jumlah diagonal samping.",
+          "constraints": "1 ≤ n ≤ 10; tiap bilangan antara −50 dan 50"
+        },
+        "en": {
+          "title": "Diagonal Sums",
+          "statement": "Read a square matrix of size n × n. Print the sum of the **main diagonal** (top left to bottom right), then the sum of the **anti-diagonal** (top right to bottom left).\n\nFor the matrix\n\n```\n1 2 3\n4 5 6\n7 8 9\n```\n\nthe output is `15 15` (1 + 5 + 9 and 3 + 5 + 7).",
+          "input_format": "First line: n. Then n lines of n integers each.",
+          "output_format": "One line: the sum of the main diagonal, then of the anti-diagonal.",
+          "constraints": "1 ≤ n ≤ 10; each number is between −50 and 50",
+          "machine": true
+        },
+        "ar": {
+          "title": "مجموع القطرين",
+          "statement": "اقرأ مصفوفة مربعة n × n. اطبع مجموع **القطر الرئيسي** (من أعلى اليسار إلى أسفل اليمين) ثم مجموع **القطر الثانوي** (من أعلى اليمين إلى أسفل اليسار).\n\nللمصفوفة\n\n```\n1 2 3\n4 5 6\n7 8 9\n```\n\nيكون المخرج `15 15` (1 + 5 + 9 و 3 + 5 + 7).",
+          "input_format": "السطر الأول: n. ثم n سطرًا في كل منها n عددًا صحيحًا.",
+          "output_format": "سطر واحد: مجموع القطر الرئيسي ثم مجموع القطر الثانوي.",
+          "constraints": "1 ≤ n ≤ 10؛ كل عدد بين −50 و 50",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = {2: 1, 3: 10}.get(i, r.randint(2, 9))\nprint(n)\nfor _ in range(n):\n    print(*[r.randint(-50, 50) for _ in range(n)])\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    int m[10][10]{};\n    for (int b = 0; b < n; b++) {\n        for (int k = 0; k < n; k++) {\n            cin >> m[b][k];\n        }\n    }\n    auto utama = 0;\n    auto samping = 0;\n    for (int k = 0; k < n; k++) {\n        utama += m[k][k];\n        samping += m[k][n - 1 - k];\n    }\n    cout << utama << \" \" << samping << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "terbesar-kedua",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Terbesar Kedua",
+          "statement": "Baca n bilangan bulat, lalu cetak **nilai terbesar kedua**: nilai terbesar di antara bilangan yang lebih kecil daripada nilai terbesar. Bilangan yang sama dihitung sebagai satu nilai.\n\nBila tidak ada (semua bilangan sama, atau hanya ada satu bilangan), cetak `tidak ada`.\n\nContoh: `4 9 9 7` → 7; `5 5 5` → `tidak ada`.\n\nSalah satu cara mencatat \"belum ada jawaban\" adalah penunjuk yang bernilai `nullptr`.",
+          "input_format": "Baris pertama: n. Baris kedua: n bilangan bulat.",
+          "output_format": "Nilai terbesar kedua, atau `tidak ada`.",
+          "constraints": "1 ≤ n ≤ 32; tiap bilangan antara −100 dan 100"
+        },
+        "en": {
+          "title": "Second Largest",
+          "statement": "Read n integers, then print the **second largest value**: the largest among the numbers that are smaller than the largest. Equal numbers count as one value.\n\nIf there is none (all numbers are equal, or there is only one), print `tidak ada` (none).\n\nExamples: `4 9 9 7` → 7; `5 5 5` → `tidak ada`.\n\nOne way to record \"no answer yet\" is a pointer holding `nullptr`.",
+          "input_format": "First line: n. Second line: n integers.",
+          "output_format": "The second largest value, or `tidak ada`.",
+          "constraints": "1 ≤ n ≤ 32; each number is between −100 and 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "ثاني أكبر قيمة",
+          "statement": "اقرأ n عددًا صحيحًا ثم اطبع **ثاني أكبر قيمة**: أكبر الأعداد التي هي أصغر من القيمة الكبرى. الأعداد المتساوية تُعدّ قيمة واحدة.\n\nإذا لم توجد (كل الأعداد متساوية، أو يوجد عدد واحد فقط) فاطبع `tidak ada` (لا يوجد).\n\nأمثلة: `4 9 9 7` ← 7؛ `5 5 5` ← `tidak ada`.\n\nمن طرق تسجيل «لا جواب بعد» مؤشر قيمته `nullptr`.",
+          "input_format": "السطر الأول: n. السطر الثاني: n عددًا صحيحًا.",
+          "output_format": "ثاني أكبر قيمة، أو `tidak ada`.",
+          "constraints": "1 ≤ n ≤ 32؛ كل عدد بين −100 و 100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = {2: 1}.get(i, r.randint(2, 30))\nv = [r.randint(-100, 100) for _ in range(n)]\nif i == 3:\n    v = [v[0]] * n\nif i == 4:\n    v = [max(v)] * 2 + v\nif i == 5:\n    v = sorted(set(v), reverse=True)\nprint(len(v))\nprint(*v)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    int *data = new int[n];\n    for (int k = 0; k < n; k++) {\n        cin >> data[k];\n    }\n    int *besar = &data[0];\n    int *kedua = nullptr;\n    for (int k = 1; k < n; k++) {\n        if (data[k] > *besar) {\n            kedua = besar;\n            besar = &data[k];\n        } else if (data[k] < *besar && (kedua == nullptr || data[k] > *kedua)) {\n            kedua = &data[k];\n        }\n    }\n    if (kedua == nullptr) {\n        cout << \"tidak ada\" << endl;\n    } else {\n        cout << *kedua << endl;\n    }\n    delete[] data;\n    data = nullptr;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "hapus-vokal",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Hapus Huruf Vokal",
+          "statement": "Baca satu baris teks, lalu cetak teks itu tanpa huruf vokalnya (`a`, `i`, `u`, `e`, `o`, baik huruf kecil maupun besar). Karakter lain, termasuk spasi, dibiarkan.\n\nPemeriksaan \"apakah ini vokal\" enak ditulis sebagai lambda yang mengembalikan `bool`.\n\nUntuk `Belajar Kode` keluarannya `Bljr Kd`.",
+          "input_format": "Satu baris teks.",
+          "output_format": "Teks itu tanpa huruf vokal.",
+          "constraints": "Teks terdiri dari huruf dan spasi tunggal, paling panjang 80 karakter; setiap kata memuat paling sedikit satu konsonan."
+        },
+        "en": {
+          "title": "Remove the Vowels",
+          "statement": "Read one line of text, then print it without its vowels (`a`, `i`, `u`, `e`, `o`, lowercase or capital). Other characters, spaces included, stay.\n\nThe test \"is this a vowel\" is nicely written as a lambda that returns a `bool`.\n\nFor `Belajar Kode` the output is `Bljr Kd`.",
+          "input_format": "One line of text.",
+          "output_format": "The text without vowels.",
+          "constraints": "The text has letters and single spaces, at most 80 characters; every word holds at least one consonant.",
+          "machine": true
+        },
+        "ar": {
+          "title": "حذف حروف العلة",
+          "statement": "اقرأ سطرًا واحدًا من النص ثم اطبعه بلا حروف العلة (`a` و `i` و `u` و `e` و `o`، صغيرة كانت أم كبيرة). تبقى المحارف الأخرى ومنها المسافات.\n\nيحسن كتابة فحص «هل هذا حرف علة» على صورة لامبدا تُرجع `bool`.\n\nعند `Belajar Kode` يكون المخرج `Bljr Kd`.",
+          "input_format": "سطر واحد من النص.",
+          "output_format": "النص بلا حروف العلة.",
+          "constraints": "النص حروف لاتينية ومسافات مفردة، 80 محرفًا على الأكثر؛ وفي كل كلمة حرف ساكن واحد على الأقل.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nKATA = ['belajar', 'program', 'komputer', 'kampus', 'buku', 'meja', 'layar', 'kode', 'data', 'angka', 'huruf', 'kelas', 'tugas', 'ujian', 'pagi', 'malam', 'cepat', 'rapi', 'benar', 'coba', 'objek', 'fungsi', 'memori', 'kompilator']\nt = ' '.join(r.choice(KATA) for _ in range(r.randint(1, 6)))\nprint(''.join(c.upper() if r.random() < 0.2 else c for c in t))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string baris;\n    getline(cin, baris);\n    auto vokal = [](char c) {\n        return c == 'a' || c == 'i' || c == 'u' || c == 'e' || c == 'o'\n            || c == 'A' || c == 'I' || c == 'U' || c == 'E' || c == 'O';\n    };\n    string hasil = \"\";\n    for (auto c : baris) {\n        if (!vokal(c)) {\n            hasil += c;\n        }\n    }\n    cout << hasil << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "urutkan-array",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Urutkan Array",
+          "statement": "Baca n bilangan bulat, lalu cetak semuanya **terurut dari yang terkecil**.\n\nTulis sendiri pengurutannya (misalnya *selection sort*: cari yang terkecil di bagian yang belum terurut, tukar ke depan, ulangi). Pustaka pengurutan baru dipakai di pertemuan-pertemuan akhir.\n\nUntuk `5 -1 9 3 3` keluarannya `-1 3 3 5 9`.",
+          "input_format": "Baris pertama: n. Baris kedua: n bilangan bulat.",
+          "output_format": "Satu baris: bilangan-bilangan itu, terurut naik.",
+          "constraints": "1 ≤ n ≤ 100; tiap bilangan antara −1000 dan 1000"
+        },
+        "en": {
+          "title": "Sort an Array",
+          "statement": "Read n integers, then print them all **sorted from the smallest**.\n\nWrite the sorting yourself (for example *selection sort*: find the smallest in the unsorted part, swap it to the front, repeat). Library sorting comes in the last meetings.\n\nFor `5 -1 9 3 3` the output is `-1 3 3 5 9`.",
+          "input_format": "First line: n. Second line: n integers.",
+          "output_format": "One line: the numbers in ascending order.",
+          "constraints": "1 ≤ n ≤ 100; each number is between −1000 and 1000",
+          "machine": true
+        },
+        "ar": {
+          "title": "ترتيب مصفوفة",
+          "statement": "اقرأ n عددًا صحيحًا ثم اطبعها كلها **مرتبة من الأصغر**.\n\nاكتب الترتيب بنفسك (مثل *الترتيب بالاختيار*: أوجد الأصغر في الجزء غير المرتب وبدِّله إلى المقدمة وكرِّر). ترتيب المكتبة يأتي في اللقاءات الأخيرة.\n\nعند `5 -1 9 3 3` يكون المخرج `-1 3 3 5 9`.",
+          "input_format": "السطر الأول: n. السطر الثاني: n عددًا صحيحًا.",
+          "output_format": "سطر واحد: الأعداد مرتبة تصاعديًا.",
+          "constraints": "1 ≤ n ≤ 100؛ كل عدد بين −1000 و 1000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = {2: 1, 3: 100}.get(i, r.randint(2, 60))\nv = [r.randint(-1000, 1000) for _ in range(n)]\nif i == 4:\n    v.sort(reverse=True)\nif i == 5:\n    v = [r.randint(1, 5) for _ in range(n)]\nprint(n)\nprint(*v)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    int *data = new int[n];\n    for (int k = 0; k < n; k++) {\n        cin >> data[k];\n    }\n    for (int a = 0; a < n - 1; a++) {\n        auto kecil = a;\n        for (int b = a + 1; b < n; b++) {\n            if (data[b] < data[kecil]) {\n                kecil = b;\n            }\n        }\n        auto sementara = data[a];\n        data[a] = data[kecil];\n        data[kecil] = sementara;\n    }\n    for (int k = 0; k < n; k++) {\n        cout << data[k] << \" \";\n    }\n    cout << endl;\n    delete[] data;\n    data = nullptr;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "median",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Median",
+          "statement": "Median adalah nilai tengah sekumpulan data **setelah diurutkan**. Bila banyak datanya ganjil, median adalah data yang tepat di tengah. Bila genap, median adalah rata-rata dua data di tengah.\n\nBaca n bilangan bulat, lalu cetak mediannya dengan satu angka di belakang koma.\n\nContoh: `7 1 5` → `5.0`; `8 2 4 6` → `5.0`; `1 2 3 6` → `2.5`.",
+          "input_format": "Baris pertama: n. Baris kedua: n bilangan bulat.",
+          "output_format": "Median dengan satu angka di belakang koma.",
+          "constraints": "1 ≤ n ≤ 99; tiap bilangan antara 0 dan 100"
+        },
+        "en": {
+          "title": "Median",
+          "statement": "The median is the middle value of a set of data **after sorting**. When the count is odd, the median is the item exactly in the middle. When it is even, the median is the average of the two middle items.\n\nRead n integers, then print their median with one digit after the decimal point.\n\nExamples: `7 1 5` → `5.0`; `8 2 4 6` → `5.0`; `1 2 3 6` → `2.5`.",
+          "input_format": "First line: n. Second line: n integers.",
+          "output_format": "The median with one digit after the decimal point.",
+          "constraints": "1 ≤ n ≤ 99; each number is between 0 and 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "الوسيط",
+          "statement": "الوسيط هو القيمة الوسطى لمجموعة بيانات **بعد ترتيبها**. إذا كان العدد فرديًا فالوسيط هو العنصر الأوسط تمامًا، وإذا كان زوجيًا فهو متوسط العنصرين الأوسطين.\n\nاقرأ n عددًا صحيحًا ثم اطبع وسيطها برقم واحد بعد الفاصلة.\n\nأمثلة: `7 1 5` ← `5.0`؛ `8 2 4 6` ← `5.0`؛ `1 2 3 6` ← `2.5`.",
+          "input_format": "السطر الأول: n. السطر الثاني: n عددًا صحيحًا.",
+          "output_format": "الوسيط برقم واحد بعد الفاصلة.",
+          "constraints": "1 ≤ n ≤ 99؛ كل عدد بين 0 و 100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = {2: 1, 3: 2, 4: 99}.get(i, r.randint(3, 60))\nprint(n)\nprint(*[r.randint(0, 100) for _ in range(n)])\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    int data[100]{};\n    for (int k = 0; k < n; k++) {\n        cin >> data[k];\n    }\n    for (int a = 1; a < n; a++) {\n        auto x = data[a];\n        auto b = a - 1;\n        while (b >= 0 && data[b] > x) {\n            data[b + 1] = data[b];\n            b--;\n        }\n        data[b + 1] = x;\n    }\n    cout << fixed << setprecision(1);\n    if (n % 2 == 1) {\n        cout << (double) data[n / 2] << endl;\n    } else {\n        cout << (data[n / 2 - 1] + data[n / 2]) / 2.0 << endl;\n    }\n    return 0;\n}\n"
+    },
+    {
+      "slug": "total-durasi",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Total Durasi",
+          "statement": "Sebuah daftar putar berisi n lagu. Durasi tiap lagu diberikan sebagai jam, menit, dan detik. Hitung durasi seluruhnya.\n\nBuat `struct Durasi { int jam; int menit; int detik; };` dan fungsi `Durasi tambah(Durasi a, Durasi b)` yang hasilnya selalu rapi: menit dan detik di bawah 60.\n\nCetak totalnya sebagai `J:MM:DD` — jam apa adanya, menit dan detik dua digit.\n\nContoh: durasi `0 45 50` dan `1 20 15` berjumlah `2:06:05`.",
+          "input_format": "Baris pertama: n. Lalu n baris, masing-masing berisi jam, menit, detik.",
+          "output_format": "Total durasi dalam bentuk `J:MM:DD`.",
+          "constraints": "1 ≤ n ≤ 20; 0 ≤ jam ≤ 5; 0 ≤ menit, detik ≤ 59"
+        },
+        "en": {
+          "title": "Total Duration",
+          "statement": "A playlist holds n songs. The duration of each is given as hours, minutes and seconds. Compute the total duration.\n\nMake a `struct Durasi { int jam; int menit; int detik; };` and a function `Durasi tambah(Durasi a, Durasi b)` whose result is always tidy: minutes and seconds below 60.\n\nPrint the total as `H:MM:SS` — hours as they are, minutes and seconds with two digits.\n\nExample: the durations `0 45 50` and `1 20 15` add up to `2:06:05`.",
+          "input_format": "First line: n. Then n lines, each with hours, minutes, seconds.",
+          "output_format": "The total duration in the form `H:MM:SS`.",
+          "constraints": "1 ≤ n ≤ 20; 0 ≤ hours ≤ 5; 0 ≤ minutes, seconds ≤ 59",
+          "machine": true
+        },
+        "ar": {
+          "title": "المدة الكلية",
+          "statement": "قائمة تشغيل فيها n أغنية. مدة كل أغنية تُعطى بالساعات والدقائق والثواني. احسب المدة الكلية.\n\nأنشئ `struct Durasi { int jam; int menit; int detik; };` ودالة `Durasi tambah(Durasi a, Durasi b)` ناتجها مرتّب دائمًا: الدقائق والثواني أقل من 60.\n\nاطبع المجموع على الصورة `H:MM:SS` — الساعات كما هي، والدقائق والثواني برقمين.\n\nمثال: المدتان `0 45 50` و `1 20 15` مجموعهما `2:06:05`.",
+          "input_format": "السطر الأول: n. ثم n سطرًا في كل منها الساعات والدقائق والثواني.",
+          "output_format": "المدة الكلية على الصورة `H:MM:SS`.",
+          "constraints": "1 ≤ n ≤ 20؛ 0 ≤ الساعات ≤ 5؛ 0 ≤ الدقائق، الثواني ≤ 59",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = {2: 1}.get(i, r.randint(2, 20))\nprint(n)\nfor _ in range(n):\n    print(r.randint(0, 5), r.randint(0, 59), r.randint(0, 59))\n",
+      "reference_solution": "#include <iostream>\n#include <iomanip>\nusing namespace std;\n\nstruct Durasi {\n    int jam;\n    int menit;\n    int detik;\n};\n\nDurasi tambah(Durasi a, Durasi b) {\n    auto total = (a.jam + b.jam) * 3600 + (a.menit + b.menit) * 60 + a.detik + b.detik;\n    return Durasi{total / 3600, total / 60 % 60, total % 60};\n}\n\nint main() {\n    int n;\n    cin >> n;\n    Durasi total{0, 0, 0};\n    for (int k = 0; k < n; k++) {\n        Durasi d{};\n        cin >> d.jam >> d.menit >> d.detik;\n        total = tambah(total, d);\n    }\n    cout << total.jam << \":\" << setfill('0') << setw(2) << total.menit << \":\" << setw(2) << total.detik << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "gabung-terurut",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Gabung Dua Daftar Terurut",
+          "statement": "Dua daftar bilangan **sudah terurut naik**. Gabungkan keduanya menjadi satu daftar yang juga terurut naik.\n\nKarena keduanya sudah terurut, tidak perlu mengurutkan ulang: cukup bandingkan elemen terdepan kedua daftar, ambil yang lebih kecil, dan ulangi.\n\nContoh: `1 4 9` dan `2 3 10 12` menjadi `1 2 3 4 9 10 12`.",
+          "input_format": "Baris pertama: n dan m. Baris kedua: n bilangan terurut naik. Baris ketiga: m bilangan terurut naik.",
+          "output_format": "Satu baris: n + m bilangan, terurut naik.",
+          "constraints": "1 ≤ n, m ≤ 50; tiap bilangan antara −1000 dan 4000"
+        },
+        "en": {
+          "title": "Merge Two Sorted Lists",
+          "statement": "Two lists of numbers are **already sorted ascending**. Merge them into one list that is sorted ascending too.\n\nBecause both are sorted there is no need to sort again: compare the front elements of the two lists, take the smaller, and repeat.\n\nExample: `1 4 9` and `2 3 10 12` become `1 2 3 4 9 10 12`.",
+          "input_format": "First line: n and m. Second line: n numbers in ascending order. Third line: m numbers in ascending order.",
+          "output_format": "One line: the n + m numbers in ascending order.",
+          "constraints": "1 ≤ n, m ≤ 50; each number is between −1000 and 4000",
+          "machine": true
+        },
+        "ar": {
+          "title": "دمج قائمتين مرتبتين",
+          "statement": "قائمتا أعداد **مرتبتان تصاعديًا أصلًا**. ادمجهما في قائمة واحدة مرتبة تصاعديًا أيضًا.\n\nلأن القائمتين مرتبتان فلا حاجة إلى ترتيب جديد: قارن العنصرين الأولين في القائمتين وخذ الأصغر وكرِّر.\n\nمثال: `1 4 9` و `2 3 10 12` تصيران `1 2 3 4 9 10 12`.",
+          "input_format": "السطر الأول: n و m. السطر الثاني: n عددًا مرتبة تصاعديًا. السطر الثالث: m عددًا مرتبة تصاعديًا.",
+          "output_format": "سطر واحد: الأعداد n + m مرتبة تصاعديًا.",
+          "constraints": "1 ≤ n, m ≤ 50؛ كل عدد بين −1000 و 4000",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn, m = r.randint(1, 50), r.randint(1, 50)\na = sorted(r.randint(-1000, 1000) for _ in range(n))\nb = sorted(r.randint(-1000, 1000) for _ in range(m))\nif i == 2:\n    b = [x + 3000 for x in b]\nif i == 3:\n    a = [x + 3000 for x in a]\nif i == 4:\n    b = a[:]\n    m = n\nprint(n, m)\nprint(*a)\nprint(*b)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n, m;\n    cin >> n >> m;\n    int a[50]{}, b[50]{};\n    for (int k = 0; k < n; k++) {\n        cin >> a[k];\n    }\n    for (int k = 0; k < m; k++) {\n        cin >> b[k];\n    }\n    auto p = 0;\n    auto q = 0;\n    while (p < n || q < m) {\n        if (q == m || (p < n && a[p] <= b[q])) {\n            cout << a[p] << \" \";\n            p++;\n        } else {\n            cout << b[q] << \" \";\n            q++;\n        }\n    }\n    cout << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "modus",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Modus",
+          "statement": "Modus adalah nilai yang paling sering muncul. Baca n bilangan, lalu cetak modusnya dan berapa kali ia muncul. Bila ada beberapa nilai yang sama seringnya, pilih yang **terkecil**.\n\nKarena nilainya hanya 1 sampai 100, sebuah array penghitung sudah cukup.\n\nContoh: `7 3 7 3 9` → `3 2`.",
+          "input_format": "Baris pertama: n. Baris kedua: n bilangan bulat.",
+          "output_format": "Satu baris: modus, lalu banyak kemunculannya.",
+          "constraints": "1 ≤ n ≤ 100; tiap bilangan antara 1 dan 100"
+        },
+        "en": {
+          "title": "Mode",
+          "statement": "The mode is the value that occurs most often. Read n numbers, then print the mode and how many times it occurs. If several values are equally frequent, choose the **smallest**.\n\nBecause the values are only 1 to 100, an array of counters is enough.\n\nExample: `7 3 7 3 9` → `3 2`.",
+          "input_format": "First line: n. Second line: n integers.",
+          "output_format": "One line: the mode, then how many times it occurs.",
+          "constraints": "1 ≤ n ≤ 100; each number is between 1 and 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "المنوال",
+          "statement": "المنوال هو القيمة الأكثر تكرارًا. اقرأ n عددًا ثم اطبع المنوال وعدد مرات ظهوره. إذا تساوت عدة قيم في التكرار فاختر **الأصغر**.\n\nلأن القيم من 1 إلى 100 فقط تكفي مصفوفة عدّادات.\n\nمثال: `7 3 7 3 9` ← `3 2`.",
+          "input_format": "السطر الأول: n. السطر الثاني: n عددًا صحيحًا.",
+          "output_format": "سطر واحد: المنوال ثم عدد مرات ظهوره.",
+          "constraints": "1 ≤ n ≤ 100؛ كل عدد بين 1 و 100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = {2: 1}.get(i, r.randint(2, 100))\nv = [r.randint(1, 100 if i % 2 else 8) for _ in range(n)]\nif i == 3:\n    v = [7, 3, 7, 3, 9]\nprint(len(v))\nprint(*v)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    int hitung[101]{};\n    for (int k = 0; k < n; k++) {\n        int x;\n        cin >> x;\n        hitung[x]++;\n    }\n    auto modus = 1;\n    for (int x = 2; x <= 100; x++) {\n        if (hitung[x] > hitung[modus]) {\n            modus = x;\n        }\n    }\n    cout << modus << \" \" << hitung[modus] << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "rotasi-kiri",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Rotasi ke Kiri",
+          "statement": "Merotasi sebuah daftar ke kiri satu langkah berarti memindahkan elemen pertama ke ujung belakang: `1 2 3 4 5` menjadi `2 3 4 5 1`.\n\nBaca n bilangan dan bilangan k, lalu cetak daftar itu setelah dirotasi ke kiri **k langkah**. Nilai k bisa jauh lebih besar daripada n; merotasi n langkah mengembalikan daftar ke keadaan semula.\n\nContoh: `1 2 3 4 5` dengan k = 2 menjadi `3 4 5 1 2`; dengan k = 7 hasilnya sama.",
+          "input_format": "Baris pertama: n dan k. Baris kedua: n bilangan bulat.",
+          "output_format": "Satu baris: daftar setelah dirotasi.",
+          "constraints": "1 ≤ n ≤ 100; 0 ≤ k ≤ 1000000000; tiap bilangan antara 0 dan 99"
+        },
+        "en": {
+          "title": "Rotate Left",
+          "statement": "Rotating a list left by one step moves its first element to the back: `1 2 3 4 5` becomes `2 3 4 5 1`.\n\nRead n numbers and a number k, then print the list after rotating it left by **k steps**. k may be far larger than n; rotating n steps puts the list back as it was.\n\nExample: `1 2 3 4 5` with k = 2 becomes `3 4 5 1 2`; with k = 7 the result is the same.",
+          "input_format": "First line: n and k. Second line: n integers.",
+          "output_format": "One line: the list after the rotation.",
+          "constraints": "1 ≤ n ≤ 100; 0 ≤ k ≤ 1000000000; each number is between 0 and 99",
+          "machine": true
+        },
+        "ar": {
+          "title": "تدوير إلى اليسار",
+          "statement": "تدوير قائمة إلى اليسار خطوة واحدة يعني نقل عنصرها الأول إلى آخرها: `1 2 3 4 5` تصير `2 3 4 5 1`.\n\nاقرأ n عددًا وعددًا k ثم اطبع القائمة بعد تدويرها إلى اليسار **k خطوة**. قد يكون k أكبر كثيرًا من n؛ والتدوير n خطوة يعيد القائمة كما كانت.\n\nمثال: `1 2 3 4 5` مع k = 2 تصير `3 4 5 1 2`، ومع k = 7 الناتج نفسه.",
+          "input_format": "السطر الأول: n و k. السطر الثاني: n عددًا صحيحًا.",
+          "output_format": "سطر واحد: القائمة بعد التدوير.",
+          "constraints": "1 ≤ n ≤ 100؛ 0 ≤ k ≤ 1000000000؛ كل عدد بين 0 و 99",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = {2: 1}.get(i, r.randint(2, 100))\nk = {3: 0, 4: n, 5: 1000000000, 6: n * 7 + 1}.get(i, r.randint(1, 200))\nprint(n, k)\nprint(*[r.randint(0, 99) for _ in range(n)])\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n, k;\n    cin >> n >> k;\n    int *data = new int[n];\n    for (int p = 0; p < n; p++) {\n        cin >> data[p];\n    }\n    k = k % n;\n    for (int p = 0; p < n; p++) {\n        cout << data[(p + k) % n] << \" \";\n    }\n    cout << endl;\n    delete[] data;\n    data = nullptr;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "kali-matriks",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Perkalian Matriks",
+          "statement": "Matriks A berukuran b × t dan matriks B berukuran t × k dapat dikalikan. Hasilnya matriks C berukuran b × k, dengan\n\n**C[i][j] = A[i][1] × B[1][j] + A[i][2] × B[2][j] + … + A[i][t] × B[t][j]**\n\nyaitu baris ke-i dari A \"dikalikan\" dengan kolom ke-j dari B.\n\nBaca kedua matriks dan cetak hasil kalinya.\n\nContoh: A = `1 2` / `3 4` dan B = `5 6` / `7 8` menghasilkan\n\n```\n19 22\n43 50\n```",
+          "input_format": "Baris pertama: b, t, k. Lalu b baris berisi t bilangan (matriks A), lalu t baris berisi k bilangan (matriks B).",
+          "output_format": "b baris, masing-masing k bilangan: matriks hasil kali.",
+          "constraints": "1 ≤ b, t, k ≤ 5; tiap bilangan antara −9 dan 9"
+        },
+        "en": {
+          "title": "Matrix Multiplication",
+          "statement": "A matrix A of size b × t and a matrix B of size t × k can be multiplied. The result is a matrix C of size b × k, with\n\n**C[i][j] = A[i][1] × B[1][j] + A[i][2] × B[2][j] + … + A[i][t] × B[t][j]**\n\nthat is, row i of A \"times\" column j of B.\n\nRead both matrices and print their product.\n\nExample: A = `1 2` / `3 4` and B = `5 6` / `7 8` give\n\n```\n19 22\n43 50\n```",
+          "input_format": "First line: b, t, k. Then b lines of t numbers (matrix A), then t lines of k numbers (matrix B).",
+          "output_format": "b lines of k numbers each: the product matrix.",
+          "constraints": "1 ≤ b, t, k ≤ 5; each number is between −9 and 9",
+          "machine": true
+        },
+        "ar": {
+          "title": "ضرب المصفوفات",
+          "statement": "المصفوفة A بحجم b × t والمصفوفة B بحجم t × k يمكن ضربهما. الناتج مصفوفة C بحجم b × k حيث\n\n**C[i][j] = A[i][1] × B[1][j] + A[i][2] × B[2][j] + … + A[i][t] × B[t][j]**\n\nأي الصف i من A «مضروبًا» في العمود j من B.\n\nاقرأ المصفوفتين واطبع حاصل ضربهما.\n\nمثال: A = `1 2` / `3 4` و B = `5 6` / `7 8` تعطيان\n\n```\n19 22\n43 50\n```",
+          "input_format": "السطر الأول: b و t و k. ثم b سطرًا في كل منها t عددًا (المصفوفة A)، ثم t سطرًا في كل منها k عددًا (المصفوفة B).",
+          "output_format": "b سطرًا في كل منها k عددًا: مصفوفة الناتج.",
+          "constraints": "1 ≤ b, t, k ≤ 5؛ كل عدد بين −9 و 9",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nb, t, k = r.randint(1, 5), r.randint(1, 5), r.randint(1, 5)\nif i == 2:\n    b = t = k = 1\nif i == 3:\n    b, t, k = 5, 5, 5\nprint(b, t, k)\nfor _ in range(b):\n    print(*[r.randint(-9, 9) for _ in range(t)])\nfor _ in range(t):\n    print(*[r.randint(-9, 9) for _ in range(k)])\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int baris, tengah, kolom;\n    cin >> baris >> tengah >> kolom;\n    int a[5][5]{}, b[5][5]{};\n    for (int i = 0; i < baris; i++) {\n        for (int j = 0; j < tengah; j++) {\n            cin >> a[i][j];\n        }\n    }\n    for (int i = 0; i < tengah; i++) {\n        for (int j = 0; j < kolom; j++) {\n            cin >> b[i][j];\n        }\n    }\n    for (int i = 0; i < baris; i++) {\n        for (int j = 0; j < kolom; j++) {\n            auto jumlah = 0;\n            for (int t = 0; t < tengah; t++) {\n                jumlah += a[i][t] * b[t][j];\n            }\n            cout << jumlah << \" \";\n        }\n        cout << endl;\n    }\n    return 0;\n}\n"
+    },
+    {
+      "slug": "peringkat-kelas",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Peringkat Kelas",
+          "statement": "Buat daftar peringkat sebuah kelas. Urutkan mahasiswa dari **nilai tertinggi**; bila nilainya sama, urutkan menurut **nama secara abjad**.\n\nCetak tiap mahasiswa di satu baris: nomor urut, titik, spasi, nama, spasi, nilai.\n\nUntuk `Budi 80`, `Citra 95`, `Andi 80`:\n\n```\n1. Citra 95\n2. Andi 80\n3. Budi 80\n```\n\nAturan \"siapa lebih dulu\" bisa ditulis sebagai lambda yang menerima dua mahasiswa dan mengembalikan `bool`; pengurutannya sendiri ditulis dengan perulangan. Dua `string` bisa dibandingkan dengan `<`.",
+          "input_format": "Baris pertama: n. Lalu n baris, masing-masing berisi nama (satu kata, diawali huruf besar) dan nilai.",
+          "output_format": "n baris daftar peringkat.",
+          "constraints": "1 ≤ n ≤ 30; semua nama berbeda; nilai antara 50 dan 100"
+        },
+        "en": {
+          "title": "Class Ranking",
+          "statement": "Make the ranking list of a class. Order the students from the **highest mark**; when marks are equal, order by **name alphabetically**.\n\nPrint each student on one line: position, full stop, space, name, space, mark.\n\nFor `Budi 80`, `Citra 95`, `Andi 80`:\n\n```\n1. Citra 95\n2. Andi 80\n3. Budi 80\n```\n\nThe rule \"who comes first\" can be written as a lambda that takes two students and returns a `bool`; the sorting itself is written with loops. Two `string` values can be compared with `<`.",
+          "input_format": "First line: n. Then n lines, each with a name (one word starting with a capital) and a mark.",
+          "output_format": "The n lines of the ranking list.",
+          "constraints": "1 ≤ n ≤ 30; all names differ; marks are between 50 and 100",
+          "machine": true
+        },
+        "ar": {
+          "title": "ترتيب الصف",
+          "statement": "أنشئ قائمة ترتيب لصف. رتِّب الطلاب من **أعلى درجة**؛ وإذا تساوت الدرجات فرتِّب بحسب **الاسم أبجديًا**.\n\nاطبع كل طالب في سطر: رقم الترتيب ثم نقطة ثم مسافة ثم الاسم ثم مسافة ثم الدرجة.\n\nللبيانات `Budi 80` و `Citra 95` و `Andi 80`:\n\n```\n1. Citra 95\n2. Andi 80\n3. Budi 80\n```\n\nقاعدة «من يسبق» يمكن كتابتها لامبدا تأخذ طالبين وتُرجع `bool`؛ أما الترتيب نفسه فيُكتب بحلقات. يمكن مقارنة قيمتين من النوع `string` بالعامل `<`.",
+          "input_format": "السطر الأول: n. ثم n سطرًا في كل منها اسم (كلمة واحدة تبدأ بحرف كبير) ودرجة.",
+          "output_format": "n سطرًا لقائمة الترتيب.",
+          "constraints": "1 ≤ n ≤ 30؛ الأسماء كلها مختلفة؛ الدرجات بين 50 و 100",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nNAMA = ['Andi', 'Budi', 'Citra', 'Dewi', 'Eko', 'Fajar', 'Gita', 'Hadi', 'Indah', 'Joko', 'Kartika', 'Lina', 'Made', 'Nanda', 'Putri', 'Rudi', 'Sari', 'Tono', 'Wulan', 'Yoga', 'Zahra', 'Bayu', 'Ayu', 'Rina', 'Dimas', 'Laras', 'Agus', 'Maya', 'Iwan', 'Tari']\nn = {2: 1}.get(i, r.randint(2, 30))\nnama = r.sample(NAMA, n)\nnilai = [r.randint(50, 100) if i % 2 else r.choice([70, 80, 90]) for _ in range(n)]\nprint(n)\nfor a, b in zip(nama, nilai):\n    print(a, b)\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nstruct Mahasiswa {\n    string nama;\n    int nilai;\n};\n\nint main() {\n    int n;\n    cin >> n;\n    Mahasiswa daftar[30]{};\n    for (int k = 0; k < n; k++) {\n        cin >> daftar[k].nama >> daftar[k].nilai;\n    }\n    auto lebihDulu = [](const Mahasiswa &a, const Mahasiswa &b) {\n        if (a.nilai != b.nilai) {\n            return a.nilai > b.nilai;\n        }\n        return a.nama < b.nama;\n    };\n    for (int a = 0; a < n - 1; a++) {\n        auto terbaik = a;\n        for (int b = a + 1; b < n; b++) {\n            if (lebihDulu(daftar[b], daftar[terbaik])) {\n                terbaik = b;\n            }\n        }\n        auto sementara = daftar[a];\n        daftar[a] = daftar[terbaik];\n        daftar[terbaik] = sementara;\n    }\n    for (int k = 0; k < n; k++) {\n        cout << k + 1 << \". \" << daftar[k].nama << \" \" << daftar[k].nilai << endl;\n    }\n    return 0;\n}\n"
+    },
+    {
+      "slug": "jumlah-bilangan-besar",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Jumlah Bilangan Besar",
+          "statement": "Tipe `int` hanya muat sampai sekitar dua miliar, dan `long long` sampai sekitar 19 digit. Bagaimana menjumlahkan dua bilangan yang panjangnya 100 digit?\n\nBaca kedua bilangan sebagai `string`, lalu jumlahkan seperti di sekolah dasar: dari digit paling kanan, satu per satu, dengan angka simpanan.\n\nContoh: `999` + `1` = `1000`; `12345678901234567890` + `98765432109876543210` = `111111111011111111100`.",
+          "input_format": "Dua baris, masing-masing satu bilangan bulat tak negatif tanpa nol di depan.",
+          "output_format": "Satu baris: jumlah kedua bilangan.",
+          "constraints": "Tiap bilangan paling panjang 100 digit."
+        },
+        "en": {
+          "title": "Adding Big Numbers",
+          "statement": "The type `int` holds up to about two billion, and `long long` up to about 19 digits. How can two numbers of 100 digits be added?\n\nRead both numbers as `string`, then add them the primary-school way: from the rightmost digit, one at a time, with a carry.\n\nExamples: `999` + `1` = `1000`; `12345678901234567890` + `98765432109876543210` = `111111111011111111100`.",
+          "input_format": "Two lines, each with one non-negative integer without leading zeros.",
+          "output_format": "One line: the sum of the two numbers.",
+          "constraints": "Each number has at most 100 digits.",
+          "machine": true
+        },
+        "ar": {
+          "title": "جمع الأعداد الكبيرة",
+          "statement": "النوع `int` يسع حتى نحو مليارين، و `long long` حتى نحو 19 رقمًا. فكيف يُجمع عددان من 100 رقم؟\n\nاقرأ العددين على أنهما `string` ثم اجمعهما بطريقة المدرسة الابتدائية: من الرقم الأيمن، رقمًا رقمًا، مع رقم محمول.\n\nأمثلة: `999` + `1` = `1000`؛ `12345678901234567890` + `98765432109876543210` = `111111111011111111100`.",
+          "input_format": "سطران في كل منهما عدد صحيح غير سالب بلا أصفار في أوله.",
+          "output_format": "سطر واحد: مجموع العددين.",
+          "constraints": "كل عدد 100 رقم على الأكثر.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ndef acak(d):\n    return str(r.randint(1, 9)) + ''.join(r.choice('0123456789') for _ in range(d - 1))\na, b = acak(r.randint(1, 100)), acak(r.randint(1, 100))\nif i == 2:\n    a, b = '9' * 100, '1'\nif i == 3:\n    a, b = '0', acak(30)\nif i == 4:\n    a, b = '9' * 50, '9' * 50\nif i == 5:\n    a, b = acak(3), acak(3)\nprint(a)\nprint(b)\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string a, b;\n    cin >> a >> b;\n    string hasil = \"\";\n    auto p = (int) a.size() - 1;\n    auto q = (int) b.size() - 1;\n    auto simpan = 0;\n    while (p >= 0 || q >= 0 || simpan > 0) {\n        auto jumlah = simpan;\n        if (p >= 0) {\n            jumlah += a[p] - '0';\n            p--;\n        }\n        if (q >= 0) {\n            jumlah += b[q] - '0';\n            q--;\n        }\n        hasil = (char) ('0' + jumlah % 10) + hasil;\n        simpan = jumlah / 10;\n    }\n    cout << hasil << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "segitiga-pascal",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Segitiga Pascal",
+          "statement": "Segitiga Pascal dimulai dengan 1 di puncak. Setiap baris berikutnya diawali dan diakhiri 1, dan setiap bilangan di antaranya adalah jumlah dua bilangan tepat di atasnya.\n\nBaca n, lalu cetak n baris pertama segitiga itu; bilangan dalam satu baris dipisah satu spasi, tanpa spasi di depan.\n\nUntuk n = 5:\n\n```\n1\n1 1\n1 2 1\n1 3 3 1\n1 4 6 4 1\n```",
+          "input_format": "Satu bilangan bulat n.",
+          "output_format": "n baris segitiga Pascal.",
+          "constraints": "1 ≤ n ≤ 20"
+        },
+        "en": {
+          "title": "Pascal's Triangle",
+          "statement": "Pascal's triangle starts with 1 at the top. Every next row begins and ends with 1, and every number between is the sum of the two numbers right above it.\n\nRead n, then print the first n rows of the triangle; numbers in a row are separated by single spaces, with no spaces in front.\n\nFor n = 5:\n\n```\n1\n1 1\n1 2 1\n1 3 3 1\n1 4 6 4 1\n```",
+          "input_format": "One integer n.",
+          "output_format": "The first n rows of Pascal's triangle.",
+          "constraints": "1 ≤ n ≤ 20",
+          "machine": true
+        },
+        "ar": {
+          "title": "مثلث باسكال",
+          "statement": "يبدأ مثلث باسكال بالعدد 1 في القمة. كل صف تالٍ يبدأ وينتهي بالعدد 1، وكل عدد بينهما هو مجموع العددين اللذين فوقه مباشرة.\n\nاقرأ n ثم اطبع الصفوف n الأولى من المثلث؛ تفصل بين أعداد الصف مسافة واحدة، وبلا مسافات في أوله.\n\nعند n = 5:\n\n```\n1\n1 1\n1 2 1\n1 3 3 1\n1 4 6 4 1\n```",
+          "input_format": "عدد صحيح واحد n.",
+          "output_format": "الصفوف n الأولى من مثلث باسكال.",
+          "constraints": "1 ≤ n ≤ 20",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint({2: 1, 3: 20}.get(i, r.randint(2, 10) if i % 2 == 0 else r.randint(11, 19)))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    int baris[20]{};\n    for (int b = 0; b < n; b++) {\n        baris[b] = 1;\n        for (int k = b - 1; k > 0; k--) {\n            baris[k] = baris[k] + baris[k - 1];\n        }\n        for (int k = 0; k <= b; k++) {\n            cout << baris[k] << \" \";\n        }\n        cout << endl;\n    }\n    return 0;\n}\n"
+    },
+    {
+      "slug": "anagram",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Anagram",
+          "statement": "Dua kata disebut anagram bila huruf-huruf yang satu dapat disusun ulang menjadi kata yang lain: `kasur` dan `rusak`, `malam` dan `lamam`.\n\nBaca dua kata, lalu cetak `anagram` atau `bukan anagram`.\n\nGagasan: hitung kemunculan tiap huruf di kedua kata dengan array 26 penghitung; keduanya anagram bila semua hitungannya sama.\n\nContoh: `kasur rusak` → `anagram`; `buku kubus` → `bukan anagram`.",
+          "input_format": "Satu baris berisi dua kata dari huruf kecil.",
+          "output_format": "`anagram` atau `bukan anagram`.",
+          "constraints": "Panjang tiap kata 1 sampai 31 huruf."
+        },
+        "en": {
+          "title": "Anagram",
+          "statement": "Two words are anagrams when the letters of one can be rearranged into the other: `kasur` and `rusak`, `malam` and `lamam`.\n\nRead two words, then print `anagram` or `bukan anagram` (not an anagram).\n\nIdea: count the occurrences of each letter in both words with an array of 26 counters; they are anagrams when all counts agree.\n\nExamples: `kasur rusak` → `anagram`; `buku kubus` → `bukan anagram`.",
+          "input_format": "One line with two words of lowercase letters.",
+          "output_format": "`anagram` or `bukan anagram`.",
+          "constraints": "Each word is 1 to 31 letters long.",
+          "machine": true
+        },
+        "ar": {
+          "title": "الجناس التصحيفي",
+          "statement": "تكون كلمتان جناسًا تصحيفيًا (anagram) إذا أمكن إعادة ترتيب حروف إحداهما لتصير الأخرى: `kasur` و `rusak`، `malam` و `lamam`.\n\nاقرأ كلمتين ثم اطبع `anagram` أو `bukan anagram` (ليست جناسًا).\n\nالفكرة: عُدَّ ظهور كل حرف في الكلمتين بمصفوفة من 26 عدّادًا؛ تكونان جناسًا إذا تطابقت كل الأعداد.\n\nأمثلة: `kasur rusak` ← `anagram`؛ `buku kubus` ← `bukan anagram`.",
+          "input_format": "سطر واحد فيه كلمتان من حروف لاتينية صغيرة.",
+          "output_format": "`anagram` أو `bukan anagram`.",
+          "constraints": "طول كل كلمة من 1 إلى 31 حرفًا.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = r.randint(1, 30)\na = [r.choice('abcdefghijklmnopqrstuvwxyz' if i % 4 < 2 else 'abc') for _ in range(n)]\nb = a[:]\nr.shuffle(b)\nif i % 2 == 1:\n    p = r.randint(0, n - 1)\n    b[p] = 'z' if b[p] != 'z' else 'y'\nif i == 5:\n    b = b + ['a']\nif i == 2:\n    a, b = list('kasur'), list('rusak')\nprint(''.join(a), ''.join(b))\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main() {\n    string a, b;\n    cin >> a >> b;\n    int selisih[26]{};\n    for (auto c : a) {\n        selisih[c - 'a']++;\n    }\n    for (auto c : b) {\n        selisih[c - 'a']--;\n    }\n    auto sama = true;\n    for (auto s : selisih) {\n        if (s != 0) {\n            sama = false;\n        }\n    }\n    if (sama) {\n        cout << \"anagram\" << endl;\n    } else {\n        cout << \"bukan anagram\" << endl;\n    }\n    return 0;\n}\n"
+    },
+    {
+      "slug": "antrean-bank",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Antrean Bank",
+          "statement": "Tirukan antrean di sebuah bank. Perintah datang satu per baris:\n\n- `datang <nama>` — seorang nasabah masuk ke ujung belakang antrean;\n- `layani` — nasabah terdepan dilayani dan keluar dari antrean;\n- `selesai` — tidak ada perintah lagi.\n\nUntuk tiap `layani`, cetak `Melayani <nama>`; bila antreannya kosong, cetak `Antrean kosong`. Di akhir, cetak `Sisa antrean: k` dengan k banyak nasabah yang belum dilayani.\n\nContoh masukan:\n\n```\ndatang Budi\ndatang Citra\nlayani\nlayani\nlayani\ndatang Eko\nselesai\n```\n\nKeluarannya:\n\n```\nMelayani Budi\nMelayani Citra\nAntrean kosong\nSisa antrean: 1\n```\n\nAntrean cocok disimpan sebagai *linked list*: simpul dibuat dengan `new`, dihapus dengan `delete`, dan ujung daftar ditandai `nullptr`.",
+          "input_format": "Beberapa baris perintah, diakhiri `selesai`.",
+          "output_format": "Satu baris untuk tiap `layani`, lalu satu baris `Sisa antrean: k`.",
+          "constraints": "Paling banyak 30 perintah sebelum `selesai`; nama satu kata."
+        },
+        "en": {
+          "title": "Bank Queue",
+          "statement": "Imitate the queue in a bank. Commands come one per line:\n\n- `datang <name>` (arrives) — a customer joins the back of the queue;\n- `layani` (serve) — the customer at the front is served and leaves the queue;\n- `selesai` (done) — no more commands.\n\nFor every `layani` print `Melayani <name>`; when the queue is empty print `Antrean kosong`. At the end print `Sisa antrean: k`, where k is the number of customers not served yet.\n\nExample input:\n\n```\ndatang Budi\ndatang Citra\nlayani\nlayani\nlayani\ndatang Eko\nselesai\n```\n\nIts output:\n\n```\nMelayani Budi\nMelayani Citra\nAntrean kosong\nSisa antrean: 1\n```\n\nA queue is naturally kept as a *linked list*: nodes are made with `new`, removed with `delete`, and the end of the list is marked by `nullptr`.",
+          "input_format": "Several command lines, ending with `selesai`.",
+          "output_format": "One line for every `layani`, then one line `Sisa antrean: k`.",
+          "constraints": "At most 30 commands before `selesai`; names are one word.",
+          "machine": true
+        },
+        "ar": {
+          "title": "طابور المصرف",
+          "statement": "حاكِ الطابور في مصرف. تأتي الأوامر أمرًا في كل سطر:\n\n- `datang <الاسم>` (وصل) — ينضم عميل إلى آخر الطابور؛\n- `layani` (اخدم) — يُخدَم العميل الذي في المقدمة ويغادر الطابور؛\n- `selesai` (انتهى) — لا أوامر بعده.\n\nلكل `layani` اطبع `Melayani <الاسم>`؛ وإذا كان الطابور فارغًا فاطبع `Antrean kosong`. في النهاية اطبع `Sisa antrean: k` حيث k عدد العملاء الذين لم يُخدَموا بعد.\n\nمثال للمدخل:\n\n```\ndatang Budi\ndatang Citra\nlayani\nlayani\nlayani\ndatang Eko\nselesai\n```\n\nومخرجه:\n\n```\nMelayani Budi\nMelayani Citra\nAntrean kosong\nSisa antrean: 1\n```\n\nيناسب الطابورَ أن يُحفظ *قائمة مترابطة*: تُنشأ العقد بـ `new` وتُحذف بـ `delete` وتُعلَّم نهاية القائمة بـ `nullptr`.",
+          "input_format": "عدة أسطر أوامر تنتهي بـ `selesai`.",
+          "output_format": "سطر لكل `layani` ثم سطر `Sisa antrean: k`.",
+          "constraints": "30 أمرًا على الأكثر قبل `selesai`؛ الاسم كلمة واحدة.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nNAMA = ['Andi', 'Budi', 'Citra', 'Dewi', 'Eko', 'Fajar', 'Gita', 'Hadi', 'Indah', 'Joko', 'Kartika', 'Lina', 'Made', 'Nanda', 'Putri', 'Rudi', 'Sari', 'Tono', 'Wulan', 'Yoga', 'Zahra', 'Bayu', 'Ayu', 'Rina', 'Dimas', 'Laras', 'Agus', 'Maya', 'Iwan', 'Tari']\nm = r.randint(1, 30)\nnama = r.sample(NAMA, 30)\np = {2: 0.2, 3: 0.9}.get(i, 0.6)\nk = 0\nfor _ in range(m):\n    if r.random() < p:\n        print('datang', nama[k])\n        k += 1\n    else:\n        print('layani')\nprint('selesai')\n",
+      "reference_solution": "#include <iostream>\n#include <string>\nusing namespace std;\n\nstruct Simpul {\n    string nama;\n    Simpul *berikut;\n};\n\nint main() {\n    Simpul *depan = nullptr;\n    Simpul *belakang = nullptr;\n    auto banyak = 0;\n    string perintah;\n    while (cin >> perintah) {\n        if (perintah == \"selesai\") {\n            break;\n        }\n        if (perintah == \"datang\") {\n            auto *baru = new Simpul{\"\", nullptr};\n            cin >> baru->nama;\n            if (belakang == nullptr) {\n                depan = baru;\n            } else {\n                belakang->berikut = baru;\n            }\n            belakang = baru;\n            banyak++;\n        } else if (depan == nullptr) {\n            cout << \"Antrean kosong\" << endl;\n        } else {\n            cout << \"Melayani \" << depan->nama << endl;\n            auto *lama = depan;\n            depan = depan->berikut;\n            if (depan == nullptr) {\n                belakang = nullptr;\n            }\n            delete lama;\n            banyak--;\n        }\n    }\n    cout << \"Sisa antrean: \" << banyak << endl;\n    while (depan != nullptr) {\n        auto *lama = depan;\n        depan = depan->berikut;\n        delete lama;\n    }\n    return 0;\n}\n"
+    },
+    {
+      "slug": "spiral-matriks",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Spiral Matriks",
+          "statement": "Baca sebuah matriks, lalu cetak semua isinya **menurut jalur spiral**: mulai dari kiri atas, ke kanan sepanjang baris teratas, turun sepanjang kolom terkanan, ke kiri sepanjang baris terbawah, naik sepanjang kolom terkiri, lalu masuk ke lapisan dalam, dan seterusnya.\n\nUntuk matriks\n\n```\n1 2 3 4\n5 6 7 8\n9 10 11 12\n```\n\nkeluarannya `1 2 3 4 8 12 11 10 9 5 6 7`.\n\nHati-hati dengan matriks yang hanya punya satu baris atau satu kolom: tidak ada elemen yang boleh tercetak dua kali.",
+          "input_format": "Baris pertama: banyak baris dan banyak kolom. Lalu isi matriks, baris demi baris.",
+          "output_format": "Satu baris: semua elemen dalam urutan spiral.",
+          "constraints": "1 ≤ baris, kolom ≤ 10; tiap elemen antara 0 dan 99"
+        },
+        "en": {
+          "title": "Matrix Spiral",
+          "statement": "Read a matrix, then print all its entries **along a spiral path**: start at the top left, go right along the top row, down the rightmost column, left along the bottom row, up the leftmost column, then into the inner layer, and so on.\n\nFor the matrix\n\n```\n1 2 3 4\n5 6 7 8\n9 10 11 12\n```\n\nthe output is `1 2 3 4 8 12 11 10 9 5 6 7`.\n\nBe careful with a matrix of a single row or a single column: no entry may be printed twice.",
+          "input_format": "First line: the number of rows and the number of columns. Then the matrix, row by row.",
+          "output_format": "One line: all entries in spiral order.",
+          "constraints": "1 ≤ rows, columns ≤ 10; each entry is between 0 and 99",
+          "machine": true
+        },
+        "ar": {
+          "title": "المصفوفة الحلزونية",
+          "statement": "اقرأ مصفوفة ثم اطبع كل عناصرها **على مسار حلزوني**: ابدأ من أعلى اليسار، ثم يمينًا على الصف العلوي، ثم نزولًا على العمود الأيمن، ثم يسارًا على الصف السفلي، ثم صعودًا على العمود الأيسر، ثم إلى الطبقة الداخلية، وهكذا.\n\nللمصفوفة\n\n```\n1 2 3 4\n5 6 7 8\n9 10 11 12\n```\n\nيكون المخرج `1 2 3 4 8 12 11 10 9 5 6 7`.\n\nانتبه إلى المصفوفة ذات الصف الواحد أو العمود الواحد: لا يجوز أن يُطبع عنصر مرتين.",
+          "input_format": "السطر الأول: عدد الصفوف وعدد الأعمدة. ثم المصفوفة صفًّا صفًّا.",
+          "output_format": "سطر واحد: كل العناصر بالترتيب الحلزوني.",
+          "constraints": "1 ≤ الصفوف، الأعمدة ≤ 10؛ كل عنصر بين 0 و 99",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nb, k = r.randint(1, 10), r.randint(1, 10)\nif i == 2:\n    b, k = 1, r.randint(2, 10)\nif i == 3:\n    b, k = r.randint(2, 10), 1\nif i == 4:\n    b, k = 10, 10\nif i == 5:\n    b, k = 3, 4\nprint(b, k)\nfor _ in range(b):\n    print(*[r.randint(0, 99) for _ in range(k)])\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int baris, kolom;\n    cin >> baris >> kolom;\n    int m[10][10]{};\n    for (int b = 0; b < baris; b++) {\n        for (int k = 0; k < kolom; k++) {\n            cin >> m[b][k];\n        }\n    }\n    auto atas = 0;\n    auto bawah = baris - 1;\n    auto kiri = 0;\n    auto kanan = kolom - 1;\n    while (atas <= bawah && kiri <= kanan) {\n        for (int k = kiri; k <= kanan; k++) {\n            cout << m[atas][k] << \" \";\n        }\n        atas++;\n        for (int b = atas; b <= bawah; b++) {\n            cout << m[b][kanan] << \" \";\n        }\n        kanan--;\n        if (atas <= bawah) {\n            for (int k = kanan; k >= kiri; k--) {\n                cout << m[bawah][k] << \" \";\n            }\n            bawah--;\n        }\n        if (kiri <= kanan) {\n            for (int b = bawah; b >= atas; b--) {\n                cout << m[b][kiri] << \" \";\n            }\n            kiri++;\n        }\n    }\n    cout << endl;\n    return 0;\n}\n"
+    },
+    {
+      "slug": "permainan-hidup",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Permainan Kehidupan",
+          "statement": "*Game of Life* dimainkan di papan berpetak. Tiap petak berisi sel **hidup** (`#`) atau **mati** (`.`). Setiap petak punya paling banyak delapan tetangga: petak-petak yang bersentuhan dengannya, termasuk secara diagonal. Petak di luar papan dianggap mati.\n\nGenerasi berikutnya dihitung **serentak** untuk semua petak, dari keadaan sekarang:\n\n- sel hidup dengan 2 atau 3 tetangga hidup tetap hidup;\n- sel mati dengan tepat 3 tetangga hidup menjadi hidup;\n- semua sel lain mati.\n\nBaca sebuah papan, lalu cetak papan generasi berikutnya.\n\nContoh: tiga sel tegak\n\n```\n.#.\n.#.\n.#.\n```\n\nmenjadi tiga sel mendatar\n\n```\n...\n###\n...\n```\n\nKarena serentak, hasilnya tidak boleh ditulis ke papan yang sedang dibaca.",
+          "input_format": "Baris pertama: banyak baris dan banyak kolom. Lalu papan, satu baris teks per baris papan.",
+          "output_format": "Papan generasi berikutnya, dengan ukuran yang sama.",
+          "constraints": "1 ≤ baris, kolom ≤ 20"
+        },
+        "en": {
+          "title": "Game of Life",
+          "statement": "The *Game of Life* is played on a board of squares. Each square holds a **live** cell (`#`) or a **dead** one (`.`). Every square has at most eight neighbours: the squares touching it, diagonals included. Squares outside the board count as dead.\n\nThe next generation is computed **at once** for all squares, from the present state:\n\n- a live cell with 2 or 3 live neighbours stays alive;\n- a dead cell with exactly 3 live neighbours becomes alive;\n- every other cell is dead.\n\nRead a board, then print the board of the next generation.\n\nExample: three cells in a column\n\n```\n.#.\n.#.\n.#.\n```\n\nbecome three cells in a row\n\n```\n...\n###\n...\n```\n\nBecause everything happens at once, the result must not be written into the board that is being read.",
+          "input_format": "First line: the number of rows and the number of columns. Then the board, one text line per row.",
+          "output_format": "The board of the next generation, of the same size.",
+          "constraints": "1 ≤ rows, columns ≤ 20",
+          "machine": true
+        },
+        "ar": {
+          "title": "لعبة الحياة",
+          "statement": "تُلعب *لعبة الحياة* على رقعة من مربعات. في كل مربع خلية **حية** (`#`) أو **ميتة** (`.`). لكل مربع ثمانية جيران على الأكثر: المربعات الملاصقة له ومنها القطرية. المربعات خارج الرقعة تُعدّ ميتة.\n\nيُحسب الجيل التالي **دفعة واحدة** لكل المربعات من الحالة الراهنة:\n\n- الخلية الحية التي لها جاران حيّان أو ثلاثة تبقى حية؛\n- الخلية الميتة التي لها ثلاثة جيران أحياء بالضبط تصير حية؛\n- كل خلية أخرى ميتة.\n\nاقرأ رقعة ثم اطبع رقعة الجيل التالي.\n\nمثال: ثلاث خلايا في عمود\n\n```\n.#.\n.#.\n.#.\n```\n\nتصير ثلاث خلايا في صف\n\n```\n...\n###\n...\n```\n\nلأن كل شيء يحدث دفعة واحدة فلا يجوز كتابة الناتج في الرقعة التي تُقرأ.",
+          "input_format": "السطر الأول: عدد الصفوف وعدد الأعمدة. ثم الرقعة، سطر نصي لكل صف.",
+          "output_format": "رقعة الجيل التالي بالحجم نفسه.",
+          "constraints": "1 ≤ الصفوف، الأعمدة ≤ 20",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nb, k = r.randint(1, 20), r.randint(1, 20)\np = {2: 0.0, 3: 1.0}.get(i, r.choice([0.2, 0.35, 0.5]))\ng = [''.join('#' if r.random() < p else '.' for _ in range(k)) for _ in range(b)]\nif i == 4:\n    b, k, g = 3, 3, ['.#.', '.#.', '.#.']\nif i == 5:\n    b, k, g = 4, 4, ['....', '.##.', '.##.', '....']\nprint(b, k)\nprint('\\n'.join(g))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint main() {\n    int baris, kolom;\n    cin >> baris >> kolom;\n    char lama[20][21]{};\n    for (int b = 0; b < baris; b++) {\n        cin >> lama[b];\n    }\n    auto hidup = [&lama, baris, kolom](int b, int k) {\n        return b >= 0 && b < baris && k >= 0 && k < kolom && lama[b][k] == '#';\n    };\n    for (int b = 0; b < baris; b++) {\n        for (int k = 0; k < kolom; k++) {\n            auto tetangga = 0;\n            for (int db = -1; db <= 1; db++) {\n                for (int dk = -1; dk <= 1; dk++) {\n                    if ((db != 0 || dk != 0) && hidup(b + db, k + dk)) {\n                        tetangga++;\n                    }\n                }\n            }\n            if (tetangga == 3 || (tetangga == 2 && hidup(b, k))) {\n                cout << \"#\";\n            } else {\n                cout << \".\";\n            }\n        }\n        cout << endl;\n    }\n    return 0;\n}\n"
+    },
+    {
+      "slug": "sudoku-sah",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Sudoku Sah",
+          "statement": "Sebuah papan sudoku yang sudah terisi penuh berukuran 9 × 9. Papan itu **sah** bila angka 1 sampai 9 masing-masing muncul tepat satu kali di:\n\n- setiap baris;\n- setiap kolom;\n- setiap kotak 3 × 3 (ada sembilan kotak, tidak saling tumpang-tindih).\n\nBaca papannya, lalu cetak `sah` atau `tidak sah`.\n\nKesalahan bisa sangat halus: ada papan yang semua baris dan kolomnya benar, tetapi salah satu kotaknya tidak.",
+          "input_format": "Sembilan baris, masing-masing berisi sembilan angka dipisah spasi.",
+          "output_format": "`sah` atau `tidak sah`.",
+          "constraints": "Tiap angka antara 1 dan 9."
+        },
+        "en": {
+          "title": "Valid Sudoku",
+          "statement": "A completely filled sudoku board measures 9 × 9. The board is **valid** when each of the digits 1 to 9 occurs exactly once in:\n\n- every row;\n- every column;\n- every 3 × 3 box (there are nine boxes, not overlapping).\n\nRead the board, then print `sah` (valid) or `tidak sah` (not valid).\n\nA mistake can be very subtle: some boards have all rows and columns right, but one box wrong.",
+          "input_format": "Nine lines, each with nine digits separated by spaces.",
+          "output_format": "`sah` or `tidak sah`.",
+          "constraints": "Each digit is between 1 and 9.",
+          "machine": true
+        },
+        "ar": {
+          "title": "سودوكو صحيحة",
+          "statement": "رقعة سودوكو مملوءة تمامًا حجمها 9 × 9. تكون الرقعة **صحيحة** إذا ظهر كل رقم من 1 إلى 9 مرة واحدة بالضبط في:\n\n- كل صف؛\n- كل عمود؛\n- كل مربع 3 × 3 (المربعات تسعة غير متداخلة).\n\nاقرأ الرقعة ثم اطبع `sah` (صحيحة) أو `tidak sah` (غير صحيحة).\n\nقد يكون الخطأ دقيقًا جدًّا: بعض الرقع كل صفوفها وأعمدتها صحيحة لكن أحد مربعاتها خاطئ.",
+          "input_format": "تسعة أسطر في كل منها تسعة أرقام تفصل بينها مسافات.",
+          "output_format": "`sah` أو `tidak sah`.",
+          "constraints": "كل رقم بين 1 و 9.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nd = list(range(1, 10))\nr.shuffle(d)\ng = [[d[(3 * (b % 3) + b // 3 + k) % 9] for k in range(9)] for b in range(9)]\nub = [x for blok in r.sample([0, 1, 2], 3) for x in r.sample([3 * blok, 3 * blok + 1, 3 * blok + 2], 3)]\nuk = [x for blok in r.sample([0, 1, 2], 3) for x in r.sample([3 * blok, 3 * blok + 1, 3 * blok + 2], 3)]\ng = [[g[b][k] for k in uk] for b in ub]\nj = i % 4\nif j == 1:\n    b, k = r.randint(0, 8), r.randint(0, 8)\n    g[b][k] = g[b][k] % 9 + 1\nelif j == 2:\n    b = r.randint(0, 8)\n    k1 = r.randint(0, 2)\n    k2 = r.randint(3, 8)\n    g[b][k1], g[b][k2] = g[b][k2], g[b][k1]\nelif j == 3:\n    b = 3 * r.randint(0, 2)\n    g[b], g[b + 1] = g[b + 1], g[b]\n    k = r.randint(0, 8)\n    b2 = (b + 3) % 9\n    k2 = (k + 3) % 9\n    v, w = g[b][k], g[b2][k2]\n    g[b][k], g[b2][k2] = w, v\nfor baris in g:\n    print(*baris)\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nbool lengkap(const int hitung[10]) {\n    for (int d = 1; d <= 9; d++) {\n        if (hitung[d] != 1) {\n            return false;\n        }\n    }\n    return true;\n}\n\nint main() {\n    int g[9][9]{};\n    for (auto &baris : g) {\n        for (auto &sel : baris) {\n            cin >> sel;\n        }\n    }\n    auto sah = true;\n    for (int a = 0; a < 9; a++) {\n        int baris[10]{}, kolom[10]{}, kotak[10]{};\n        for (int b = 0; b < 9; b++) {\n            baris[g[a][b]]++;\n            kolom[g[b][a]]++;\n            kotak[g[a / 3 * 3 + b / 3][a % 3 * 3 + b % 3]]++;\n        }\n        if (!lengkap(baris) || !lengkap(kolom) || !lengkap(kotak)) {\n            sah = false;\n        }\n    }\n    if (sah) {\n        cout << \"sah\" << endl;\n    } else {\n        cout << \"tidak sah\" << endl;\n    }\n    return 0;\n}\n"
+    },
+    {
+      "slug": "ratu-pertama",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 2000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Ratu Pertama Sudah Ditaruh",
+          "statement": "Dalam teka-teki *n ratu*, n buah ratu catur harus ditaruh di papan n × n sehingga **tidak ada dua ratu yang saling menyerang**: tidak sebaris, tidak sekolom, dan tidak sediagonal.\n\nRatu di baris pertama sudah ditaruh di kolom k. Dengan berapa cara ratu-ratu di baris lainnya dapat ditaruh?\n\nContoh: untuk papan 4 × 4, ratu pertama di kolom 2 memberi 1 cara, sedangkan ratu pertama di kolom 1 memberi 0 cara. Untuk papan 8 × 8 dengan ratu pertama di kolom 1 ada 4 cara.\n\nGagasan: taruh ratu baris demi baris dengan fungsi rekursif. Di tiap baris, coba setiap kolom; bila aman terhadap semua ratu di baris-baris sebelumnya, lanjutkan ke baris berikutnya. Kolom ratu tiap baris cukup dicatat dalam sebuah array.",
+          "input_format": "Satu baris berisi n dan k.",
+          "output_format": "Satu bilangan bulat: banyak cara.",
+          "constraints": "1 ≤ k ≤ n ≤ 9"
+        },
+        "en": {
+          "title": "The First Queen is Placed",
+          "statement": "In the *n queens* puzzle, n chess queens must be put on an n × n board so that **no two queens attack each other**: not in the same row, the same column, or the same diagonal.\n\nThe queen of the first row is already placed in column k. In how many ways can the queens of the other rows be placed?\n\nExamples: on a 4 × 4 board, a first queen in column 2 gives 1 way, while a first queen in column 1 gives 0 ways. On an 8 × 8 board with the first queen in column 1 there are 4 ways.\n\nIdea: place the queens row by row with a recursive function. In each row try every column; when it is safe against all queens in the earlier rows, go on to the next row. The column of each row's queen can be kept in an array.",
+          "input_format": "One line with n and k.",
+          "output_format": "One integer: the number of ways.",
+          "constraints": "1 ≤ k ≤ n ≤ 9",
+          "machine": true
+        },
+        "ar": {
+          "title": "الوزير الأول موضوع",
+          "statement": "في لغز *n وزيرًا* يجب وضع n وزيرًا من الشطرنج على رقعة n × n بحيث **لا يهاجم وزيرٌ وزيرًا آخر**: لا في الصف نفسه ولا في العمود نفسه ولا على القطر نفسه.\n\nوزير الصف الأول موضوع أصلًا في العمود k. بكم طريقة يمكن وضع وزراء الصفوف الأخرى؟\n\nأمثلة: على رقعة 4 × 4 يعطي الوزير الأول في العمود 2 طريقة واحدة، ويعطي الوزير الأول في العمود 1 صفر طرق. وعلى رقعة 8 × 8 مع الوزير الأول في العمود 1 توجد 4 طرق.\n\nالفكرة: ضع الوزراء صفًّا صفًّا بدالة عودية. في كل صف جرِّب كل عمود؛ فإذا كان آمنًا من كل وزراء الصفوف السابقة فانتقل إلى الصف التالي. يكفي حفظ عمود وزير كل صف في مصفوفة.",
+          "input_format": "سطر واحد فيه n و k.",
+          "output_format": "عدد صحيح واحد: عدد الطرق.",
+          "constraints": "1 ≤ k ≤ n ≤ 9",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = {2: 1, 3: 9, 4: 2, 5: 3}.get(i, r.randint(4, 6) if i % 2 == 0 else r.randint(7, 9))\nprint(n, r.randint(1, n))\n",
+      "reference_solution": "#include <iostream>\nusing namespace std;\n\nint hitung(int baris, int n, int kolomRatu[]) {\n    if (baris == n) {\n        return 1;\n    }\n    auto banyak = 0;\n    for (int k = 0; k < n; k++) {\n        auto aman = true;\n        for (int b = 0; b < baris; b++) {\n            auto selisih = kolomRatu[b] - k;\n            if (selisih == 0 || selisih == baris - b || selisih == b - baris) {\n                aman = false;\n            }\n        }\n        if (aman) {\n            kolomRatu[baris] = k;\n            banyak += hitung(baris + 1, n, kolomRatu);\n        }\n    }\n    return banyak;\n}\n\nint main() {\n    int n, kolom;\n    cin >> n >> kolom;\n    int kolomRatu[9]{};\n    kolomRatu[0] = kolom - 1;\n    cout << hitung(1, n, kolomRatu) << endl;\n    return 0;\n}\n"
+    }
+  ]
+}

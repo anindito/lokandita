@@ -1170,7 +1170,7 @@ How one meeting is made (the next session repeats this for the next row):
 | DDP101 | 5 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-5.md` | no | no |
 | DDP101 | 6 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-6.md` | no | no |
 | DDP101 | 7 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-7.md` | no | no |
-| PBO301 | 1 | no | no | — | no | no |
+| PBO301 | 1 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/pbo301-pertemuan-1.md` | no | no |
 | PBO301 | 2 | no | no | — | no | no |
 | PBO301 | 3 | no | no | — | no | no |
 | PBO301 | 4 | no | no | — | no | no |
@@ -1234,5 +1234,27 @@ Before any problem was written (read-only queries, output in the session): the e
   - Several recursive reference solutions are deliberately exponential (`fibonacci` to 30, `kombinasi` to C(25, 12), `partisi` to 60, `catalan` to 15); the slowest validated run stayed under half the 2 s limit (no `reference_slow` warning). A student who calls `langkah(n − 1)` twice in `hanoi-langkah` gets a time limit at large n; the statement warns about it.
   - Otherwise as the earlier meetings: read by nobody but the agent; English and Arabic by the agent.
 
-**DDP101 meetings 4–7 are all built and imported; 128 problems await the owner's review. Next row: PBO301 meeting 1.**
+**DDP101 meetings 4–7 are all built and imported; 128 problems await the owner's review.**
+
+### PBO301 detection rules, checked on the real analyser (2026-11-23)
+
+Twelve probe programs were run through `kotak.analisis` (the judge's own analyser container; output in the session). They confirm `docs/DETEKSI-KONSEP.md` and add what the owner should know before reviewing PBO301 problems:
+
+- Any `class` with a body counts as `CLASS_OBJECT`, used or not: `class X {};` above purely procedural code satisfies the requirement. A `struct` with a member function counts too.
+- A class whose data members sit in the default-private part of `class`, or under `private:` / `protected:`, is `ENCAPSULATION`. Reference solutions for meetings 2 and 3 therefore put everything under `public:`.
+- **An association that exists only as a method parameter (`void baca(const Buku &b)`) is not `KOMPOSISI_AGREGASI`**; only a data member of another class type is. Meeting 5 problems on pure association cannot require that concept.
+- `class Darat : virtual public Kendaraan` is `INHERITANCE` and not `POLYMORPHISM`. A method `info()` that calls `Kendaraan::info()` is reported as `REKURSI` (a false positive; harmless in PBO301, where `REKURSI` is a base concept).
+- `enum class`, `constexpr`, `static` members, `const` methods, `friend`, `this->`, `= default` / `= delete` are not counted as any concept.
+
+### PBO301 meeting 1 — Pengantar OOP, C++ Modern, UML (2026-11-23)
+
+- 32 procedural problems in modern C++ style, 8 / 8 / 6 / 6 / 4, 232 points: range-based `for` over arrays and strings, `auto`, `nullptr` with `new` / `delete`, uniform initialisation, lambdas, `enum class`, structs, arrays and matrices, a linked list. No class, STL container, STL algorithm or exception in any reference solution (22 allowed concepts: the 21 base concepts and `MODERN_CPP`).
+- `periksa.py` → `32 dari 32 soal lulus` (240 judge tests per problem, no warning; 36 generated tests per problem equal to the separate Python calculation; 43 quoted examples equal).
+- `spark soal:impor` → `32 diterima, 0 ditolak, 0 tidak berubah`. Production shows 32 versions `PENDING_REVIEW` (8 / 8 / 6 / 6 / 4), meeting not published.
+- Skipped from the syllabus of this meeting: UML diagrams and UML tools (not judgeable from output); the comparison of paradigms as prose; and, by the owner's decision of 2026-11-23, the history of C++ and the toolchain setup.
+- Weaker than it looks:
+  - **Nothing forces the modern style.** No concept is required in the student's code: a C-style solution with index loops and `NULL` gets full marks. The statements recommend the modern construct; the judge only sees output.
+  - These are in effect review problems on arrays, strings, structs and pointers (DDP101 meetings 9–12 and SDA), which is what a meeting "before classes" leaves to practise.
+  - `std::vector` is not used anywhere although modern C++ practice would use it: `STL_CONTAINER` is not allowed until meeting 13. Students may use it; reference solutions may not.
+  - Read by nobody but the agent; English and Arabic by the agent.
 
