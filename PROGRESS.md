@@ -1,6 +1,6 @@
 # Progress
 
-**Stage 10b — integrity and communication (`SPEC.md` §13.2, §14) — code finished and pushed 2026-11-22, NOT deployed and NOT tagged.** Deploy waits for the owner's word on two things: the uncommitted `docs/branding/` changes (not the agent's) and when `lokakode` may restart under students. The owner's gate has not been run. See "Stage 10b" at the end of this file.
+**Stage 10b — integrity and communication (`SPEC.md` §13.2, §14) — deployed 2026-11-22 at `0ebd1a1`; smoke 39 lulus. NOT tagged: the owner's gate has not been reported. Code similarity was dropped by the owner's decision. See "Stage 10b" and "Deploy of stage 10b" at the end of this file.**
 
 **Stage 10a — Safe Exam Browser (`SPEC.md` §13.1) — closed 2026-11-22, tag `tahap-10a`; the owner reported gate steps 1–6 passed for every course; **enforcement is ON in production since 2026-11-22 (`SEB_ENFORCEMENT=enabled`)**. The owner reported that a student is refused without SEB and staff are not; and that a student can log in and work inside SEB under enforcement (confirmed by the server log); Run, Submit and the heartbeat from real SEB under enforcement are not in the log yet. See "Stage 10a after the tag" at the end of this file. Next: stage 10b (similarity, typing anomaly, integrity page, notifications, clarifications, announcements), not started; it begins in a new session with a plan.**
 
@@ -1074,4 +1074,19 @@ Owner's gate for stage 10b (after deploy):
 5. Reset the test student's password from the class page; after the forced change the student sees the notification naming who reset it.
 6. Read the new sentence on `lokandita.com/ketentuan` and `/privasi` in the three languages.
 7. Optional, inside SEB: with an editor tool that inserts a long block at once (or undo of a large deletion), check that **Ketikan tak wajar** appears on the Integritas page.
+
+### Deploy of stage 10b — 2026-11-22 (output in the session)
+
+- Owner's answers: branding files "commit them as they are"; restart "now"; privacy sentence about the asker's name "yes"; fix the judge test "yes".
+- Added after the first report (`78201fc`): the privacy page says, in `id`, `en`, `ar`, that classmates see the asker's name next to a clarification question whose answer is published to the class; the judge test now compares each expected output as a whole word of every text in result, progress and log (`kata_teks`), with a guard test that the check still finds a real leak.
+- `0ebd1a1`: the owner's branding files committed as they were (12 PNG deleted, `LOKANDITA-BRAND.md` and `newbranding.zip`, 16 MB, added). `docs/branding/LISENSI.md` was not checked against them.
+- `infra/cek-env.sh` LULUS; `infra/backup.sh` → `backup SELESAI`; `infra/deploy.sh auth`, `lokakode`, `portal`, `judge` each verified at `0ebd1a1` (`/healthz`; the worker by its heartbeat).
+- `infra/smoke.sh` → **39 lulus, 0 gagal, 0 belum aktif**; check 11 passes; check 10: `SEB_ENFORCEMENT=enabled`, unchanged.
+- Migration `2026-11-22-000007` is the last row of `lokakode.migrations`; `notifications`, `clarifications`, `announcements` exist and were empty right after deploy.
+- Real requests from the internet without a session: `/notifikasi`, `/pengumuman`, `/kelas/1/integritas`, `/kelas/1/integritas/ekspor/csv`, `/kelas/1/klarifikasi`, `/kelas/1/pengumuman`, `/api/soal/1/klarifikasi` of `lokakode.lokandita.com` → `302` to the LokaAuth login with the right `next`. `lokandita.com/ketentuan` and `/privasi` show "Terakhir diperbarui: 22 November 2026" and the new sentences.
+- No error line in the `lokakode` container log in the five minutes after the restart.
+- `infra/tes.sh judge`, complete, with the fixed test → **259 passed** (it ran while the deploy was going on). `infra/tes.sh portal` for the changed pages → 30 tests pass; the full `lokakode`, `auth` and `portal` suites were last run before `78201fc` (282, 105, 86 pass) and nothing of `lokakode` or `auth` changed after that.
+- **Not verified by the agent: any page behind a session in production** — the new student navigation, the Klarifikasi tab, the staff pages, the exports with real data, and the typing event from real SEB. That is the owner's gate (steps above).
+- The commit that holds these lines differs from the deployed `0ebd1a1` only in this file and was **not** redeployed, so as not to restart the containers under students a second time; `infra/smoke.sh` check 0 fails until the next deploy.
+- After the gate: tag `tahap-10b`.
 
