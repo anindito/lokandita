@@ -1167,7 +1167,7 @@ How one meeting is made (the next session repeats this for the next row):
 | Course | Meeting | Built | Imported | Review sheet | Reviewed by owner | Approved |
 |---|---|---|---|---|---|---|
 | DDP101 | 4 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-4.md` | no | no |
-| DDP101 | 5 | no | no | — | no | no |
+| DDP101 | 5 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-5.md` | no | no |
 | DDP101 | 6 | no | no | — | no | no |
 | DDP101 | 7 | no | no | — | no | no |
 | PBO301 | 1 | no | no | — | no | no |
@@ -1193,4 +1193,16 @@ Before any problem was written (read-only queries, output in the session): the e
   - `kategori-imt` prints a decimal; inputs within 0.001 of a category limit or of a rounding half are never generated, so answers do not depend on the order of the floating-point operations.
   - Difficulty labels are the agent's judgement until calibration data exists.
   - The statements were changed from tables to lists **after** the judge check and before the import; solutions and generators were not touched, and the importer validated the final file itself.
+
+### DDP101 meeting 5 — Struktur Kontrol: Perulangan (2026-11-23)
+
+- 32 problems, 8 / 8 / 6 / 6 / 4, 232 points. Loops over data read one item at a time; no array and no own function in any reference solution. Syllabus items covered: `for`, `while`, sentinel loops, `break` / `continue`, nested loops and patterns, simple statistics, searching a value.
+- `periksa.py` with the ten allowed concepts → `32 dari 32 soal lulus` (240 judge tests per problem, no warning; 36 generated tests per problem equal to the separate Python calculation; 48 quoted examples equal).
+- `spark soal:impor` → `32 diterima, 0 ditolak, 0 tidak berubah`. Production shows 32 versions `PENDING_REVIEW` (8 / 8 / 6 / 6 / 4), meeting not published.
+- Weaker than it looks:
+  - The same as meeting 4: read by nobody but the agent, English and Arabic by the agent, Indonesian output words in all three versions, difficulty labels unproven.
+  - Pattern problems (`ketupat-berongga`, `papan-catur`, the star shapes) need exact leading spaces; only trailing spaces are forgiven. A wrong pattern is "wrong output" without a hint.
+  - `tripel-pythagoras` with three plain nested loops and no `break` is about 4.5 million steps at n = 300 and passes the 2 s limit easily; the statement's remark about stopping early is advice, not something the judge enforces.
+  - `rata-rata-n` and `statistik-nilai` print two decimals; inputs whose average falls within 0.001 of a rounding half are never generated.
+  - No `do … while` problem demands that form: every problem can be solved with `for` or `while`.
 

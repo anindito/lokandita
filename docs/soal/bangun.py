@@ -21,6 +21,13 @@ def cpp(isi: str, *pustaka: str) -> str:
     return kepala + "using namespace std;\n\nint main() {\n" + isi.rstrip("\n") + "\n    return 0;\n}\n"
 
 
+def program(depan: str, isi: str, *pustaka: str) -> str:
+    """Program C++ lengkap: `depan` (fungsi, kelas) di atas main(), lalu isi main()."""
+    kepala = "".join(f"#include <{p}>\n" for p in ("iostream", *pustaka))
+    return (kepala + "using namespace std;\n\n" + depan.strip("\n") + "\n\nint main() {\n"
+            + isi.rstrip("\n") + "\n    return 0;\n}\n")
+
+
 def _teks(t, mesin: bool) -> dict:
     judul, pernyataan, masukan, keluaran, batasan = t
     hasil = {"title": judul, "statement": pernyataan, "input_format": masukan, "output_format": keluaran, "constraints": batasan}
