@@ -1168,7 +1168,7 @@ How one meeting is made (the next session repeats this for the next row):
 |---|---|---|---|---|---|---|
 | DDP101 | 4 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-4.md` | no | no |
 | DDP101 | 5 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-5.md` | no | no |
-| DDP101 | 6 | no | no | — | no | no |
+| DDP101 | 6 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-6.md` | no | no |
 | DDP101 | 7 | no | no | — | no | no |
 | PBO301 | 1 | no | no | — | no | no |
 | PBO301 | 2 | no | no | — | no | no |
@@ -1205,4 +1205,18 @@ Before any problem was written (read-only queries, output in the session): the e
   - `tripel-pythagoras` with three plain nested loops and no `break` is about 4.5 million steps at n = 300 and passes the 2 s limit easily; the statement's remark about stopping early is advice, not something the judge enforces.
   - `rata-rata-n` and `statistik-nilai` print two decimals; inputs whose average falls within 0.001 of a rounding half are never generated.
   - No `do … while` problem demands that form: every problem can be solved with `for` or `while`.
+
+### DDP101 meeting 6 — Fungsi dan Parameter Passing (2026-11-23)
+
+- 32 problems, 8 / 8 / 6 / 6 / 4, 232 points. Every statement names the function to write (for example `void tukar(int &a, int &b)`); 11 problems are built around by-reference parameters. No array, recursion, overloading or default argument in any reference solution.
+- `REFERENSI` was still not ticked for this meeting in production when the file was checked and imported (12 allowed concepts), so no reference solution declares a reference variable; by-reference parameters are `PARAMETER_REF` and allowed.
+- `periksa.py` with those 12 concepts → `32 dari 32 soal lulus` (240 judge tests per problem, no warning; 36 generated tests per problem equal to the separate Python calculation; 59 quoted examples equal).
+- `spark soal:impor` → `32 diterima, 0 ditolak, 0 tidak berubah`. Production shows 32 versions `PENDING_REVIEW` (8 / 8 / 6 / 6 / 4), meeting not published.
+- Weaker than it looks:
+  - **These problems do not require a function in the student's code.** `required_concepts_in_submission` is empty: a student who writes everything in `main` and prints the right output gets full marks. The owner approved a requirement for recursion only; requiring `FUNGSI` or `PARAMETER_REF` here is his decision and would be a new version of each problem.
+  - Overloading and default arguments, which the syllabus lists for this meeting, are in meeting 7, where the concept map first allows them.
+  - Inline functions from the syllabus have no problem: `inline` cannot be seen in output.
+  - `keliling-segitiga-titik` prints two decimals from `sqrt`; inputs whose perimeter falls within 0.001 of a rounding half are never generated.
+  - `romawi-ke-angka` refers to "soal pertemuan lalu" (the Roman numeral problem of meeting 4).
+  - Otherwise as meetings 4 and 5: read by nobody but the agent; English and Arabic by the agent; Indonesian output words in all three versions.
 
