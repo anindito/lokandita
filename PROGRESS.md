@@ -1004,3 +1004,11 @@ Gate result for stage 10a, 2026-11-22:
 - The tagged commit differs from the deployed `feeffdd` only in this file. **It has not been redeployed**: the working tree holds changes that are not the agent's (`docs/branding/`: one zip deleted, four new directories), and `infra/deploy.sh` refuses a tree with uncommitted changes. Until those are committed or removed and the four components are redeployed, `infra/smoke.sh` check 0 fails. Nothing that runs has changed.
 
 **Stage 10a closed 2026-11-22, tag `tahap-10a`.**
+
+Stage 10a after the tag, 2026-11-22:
+
+- **The owner reported: "Steps 1–6 of the stage 10a gate passed for every course."** The agent did not watch them.
+- The entry above ("no Browser Exam Key is registered") was true when it was written and is no longer: the keys were registered afterwards, at about 18:31 WIB. Read from the live database on the owner's request, nothing changed: DDP101 — 104 `AKTIF` students, configuration version 1, 1 key; PBO301 — 103, version 1, 1 key; TS-PY — 28, version 1, 1 key. 235 `AKTIF` students in the active year, none in more than one course. No course with active students lacks a configuration or a key. Audit: 3 `seb.dibuat`, 4 `seb.kunci`.
+- The access log shows an SEB 3.10.2 client opening `/beranda`, `/seb/periksa` and `/latihan/…`; what the check page displayed is not in the log and is taken from the owner's report.
+- Branding files under `docs/branding/` (12 PNG in four directories; the old zip removed) are the owner's and were committed as they were, on his word, so that `infra/deploy.sh` runs again. `docs/branding/LISENSI.md` still names the removed zip.
+- Enforcement: see the next lines.
