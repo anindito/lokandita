@@ -579,6 +579,7 @@ Values are written without quotes.
   9. the Portal's hero photo (stage 11c, §16), asked the same way: the first AVIF file named by the landing page answers `200 image/avif`, and `/media/hero/smoke.php` answers `403`.
   10. Safe Exam Browser (stage 10a, §8), asked the same way: `GET /seb` of `lokakode` answers `200` and names the state of enforcement that the running container has; `GET /seb/periksa` answers `200` and reports no SEB header; `SEB_ENFORCEMENT` in the running container equals the value in `apps/lokakode/.env`. `disabled` passes, with a warning line that says students are not required to use SEB.
   11. integrity and communication (stage 10b, §17): the `lokakode` schema has the tables `notifications`, `clarifications` and `announcements`; asked as in check 8, `GET /notifikasi`, `/pengumuman`, `/kelas/1/integritas`, `/kelas/1/klarifikasi` and `/kelas/1/pengumuman` of `lokakode` without a cookie each redirect to `AUTH_LOGIN_URL` with `next` equal to that address (the route exists in the running code); `GET /ketentuan` of `portal` in Indonesian holds the sentence on unusual typing — it fails when a text override (§15) of that page lacks the sentence.
+  12. brand (§16 "Brand files"), asked as in check 8: `auth`, `portal` and `lokakode` each answer `200` for `/favicon.ico`, `/merek/icon-{16,32,180,192,512}.png`, `/merek/logo-{terang,gelap}.webp` and a `/merek/site.webmanifest` that is JSON with a name and two icons; `GET /` of `portal` carries the six app cards in the order of §16; no public page of `portal` and not the landing of `lokakode` contains "LokaAuth" — it fails when a text override (§15) brings the name back.
 - `smoke.sh` additionally checks (as check 0) that every app container reports the current `HEAD` at `/healthz`.
 - In check 1 a host in maintenance must answer `503`, an open host `2xx`/`3xx`, and `www` a `301` to the apex; the certificate must validate.
 - Checks 3–5 become active in stage 5, check 6 in stage 7 and check 7 in stage 8, by a switch at the top of `smoke.sh`. Until then each prints `BELUM AKTIF`, is counted separately, and is not reported as passed.
@@ -697,7 +698,7 @@ portal.teks       (halaman VARCHAR(20), bahasa ENUM('id','en','ar'), isi MEDIUMT
 portal.audit_log  (id BIGINT PK, actor_id CHAR(36), action VARCHAR(60), halaman, bahasa, sebelum MEDIUMTEXT NULL, sesudah MEDIUMTEXT NULL, ip, user_agent, created_at)
 ```
 
-- `halaman` is one of `depan`, `aplikasi` (the three app descriptions, also shown on `/beranda`), `tentang`, `privasi`, `ketentuan`. Until 2026-11-21 there was a sixth, `kontak`; its contents are now the last sections of `tentang`, and `/kontak` answers `301` to `/tentang`.
+- `halaman` is one of `depan`, `aplikasi` (one description per app of `Config\Aplikasi`, six since 2026-11-22 — see §16 "App list"; also shown on `/beranda`), `tentang`, `privasi`, `ketentuan`. Until 2026-11-21 there was a sixth, `kontak`; its contents are now the last sections of `tentang`, and `/kontak` answers `301` to `/tentang`.
 - `isi`, `sebelum` and `sesudah` hold JSON as text (a MySQL `JSON` column would reorder the keys, and their order is the order on the page).
 - `isi` has exactly the shape of that page's array in the language file: the same keys, the same number of sections (`bagian`); only the texts and the number of paragraphs (`pembuka`, `isi`, `cara`) and bullets (`butir`) may differ. `App\Libraries\Teks::dariForm` builds it from the form and refuses anything else, so a stored row can always be rendered by the same view as the default.
 - Reading (`App\Libraries\Teks::ambil`): the row when there is one **and it still has the shape of the default** (same keys, same number of sections), else the language file; a row of another shape is left in the table, not shown, and logged as `teks.bentuk_usang`. When the `portal` database cannot be reached the language file is used and `teks.db_unavailable` is logged — a public page never fails because of this table.
@@ -777,9 +778,38 @@ In the route group of §15: behind `masuk:superadmin` (any other role `403`, no 
 - Written to `portal.audit_log` (§15) in the same transaction, with `halaman = 'foto'`, `bahasa` NULL and the photo's description (id, original file name, size, source, licence, alt texts) in `sebelum` / `sesudah`: `foto.diunggah`, `foto.ditayangkan` (first time live), `foto.dipulihkan` (an earlier photo live again), `foto.bawaan`. Publishing the photo that is already live writes nothing.
 - A photo that is uploaded but not published is not referenced by any public page, but its files answer to anyone who knows the random name.
 
+### Brand files (2026-11-22)
+
+The brand family and its names: `docs/branding/LOKANDITA-BRAND.md`. **"LokaAuth" is not a name users see any more**: interface text says "Akun Lokandita" (`en` "Lokandita account", `ar` "حساب Lokandita"), the identity site's title and manifest say "Akun Lokandita", and new TOTP enrolments carry the issuer "Lokandita". Internal identifiers keep their names: directories, hosts, environment variables, service tokens, `"aplikasi": "auth"` and the file name in §14, log lines, and the operator's `spark` output.
+
+Originals are `docs/branding/baru/Lokandita-Brand-Family-Variation-1/brands/<Brand>/` and are never served. What is served is derived from them by **`infra/buat-merek.sh`** (PHP/GD in the app image, no network) and committed under `apps/<app>/public/`; `infra/buat-merek.sh --periksa` fails when the committed files are not what the originals produce. `auth` and `portal` carry the Lokandita brand, `lokakode` its own.
+
+| File (every app) | What |
+|---|---|
+| `/favicon.ico` | ICO holding the original 16, 32 and 48 px PNGs, light variant |
+| `/merek/icon-16.png`, `icon-32.png`, `icon-192.png`, `icon-512.png` | originals, byte for byte (512 is the "logo only" file) |
+| `/merek/icon-16-gelap.png`, `icon-32-gelap.png` | dark variant, linked with `media="(prefers-color-scheme: dark)"` |
+| `/merek/icon-180.png` | the 180 px original on opaque `#f4f7fb` (iOS paints transparency black) |
+| `/merek/site.webmanifest` | `application/manifest+json`: `name`, `short_name`, icons 192 and 512 |
+| `/merek/logo-{terang,gelap}.{webp,png}`, `logo.json` | header logo: "name right" original with the transparent margin trimmed, 80 px high (shown at 40); `logo.json` = `{ lebar, tinggi }` as shown |
+
+| File (one app) | What |
+|---|---|
+| `auth`, `lokakode`: `/merek/og-image.png` | 1200 × 630, the light logo centred on `#f4f7fb`. **The Portal's Open Graph image stays the photo crop `/merek/og-image.jpg` above** (the owner's decision) |
+| `lokakode`: `/merek/pembuka-{terang,gelap}.{webp,png}` | hero of the landing: "name below" original at 704 px |
+| `portal`: `/merek/aplikasi/<kode>-{terang,gelap}.{webp,png}` | app-card icons, 112 px (shown at 56), one set per brand folder that has a "logo only" file; `<kode>` is the brand name in lower case |
+
+The shared layout (`tata_letak.php`) writes the icon links, the manifest link, `theme-color` and the header logo; a `<picture>` chooses the dark files under `prefers-color-scheme: dark`. No original is recoloured. The CSP is unchanged (`default-src 'self'` covers the manifest, `img-src 'self'` the images).
+
+### App list
+
+The apps the Portal shows are data: `apps/portal/app/Config/Aplikasi.php`, one entry per app in display order — `nama`, `status` (`aktif` = a link to the address in the environment variable named by `alamat`; `segera` = not a link, badge "Segera"), `ikon` (file name under `/merek/aplikasi/`, or `null`). The one-line description is `Portal.aplikasi.<kode>` in the three language files and can be overridden as page `aplikasi` (§15). Adding an app is one entry plus one line per language; no view changes. An entry without an icon, or whose icon file is missing, is drawn with a neutral ring of the same size.
+
+Order since 2026-11-22: `lokakode` (aktif), `lokaujian`, `lokakelas`, `lokasiber`, `lokaretas`, `lokadata` (segera). `/beranda` (§4) still shows only the apps `app_access` allows; `lokakelas`, `lokaretas` and `lokadata` are not values of `app_access.app`, and nothing in §3 changed.
+
 ### Icons
 
-Icons on the public pages are Lucide SVG files in `packages/lokandita-auth/ikon/` (`docs/branding/LISENSI.md`), written inline by `Lokandita\Auth\Ikon::svg()`: `aria-hidden="true"` unless a label is given, class `ikon-arah` for icons that are mirrored under `dir="rtl"`. The footer of every page of the three apps uses them.
+Icons on the public pages (other than the app cards, which use the brand icons above) are Lucide SVG files in `packages/lokandita-auth/ikon/` (`docs/branding/LISENSI.md`), written inline by `Lokandita\Auth\Ikon::svg()`: `aria-hidden="true"` unless a label is given, class `ikon-arah` for icons that are mirrored under `dir="rtl"`. The footer of every page of the three apps uses them.
 
 ## 17. Integrity events and communication (stage 10b, `SPEC.md` §13.2, §14)
 

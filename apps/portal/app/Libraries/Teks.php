@@ -18,7 +18,7 @@ use Lokandita\Auth\Log;
 final class Teks
 {
     /**
-     * Halaman yang bisa disunting. `aplikasi` = keterangan tiga kartu aplikasi. `kontak` tidak
+     * Halaman yang bisa disunting. `aplikasi` = keterangan kartu aplikasi (satu per butir Config\Aplikasi). `kontak` tidak
      * ada lagi: sejak 2026-11-21 isinya adalah bagian-bagian terakhir halaman `tentang`.
      */
     public const HALAMAN = ['depan', 'aplikasi', 'tentang', 'privasi', 'ketentuan'];

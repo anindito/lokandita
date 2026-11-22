@@ -115,7 +115,7 @@ return [
         'tanggalLulus'  => 'lulus {0}',
         'tanpaAkses'    => 'Belum diberi akses LokaKode',
         'akunTidakAktif' => 'Akun tidak aktif',
-        'akunHilang'    => 'Akun tidak ditemukan di LokaAuth',
+        'akunHilang'    => 'Akun Lokandita tidak ditemukan',
         'statusNama'    => [
             'AKTIF'             => 'Aktif',
             'LULUS'             => 'Lulus',
@@ -144,7 +144,7 @@ return [
         'tidakAdaYangBisa' => 'Tidak ada mahasiswa yang bisa didaftarkan dari isian ini.',
         'kembali'       => 'Kembali ke kelas',
         'melebihi'      => 'Perhatian: kelas ini akan berisi {0} mahasiswa aktif, melebihi kapasitasnya ({1}). Pendaftaran tetap bisa dilanjutkan.',
-        'keLokaAuth'    => 'Akun dibuat oleh superadmin di LokaAuth',
+        'keLokaAuth'    => 'Akun dibuat oleh superadmin di situs Akun Lokandita',
         'dariKelas'     => 'kelas {0}',
         'golongan'      => [
             'siap'           => 'Akan didaftarkan',
@@ -154,7 +154,7 @@ return [
             'lulus'          => 'Sudah dinyatakan lulus di mata kuliah ini',
             'statusLain'     => 'Pendaftarannya berstatus lain — hubungi superadmin',
             'bukanMahasiswa' => 'Bukan akun mahasiswa — tidak didaftarkan',
-            'tidakAda'       => 'Tidak ditemukan di LokaAuth — LokaKode tidak membuat akun',
+            'tidakAda'       => 'Tidak ada Akun Lokandita dengan nomor ini — LokaKode tidak membuat akun',
             'tidakSah'       => 'Bentuk nomor induk tidak dikenali',
         ],
     ],
@@ -169,7 +169,7 @@ return [
         'sekali'       => 'Kata sandi ini hanya ditampilkan sekali dan tidak disimpan. Sampaikan langsung kepada mahasiswa; ia wajib menggantinya saat masuk.',
         'selesai'      => 'Kata sandi sudah direset',
         'gagal'        => 'Layanan masuk sedang tidak bisa dihubungi. Kata sandi mahasiswa TIDAK berubah. Coba lagi sebentar lagi.',
-        'bukanMahasiswa' => 'Akun ini bukan akun mahasiswa. Kata sandinya hanya bisa direset oleh superadmin di LokaAuth.',
+        'bukanMahasiswa' => 'Akun ini bukan akun mahasiswa. Kata sandinya hanya bisa direset oleh superadmin di situs Akun Lokandita.',
         'kembali'      => 'Kembali ke kelas',
     ],
 
@@ -192,7 +192,7 @@ return [
     ],
 
     'audit' => [
-        'penjelasan' => 'Setiap perubahan struktur akademik di LokaKode. Login dan perubahan akun dicatat di log audit LokaAuth.',
+        'penjelasan' => 'Setiap perubahan struktur akademik di LokaKode. Login dan perubahan akun dicatat di log audit Akun Lokandita.',
         'aksi'       => 'Aksi (awalan)',
         'aktor'      => 'Pelaku (nomor induk)',
         'target'     => 'Sasaran',
@@ -241,7 +241,7 @@ return [
         'kelasKapasitas'     => 'Kapasitas harus berupa angka mulai dari 1, atau dikosongkan.',
         'kelasBerisi'        => 'Kelas ini tidak bisa dihapus: masih ada {0} pendaftaran dan {1} riwayat pindah kelas yang bergantung padanya. Arsipkan saja kelasnya.',
         'belumYakin'         => 'Centang pernyataan yakin sebelum menghapus kelas.',
-        'pengajarTidakAda'   => 'Nomor induk ini tidak terdaftar di LokaAuth.',
+        'pengajarTidakAda'   => 'Nomor induk ini tidak terdaftar sebagai Akun Lokandita.',
         'pengajarBukanDosen' => 'Pengajar harus akun dengan peran dosen.',
         'pengajarTidakAktif' => 'Akun dosen ini sedang tidak aktif.',
         'labelPanjang'       => 'Nama tahun ajaran harus 3 sampai 40 karakter, misalnya "2026/2027 Ganjil".',
@@ -251,7 +251,7 @@ return [
         'kodeBentuk'         => 'Kode berisi 2 sampai 20 huruf besar, angka, atau tanda hubung, misalnya DDP101.',
         'kodeDipakai'        => 'Sudah ada mata kuliah dengan kode ini.',
         'namaPanjang'        => 'Nama harus 3 sampai 190 karakter.',
-        'pengampuTidakAda'   => 'Nomor induk ini tidak terdaftar di LokaAuth.',
+        'pengampuTidakAda'   => 'Nomor induk ini tidak terdaftar sebagai Akun Lokandita.',
         'pengampuBukanDosen' => 'Pengampu harus akun dengan peran dosen.',
         'pengampuTidakAktif' => 'Akun dosen ini sedang tidak aktif.',
     ],

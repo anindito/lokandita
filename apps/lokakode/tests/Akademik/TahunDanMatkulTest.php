@@ -132,7 +132,7 @@ final class TahunDanMatkulTest extends KodeCase
         $this->matkul('ADA100', 'Sudah Ada', $ok);
 
         $kasus = [
-            [['code' => 'UJI100', 'name' => 'Uji', 'pengampu' => 'tidak-terdaftar'], 'tidak terdaftar di LokaAuth'],
+            [['code' => 'UJI100', 'name' => 'Uji', 'pengampu' => 'tidak-terdaftar'], 'tidak terdaftar sebagai Akun Lokandita'],
             [['code' => 'UJI100', 'name' => 'Uji', 'pengampu' => $mhs['nomor_induk']], 'harus akun dengan peran dosen'],
             [['code' => 'UJI100', 'name' => 'Uji', 'pengampu' => $mati['nomor_induk']], 'sedang tidak aktif'],
             [['code' => 'ADA100', 'name' => 'Uji', 'pengampu' => $ok['nomor_induk']], 'Sudah ada mata kuliah dengan kode ini.'],

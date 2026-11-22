@@ -2,12 +2,12 @@
 /**
  * Isi halaman depan Portal. Dipakai halaman publik dan pratinjau di /admin/teks.
  * Variabel: $t (teks `depan`), $ket (teks `aplikasi`: kode => keterangan), $aplikasi
- * (App\Libraries\Aplikasi::daftar()), $foto (App\Libraries\Foto), $bahasa (bahasa isi ini;
- * di pratinjau bisa berbeda dari bahasa halaman penyuntingnya).
+ * (App\Libraries\Aplikasi::daftar(), dari Config\Aplikasi: urutan, nama, tautan dan ikon kartu),
+ * $foto (App\Libraries\Foto), $bahasa (bahasa isi ini; di pratinjau bisa berbeda dari bahasa
+ * halaman penyuntingnya).
  */
 use Lokandita\Auth\Ikon;
 
-$ikonAplikasi = ['lokakode' => 'code-xml', 'lokaujian' => 'clipboard-check', 'lokasiber' => 'shield-check'];
 // Jumlah langkah bisa diubah di /admin/teks: empat yang pertama punya ikon sendiri, sisanya ikon umum.
 $ikonLangkah  = ['log-in', 'key-round', 'layout-grid', 'log-out'];
 $berarah      = ['log-in', 'log-out'];
@@ -23,22 +23,31 @@ $berarah      = ['log-in', 'log-out'];
 </section>
 
 <h2 class="judul-bagian"><?= esc($t['aplikasi']) ?></h2>
-<ul class="petak">
+<ul class="petak petak-aplikasi">
     <?php foreach ($aplikasi as $kode => $a): ?>
         <li>
             <?php if ($a['url'] !== null): ?>
-                <a class="kartu-aplikasi" href="<?= esc($a['url']) ?>/">
-                    <span class="ikon-wadah"><?= Ikon::svg($ikonAplikasi[$kode] ?? 'layout-grid') ?></span>
-                    <strong><?= esc($a['nama']) ?></strong>
-                    <span><?= esc($ket[$kode]) ?></span>
+                <a class="kartu-aplikasi" href="<?= esc($a['url']) ?>/" data-aplikasi="<?= esc($kode) ?>">
+                    <span class="kartu-kepala">
+                        <?= view('publik/_kartu_ikon', ['ikon' => $a['ikon']]) ?>
+                        <span class="kartu-judul">
+                            <strong><?= esc($a['nama']) ?></strong>
+                            <span class="lencana lencana-tersedia"><?= lang('Portal.tersedia', [], $bahasa) ?></span>
+                        </span>
+                    </span>
+                    <span><?= esc($ket[$kode] ?? '') ?></span>
                     <span class="kartu-buka"><?= lang('Portal.buka', [], $bahasa) ?> <?= Ikon::svg('arrow-right', '', true) ?></span>
                 </a>
             <?php else: ?>
-                <div class="kartu-aplikasi kartu-aplikasi-segera">
-                    <span class="ikon-wadah"><?= Ikon::svg($ikonAplikasi[$kode] ?? 'layout-grid') ?></span>
-                    <strong><?= esc($a['nama']) ?></strong>
-                    <span class="lencana lencana-segera"><?= lang('Lokandita.segera', [], $bahasa) ?></span>
-                    <span><?= esc($ket[$kode]) ?></span>
+                <div class="kartu-aplikasi kartu-aplikasi-segera" data-aplikasi="<?= esc($kode) ?>">
+                    <span class="kartu-kepala">
+                        <?= view('publik/_kartu_ikon', ['ikon' => $a['ikon']]) ?>
+                        <span class="kartu-judul">
+                            <strong><?= esc($a['nama']) ?></strong>
+                            <span class="lencana lencana-segera"><?= lang('Lokandita.segera', [], $bahasa) ?></span>
+                        </span>
+                    </span>
+                    <span><?= esc($ket[$kode] ?? '') ?></span>
                 </div>
             <?php endif ?>
         </li>

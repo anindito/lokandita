@@ -30,7 +30,7 @@ abstract class BaseController extends Controller
      */
     protected function halaman(string $view, array $data = [], int $status = 200): ResponseInterface
     {
-        $data['namaAplikasi'] = 'LokaAuth';
+        $data['namaAplikasi'] = \Lokandita\Auth\Aplikasi::nama();
 
         return $this->response->setStatusCode($status)->setBody(view($view, $data));
     }

@@ -11,6 +11,8 @@ use Tests\Support\PortalCase;
  */
 final class PublikTest extends PortalCase
 {
+    use \Lokandita\Auth\Testing\MerekTes;
+
     private const HALAMAN = [
         '/'          => 'Satu akun untuk semua aplikasi belajar Anda',
         '/tentang'   => 'Tentang Lokandita',
@@ -140,20 +142,111 @@ final class PublikTest extends PortalCase
     }
 
     /**
-     * SPEC.md §15: LokaKode aktif; LokaUjian dan LokaSiber bertanda "segera" dan tidak bisa diklik.
+     * Daftar aplikasi (Config\Aplikasi, docs/branding/LOKANDITA-BRAND.md): enam kartu dalam urutan
+     * yang ditetapkan; LokaKode hidup dan bertaut, lima lainnya "Segera" dan bukan tautan. Setiap
+     * kartu punya ikon mereknya sendiri (terang dan gelap), nama, satu baris keterangan dan status.
      */
     public function testKartuAplikasiDiHalamanDepan(): void
     {
-        $r = $this->tamu()->get('/');
-        $this->assertStringContainsString('<a class="kartu-aplikasi" href="https://lokakode.lokandita.com/">', $r->body);
-        $this->assertSame(1, preg_match_all('/<a class="kartu-aplikasi"/', $r->body));
-        $this->assertSame(2, preg_match_all('/<div class="kartu-aplikasi kartu-aplikasi-segera">/', $r->body));
-        $this->assertSame(2, preg_match_all('/<span class="lencana lencana-segera">Segera<\/span>/', $r->body));
-        foreach (['LokaUjian', 'LokaSiber'] as $nama) {
-            $this->assertStringContainsString('<strong>' . $nama . '</strong>', $r->body);
-            $this->assertDoesNotMatchRegularExpression('/<a[^>]*>\s*<strong>' . $nama . '/', $r->body, "{$nama} tidak boleh berupa tautan");
+        $urutan = ['lokakode' => 'LokaKode', 'lokaujian' => 'LokaUjian', 'lokakelas' => 'LokaKelas', 'lokasiber' => 'LokaSiber', 'lokaretas' => 'LokaRetas', 'lokadata' => 'LokaData'];
+        $status = ['id' => ['Tersedia', 'Segera'], 'en' => ['Available', 'Coming soon'], 'ar' => ['متاح', 'قريبًا']];
+        foreach ($status as $bahasa => [$tersedia, $segera]) {
+            $tamu = $this->tamu();
+            $tamu->get('/bahasa/' . $bahasa . '?kembali=/');
+            $r   = $tamu->get('/');
+            $ket = (require APPPATH . "Language/{$bahasa}/Portal.php")['aplikasi'];
+            $this->assertSame(array_keys($urutan), array_keys($ket), "{$bahasa}: satu keterangan per aplikasi, urutan yang sama");
+
+            $this->assertSame(1, preg_match('#<ul class="petak petak-aplikasi">(.*?)</ul>#s', $r->body, $m), $bahasa);
+            preg_match_all('#<li>\s*<(a|div) class="kartu-aplikasi[^"]*"([^>]*)data-aplikasi="([a-z]+)">(.*?)</\1>\s*</li>#s', $m[1], $kartu, PREG_SET_ORDER);
+            $this->assertSame(array_keys($urutan), array_column($kartu, 3), "{$bahasa}: urutan kartu");
+            foreach ($kartu as [, $tag, $atribut, $kode, $isi]) {
+                $apa = "{$bahasa}/{$kode}";
+                // Ikon merek aplikasi itu sendiri: 56 × 56, ragam gelap dan terang, hiasan (alt kosong).
+                $this->assertSame(2, preg_match_all('#<source media="\(prefers-color-scheme: dark\)"[^>]*srcset="/merek/aplikasi/' . $kode . '-gelap\.(webp|png)\?v=#', $isi), $apa);
+                $this->assertMatchesRegularExpression('#<img src="/merek/aplikasi/' . $kode . '-terang\.png\?v=[^"]*" alt="" width="56" height="56" loading="lazy" decoding="async">#', $isi, $apa);
+                $this->assertStringContainsString('<strong>' . $urutan[$kode] . '</strong>', $isi, $apa);
+                $this->assertStringContainsString('<span>' . htmlspecialchars($ket[$kode], ENT_QUOTES) . '</span>', $isi, $apa);
+                $this->assertStringNotContainsString('<a ', $isi, $apa);
+                if ($kode === 'lokakode') {
+                    $this->assertSame('a', $tag, $apa);
+                    $this->assertStringContainsString('href="https://lokakode.lokandita.com/"', $atribut, $apa);
+                    $this->assertStringContainsString('<span class="lencana lencana-tersedia">' . $tersedia . '</span>', $isi, $apa);
+                } else {
+                    $this->assertSame('div', $tag, "{$apa} tidak boleh berupa tautan");
+                    $this->assertStringNotContainsString('href', $atribut, $apa);
+                    $this->assertStringContainsString('<span class="lencana lencana-segera">' . $segera . '</span>', $isi, $apa);
+                }
+            }
+            $this->assertDoesNotMatchRegularExpression('/href="[^"]*(lokaujian|lokakelas|lokasiber|lokaretas|lokadata)/i', $r->body, $bahasa);
         }
-        $this->assertDoesNotMatchRegularExpression('/href="[^"]*(lokaujian|lokasiber)/i', $r->body);
+        // Setiap ikon kartu dijawab, 112 × 112 (2× ukuran tampil), PNG dan WebP.
+        foreach (array_keys($urutan) as $kode) {
+            foreach (['terang', 'gelap'] as $ragam) {
+                foreach (['png' => 'image/png', 'webp' => 'image/webp'] as $akhiran => $tipe) {
+                    $b = $this->tamu()->get("/merek/aplikasi/{$kode}-{$ragam}.{$akhiran}");
+                    $this->assertSame(200, $b->status, $kode);
+                    $this->assertSame($tipe, $b->header('Content-Type'), $kode);
+                    $this->assertSame([112, 112], array_slice(getimagesizefromstring($b->body), 0, 2), $kode);
+                }
+            }
+        }
+    }
+
+    /**
+     * Aplikasi tanpa ikon mendapat lingkaran netral seukuran — bukan logo karangan, bukan gambar
+     * rusak. Tujuh merek sekarang semuanya punya ikon, jadi yang diuji potongan tampilannya sendiri
+     * dan gaya yang disajikan; tidak ada halaman hidup yang menampilkannya.
+     */
+    public function testAplikasiTanpaIkonMendapatLingkaranNetral(): void
+    {
+        $ikon = null;
+        ob_start();
+        include APPPATH . 'Views/publik/_kartu_ikon.php';
+        $html = trim((string) ob_get_clean());
+        $this->assertSame('<span class="kartu-ikon kartu-ikon-kosong" aria-hidden="true"></span>', $html);
+        $gaya = $this->tamu()->get('/aset/lokandita.css')->body;
+        $this->assertMatchesRegularExpression('/\.kartu-ikon\{[^}]*width:3\.5rem[^}]*height:3\.5rem/', $gaya);
+        $this->assertMatchesRegularExpression('/\.kartu-ikon-kosong\{[^}]*border-radius:50%/', $gaya);
+    }
+
+    /**
+     * "LokaAuth" bukan nama untuk pengguna lagi: tidak ada di halaman publik mana pun dalam tiga
+     * bahasa; halaman Tentang dan Privasi menyebut "Akun Lokandita" (id) dan padanannya.
+     */
+    public function testNamaLokaAuthTidakTampilLagi(): void
+    {
+        $pengganti = ['id' => 'Akun Lokandita', 'en' => 'Lokandita account', 'ar' => 'حساب Lokandita'];
+        foreach ($pengganti as $bahasa => $nama) {
+            $tamu = $this->tamu();
+            $tamu->get('/bahasa/' . $bahasa . '?kembali=/');
+            foreach (array_keys(self::HALAMAN) as $jalur) {
+                $r = $tamu->get($jalur);
+                $this->assertSame(200, $r->status, "{$bahasa}{$jalur}");
+                $this->assertStringNotContainsStringIgnoringCase('LokaAuth', $r->body, "{$bahasa}{$jalur}");
+                if ($jalur === '/tentang' || $jalur === '/privasi') {
+                    $this->assertStringContainsString($nama, $r->body, "{$bahasa}{$jalur}");
+                }
+            }
+            $isi = require APPPATH . "Language/{$bahasa}/Portal.php";
+            array_walk_recursive($isi, function ($teks) use ($bahasa): void {
+                $this->assertStringNotContainsStringIgnoringCase('LokaAuth', (string) $teks, $bahasa);
+            });
+        }
+    }
+
+    /**
+     * Portal membawa merek induk. Gambar Open Graph-nya tetap potongan foto pembuka (keputusan
+     * pemilik 2026-11-22), jadi tidak ada og-image.png dari berkas merek di sini.
+     */
+    public function testIkonLogoDanManifestPortal(): void
+    {
+        $csp = "default-src 'self'; script-src 'self' 'nonce-N'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self' https://lokandita.com https://auth.lokandita.com";
+        $this->periksaMerek($this->tamu(), '/', 'Lokandita', null, $csp);
+        $r = $this->tamu()->get('/');
+        $this->assertStringContainsString('<meta property="og:image" content="https://lokandita.com/merek/og-image.jpg">', $r->body);
+        $this->assertSame(404, $this->tamu()->get('/merek/og-image.png')->status);
+        $this->assertSame(404, $this->tamu()->get('/merek/apple-touch-icon.png')->status);
     }
 
     /**

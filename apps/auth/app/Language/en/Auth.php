@@ -34,7 +34,7 @@ return [
     ],
     'mfa'                => [
         'kodeJudul'          => 'Verification code',
-        'kodePengantar'      => 'Open the authenticator app on your phone and enter the 6-digit code for LokaAuth.',
+        'kodePengantar'      => 'Open the authenticator app on your phone and enter the 6-digit code for your Lokandita account.',
         'kode'               => 'Code',
         'kodePetunjuk'       => 'No phone with you? Enter one of your backup codes.',
         'periksa'            => 'Continue',

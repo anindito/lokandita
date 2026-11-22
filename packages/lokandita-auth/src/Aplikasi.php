@@ -9,7 +9,7 @@ namespace Lokandita\Auth;
  */
 final class Aplikasi
 {
-    private const NAMA = ['auth' => 'LokaAuth', 'lokakode' => 'LokaKode', 'portal' => 'Lokandita'];
+    private const NAMA = ['auth' => 'Akun Lokandita', 'lokakode' => 'LokaKode', 'portal' => 'Lokandita'];
 
     public static function kode(): string
     {

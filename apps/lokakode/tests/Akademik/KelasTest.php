@@ -160,7 +160,7 @@ final class KelasTest extends KodeCase
         $csrf = $this->csrf($http);
         $mati = $this->user('dosen', 'Dosen Nonaktif', ['status' => 'suspended']);
 
-        foreach ([['tidak-ada', 'tidak terdaftar di LokaAuth'], [$d['mhsB']['nomor_induk'], 'harus akun dengan peran dosen'], [$mati['nomor_induk'], 'sedang tidak aktif']] as [$nomor, $pesan]) {
+        foreach ([['tidak-ada', 'tidak terdaftar sebagai Akun Lokandita'], [$d['mhsB']['nomor_induk'], 'harus akun dengan peran dosen'], [$mati['nomor_induk'], 'sedang tidak aktif']] as [$nomor, $pesan]) {
             $r = $http->post('/kelas/' . $d['kelasXA'] . '/pengajar', ['csrf' => $csrf, 'nomor_induk' => $nomor]);
             $this->assertSame(422, $r->status, $nomor);
             $this->assertStringContainsString($pesan, $r->body);

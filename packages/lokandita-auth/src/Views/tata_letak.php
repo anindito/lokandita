@@ -21,6 +21,10 @@ $locale    = service('request')->getLocale();
 $identitas = \Lokandita\Auth\Current::identity();
 $aplikasi  = $namaAplikasi ?? \Lokandita\Auth\Aplikasi::nama();
 $versi     = substr((string) getenv('LOKANDITA_COMMIT'), 0, 12);
+// Logo kepala situs ini (public/merek/, dibuat infra/buat-merek.sh dari docs/branding/baru/):
+// ukuran tampilnya ditulis di logo.json supaya tempatnya sudah ada sebelum gambarnya tiba.
+$logo      = json_decode((string) @file_get_contents(FCPATH . 'merek/logo.json'), true);
+$logo      = is_array($logo) && isset($logo['lebar'], $logo['tinggi']) ? $logo : null;
 ?>
 <!doctype html>
 <html lang="<?= esc($locale) ?>" dir="<?= \Lokandita\Auth\Locale::arah($locale) ?>">
@@ -46,7 +50,15 @@ $versi     = substr((string) getenv('LOKANDITA_COMMIT'), 0, 12);
     <meta name="robots" content="noindex, nofollow">
 <?php endif ?>
     <title><?= esc($judul ?? $aplikasi) ?> — <?= esc($aplikasi) ?></title>
-    <link rel="icon" href="/favicon.ico">
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48">
+    <?php foreach (['light' => '', 'dark' => '-gelap'] as $mode => $akhiran): ?>
+    <link rel="icon" type="image/png" sizes="16x16" href="/merek/icon-16<?= $akhiran ?>.png?v=<?= esc($versi) ?>" media="(prefers-color-scheme: <?= $mode ?>)">
+    <link rel="icon" type="image/png" sizes="32x32" href="/merek/icon-32<?= $akhiran ?>.png?v=<?= esc($versi) ?>" media="(prefers-color-scheme: <?= $mode ?>)">
+    <?php endforeach ?>
+    <link rel="apple-touch-icon" sizes="180x180" href="/merek/icon-180.png?v=<?= esc($versi) ?>">
+    <link rel="manifest" href="/merek/site.webmanifest?v=<?= esc($versi) ?>">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#191d33" media="(prefers-color-scheme: dark)">
     <link rel="stylesheet" href="/aset/lokandita.css?v=<?= esc($versi) ?>">
     <script src="/aset/lokandita.js?v=<?= esc($versi) ?>" defer></script>
     <?php foreach (\Lokandita\Auth\Sisipan::semuaSkrip() as $skripSisipan): ?>
@@ -58,10 +70,16 @@ $versi     = substr((string) getenv('LOKANDITA_COMMIT'), 0, 12);
 <a class="lewati" href="#isi"><?= lang('Lokandita.lewati') ?></a>
 <header class="kepala">
     <a class="merek" href="/">
-        <?php if (is_file(FCPATH . 'merek/icon-192.png')): ?>
-            <img src="/merek/icon-192.png" alt="" width="36" height="36">
+        <?php if ($logo !== null): ?>
+            <picture>
+                <source media="(prefers-color-scheme: dark)" type="image/webp" srcset="/merek/logo-gelap.webp?v=<?= esc($versi) ?>">
+                <source media="(prefers-color-scheme: dark)" srcset="/merek/logo-gelap.png?v=<?= esc($versi) ?>">
+                <source type="image/webp" srcset="/merek/logo-terang.webp?v=<?= esc($versi) ?>">
+                <img src="/merek/logo-terang.png?v=<?= esc($versi) ?>" alt="<?= esc($aplikasi) ?>" width="<?= (int) $logo['lebar'] ?>" height="<?= (int) $logo['tinggi'] ?>">
+            </picture>
+        <?php else: ?>
+            <span><?= esc($aplikasi) ?></span>
         <?php endif ?>
-        <span><?= esc($aplikasi) ?></span>
     </a>
     <?php if ($identitas !== null): ?>
         <?= view('Lokandita\Auth\Views\menu_akun', ['identitas' => $identitas]) ?>

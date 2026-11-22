@@ -30,4 +30,8 @@ Catatan untuk `hero-portal.jpg`:
 
 ## Merek
 
-Logo dan ikon LokaAuth dan LokaKode di `docs/branding/branding-siap-pakai.zip` adalah milik pemilik Lokandita. Tidak ada logo, favicon atau gambar Open Graph khusus untuk Portal (Lokandita) di dalamnya.
+Logo dan ikon ketujuh merek keluarga Lokandita (Lokandita, LokaKode, LokaUjian, LokaKelas, LokaSiber, LokaRetas, LokaData) adalah milik pemilik Lokandita. Berkas aslinya: `docs/branding/newbranding.zip`, dibongkar apa adanya ke `docs/branding/baru/` pada 2026-11-22 (172 berkas; rinciannya di `ASSET-MANIFEST.csv` di dalamnya). Berkas asli tidak pernah disajikan dan tidak pernah diubah.
+
+Yang disajikan adalah turunannya di `apps/<app>/public/favicon.ico` dan `apps/<app>/public/merek/`, dibuat `infra/buat-merek.sh` (`KONTRAK.md` §16 "Brand files"). Tidak ada berkas yang diwarnai ulang. Berkas merek lama (12 PNG di `docs/branding/LokaAuth`, `LokaKode`, `LokaUjian`, `LokaSiber`, dihapus pemilik pada `0ebd1a1`) tidak dipakai lagi dan hanya ada di riwayat Git.
+
+Gambar Open Graph Portal tetap potongan foto pembuka (lihat "Foto" di atas), bukan logo.

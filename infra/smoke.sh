@@ -233,6 +233,33 @@ else
 	tidak "portal GET /ketentuan -> '$j' atau tidak memuat kalimat tentang ketikan tak wajar (bila teksnya diubah lewat /admin/teks, tambahkan kalimat itu di sana)"
 fi
 
+echo "12. merek (KONTRAK.md §16 \"Brand files\")"
+# Setiap situs menyajikan ikon, manifest dan logo kepalanya dari kode yang BERJALAN; halaman depan
+# Portal memuat keenam kartu aplikasi dalam urutannya; nama lama "LokaAuth" tidak tampil — juga
+# tidak lewat teks pengganti dari /admin/teks.
+for pasangan in "lokakode auth" "lokakode portal" "portal lokakode"; do
+	read -r penanya a <<< "$pasangan"
+	kurang=""
+	for jalur in /favicon.ico /merek/icon-16.png /merek/icon-32.png /merek/icon-180.png /merek/icon-192.png /merek/icon-512.png /merek/logo-terang.webp /merek/logo-gelap.webp; do
+		j="$(tanya "$penanya" "$a" "$jalur")"
+		[ "$j" = "200 " ] || kurang="$kurang $jalur($j)"
+	done
+	j="$(tanya "$penanya" "$a" /merek/site.webmanifest)"
+	if [ "$j" != "200 " ] || ! isi "$penanya" | jq -e '.name and (.icons | length == 2)' > /dev/null 2>&1; then kurang="$kurang /merek/site.webmanifest($j)"; fi
+	if [ -z "$kurang" ]; then ok "$a: favicon, ikon 16/32/180/192/512, logo kepala dan manifest terjawab"; else tidak "$a: berkas merek tidak terjawab:$kurang"; fi
+done
+tanya lokakode portal / > /dev/null
+kartu="$(isi lokakode | grep -o 'data-aplikasi="[a-z]*"' | sed 's/.*="//; s/"//' | tr '\n' ' ')"
+if [ "$kartu" = "lokakode lokaujian lokakelas lokasiber lokaretas lokadata " ]; then ok "portal GET /: enam kartu aplikasi dalam urutannya"; else tidak "portal GET /: kartu aplikasi '$kartu'"; fi
+sisa=""
+for jalur in / /tentang /privasi /ketentuan; do
+	tanya lokakode portal "$jalur" > /dev/null
+	if isi lokakode | grep -qi 'lokaauth'; then sisa="$sisa $jalur"; fi
+done
+tanya portal lokakode / > /dev/null
+if isi portal | grep -qi 'lokaauth'; then sisa="$sisa lokakode:/"; fi
+if [ -z "$sisa" ]; then ok "halaman publik tidak memuat nama lama LokaAuth"; else tidak "nama lama LokaAuth masih tampil di:$sisa (bila dari /admin/teks, betulkan di sana)"; fi
+
 echo
 echo "smoke: $lulus lulus, $gagal_n gagal, $tunda belum aktif"
 if [ "$gagal_n" -gt 0 ]; then

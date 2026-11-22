@@ -7,6 +7,7 @@ return [
     'diperbaruiPada' => 'Terakhir diperbarui: {0}',
     // Tautan pada kartu aplikasi, dan teks alternatif foto pembuka bawaan (docs/branding/LISENSI.md).
     'buka' => 'Buka',
+    'tersedia' => 'Tersedia',
     'foto' => [
         'altBawaan' => 'Deretan komputer dan papan ketik di atas meja panjang sebuah laboratorium komputer.',
     ],
@@ -16,9 +17,12 @@ return [
         'ketentuan' => 'Ketentuan',
     ],
     'aplikasi' => [
-        'lokakode'  => 'Latihan pemrograman C, C++ dan Python dengan penilaian otomatis.',
-        'lokaujian' => 'Sedang disiapkan.',
-        'lokasiber' => 'Sedang disiapkan.',
+        'lokakode'  => 'Latihan pemrograman dengan penilaian otomatis.',
+        'lokaujian' => 'Ujian dan kuis.',
+        'lokakelas' => 'Pengelolaan dan pembagian materi kuliah.',
+        'lokasiber' => 'CTF dan forensik digital.',
+        'lokaretas' => 'Cyber range untuk latihan keamanan.',
+        'lokadata'  => 'Belajar analitik data.',
     ],
     'depan' => [
         'judul'       => 'Lokandita — belajar pemrograman dengan satu akun',
@@ -58,9 +62,9 @@ return [
                 'judul' => 'Aplikasi',
                 'isi'   => [],
                 'butir' => [
-                    'LokaAuth — tempat masuk dan pengelolaan akun untuk semua aplikasi Lokandita.',
+                    'Akun Lokandita — tempat masuk dan pengelolaan akun untuk semua aplikasi Lokandita.',
                     'LokaKode — latihan pemrograman dalam C, C++ dan Python. Setiap kiriman dijalankan dan dinilai otomatis, dan setiap mahasiswa mendapat angka soal yang berbeda.',
-                    'LokaUjian dan LokaSiber — sedang disiapkan dan belum bisa dipakai.',
+                    'LokaUjian, LokaKelas, LokaSiber, LokaRetas dan LokaData — sedang disiapkan dan belum bisa dipakai.',
                 ],
             ],
             [
@@ -114,7 +118,7 @@ return [
         'deskripsi'  => 'Data pribadi apa yang disimpan Lokandita, untuk apa, siapa yang dapat melihatnya, dan apa hak Anda.',
         'diperbarui' => 'Terakhir diperbarui: 22 November 2026',
         'pembuka'    => [
-            'Halaman ini menjelaskan data pribadi yang diproses Lokandita (LokaAuth, LokaKode dan Portal ini), dengan mengacu pada Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi.',
+            'Halaman ini menjelaskan data pribadi yang diproses Lokandita (Akun Lokandita, LokaKode dan Portal ini), dengan mengacu pada Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi.',
             'Data dikelola oleh pengelola Lokandita, yang dapat dihubungi di {email}.',
         ],
         'bagian'     => [

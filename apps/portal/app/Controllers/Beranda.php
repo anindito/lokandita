@@ -46,7 +46,7 @@ final class Beranda extends BaseController
     public function dataSaya(): ResponseInterface
     {
         $identitas = Current::identity();
-        $tautan    = ['LokaAuth' => rtrim((string) getenv('AUTH_PUBLIC_URL'), '/') . '/data-saya'];
+        $tautan    = ['Akun Lokandita' => rtrim((string) getenv('AUTH_PUBLIC_URL'), '/') . '/data-saya'];
         if (SessionReader::hasAccess($identitas->userId, 'lokakode')) {
             $tautan['LokaKode'] = Aplikasi::daftar()['lokakode']['url'] . '/data-saya';
         }

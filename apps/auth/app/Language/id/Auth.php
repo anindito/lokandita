@@ -35,7 +35,7 @@ return [
     ],
     'mfa'                => [
         'kodeJudul'          => 'Kode verifikasi',
-        'kodePengantar'      => 'Buka aplikasi autentikator di ponsel Anda dan masukkan kode 6 angka untuk LokaAuth.',
+        'kodePengantar'      => 'Buka aplikasi autentikator di ponsel Anda dan masukkan kode 6 angka untuk Akun Lokandita.',
         'kode'               => 'Kode',
         'kodePetunjuk'       => 'Tidak membawa ponsel? Masukkan salah satu kode cadangan Anda.',
         'periksa'            => 'Lanjutkan',

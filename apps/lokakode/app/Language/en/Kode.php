@@ -115,7 +115,7 @@ return [
         'tanggalLulus'   => 'graduated {0}',
         'tanpaAkses'     => 'No LokaKode access yet',
         'akunTidakAktif' => 'Account not active',
-        'akunHilang'     => 'Account not found in LokaAuth',
+        'akunHilang'     => 'No Lokandita account found',
         'statusNama'     => [
             'AKTIF'             => 'Active',
             'LULUS'             => 'Graduated',
@@ -144,7 +144,7 @@ return [
         'tidakAdaYangBisa' => 'No student from this input can be enrolled.',
         'kembali'       => 'Back to the class',
         'melebihi'      => 'Note: this class will hold {0} active students, above its capacity ({1}). You can still continue.',
-        'keLokaAuth'    => 'Accounts are created by the superadmin in LokaAuth',
+        'keLokaAuth'    => 'Accounts are created by the superadmin on the Lokandita account site',
         'dariKelas'     => 'class {0}',
         'golongan'      => [
             'siap'           => 'Will be enrolled',
@@ -154,7 +154,7 @@ return [
             'lulus'          => 'Already graduated from this course',
             'statusLain'     => 'The enrollment has another status — contact the superadmin',
             'bukanMahasiswa' => 'Not a student account — not enrolled',
-            'tidakAda'       => 'Not found in LokaAuth — LokaKode does not create accounts',
+            'tidakAda'       => 'No Lokandita account with this number — LokaKode does not create accounts',
             'tidakSah'       => 'ID number format not recognised',
         ],
     ],
@@ -169,7 +169,7 @@ return [
         'sekali'       => 'This password is shown only once and is not stored. Give it to the student directly; they must change it when they log in.',
         'selesai'      => 'The password has been reset',
         'gagal'        => 'The login service cannot be reached. The student password has NOT changed. Try again in a moment.',
-        'bukanMahasiswa' => 'This is not a student account. Its password can only be reset by the superadmin in LokaAuth.',
+        'bukanMahasiswa' => 'This is not a student account. Its password can only be reset by the superadmin on the Lokandita account site.',
         'kembali'      => 'Back to the class',
     ],
 
@@ -192,7 +192,7 @@ return [
     ],
 
     'audit' => [
-        'penjelasan' => 'Every change to the academic structure in LokaKode. Logins and account changes are in the LokaAuth audit log.',
+        'penjelasan' => 'Every change to the academic structure in LokaKode. Logins and account changes are in the Lokandita account audit log.',
         'aksi'       => 'Action (prefix)',
         'aktor'      => 'Actor (ID number)',
         'target'     => 'Target',
@@ -241,7 +241,7 @@ return [
         'kelasKapasitas'     => 'Capacity must be a number from 1, or left empty.',
         'kelasBerisi'        => 'This class cannot be deleted: {0} enrollments and {1} class-move records still depend on it. Archive the class instead.',
         'belumYakin'         => 'Tick the confirmation before deleting the class.',
-        'pengajarTidakAda'   => 'This ID number is not registered in LokaAuth.',
+        'pengajarTidakAda'   => 'This ID number has no Lokandita account.',
         'pengajarBukanDosen' => 'A teacher must be an account with the lecturer role.',
         'pengajarTidakAktif' => 'This lecturer account is not active.',
         'labelPanjang'       => 'The name must be 3 to 40 characters, for example "2026/2027 Odd".',
@@ -251,7 +251,7 @@ return [
         'kodeBentuk'         => 'The code is 2 to 20 capital letters, digits or hyphens, for example DDP101.',
         'kodeDipakai'        => 'A course with this code already exists.',
         'namaPanjang'        => 'The name must be 3 to 190 characters.',
-        'pengampuTidakAda'   => 'This ID number is not registered in LokaAuth.',
+        'pengampuTidakAda'   => 'This ID number has no Lokandita account.',
         'pengampuBukanDosen' => 'The course owner must be an account with the lecturer role.',
         'pengampuTidakAktif' => 'This lecturer account is not active.',
     ],

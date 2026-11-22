@@ -7,6 +7,7 @@ return [
     'diperbaruiPada' => 'Last updated: {0}',
     // Tautan pada kartu aplikasi, dan teks alternatif foto pembuka bawaan (docs/branding/LISENSI.md).
     'buka' => 'Open',
+    'tersedia' => 'Available',
     'foto' => [
         'altBawaan' => 'A row of computers and keyboards on a long desk in a computer lab.',
     ],
@@ -16,9 +17,12 @@ return [
         'ketentuan' => 'Terms',
     ],
     'aplikasi' => [
-        'lokakode'  => 'Programming practice in C, C++ and Python with automatic judging.',
-        'lokaujian' => 'In preparation.',
-        'lokasiber' => 'In preparation.',
+        'lokakode'  => 'Programming practice with an automatic judge.',
+        'lokaujian' => 'Exams and quizzes.',
+        'lokakelas' => 'Class material management and distribution.',
+        'lokasiber' => 'CTF and digital forensics.',
+        'lokaretas' => 'A cyber range for security practice.',
+        'lokadata'  => 'Learning data analytics.',
     ],
     'depan' => [
         'judul'       => 'Lokandita — learn programming with one account',
@@ -58,9 +62,9 @@ return [
                 'judul' => 'Applications',
                 'isi'   => [],
                 'butir' => [
-                    'LokaAuth — sign-in and account management for every Lokandita application.',
+                    'Lokandita account — sign-in and account management for every Lokandita application.',
                     'LokaKode — programming practice in C, C++ and Python. Every submission is run and judged automatically, and every student gets different numbers in a problem.',
-                    'LokaUjian and LokaSiber — in preparation and not yet available.',
+                    'LokaUjian, LokaKelas, LokaSiber, LokaRetas and LokaData — in preparation and not yet available.',
                 ],
             ],
             [
@@ -114,7 +118,7 @@ return [
         'deskripsi'  => 'Which personal data Lokandita stores, what for, who can see it, and what your rights are.',
         'diperbarui' => 'Last updated: 22 November 2026',
         'pembuka'    => [
-            'This page describes the personal data processed by Lokandita (LokaAuth, LokaKode and this Portal), with reference to Indonesian Law Number 27 of 2022 on Personal Data Protection.',
+            'This page describes the personal data processed by Lokandita (Lokandita accounts, LokaKode and this Portal), with reference to Indonesian Law Number 27 of 2022 on Personal Data Protection.',
             'The data is managed by the Lokandita administrator, who can be reached at {email}.',
         ],
         'bagian'     => [

@@ -84,6 +84,11 @@
 
   .kepala { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .6rem 1.25rem; background: var(--kartu); border-bottom: 1px solid var(--garis); }
   .merek { display: flex; align-items: center; gap: .6rem; font-weight: 700; font-size: 1.1rem; color: var(--teks); text-decoration: none; }
+  /* Logo kepala: gambar merek (nama sudah di dalamnya), ragam terang atau gelap menurut mode. */
+  /* Logo tidak pernah menyempit: di layar sempit navigasi di sebelahnya yang turun ke baris berikut. */
+  .merek { flex: none; }
+  .merek picture, .merek img { display: block; }
+  .merek img { width: auto; height: 2.5rem; max-width: none; }
   .isi { flex: 1; width: 100%; max-width: 72rem; margin: 0 auto; padding: 1.5rem 1.25rem; }
   .isi-sempit { max-width: 26rem; margin: 2rem auto; }
   .kaki { padding: 1.25rem; text-align: center; color: var(--teks-redup); font-size: .875rem; border-top: 1px solid var(--garis); display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; align-items: center; justify-content: center; }
@@ -120,7 +125,8 @@
   /* Kotak foto selalu 4:3, apa pun perbandingan fotonya: tempatnya sudah ada sebelum foto tiba. */
   .pembuka-foto img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 1.25rem; background: var(--garis); box-shadow: var(--bayang); }
   .pembuka-logo { justify-self: center; width: min(100%, 22rem); }
-  .pembuka-logo img { display: block; width: 100%; height: auto; aspect-ratio: 1; border-radius: 1.25rem; box-shadow: var(--bayang); }
+  /* Logo bertepi tembus pandang: tanpa sudut dan bayangan kotak. */
+  .pembuka-logo img { display: block; width: 100%; height: auto; aspect-ratio: 1; }
 
   .judul-bagian { font-size: 1.5rem; line-height: 1.25; margin: var(--j4) 0 var(--j3); }
   .petak { display: grid; gap: var(--j3); grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); margin: 0 0 var(--j4); padding: 0; list-style: none; }
@@ -135,13 +141,41 @@
   .kartu-aplikasi .kartu-buka { display: inline-flex; gap: .35rem; align-items: center; margin-top: auto; padding-top: var(--j1); color: var(--utama); font-weight: 600; }
   /* "Segera": latar keemasan dengan teks berwarna teks biasa — emas sebagai warna huruf tidak cukup kontras. */
   .kartu-aplikasi .lencana, .lencana-segera { align-self: flex-start; color: var(--teks); font-weight: 600; border-color: var(--emas); background: color-mix(in srgb, var(--emas) 22%, transparent); }
-  .kartu-aplikasi-segera { border-style: dashed; box-shadow: none; }
+  /* Kartu aplikasi Portal: ikon merek 56 px, di sebelahnya nama dengan status di bawahnya; blok
+     nama-dan-status rata tengah terhadap ikon. Baris mengikuti arah halaman, jadi untuk Arab ikon
+     ada di kanan. Nama tidak pernah dipenggal di tengah kata. */
+  .kartu-kepala { display: flex; align-items: center; gap: var(--j2); }
+  .kartu-judul { display: flex; flex-direction: column; align-items: flex-start; gap: .3rem; min-width: 0; }
+  .kartu-judul strong { color: var(--teks); line-height: 1.2; }
+  .kartu-aplikasi .lencana-tersedia { border-color: var(--hijau); background: color-mix(in srgb, var(--hijau) 14%, transparent); }
+  .kartu-ikon { display: block; flex: none; width: 3.5rem; height: 3.5rem; }
+  .kartu-ikon img { display: block; width: 100%; height: 100%; }
+  /* Aplikasi tanpa ikon: lingkaran netral seukuran. */
+  .kartu-ikon-kosong { border-radius: 50%; border: 2px solid var(--garis); background: color-mix(in srgb, var(--teks-redup) 10%, transparent); }
+  /* "Segera" lebih tenang daripada kartu yang hidup, tanpa terlihat rusak: garis putus-putus, tanpa
+     latar kartu dan bayangan, ikon abu-abu, nama berwarna teks redup. Teksnya tidak dibuat tembus
+     pandang (kontras tetap di atas 4,5 : 1). */
+  .kartu-aplikasi-segera { border-style: dashed; box-shadow: none; background: transparent; }
+  .kartu-aplikasi-segera .kartu-judul strong { color: var(--teks-redup); }
+  .kartu-aplikasi-segera .kartu-ikon img { filter: grayscale(1); opacity: .65; }
 
-  /* Langkah-langkah "cara": kartu bernomor dengan ikon. */
-  .langkah { display: grid; gap: var(--j2); grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); margin: 0 0 var(--j3); padding: 0; list-style: none; }
-  .langkah li { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto 1fr; gap: .15rem var(--j2); align-items: start; margin: 0; padding: var(--j3); background: var(--kartu); border: 1px solid var(--garis); border-radius: var(--sudut); }
-  .langkah .ikon-wadah { grid-row: span 2; }
-  .langkah-nomor { font-size: .85rem; font-weight: 700; color: var(--teks-redup); font-variant-numeric: tabular-nums; }
+  /* Langkah-langkah "cara" (halaman depan Portal dan LokaKode; satu gaya untuk keduanya): kartu
+     dengan ikon di tepi awal. Nomor langkah mengawali teksnya DI BARIS YANG SAMA, tebal dan berwarna
+     aksen; teks menyambung tepat sesudahnya dan baris berikutnya turun di bawah nomor seperti teks
+     biasa. Ikon diletakkan mutlak di tepi awal kartu, sehingga nomor dan teks mengalir sebagai satu
+     paragraf; untuk Arab ikon dan nomor ada di kanan dan teks menyusul ke kiri.
+     Kartu sama lebar dan baris terakhir dipusatkan: satu per baris di ponsel, dua di layar sedang,
+     empat di layar lebar — kecuali bila langkahnya lima: tiga lalu dua di tengah, supaya tidak ada
+     kartu yang sendirian di barisnya. */
+  .langkah { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--j2); margin: 0 0 var(--j3); padding: 0; list-style: none; }
+  .langkah li { position: relative; width: 100%; min-height: calc(2.75rem + 2 * var(--j3)); margin: 0; padding: var(--j3); padding-inline-start: calc(var(--j3) + 2.75rem + var(--j2)); background: var(--kartu); border: 1px solid var(--garis); border-radius: var(--sudut); }
+  .langkah .ikon-wadah { position: absolute; top: var(--j3); inset-inline-start: var(--j3); }
+  .langkah-nomor { margin-inline-end: .3em; font-weight: 700; color: var(--utama); font-variant-numeric: tabular-nums; }
+  @media (min-width: 40rem) { .langkah li { width: calc((100% - var(--j2)) / 2 - .1px); } }
+  @media (min-width: 64rem) {
+    .langkah li { width: calc((100% - 3 * var(--j2)) / 4 - .1px); }
+    .langkah li:first-child:nth-last-child(5), .langkah li:first-child:nth-last-child(5) ~ li { width: calc((100% - 2 * var(--j2)) / 3 - .1px); }
+  }
   .bantuan { display: flex; gap: var(--j1); align-items: flex-start; }
   .bantuan .ikon { margin-top: .2em; color: var(--utama); }
   .tautan-ikon { display: inline-flex; gap: .4rem; align-items: center; }

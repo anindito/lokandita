@@ -30,7 +30,7 @@
         <?php if ($admin !== null): ?>
             <li>
                 <a class="kartu-aplikasi" href="<?= esc($admin) ?>" data-aplikasi="auth">
-                    <strong>LokaAuth</strong>
+                    <strong>Akun Lokandita</strong>
                     <span><?= lang('Portal.beranda.admin') ?></span>
                 </a>
             </li>

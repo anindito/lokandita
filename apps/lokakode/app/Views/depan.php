@@ -20,8 +20,11 @@ $berarah     = ['log-in', 'send'];
         <p class="petunjuk"><?= lang('Depan.tanpaDaftar') ?></p>
     </div>
     <picture class="pembuka-logo">
-        <source type="image/webp" srcset="/merek/logo.webp">
-        <img src="/merek/logo.png" width="512" height="512" alt="<?= lang('Depan.logoAlt') ?>" fetchpriority="high" decoding="async">
+        <?php $versi = substr((string) getenv('LOKANDITA_COMMIT'), 0, 12) ?>
+        <source media="(prefers-color-scheme: dark)" type="image/webp" srcset="/merek/pembuka-gelap.webp?v=<?= esc($versi) ?>">
+        <source media="(prefers-color-scheme: dark)" srcset="/merek/pembuka-gelap.png?v=<?= esc($versi) ?>">
+        <source type="image/webp" srcset="/merek/pembuka-terang.webp?v=<?= esc($versi) ?>">
+        <img src="/merek/pembuka-terang.png?v=<?= esc($versi) ?>" width="352" height="352" alt="<?= lang('Depan.logoAlt') ?>" fetchpriority="high" decoding="async">
     </picture>
 </section>
 

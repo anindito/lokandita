@@ -63,7 +63,9 @@ final class Mfa
     {
         $totp = TOTP::createFromSecret($secret, new SystemClock());
         $totp->setLabel($nomorInduk);
-        $totp->setIssuer('LokaAuth');
+        // Nama yang tampil di aplikasi autentikator. Sampai 2026-11-22 'LokaAuth'; pendaftaran lama tetap
+        // bernama itu di ponsel penggunanya dan tetap berlaku (nama bukan bagian dari kode).
+        $totp->setIssuer('Lokandita');
 
         return $totp->getProvisioningUri();
     }
