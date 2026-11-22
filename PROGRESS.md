@@ -1169,7 +1169,7 @@ How one meeting is made (the next session repeats this for the next row):
 | DDP101 | 4 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-4.md` | no | no |
 | DDP101 | 5 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-5.md` | no | no |
 | DDP101 | 6 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-6.md` | no | no |
-| DDP101 | 7 | no | no | — | no | no |
+| DDP101 | 7 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ddp101-pertemuan-7.md` | no | no |
 | PBO301 | 1 | no | no | — | no | no |
 | PBO301 | 2 | no | no | — | no | no |
 | PBO301 | 3 | no | no | — | no | no |
@@ -1219,4 +1219,20 @@ Before any problem was written (read-only queries, output in the session): the e
   - `keliling-segitiga-titik` prints two decimals from `sqrt`; inputs whose perimeter falls within 0.001 of a rounding half are never generated.
   - `romawi-ke-angka` refers to "soal pertemuan lalu" (the Roman numeral problem of meeting 4).
   - Otherwise as meetings 4 and 5: read by nobody but the agent; English and Arabic by the agent; Indonesian output words in all three versions.
+
+### DDP101 meeting 7 — Fungsi Lanjutan, Rekursi, dan Debugging (2026-11-23)
+
+- 32 problems, 8 / 8 / 6 / 6 / 4, 232 points: 28 recursion problems and 4 on overloading and default arguments (`luas-dua-bentuk`, `volume-bawaan`, `gabung-atau-jumlah`, `format-waktu`).
+- **The 28 recursion problems carry `required_concepts_in_submission: ["REKURSI"]`** (owner's decision): correct output without a recursive function gives `CONCEPT_NOT_MET` and half the score. Each of those statements says so. Production shows the requirement stored on 28 versions and empty on 4.
+- `periksa.py` with the 14 allowed concepts → `32 dari 32 soal lulus` (240 judge tests per problem, no warning; 36 generated tests per problem equal to the separate Python calculation, which uses no recursion anywhere — closed formulas, loops, simulation, `math.comb`, `itertools`; 63 quoted examples equal; every required concept is present in its own reference solution).
+- `spark soal:impor` → `32 diterima, 0 ditolak, 0 tidak berubah`. Production shows 32 versions `PENDING_REVIEW` (8 / 8 / 6 / 6 / 4), meeting not published.
+- Skipped from the syllabus of this meeting: function templates, lambdas and functions as parameters (their concepts — `TEMPLATE_FUNGSI`, `MODERN_CPP`, `POINTER` — are not allowed in DDP101 at meeting 7), and the debugging material (GDB, breakpoints, watch variables), which output cannot judge. Scope and lifetime of variables have no problem of their own; `hitung-panggilan` touches them through a by-reference counter.
+- Weaker than it looks:
+  - **`CONCEPT_NOT_MET` has not been exercised with these problems.** I checked that the requirement is stored and that the reference solutions satisfy it; no student-style submission without recursion was sent through the deployed judge, because that needs a student session and an open class window, which are the owner's.
+  - The recursion check is presence only: one recursive function anywhere in the file satisfies it, even if the answer is computed by a loop.
+  - The four overloading problems require nothing: a student can solve them with one function and an `if`.
+  - Several recursive reference solutions are deliberately exponential (`fibonacci` to 30, `kombinasi` to C(25, 12), `partisi` to 60, `catalan` to 15); the slowest validated run stayed under half the 2 s limit (no `reference_slow` warning). A student who calls `langkah(n − 1)` twice in `hanoi-langkah` gets a time limit at large n; the statement warns about it.
+  - Otherwise as the earlier meetings: read by nobody but the agent; English and Arabic by the agent.
+
+**DDP101 meetings 4–7 are all built and imported; 128 problems await the owner's review. Next row: PBO301 meeting 1.**
 
