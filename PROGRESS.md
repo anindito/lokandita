@@ -1,5 +1,7 @@
 # Progress
 
+**Stage 13, second task (2026-11-23) — TS-PY: practice problems for meetings 1–5 and the practical mid-term at meeting 8 (owner's decision B: numbering follows RPS Rev2). Meeting 1 is built, imported and awaits review. The meeting layout is prepared in the repository but NOT yet applied to production; the exam type is approved and not started. See "Stage 13 — TS-PY" at the end of this file; the next session continues from the table there.**
+
 **Stage 13 — problem production — all eleven meetings of the task (DDP101 4–7, PBO301 1–7) are built, imported and, on the owner's word of 2026-11-23 ("setujui semua soal yang sudah dibuat"), approved: 352 problems `APPROVED`. No meeting of the eleven is published and no class window is open — that is the owner's to do. No tag yet. See "Stage 13" at the end of this file.**
 
 **Brand scheme and step cards — not a numbered stage, no tag — deployed 2026-11-22, running `ea483b6`; smoke 44 lulus, 0 gagal. New logos and icons on the three sites, "LokaAuth" shown to users as "Akun Lokandita", the Portal's app list is data (six cards), step numbers sit on the line of their text. Not seen by the owner in a browser yet; see "Brand scheme" at the end of this file. Next: stage 13 (problem production), not started.**
@@ -1351,3 +1353,51 @@ Twelve probe programs were run through `kotak.analisis` (the judge's own analyse
 - Read back from production: DDP101 4–7 and PBO301 1–7 each show 32 versions `APPROVED` and 32 rows in `meeting_problems`; `published_at` is NULL for all eleven.
 - The "reviewed" column of the table stays "no": the owner approved without the agent knowing which statements were read. The weaknesses listed per meeting above still hold.
 - Not done by the agent, by instruction: publishing the meetings and opening class windows.
+
+
+## Stage 13 — TS-PY (from 2026-11-23)
+
+Task from the owner (2026-11-23): TS-PY only; DDP101 and PBO301 untouched. Practice problems for meetings 1–5; a practical mid-term held in LokaKode covering meetings 1–5; everything else switched off, kept for reference. No pandas, NumPy or Matplotlib in any problem; the `judge-python` image is not changed.
+
+Owner's decisions of 2026-11-23:
+
+1. **Numbering follows RPS Rev2 (option B):** 7 = "Review Integratif dan Simulasi UTS" (off), **8 = "Ujian Tengah Semester (UTS) — Praktik" (exam)**, 9–16 retitled per Rev2 (off). Meetings 6–16 carry no concepts, so the exam inherits exactly the 13 concepts of meetings 1–5. The exam covers meetings 1–5 only (the owner's instruction; Rev2 itself says P1–P6).
+2. The layout is applied by the agent in one audited transaction.
+3. During the exam a student sees after Submit only "kiriman diterima" and compile errors — no verdict, no tests passed, no points. Run on sample tests works as usual.
+4. A "Buka selama 150 menit" button: a hard server cut-off and a countdown; manual close stays possible.
+5. After release a student sees the total and points per problem number; no statements; never a leaderboard for an exam.
+
+Steps:
+
+| Step | State |
+|---|---|
+| 1 — meeting layout | **Repository ready, production NOT changed.** `benih.json`, `BenihKurikulumTest` and `docs/PETA-KONSEP.md` are edited but uncommitted (they must go in with the row change). The agent's SQL transaction was refused by the permission layer of the agent's own tool; nothing was written. |
+| 2 — exam-type meeting | Plan presented and approved with the decisions above; **no code written**. |
+| 3 — practice problems, meetings 1–5 | see table |
+| 4 — mid-term problems, meeting 8 | not started; composition and points must be proposed to the owner first |
+
+| Course | Meeting | Built | Imported | Review sheet | Reviewed by owner | Approved |
+|---|---|---|---|---|---|---|
+| TS-PY | 1 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-1.md` | no | no |
+| TS-PY | 2 | no | no | — | no | no |
+| TS-PY | 3 | no | no | — | no | no |
+| TS-PY | 4 | no | no | — | no | no |
+| TS-PY | 5 | no | no | — | no | no |
+| TS-PY | 8 (UTS) | no | no | — (every statement in full) | no | no |
+
+How one meeting is made: as in "Stage 13 — problem production" above, with `buat-ts-py-pertemuan-<n>.py`, `cek-ts-py-pertemuan-<n>.py`, and `waktu_ms=5000`.
+
+### TS-PY meeting 1 — Pengenalan Pemrograman, Algoritma, dan Python (2026-11-23)
+
+- 32 problems, 8 / 8 / 6 / 6 / 4, 232 points, in id, en, ar. Reference solutions use only `input()`, `int(input())`, `print()` and `+ - * / // % **`: no `if`, loop, function, list, formatting, `round()`, conversion outside reading, string concatenation, or import.
+- Contexts: concrete volume (the RPS practicum), material quantities (bricks, tiles, bars, stirrups, mix proportions, bill of quantities), unit conversion, column stress, slope, channel discharge, rainfall on a roof and a storage tank, earthwork (trucks, haul cycles, trench and footing excavation), traffic counts and passenger car units, levelling readings, interpolation between pegs.
+- `periksa.py` with `IO_DASAR,ARITMETIKA,VARIABEL_TIPE` → `32 dari 32 soal lulus` on the first run (240 judge tests per problem, no warning; 37 tests per problem equal to the separate calculation; 33 quoted examples equal).
+- `spark soal:impor` → `32 diterima, 0 ditolak, 0 tidak berubah`. Production shows 32 versions `PENDING_REVIEW` (8 / 8 / 6 / 6 / 4), 0 attached to the meeting, meeting not published.
+- Weaker than it looks:
+  - **Nobody but the agent has read these statements.** English and Arabic were written by the agent and carry the machine-translation badge. Output words (`Proyek:`, `Sisa … sak`, `Truk penuh:`, …) are Indonesian in all three versions.
+  - **Fourteen problems print a fraction and are compared in `float` mode** (tolerance 1e-6): a student who rounds to two decimals is marked wrong, and each of those statements says not to round. Sample outputs are what Python prints, so a few look long (`148.14814814814815`).
+  - **A prompt inside `input("…")` makes every answer wrong**; each statement warns about it, but first-week students will still do it.
+  - "Sulit" here means several steps of unit handling and whole-number rounding; with arithmetic only, nothing is algorithmically hard. Difficulty labels are the agent's judgement.
+  - The practice factors (motorcycle 0.25 and truck 2.5 passenger car units, d² ÷ 162, π = 3.14, VAT 11 %) are labelled "parameter latihan" in the statements; the owner should confirm he wants these values.
+  - `galian-pondasi` takes the trench length on the centre line, 2 × (p + l), with no corner correction; `sengkang-balok` counts L // s + 1 stirrups. Both rules are stated in the problem; a lecturer in structures may prefer other conventions.
+  - The separate calculation was written by the same agent, by a different route (exact fractions, `datetime`, simulation loops).
