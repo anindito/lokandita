@@ -1381,7 +1381,7 @@ Steps:
 | TS-PY | 1 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-1.md` | no | no |
 | TS-PY | 2 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-2.md` | no | no |
 | TS-PY | 3 | yes; judge check passed 2026-11-23 | **no — held until no student is submitting** (see "Imports held") | `docs/soal/tinjauan/ts-py-pertemuan-3.md` | no | no |
-| TS-PY | 4 | no | no | — | no | no |
+| TS-PY | 4 | yes; judge check passed 2026-11-23 | **no — held** (see "Imports held") | `docs/soal/tinjauan/ts-py-pertemuan-4.md` | no | no |
 | TS-PY | 5 | no | no | — | no | no |
 | TS-PY | 8 (UTS) | no | no | — (every statement in full) | no | no |
 
@@ -1427,6 +1427,19 @@ How one meeting is made: as in "Stage 13 — problem production" above, with `bu
   - The generators never put a fractional result exactly on a class limit (for example a slope of exactly 8 %), because the binary fraction at the limit depends on the order of operations; whole-number limits are tested.
   - `umur-benda-uji` needs twenty-two `if` statements without loops or lists; it is labelled sulit for its length, and students who know arithmetic tricks can shorten it.
   - `faktor-reduksi` produces unrealistically heavy reinforcement in its compression-controlled tests.
+
+### TS-PY meeting 4 — Perulangan (Iteration) dengan for dan while (2026-11-23)
+
+- 32 problems, 8 / 8 / 6 / 6 / 4, 232 points, in id, en, ar. Reference solutions add `for` with `range()`, `while`, counters and accumulators, a sentinel value, nested loops, `break` and `continue`, and `print(..., end="")`; no list, function or string operation — data are read and processed one value at a time.
+- Contexts: haul trips, stake positions, conversion tables, average strength, rainy days, largest axle load, stair heights, rainfall summary, pumping a flooded pit, pass percentage, peak traffic hour, cement reorder day, traffic growth, total rise and fall, longest dry spell, river cross-section by the trapezoid rule, two trucks arriving together, depreciation, pile grid coordinates, sensor readings with failures, column layout drawing, loan instalments, maximum three-day rainfall, choosing bars for a required steel area, cutting bars in order, largest square tile (GCD), reservoir simulation, normal depth by bisection, combinations of full trucks, mixer queue at one pump.
+- `periksa.py` with the nine allowed concepts → `32 dari 32 soal lulus` on the first run; 35 quoted examples equal. Locally 803 comparisons, 0 different.
+- **Not imported yet** (see "Imports held").
+- Weaker than it looks:
+  - **Nobody but the agent has read these statements**; English and Arabic carry the machine-translation badge.
+  - Input is one value per line with the count first (or a closing `0`); a student who already knows lists may use them and will be refused by the concept check, since `PY_LIST` arrives at meeting 5.
+  - `kedalaman-biseksi` fixes the method in the statement (bounds 0 and 10, 50 halvings) so that every correct program prints the same three decimals; the separate calculation uses 400 halvings in 50-digit decimals.
+  - `pilih-tulangan` and `kombinasi-truk` are exhaustive searches with nested loops; their rules (2 to 8 bars in a layer, truck sizes 5 / 8 / 12 m³) are exercise parameters.
+  - `denah-kolom` prints characters with `end=""`, which the RPS may not have shown by meeting 4; the statement explains it.
 
 ### Imports held (2026-11-23)
 

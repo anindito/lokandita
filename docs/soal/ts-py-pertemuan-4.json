@@ -1,0 +1,1159 @@
+{
+  "course": "TS-PY",
+  "meeting": 4,
+  "language": "python",
+  "problems": [
+    {
+      "slug": "total-ritase",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Total Volume Angkutan",
+          "statement": "Mandor mencatat volume tanah setiap ritase truk. Jumlahkan semua ritase hari itu.\n\nContoh: masukan `3`, lalu `7`, `7`, `5` menghasilkan `Total: 19 m3`.",
+          "input_format": "Baris pertama: banyaknya ritase N. Lalu N baris, masing-masing volume satu ritase (m³, bilangan bulat). Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Satu baris berbentuk `Total: X m3`.",
+          "constraints": "N 1 sampai 30; setiap volume 3 sampai 12."
+        },
+        "en": {
+          "title": "Total Hauled Volume",
+          "statement": "A foreman records the volume of soil of every truck trip. Add up all the trips of the day.\n\nExample: the input `3`, then `7`, `7`, `5` gives `Total: 19 m3`.",
+          "input_format": "First line: the number of trips N. Then N lines, each the volume of one trip (m³, a whole number). Call `input()` with nothing inside the brackets.",
+          "output_format": "One line of the form `Total: X m3`.",
+          "constraints": "N is 1 to 30; each volume is 3 to 12.",
+          "machine": true
+        },
+        "ar": {
+          "title": "إجمالي الحجم المنقول",
+          "statement": "يسجّل رئيس العمال حجم التربة في كل رحلة شاحنة. اجمع رحلات اليوم كلها.\n\nمثال: المدخل `3` ثم `7` و`7` و`5` يعطي `Total: 19 m3`.",
+          "input_format": "السطر الأول: عدد الرحلات N. ثم N سطرًا، في كل سطر حجم رحلة واحدة (م³، عدد صحيح). استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطر واحد بالشكل `Total: X m3`.",
+          "constraints": "N من 1 إلى 30؛ وكل حجم من 3 إلى 12.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = 1 if i == 3 else r.randint(2, 30)\nprint(n)\nfor _ in range(n):\n    print(r.randint(3, 12))\n",
+      "reference_solution": "banyak = int(input())\ntotal = 0\nfor _ in range(banyak):\n    volume = int(input())\n    total = total + volume\nprint(f\"Total: {total} m3\")\n"
+    },
+    {
+      "slug": "patok-berjarak",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Posisi Patok di Sepanjang Jalan",
+          "statement": "Patok dipasang di sepanjang sumbu jalan mulai dari titik 0, lalu setiap jarak tertentu, selama posisinya tidak melewati panjang jalan. Cetak posisi setiap patok, satu per baris.\n\nContoh: panjang `100` dan jarak `25` menghasilkan `0`, `25`, `50`, `75`, `100` (lima baris). Panjang `90` dan jarak `25` menghasilkan `0`, `25`, `50`, `75`.",
+          "input_format": "Dua baris: panjang jalan (m), lalu jarak antarpatok (m). Keduanya bilangan bulat. Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Posisi setiap patok dalam meter, satu per baris, dari yang terkecil.",
+          "constraints": "Jarak 5 sampai 50; panjang 5 sampai 1050."
+        },
+        "en": {
+          "title": "Stake Positions Along a Road",
+          "statement": "Stakes are set along the road centre line starting at point 0, then at every given spacing, as long as the position does not pass the length of the road. Print the position of each stake, one per line.\n\nExample: length `100` and spacing `25` give `0`, `25`, `50`, `75`, `100` (five lines). Length `90` and spacing `25` give `0`, `25`, `50`, `75`.",
+          "input_format": "Two lines: the road length (m), then the spacing between stakes (m). Both are whole numbers. Call `input()` with nothing inside the brackets.",
+          "output_format": "The position of each stake in metres, one per line, smallest first.",
+          "constraints": "Spacing 5 to 50; length 5 to 1050.",
+          "machine": true
+        },
+        "ar": {
+          "title": "مواضع الأوتاد على طول الطريق",
+          "statement": "تُثبَّت الأوتاد على محور الطريق ابتداءً من النقطة 0 ثم عند كل مسافة محددة، ما دام الموضع لا يتجاوز طول الطريق. اطبع موضع كل وتد في سطر.\n\nمثال: الطول `100` والمسافة `25` يعطيان `0` و`25` و`50` و`75` و`100` (خمسة أسطر). والطول `90` والمسافة `25` يعطيان `0` و`25` و`50` و`75`.",
+          "input_format": "سطران: طول الطريق (م) ثم المسافة بين الأوتاد (م). كلاهما عدد صحيح. استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "موضع كل وتد بالمتر، كلٌّ في سطر، من الأصغر.",
+          "constraints": "المسافة من 5 إلى 50؛ والطول من 5 إلى 1050.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ns = r.choice([5, 10, 20, 25, 50])\nk = r.randint(1, 20)\nL = s * k if i % 3 == 0 else s * k + r.randint(1, s - 1)\nprint(L)\nprint(s)\n",
+      "reference_solution": "panjang = int(input())\njarak = int(input())\nfor posisi in range(0, panjang + 1, jarak):\n    print(posisi)\n"
+    },
+    {
+      "slug": "tabel-inci",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Tabel Inci ke Milimeter",
+          "statement": "Diameter pipa sering ditulis dalam inci. Buat tabel konversi dari 1 inci sampai N inci: 1 inci = 25.4 mm. Hasil dicetak dengan satu angka di belakang titik.\n\nContoh: `3` menghasilkan\n\n```\n1 in = 25.4 mm\n2 in = 50.8 mm\n3 in = 76.2 mm\n```",
+          "input_format": "Satu baris: N (bilangan bulat). Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "N baris berbentuk `K in = X mm`, untuk K = 1 sampai N.",
+          "constraints": "N 1 sampai 24."
+        },
+        "en": {
+          "title": "Inch to Millimetre Table",
+          "statement": "Pipe diameters are often given in inches. Make a conversion table from 1 inch to N inches: 1 inch = 25.4 mm. Print the result with one digit after the point.\n\nExample: `3` gives\n\n```\n1 in = 25.4 mm\n2 in = 50.8 mm\n3 in = 76.2 mm\n```",
+          "input_format": "One line: N (a whole number). Call `input()` with nothing inside the brackets.",
+          "output_format": "N lines of the form `K in = X mm`, for K = 1 to N.",
+          "constraints": "N is 1 to 24.",
+          "machine": true
+        },
+        "ar": {
+          "title": "جدول التحويل من البوصة إلى المليمتر",
+          "statement": "تُكتب أقطار الأنابيب غالبًا بالبوصة. أنشئ جدول تحويل من 1 بوصة إلى N بوصة: 1 بوصة = 25.4 مم. اطبع الناتج بمنزلة عشرية واحدة.\n\nمثال: `3` يعطي\n\n```\n1 in = 25.4 mm\n2 in = 50.8 mm\n3 in = 76.2 mm\n```",
+          "input_format": "سطر واحد: N (عدد صحيح). استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "N سطرًا بالشكل `K in = X mm` من K = 1 إلى N.",
+          "constraints": "N من 1 إلى 24.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(1 if i == 2 else r.randint(2, 24))\n",
+      "reference_solution": "banyak = int(input())\nfor inci in range(1, banyak + 1):\n    print(f\"{inci} in = {inci * 25.4:.1f} mm\")\n"
+    },
+    {
+      "slug": "rata-kuat-tekan",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Rata-rata Kuat Tekan",
+          "statement": "Laboratorium menguji beberapa benda uji dari satu pengecoran. Hitung rata-rata kuat tekannya dan cetak dengan dua angka di belakang titik.\n\nContoh: masukan `4`, lalu `25`, `27`, `30`, `26` menghasilkan `Rata-rata: 27.00 MPa`.",
+          "input_format": "Baris pertama: banyaknya benda uji N. Lalu N baris, masing-masing satu hasil uji (MPa, bilangan bulat). Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Satu baris berbentuk `Rata-rata: R MPa`, dengan R dua angka di belakang titik.",
+          "constraints": "N 2 sampai 20; setiap hasil 18 sampai 42."
+        },
+        "en": {
+          "title": "Average Compressive Strength",
+          "statement": "A laboratory tests several specimens from one pour. Compute the average strength and print it with two digits after the point.\n\nExample: the input `4`, then `25`, `27`, `30`, `26` gives `Rata-rata: 27.00 MPa`.",
+          "input_format": "First line: the number of specimens N. Then N lines, each one test result (MPa, a whole number). Call `input()` with nothing inside the brackets.",
+          "output_format": "One line of the form `Rata-rata: R MPa`, with R having two digits after the point (the word stays in Indonesian).",
+          "constraints": "N is 2 to 20; each result is 18 to 42.",
+          "machine": true
+        },
+        "ar": {
+          "title": "متوسط مقاومة الضغط",
+          "statement": "يختبر المختبر عدة عيّنات من صبّة واحدة. احسب متوسط المقاومة واطبعه بمنزلتين عشريتين.\n\nمثال: المدخل `4` ثم `25` و`27` و`30` و`26` يعطي `Rata-rata: 27.00 MPa`.",
+          "input_format": "السطر الأول: عدد العيّنات N. ثم N سطرًا، في كل سطر نتيجة اختبار (MPa، عدد صحيح). استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطر واحد بالشكل `Rata-rata: R MPa` حيث R بمنزلتين عشريتين (تبقى الكلمة بالإندونيسية).",
+          "constraints": "N من 2 إلى 20؛ وكل نتيجة من 18 إلى 42.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ndef aman(x, d):\n    y = abs(x) * 10 ** d\n    return abs(y - int(y) - 0.5) > 0.002\n\n\nwhile True:\n    n = r.randint(2, 20)\n    v = [r.randint(18, 42) for _ in range(n)]\n    if aman(sum(v) / n, 2):\n        break\nprint(n)\nfor x in v:\n    print(x)\n",
+      "reference_solution": "banyak = int(input())\njumlah = 0\nfor _ in range(banyak):\n    jumlah = jumlah + int(input())\nrata_rata = jumlah / banyak\nprint(f\"Rata-rata: {rata_rata:.2f} MPa\")\n"
+    },
+    {
+      "slug": "hari-hujan-sebulan",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Banyaknya Hari Hujan",
+          "statement": "Pos hujan mencatat curah hujan setiap hari dalam milimeter; angka 0 berarti tidak hujan. Hitung berapa hari yang hujan.\n\nContoh: masukan `5`, lalu `0`, `12`, `0`, `3`, `40` menghasilkan `Hari hujan: 3`.",
+          "input_format": "Baris pertama: banyaknya hari N. Lalu N baris, masing-masing curah hujan satu hari (mm, bilangan bulat). Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Satu baris berbentuk `Hari hujan: K`.",
+          "constraints": "N 5 sampai 31; curah hujan 0 sampai 95."
+        },
+        "en": {
+          "title": "Number of Rainy Days",
+          "statement": "A rain gauge records the rainfall of each day in millimetres; 0 means no rain. Count the days with rain.\n\nExample: the input `5`, then `0`, `12`, `0`, `3`, `40` gives `Hari hujan: 3`.",
+          "input_format": "First line: the number of days N. Then N lines, each the rainfall of one day (mm, a whole number). Call `input()` with nothing inside the brackets.",
+          "output_format": "One line of the form `Hari hujan: K` (the words stay in Indonesian).",
+          "constraints": "N is 5 to 31; rainfall is 0 to 95.",
+          "machine": true
+        },
+        "ar": {
+          "title": "عدد الأيام الماطرة",
+          "statement": "تسجّل محطة المطر هطول كل يوم بالمليمتر؛ والعدد 0 يعني عدم هطول. احسب عدد الأيام الماطرة.\n\nمثال: المدخل `5` ثم `0` و`12` و`0` و`3` و`40` يعطي `Hari hujan: 3`.",
+          "input_format": "السطر الأول: عدد الأيام N. ثم N سطرًا، في كل سطر هطول يوم واحد (مم، عدد صحيح). استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطر واحد بالشكل `Hari hujan: K` (تبقى الكلمات بالإندونيسية).",
+          "constraints": "N من 5 إلى 31؛ والهطول من 0 إلى 95.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = r.randint(5, 31)\nprint(n)\nfor _ in range(n):\n    print(0 if i == 4 or r.random() < 0.45 else r.randint(1, 95))\n",
+      "reference_solution": "banyak_hari = int(input())\nhari_hujan = 0\nfor _ in range(banyak_hari):\n    curah = int(input())\n    if curah > 0:\n        hari_hujan = hari_hujan + 1\nprint(f\"Hari hujan: {hari_hujan}\")\n"
+    },
+    {
+      "slug": "beban-terbesar",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Beban Gandar Terbesar",
+          "statement": "Jembatan timbang mencatat beban gandar setiap truk yang lewat. Temukan beban yang terbesar.\n\nContoh: masukan `4`, lalu `8200`, `7900`, `10150`, `9600` menghasilkan `Terbesar: 10150 kg`.",
+          "input_format": "Baris pertama: banyaknya truk N. Lalu N baris, masing-masing satu beban gandar (kg, bilangan bulat). Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Satu baris berbentuk `Terbesar: X kg`.",
+          "constraints": "N 2 sampai 25; beban 4000 sampai 13090."
+        },
+        "en": {
+          "title": "The Largest Axle Load",
+          "statement": "A weighbridge records the axle load of every passing truck. Find the largest load.\n\nExample: the input `4`, then `8200`, `7900`, `10150`, `9600` gives `Terbesar: 10150 kg`.",
+          "input_format": "First line: the number of trucks N. Then N lines, each one axle load (kg, a whole number). Call `input()` with nothing inside the brackets.",
+          "output_format": "One line of the form `Terbesar: X kg` (the word stays in Indonesian).",
+          "constraints": "N is 2 to 25; loads are 4000 to 13090.",
+          "machine": true
+        },
+        "ar": {
+          "title": "أكبر حمل محوري",
+          "statement": "يسجّل الميزان الجسري الحمل المحوري لكل شاحنة تمرّ. أوجد أكبر حمل.\n\nمثال: المدخل `4` ثم `8200` و`7900` و`10150` و`9600` يعطي `Terbesar: 10150 kg`.",
+          "input_format": "السطر الأول: عدد الشاحنات N. ثم N سطرًا، في كل سطر حمل محوري واحد (كغ، عدد صحيح). استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطر واحد بالشكل `Terbesar: X kg` (تبقى الكلمة بالإندونيسية).",
+          "constraints": "N من 2 إلى 25؛ والأحمال من 4000 إلى 13090.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = r.randint(2, 25)\nv = [r.randint(40, 130) * 100 + r.randint(0, 9) * 10 for _ in range(n)]\nif i == 1:\n    v.sort()\nif i == 2:\n    v.sort(reverse=True)\nprint(n)\nfor x in v:\n    print(x)\n",
+      "reference_solution": "banyak = int(input())\nterbesar = int(input())\nfor _ in range(banyak - 1):\n    beban = int(input())\n    if beban > terbesar:\n        terbesar = beban\nprint(f\"Terbesar: {terbesar} kg\")\n"
+    },
+    {
+      "slug": "anak-tangga",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Ketinggian Setiap Anak Tangga",
+          "statement": "Sebuah tangga mempunyai N anak tangga yang tingginya sama. Cetak ketinggian permukaan setiap anak tangga dari lantai: anak tangga pertama setinggi satu tanjakan, yang kedua dua tanjakan, dan seterusnya.\n\nContoh: `3` anak tangga dengan tanjakan `18` menghasilkan\n\n```\nAnak tangga 1: 18 cm\nAnak tangga 2: 36 cm\nAnak tangga 3: 54 cm\n```",
+          "input_format": "Dua baris: banyaknya anak tangga N, lalu tinggi satu tanjakan (cm). Keduanya bilangan bulat. Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "N baris berbentuk `Anak tangga K: H cm`.",
+          "constraints": "N 2 sampai 24; tanjakan 15 sampai 20."
+        },
+        "en": {
+          "title": "Height of Every Stair Step",
+          "statement": "A staircase has N steps of equal height. Print the height of each tread above the floor: the first step is one riser high, the second two risers, and so on.\n\nExample: `3` steps with a riser of `18` give\n\n```\nAnak tangga 1: 18 cm\nAnak tangga 2: 36 cm\nAnak tangga 3: 54 cm\n```",
+          "input_format": "Two lines: the number of steps N, then the height of one riser (cm). Both are whole numbers. Call `input()` with nothing inside the brackets.",
+          "output_format": "N lines of the form `Anak tangga K: H cm` (the words stay in Indonesian).",
+          "constraints": "N is 2 to 24; the riser is 15 to 20.",
+          "machine": true
+        },
+        "ar": {
+          "title": "ارتفاع كل درجة في السلّم",
+          "statement": "لسلّمٍ N درجة متساوية الارتفاع. اطبع ارتفاع سطح كل درجة عن الأرضية: الأولى بارتفاع قائمة واحدة، والثانية قائمتين، وهكذا.\n\nمثال: `3` درجات بقائمة `18` تعطي\n\n```\nAnak tangga 1: 18 cm\nAnak tangga 2: 36 cm\nAnak tangga 3: 54 cm\n```",
+          "input_format": "سطران: عدد الدرجات N ثم ارتفاع القائمة الواحدة (سم). كلاهما عدد صحيح. استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "N سطرًا بالشكل `Anak tangga K: H cm` (تبقى الكلمات بالإندونيسية).",
+          "constraints": "N من 2 إلى 24؛ والقائمة من 15 إلى 20.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(2, 24))\nprint(r.randint(15, 20))\n",
+      "reference_solution": "banyak = int(input())\ntinggi_anak = int(input())\nfor nomor in range(1, banyak + 1):\n    print(f\"Anak tangga {nomor}: {nomor * tinggi_anak} cm\")\n"
+    },
+    {
+      "slug": "muatan-sampai-nol",
+      "difficulty": "mudah_sekali",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Menjumlah Muatan sampai Angka Nol",
+          "statement": "Petugas gudang mengetik berat setiap kiriman material satu per satu dan menutup daftar dengan angka `0`. Banyaknya kiriman tidak diketahui sebelumnya. Jumlahkan semua berat sebelum angka 0 itu. Bila angka pertama sudah 0, totalnya 0.\n\nContoh: masukan `1200`, `800`, `1500`, `0` menghasilkan `Total: 3500 kg`.",
+          "input_format": "Beberapa baris, masing-masing satu berat (kg, bilangan bulat positif), diakhiri satu baris berisi `0`. Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Satu baris berbentuk `Total: X kg`.",
+          "constraints": "Paling banyak 25 kiriman; setiap berat 50 sampai 1500."
+        },
+        "en": {
+          "title": "Adding Loads Until a Zero",
+          "statement": "A store clerk types the weight of each delivery one by one and closes the list with the number `0`. The number of deliveries is not known in advance. Add up all the weights before that 0. If the first number is already 0, the total is 0.\n\nExample: the input `1200`, `800`, `1500`, `0` gives `Total: 3500 kg`.",
+          "input_format": "Several lines, each one weight (kg, a positive whole number), ended by one line containing `0`. Call `input()` with nothing inside the brackets.",
+          "output_format": "One line of the form `Total: X kg`.",
+          "constraints": "At most 25 deliveries; each weight is 50 to 1500.",
+          "machine": true
+        },
+        "ar": {
+          "title": "جمع الحمولات حتى الصفر",
+          "statement": "يكتب أمين المخزن وزن كل شحنة واحدة تلو الأخرى ويختم القائمة بالعدد `0`. عدد الشحنات غير معروف سلفًا. اجمع كل الأوزان التي تسبق ذلك الصفر. إذا كان العدد الأول 0 فالمجموع 0.\n\nمثال: المدخل `1200` و`800` و`1500` و`0` يعطي `Total: 3500 kg`.",
+          "input_format": "عدة أسطر، في كل سطر وزن (كغ، عدد صحيح موجب)، تنتهي بسطر فيه `0`. استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطر واحد بالشكل `Total: X kg`.",
+          "constraints": "25 شحنة على الأكثر؛ وكل وزن من 50 إلى 1500.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = 0 if i == 6 else r.randint(1, 25)\nfor _ in range(n):\n    print(r.randint(5, 150) * 10)\nprint(0)\n",
+      "reference_solution": "total = 0\nmuatan = int(input())\nwhile muatan != 0:\n    total = total + muatan\n    muatan = int(input())\nprint(f\"Total: {total} kg\")\n"
+    },
+    {
+      "slug": "rekap-hujan",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Rekap Curah Hujan",
+          "statement": "Dari catatan curah hujan harian, buat rekap: jumlah seluruhnya, rata-rata per hari (satu angka di belakang titik), dan curah hujan harian terbesar.\n\nContoh: masukan `4`, lalu `10`, `0`, `25`, `7` menghasilkan\n\n```\nTotal: 42 mm\nRata-rata: 10.5 mm\nMaksimum: 25 mm\n```",
+          "input_format": "Baris pertama: banyaknya hari N. Lalu N baris, masing-masing curah hujan satu hari (mm, bilangan bulat). Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Tiga baris: `Total: T mm`, `Rata-rata: R mm` (satu desimal), `Maksimum: M mm`.",
+          "constraints": "N 3 sampai 31; curah hujan 0 sampai 120."
+        },
+        "en": {
+          "title": "Rainfall Summary",
+          "statement": "From the daily rainfall record make a summary: the total, the average per day (one digit after the point) and the largest daily rainfall.\n\nExample: the input `4`, then `10`, `0`, `25`, `7` gives\n\n```\nTotal: 42 mm\nRata-rata: 10.5 mm\nMaksimum: 25 mm\n```",
+          "input_format": "First line: the number of days N. Then N lines, each the rainfall of one day (mm, a whole number). Call `input()` with nothing inside the brackets.",
+          "output_format": "Three lines: `Total: T mm`, `Rata-rata: R mm` (one decimal), `Maksimum: M mm` (Indonesian words).",
+          "constraints": "N is 3 to 31; rainfall is 0 to 120.",
+          "machine": true
+        },
+        "ar": {
+          "title": "ملخّص الهطول المطري",
+          "statement": "من سجل الهطول اليومي أنشئ ملخّصًا: المجموع، والمتوسط اليومي (بمنزلة عشرية واحدة)، وأكبر هطول يومي.\n\nمثال: المدخل `4` ثم `10` و`0` و`25` و`7` يعطي\n\n```\nTotal: 42 mm\nRata-rata: 10.5 mm\nMaksimum: 25 mm\n```",
+          "input_format": "السطر الأول: عدد الأيام N. ثم N سطرًا، في كل سطر هطول يوم واحد (مم، عدد صحيح). استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "ثلاثة أسطر: `Total: T mm` و`Rata-rata: R mm` (منزلة واحدة) و`Maksimum: M mm` (بالإندونيسية).",
+          "constraints": "N من 3 إلى 31؛ والهطول من 0 إلى 120.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ndef aman(x, d):\n    y = abs(x) * 10 ** d\n    return abs(y - int(y) - 0.5) > 0.002\n\n\nwhile True:\n    n = r.randint(3, 31)\n    v = [0 if r.random() < 0.3 else r.randint(1, 120) for _ in range(n)]\n    if aman(sum(v) / n, 1):\n        break\nprint(n)\nfor x in v:\n    print(x)\n",
+      "reference_solution": "banyak_hari = int(input())\ntotal = 0\nmaksimum = 0\nfor _ in range(banyak_hari):\n    curah = int(input())\n    total = total + curah\n    if curah > maksimum:\n        maksimum = curah\nprint(f\"Total: {total} mm\")\nprint(f\"Rata-rata: {total / banyak_hari:.1f} mm\")\nprint(f\"Maksimum: {maksimum} mm\")\n"
+    },
+    {
+      "slug": "pompa-banjir",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Memompa Genangan",
+          "statement": "Sebuah galian tergenang air. Setiap jam hujan menambah genangan dan pompa menguranginya; pompa selalu lebih kuat daripada hujan. Simulasikan jam demi jam: tambahkan air hujan, kurangi kapasitas pompa, dan berhenti begitu genangan habis (nol atau kurang). Cetak banyaknya jam yang diperlukan.\n\nContoh: genangan `500`, hujan `20`, pompa `120` menghasilkan `Kering setelah 5 jam` (500, 400, 300, 200, 100, 0).",
+          "input_format": "Tiga baris: volume genangan awal (m³), tambahan hujan per jam (m³), kapasitas pompa per jam (m³). Semuanya bilangan bulat. Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Satu baris berbentuk `Kering setelah K jam`.",
+          "constraints": "Genangan 1 sampai 8000; pompa 40 sampai 200; hujan paling sedikit 10 lebih kecil dari pompa."
+        },
+        "en": {
+          "title": "Pumping Out a Flooded Pit",
+          "statement": "An excavation is flooded. Every hour rain adds to the water and a pump removes some; the pump is always stronger than the rain. Simulate hour by hour: add the rain, subtract the pump capacity, and stop as soon as the water is gone (zero or less). Print the number of hours needed.\n\nExample: water `500`, rain `20`, pump `120` give `Kering setelah 5 jam` (500, 400, 300, 200, 100, 0).",
+          "input_format": "Three lines: the initial water volume (m³), the rain added per hour (m³), the pump capacity per hour (m³). All whole numbers. Call `input()` with nothing inside the brackets.",
+          "output_format": "One line of the form `Kering setelah K jam` (the words stay in Indonesian).",
+          "constraints": "Water 1 to 8000; pump 40 to 200; rain at least 10 less than the pump.",
+          "machine": true
+        },
+        "ar": {
+          "title": "ضخّ المياه من حفرة مغمورة",
+          "statement": "غُمرت حفرة بالماء. في كل ساعة يضيف المطر ماءً وتسحب المضخة جزءًا منه؛ والمضخة أقوى من المطر دائمًا. حاكِ العملية ساعة بساعة: أضف ماء المطر واطرح قدرة المضخة وتوقف حالما ينتهي الماء (صفر أو أقل). اطبع عدد الساعات اللازمة.\n\nمثال: ماء `500` ومطر `20` ومضخة `120` تعطي `Kering setelah 5 jam` (500، 400، 300، 200، 100، 0).",
+          "input_format": "ثلاثة أسطر: حجم الماء الابتدائي (م³)، إضافة المطر في الساعة (م³)، قدرة المضخة في الساعة (م³). كلها أعداد صحيحة. استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطر واحد بالشكل `Kering setelah K jam` (تبقى الكلمات بالإندونيسية).",
+          "constraints": "الماء من 1 إلى 8000؛ المضخة من 40 إلى 200؛ والمطر أقل من المضخة بـ10 على الأقل.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\np = r.randint(40, 200)\na = r.randint(0, p - 10)\nk = r.randint(1, 40)\nv = (p - a) * k if i % 3 == 0 else (p - a) * k - r.randint(0, p - a - 1)\nprint(max(1, v))\nprint(a)\nprint(p)\n",
+      "reference_solution": "genangan = int(input())\nhujan_per_jam = int(input())\npompa_per_jam = int(input())\njam = 0\nwhile genangan > 0:\n    genangan = genangan + hujan_per_jam - pompa_per_jam\n    jam = jam + 1\nprint(f\"Kering setelah {jam} jam\")\n"
+    },
+    {
+      "slug": "persen-lulus",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Persentase Benda Uji yang Lulus",
+          "statement": "Sejumlah benda uji diperiksa terhadap satu batas kuat tekan. Benda uji lulus bila hasilnya tidak kurang dari batas. Hitung banyaknya yang lulus dan persentasenya (satu angka di belakang titik).\n\nContoh: masukan `4`, batas `25`, lalu `26`, `24`, `25`, `30` menghasilkan\n\n```\nLulus: 3 dari 4\nPersentase: 75.0%\n```",
+          "input_format": "Baris pertama: banyaknya benda uji N. Baris kedua: batas (MPa). Lalu N baris hasil uji (MPa). Semuanya bilangan bulat. Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Dua baris: `Lulus: K dari N`, lalu `Persentase: P%` dengan P satu angka di belakang titik.",
+          "constraints": "N 3 sampai 30; batas 20, 25, atau 30; hasil 14 sampai 38."
+        },
+        "en": {
+          "title": "Percentage of Specimens That Pass",
+          "statement": "A number of specimens are checked against one strength limit. A specimen passes when its result is not below the limit. Count those that pass and their percentage (one digit after the point).\n\nExample: the input `4`, limit `25`, then `26`, `24`, `25`, `30` gives\n\n```\nLulus: 3 dari 4\nPersentase: 75.0%\n```",
+          "input_format": "First line: the number of specimens N. Second line: the limit (MPa). Then N lines of results (MPa). All whole numbers. Call `input()` with nothing inside the brackets.",
+          "output_format": "Two lines: `Lulus: K dari N`, then `Persentase: P%` with P having one digit after the point (Indonesian words).",
+          "constraints": "N is 3 to 30; the limit is 20, 25 or 30; results are 14 to 38.",
+          "machine": true
+        },
+        "ar": {
+          "title": "نسبة العيّنات الناجحة",
+          "statement": "تُفحص عدة عيّنات مقابل حدّ واحد لمقاومة الضغط. تنجح العيّنة إذا لم تقلّ نتيجتها عن الحد. احسب عدد الناجحة ونسبتها المئوية (بمنزلة عشرية واحدة).\n\nمثال: المدخل `4` والحد `25` ثم `26` و`24` و`25` و`30` يعطي\n\n```\nLulus: 3 dari 4\nPersentase: 75.0%\n```",
+          "input_format": "السطر الأول: عدد العيّنات N. السطر الثاني: الحد (MPa). ثم N سطرًا للنتائج (MPa). كلها أعداد صحيحة. استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطران: `Lulus: K dari N` ثم `Persentase: P%` حيث P بمنزلة عشرية واحدة (بالإندونيسية).",
+          "constraints": "N من 3 إلى 30؛ الحد 20 أو 25 أو 30؛ والنتائج من 14 إلى 38.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ndef aman(x, d):\n    y = abs(x) * 10 ** d\n    return abs(y - int(y) - 0.5) > 0.002\n\n\nwhile True:\n    n = r.randint(3, 30)\n    b = r.choice([20, 25, 30])\n    v = [b + r.randint(-6, 8) for _ in range(n)]\n    if i == 5:\n        v = [b - r.randint(1, 6) for _ in range(n)]\n    k = sum(1 for x in v if x >= b)\n    if aman(k * 100 / n, 1):\n        break\nprint(n)\nprint(b)\nfor x in v:\n    print(x)\n",
+      "reference_solution": "banyak = int(input())\nbatas = int(input())\nlulus = 0\nfor _ in range(banyak):\n    hasil = int(input())\n    if hasil >= batas:\n        lulus = lulus + 1\nprint(f\"Lulus: {lulus} dari {banyak}\")\nprint(f\"Persentase: {lulus * 100 / banyak:.1f}%\")\n"
+    },
+    {
+      "slug": "tabel-kecepatan",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Tabel Kecepatan Rencana",
+          "statement": "Perencana jalan memerlukan tabel kecepatan dalam m/detik. Mulai dari kecepatan awal, naikkan dengan langkah tetap selama belum melewati kecepatan akhir, dan cetak setiap nilainya dalam km/jam dan m/detik (dua angka di belakang titik). 1 km/jam = 1000 / 3600 m/detik.\n\nContoh: awal `40`, akhir `60`, langkah `10` menghasilkan\n\n```\n40 km/jam = 11.11 m/detik\n50 km/jam = 13.89 m/detik\n60 km/jam = 16.67 m/detik\n```",
+          "input_format": "Tiga baris: kecepatan awal, kecepatan akhir, langkah (km/jam, bilangan bulat). Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Satu baris untuk setiap kecepatan, berbentuk `V km/jam = X m/detik`.",
+          "constraints": "Awal 10 sampai 60; langkah 5, 10, atau 20; paling banyak 9 baris."
+        },
+        "en": {
+          "title": "Design Speed Table",
+          "statement": "A road designer needs a table of speeds in m/s. Start at the first speed, increase by a fixed step as long as the last speed is not passed, and print each value in km/h and m/s (two digits after the point). 1 km/h = 1000 / 3600 m/s.\n\nExample: first `40`, last `60`, step `10` give\n\n```\n40 km/jam = 11.11 m/detik\n50 km/jam = 13.89 m/detik\n60 km/jam = 16.67 m/detik\n```",
+          "input_format": "Three lines: the first speed, the last speed, the step (km/h, whole numbers). Call `input()` with nothing inside the brackets.",
+          "output_format": "One line for each speed, of the form `V km/jam = X m/detik` (Indonesian unit words).",
+          "constraints": "First speed 10 to 60; step 5, 10 or 20; at most 9 lines.",
+          "machine": true
+        },
+        "ar": {
+          "title": "جدول السرعة التصميمية",
+          "statement": "يحتاج مصمّم الطرق إلى جدول للسرعات بوحدة م/ث. ابدأ من السرعة الأولى وزِد بخطوة ثابتة ما دامت السرعة الأخيرة لم تُتجاوز، واطبع كل قيمة بوحدة كم/س وبوحدة م/ث (بمنزلتين عشريتين). 1 كم/س = 1000 / 3600 م/ث.\n\nمثال: الأولى `40` والأخيرة `60` والخطوة `10` تعطي\n\n```\n40 km/jam = 11.11 m/detik\n50 km/jam = 13.89 m/detik\n60 km/jam = 16.67 m/detik\n```",
+          "input_format": "ثلاثة أسطر: السرعة الأولى، السرعة الأخيرة، الخطوة (كم/س، أعداد صحيحة). استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطر لكل سرعة بالشكل `V km/jam = X m/detik` (كلمات الوحدات بالإندونيسية).",
+          "constraints": "السرعة الأولى من 10 إلى 60؛ الخطوة 5 أو 10 أو 20؛ 9 أسطر على الأكثر.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ns = r.choice([5, 10, 20])\na = r.randint(2, 12) * 5\nb = a + s * r.randint(0, 8) + (r.randint(1, s - 1) if i % 2 else 0)\nprint(a)\nprint(b)\nprint(s)\n",
+      "reference_solution": "awal = int(input())\nakhir = int(input())\nlangkah = int(input())\nkecepatan = awal\nwhile kecepatan <= akhir:\n    print(f\"{kecepatan} km/jam = {kecepatan * 1000 / 3600:.2f} m/detik\")\n    kecepatan = kecepatan + langkah\n"
+    },
+    {
+      "slug": "jam-puncak",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Jam Puncak Lalu Lintas",
+          "statement": "Survei mencatat jumlah kendaraan setiap jam secara berurutan. Tentukan jam ke berapa lalu lintas paling ramai dan berapa jumlahnya. Bila ada beberapa jam dengan jumlah terbanyak yang sama, ambil jam yang paling awal.\n\nContoh: masukan `4`, lalu `310`, `455`, `455`, `290` menghasilkan `Jam ke-2: 455 kendaraan`.",
+          "input_format": "Baris pertama: banyaknya jam N. Lalu N baris, jumlah kendaraan jam ke-1 sampai jam ke-N (bilangan bulat). Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Satu baris berbentuk `Jam ke-K: C kendaraan`.",
+          "constraints": "N 3 sampai 24; jumlah kendaraan 100 sampai 900."
+        },
+        "en": {
+          "title": "Peak Traffic Hour",
+          "statement": "A survey records the number of vehicles of each hour in order. Find which hour is the busiest and its count. If several hours share the largest count, take the earliest.\n\nExample: the input `4`, then `310`, `455`, `455`, `290` gives `Jam ke-2: 455 kendaraan`.",
+          "input_format": "First line: the number of hours N. Then N lines, the vehicle counts of hour 1 to hour N (whole numbers). Call `input()` with nothing inside the brackets.",
+          "output_format": "One line of the form `Jam ke-K: C kendaraan` (Indonesian words).",
+          "constraints": "N is 3 to 24; counts are 100 to 900.",
+          "machine": true
+        },
+        "ar": {
+          "title": "ساعة الذروة المرورية",
+          "statement": "يسجّل مسحٌ عدد المركبات في كل ساعة بالترتيب. حدِّد أي ساعة هي الأكثر ازدحامًا وعدد مركباتها. إذا تساوت عدة ساعات في العدد الأكبر فخذ أبكرها.\n\nمثال: المدخل `4` ثم `310` و`455` و`455` و`290` يعطي `Jam ke-2: 455 kendaraan`.",
+          "input_format": "السطر الأول: عدد الساعات N. ثم N سطرًا، عدد المركبات من الساعة 1 إلى الساعة N (أعداد صحيحة). استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطر واحد بالشكل `Jam ke-K: C kendaraan` (بالإندونيسية).",
+          "constraints": "N من 3 إلى 24؛ والأعداد من 100 إلى 900.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = r.randint(3, 24)\nv = [r.randint(100, 900) for _ in range(n)]\nif i % 3 == 1:\n    k = r.randrange(n - 1)\n    m = max(v)\n    v[k] = m\n    v[r.randrange(k + 1, n)] = m\nprint(n)\nfor x in v:\n    print(x)\n",
+      "reference_solution": "banyak_jam = int(input())\njam_puncak = 0\nterbanyak = -1\nfor jam in range(1, banyak_jam + 1):\n    kendaraan = int(input())\n    if kendaraan > terbanyak:\n        terbanyak = kendaraan\n        jam_puncak = jam\nprint(f\"Jam ke-{jam_puncak}: {terbanyak} kendaraan\")\n"
+    },
+    {
+      "slug": "stok-semen",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Kapan Memesan Semen Lagi",
+          "statement": "Gudang proyek mempunyai stok semen awal dan rencana pemakaian per hari. Kurangi stok hari demi hari. Begitu stok turun di bawah batas minimum, semen harus dipesan ulang pada hari itu dan perhitungan berhenti (pemakaian hari-hari berikutnya tidak dihitung). Bila sampai hari terakhir stok tidak pernah di bawah batas, stok aman. Cetak juga sisa stok saat perhitungan berhenti.\n\nContoh: stok `100`, batas `30`, `4` hari dengan pemakaian `20`, `25`, `30`, `10` menghasilkan\n\n```\nPesan ulang pada hari 3\nSisa: 25 sak\n```\n\nDengan batas `10` hasilnya `STOK AMAN` lalu `Sisa: 15 sak`.",
+          "input_format": "Baris pertama: stok awal (sak). Baris kedua: batas minimum (sak). Baris ketiga: banyaknya hari N. Lalu N baris pemakaian per hari. Semuanya bilangan bulat. Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Baris pertama `Pesan ulang pada hari K` atau `STOK AMAN`. Baris kedua `Sisa: S sak`.",
+          "constraints": "N 3 sampai 20; pemakaian per hari 5 sampai 40; jumlah seluruh pemakaian tidak melebihi stok awal."
+        },
+        "en": {
+          "title": "When to Reorder Cement",
+          "statement": "A site store has an opening stock of cement and a planned use per day. Subtract the use day by day. As soon as the stock falls below the minimum level, cement must be reordered on that day and the calculation stops (the use of later days is not counted). If the stock never falls below the level through the last day, the stock is safe. Also print the stock left when the calculation stops.\n\nExample: stock `100`, level `30`, `4` days with uses `20`, `25`, `30`, `10` give\n\n```\nPesan ulang pada hari 3\nSisa: 25 sak\n```\n\nWith a level of `10` the result is `STOK AMAN` then `Sisa: 15 sak`.",
+          "input_format": "First line: the opening stock (bags). Second line: the minimum level (bags). Third line: the number of days N. Then N lines of daily use. All whole numbers. Call `input()` with nothing inside the brackets.",
+          "output_format": "First line `Pesan ulang pada hari K` or `STOK AMAN`. Second line `Sisa: S sak` (Indonesian words).",
+          "constraints": "N is 3 to 20; daily use is 5 to 40; the total use never exceeds the opening stock.",
+          "machine": true
+        },
+        "ar": {
+          "title": "متى يُعاد طلب الإسمنت",
+          "statement": "في مخزن المشروع رصيد ابتدائي من الإسمنت وخطة استهلاك يومية. اطرح الاستهلاك يومًا بيوم. حالما ينزل الرصيد دون الحد الأدنى يجب إعادة الطلب في ذلك اليوم ويتوقف الحساب (لا يُحسب استهلاك الأيام التالية). إذا لم ينزل الرصيد دون الحد حتى اليوم الأخير فالرصيد آمن. اطبع كذلك الرصيد المتبقي عند توقف الحساب.\n\nمثال: رصيد `100` وحدّ `30` و`4` أيام باستهلاك `20` و`25` و`30` و`10` تعطي\n\n```\nPesan ulang pada hari 3\nSisa: 25 sak\n```\n\nومع حدّ `10` تكون النتيجة `STOK AMAN` ثم `Sisa: 15 sak`.",
+          "input_format": "السطر الأول: الرصيد الابتدائي (كيس). السطر الثاني: الحد الأدنى (كيس). السطر الثالث: عدد الأيام N. ثم N سطرًا للاستهلاك اليومي. كلها أعداد صحيحة. استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "السطر الأول `Pesan ulang pada hari K` أو `STOK AMAN`. السطر الثاني `Sisa: S sak` (بالإندونيسية).",
+          "constraints": "N من 3 إلى 20؛ الاستهلاك اليومي من 5 إلى 40؛ ومجموع الاستهلاك لا يتجاوز الرصيد الابتدائي.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = r.randint(3, 20)\nv = [r.randint(5, 40) for _ in range(n)]\ns = sum(v) + r.randint(0, 60)\nm = r.randint(5, 30) if i % 3 == 0 else r.randint(40, max(41, s // 2))\nprint(s)\nprint(m)\nprint(n)\nfor x in v:\n    print(x)\n",
+      "reference_solution": "stok = int(input())\nbatas_minimum = int(input())\nbanyak_hari = int(input())\nhari_pesan = 0\nfor hari in range(1, banyak_hari + 1):\n    pemakaian = int(input())\n    stok = stok - pemakaian\n    if stok < batas_minimum:\n        hari_pesan = hari\n        break\nif hari_pesan == 0:\n    print(\"STOK AMAN\")\nelse:\n    print(f\"Pesan ulang pada hari {hari_pesan}\")\nprint(f\"Sisa: {stok} sak\")\n"
+    },
+    {
+      "slug": "pertumbuhan-lhr",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Pertumbuhan Lalu Lintas",
+          "statement": "Lalu lintas harian (LHR) sebuah ruas jalan tumbuh dengan persentase tetap setiap tahun. Setiap tahun LHR baru adalah LHR lama ditambah pertumbuhannya, lalu dibulatkan ke bawah menjadi bilangan bulat sebelum dipakai untuk tahun berikutnya: `lhr = lhr * (100 + persen) // 100`. Hitung LHR setelah sejumlah tahun.\n\nContoh: LHR `1000`, pertumbuhan `5`, selama `3` tahun menghasilkan `LHR tahun ke-3: 1157` (1050, 1102, 1157).",
+          "input_format": "Tiga baris: LHR sekarang, persen pertumbuhan per tahun, banyaknya tahun. Semuanya bilangan bulat. Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Satu baris berbentuk `LHR tahun ke-T: X`.",
+          "constraints": "LHR 200 sampai 30000; pertumbuhan 1 sampai 9; tahun 1 sampai 20."
+        },
+        "en": {
+          "title": "Traffic Growth",
+          "statement": "The daily traffic (LHR) of a road section grows by a fixed percentage every year. Each year the new LHR is the old LHR plus its growth, rounded down to a whole number before it is used for the next year: `lhr = lhr * (100 + persen) // 100`. Compute the LHR after a number of years.\n\nExample: LHR `1000`, growth `5`, for `3` years gives `LHR tahun ke-3: 1157` (1050, 1102, 1157).",
+          "input_format": "Three lines: the present LHR, the growth percent per year, the number of years. All whole numbers. Call `input()` with nothing inside the brackets.",
+          "output_format": "One line of the form `LHR tahun ke-T: X` (Indonesian words).",
+          "constraints": "LHR 200 to 30000; growth 1 to 9; years 1 to 20.",
+          "machine": true
+        },
+        "ar": {
+          "title": "نموّ المرور",
+          "statement": "ينمو المرور اليومي (LHR) لمقطع طريق بنسبة ثابتة كل سنة. في كل سنة يكون LHR الجديد هو القديم مضافًا إليه نموّه، ثم يُقرَّب إلى الأسفل عددًا صحيحًا قبل استعماله للسنة التالية: `lhr = lhr * (100 + persen) // 100`. احسب LHR بعد عدد من السنين.\n\nمثال: LHR `1000` ونموّ `5` لمدة `3` سنوات يعطي `LHR tahun ke-3: 1157` (1050، 1102، 1157).",
+          "input_format": "ثلاثة أسطر: LHR الحالي، نسبة النمو السنوية، عدد السنين. كلها أعداد صحيحة. استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطر واحد بالشكل `LHR tahun ke-T: X` (بالإندونيسية).",
+          "constraints": "LHR من 200 إلى 30000؛ النمو من 1 إلى 9؛ السنون من 1 إلى 20.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(200, 30000))\nprint(r.randint(1, 9))\nprint(r.randint(1, 20))\n",
+      "reference_solution": "lhr = int(input())\npersen = int(input())\ntahun = int(input())\nfor _ in range(tahun):\n    lhr = lhr * (100 + persen) // 100\nprint(f\"LHR tahun ke-{tahun}: {lhr}\")\n"
+    },
+    {
+      "slug": "naik-turun",
+      "difficulty": "mudah",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Total Tanjakan dan Turunan",
+          "statement": "Elevasi sumbu jalan diukur di titik-titik yang berurutan. Hitung jumlah seluruh kenaikan dan jumlah seluruh penurunan di antara titik-titik yang bersebelahan.\n\nContoh: masukan `5`, lalu `100`, `130`, `120`, `160`, `150` menghasilkan\n\n```\nNaik: 70 cm\nTurun: 20 cm\n```\n\n(naik 30 dan 40; turun 10 dan 10).",
+          "input_format": "Baris pertama: banyaknya titik N. Lalu N baris elevasi berurutan (cm, bilangan bulat). Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Dua baris: `Naik: A cm`, lalu `Turun: B cm`.",
+          "constraints": "N 2 sampai 25; beda elevasi dua titik bersebelahan paling banyak 80."
+        },
+        "en": {
+          "title": "Total Rise and Fall",
+          "statement": "The elevation of a road centre line is measured at consecutive points. Compute the sum of all rises and the sum of all falls between neighbouring points.\n\nExample: the input `5`, then `100`, `130`, `120`, `160`, `150` gives\n\n```\nNaik: 70 cm\nTurun: 20 cm\n```\n\n(rises of 30 and 40; falls of 10 and 10).",
+          "input_format": "First line: the number of points N. Then N lines of consecutive elevations (cm, whole numbers). Call `input()` with nothing inside the brackets.",
+          "output_format": "Two lines: `Naik: A cm` (rise), then `Turun: B cm` (fall); Indonesian words.",
+          "constraints": "N is 2 to 25; neighbouring elevations differ by at most 80.",
+          "machine": true
+        },
+        "ar": {
+          "title": "مجموع الصعود والهبوط",
+          "statement": "قيس منسوب محور الطريق عند نقاط متتالية. احسب مجموع كل الارتفاعات ومجموع كل الانخفاضات بين النقاط المتجاورة.\n\nمثال: المدخل `5` ثم `100` و`130` و`120` و`160` و`150` يعطي\n\n```\nNaik: 70 cm\nTurun: 20 cm\n```\n\n(صعود 30 و40؛ هبوط 10 و10).",
+          "input_format": "السطر الأول: عدد النقاط N. ثم N سطرًا للمناسيب المتتالية (سم، أعداد صحيحة). استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطران: `Naik: A cm` (صعود) ثم `Turun: B cm` (هبوط)؛ بالإندونيسية.",
+          "constraints": "N من 2 إلى 25؛ والفرق بين نقطتين متجاورتين لا يزيد على 80.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = r.randint(2, 25)\ne = r.randint(500, 3000)\nprint(n)\nfor k in range(n):\n    print(e)\n    e += 0 if r.random() < 0.15 else (r.randint(1, 80) if i == 2 else -r.randint(1, 80) if i == 3 else r.randint(-80, 80))\n",
+      "reference_solution": "banyak_titik = int(input())\nsebelumnya = int(input())\nnaik = 0\nturun = 0\nfor _ in range(banyak_titik - 1):\n    elevasi = int(input())\n    if elevasi > sebelumnya:\n        naik = naik + elevasi - sebelumnya\n    else:\n        turun = turun + sebelumnya - elevasi\n    sebelumnya = elevasi\nprint(f\"Naik: {naik} cm\")\nprint(f\"Turun: {turun} cm\")\n"
+    },
+    {
+      "slug": "kemarau-terpanjang",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Deret Hari Kering Terpanjang",
+          "statement": "Untuk merencanakan penyiraman timbunan, pelaksana ingin tahu deret hari kering terpanjang: berapa hari berturut-turut paling lama curah hujannya 0. Bila tidak ada hari kering, jawabannya 0.\n\nContoh: masukan `8`, lalu `0`, `0`, `5`, `0`, `0`, `0`, `12`, `0` menghasilkan `Kering terpanjang: 3 hari`.",
+          "input_format": "Baris pertama: banyaknya hari N. Lalu N baris curah hujan harian (mm, bilangan bulat; 0 berarti kering). Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Satu baris berbentuk `Kering terpanjang: K hari`.",
+          "constraints": "N 5 sampai 40; curah hujan 0 sampai 90."
+        },
+        "en": {
+          "title": "The Longest Dry Spell",
+          "statement": "To plan the watering of a fill, the contractor wants the longest dry spell: the largest number of consecutive days with a rainfall of 0. If there is no dry day, the answer is 0.\n\nExample: the input `8`, then `0`, `0`, `5`, `0`, `0`, `0`, `12`, `0` gives `Kering terpanjang: 3 hari`.",
+          "input_format": "First line: the number of days N. Then N lines of daily rainfall (mm, whole numbers; 0 means dry). Call `input()` with nothing inside the brackets.",
+          "output_format": "One line of the form `Kering terpanjang: K hari` (Indonesian words).",
+          "constraints": "N is 5 to 40; rainfall is 0 to 90.",
+          "machine": true
+        },
+        "ar": {
+          "title": "أطول فترة جفاف",
+          "statement": "لتخطيط رشّ الردم يريد المنفّذ معرفة أطول فترة جفاف: أكبر عدد من الأيام المتتالية التي هطولها 0. إذا لم يوجد يوم جاف فالجواب 0.\n\nمثال: المدخل `8` ثم `0` و`0` و`5` و`0` و`0` و`0` و`12` و`0` يعطي `Kering terpanjang: 3 hari`.",
+          "input_format": "السطر الأول: عدد الأيام N. ثم N سطرًا للهطول اليومي (مم، أعداد صحيحة؛ 0 يعني جافًّا). استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطر واحد بالشكل `Kering terpanjang: K hari` (بالإندونيسية).",
+          "constraints": "N من 5 إلى 40؛ والهطول من 0 إلى 90.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = r.randint(5, 40)\np = [0.5, 0.2, 0.8, 0.0, 1.0][i % 5]\nv = [0 if r.random() < p else r.randint(1, 90) for _ in range(n)]\nprint(n)\nfor x in v:\n    print(x)\n",
+      "reference_solution": "banyak_hari = int(input())\nberturut = 0\nterpanjang = 0\nfor _ in range(banyak_hari):\n    curah = int(input())\n    if curah == 0:\n        berturut = berturut + 1\n        if berturut > terpanjang:\n            terpanjang = berturut\n    else:\n        berturut = 0\nprint(f\"Kering terpanjang: {terpanjang} hari\")\n"
+    },
+    {
+      "slug": "luas-penampang-sungai",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Luas Penampang Sungai",
+          "statement": "Kedalaman sungai diukur di beberapa titik yang berjarak sama dari tepi ke tepi. Luas penampang basah dihitung dengan aturan trapesium: untuk setiap dua titik bersebelahan, luas pias = jarak × (kedalaman kiri + kedalaman kanan) / 2; jumlahkan semua pias. Kedalaman diberikan dalam sentimeter dan jarak dalam meter; cetak luas dalam m² dengan dua angka di belakang titik.\n\nContoh: jarak `2`, `4` titik dengan kedalaman `0`, `120`, `180`, `0` menghasilkan `Luas: 6.00 m2` (pias 1.20 + 3.00 + 1.80 m²).",
+          "input_format": "Baris pertama: jarak antartitik (m). Baris kedua: banyaknya titik N. Lalu N baris kedalaman (cm). Semuanya bilangan bulat. Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Satu baris berbentuk `Luas: A m2`, dengan A dua angka di belakang titik.",
+          "constraints": "Jarak 1 sampai 5; N 3 sampai 20; kedalaman 0 sampai 450, kelipatan 10."
+        },
+        "en": {
+          "title": "Cross-Section Area of a River",
+          "statement": "The depth of a river is measured at several equally spaced points from bank to bank. The wetted area is computed with the trapezoid rule: for each pair of neighbouring points, strip area = spacing × (left depth + right depth) / 2; add all strips. Depths are given in centimetres and the spacing in metres; print the area in m² with two digits after the point.\n\nExample: spacing `2`, `4` points with depths `0`, `120`, `180`, `0` give `Luas: 6.00 m2` (strips 1.20 + 3.00 + 1.80 m²).",
+          "input_format": "First line: the spacing between points (m). Second line: the number of points N. Then N lines of depths (cm). All whole numbers. Call `input()` with nothing inside the brackets.",
+          "output_format": "One line of the form `Luas: A m2`, with A having two digits after the point (the word stays in Indonesian).",
+          "constraints": "Spacing 1 to 5; N is 3 to 20; depths 0 to 450, multiples of 10.",
+          "machine": true
+        },
+        "ar": {
+          "title": "مساحة المقطع العرضي لنهر",
+          "statement": "قيس عمق النهر عند عدة نقاط متساوية التباعد من ضفة إلى ضفة. تُحسب المساحة المبتلّة بقاعدة شبه المنحرف: لكل نقطتين متجاورتين مساحة الشريحة = التباعد × (العمق الأيسر + العمق الأيمن) / 2؛ ثم تُجمع الشرائح. الأعماق بالسنتيمتر والتباعد بالمتر؛ اطبع المساحة بالمتر المربع بمنزلتين عشريتين.\n\nمثال: تباعد `2` و`4` نقاط بأعماق `0` و`120` و`180` و`0` تعطي `Luas: 6.00 m2` (الشرائح 1.20 + 3.00 + 1.80 م²).",
+          "input_format": "السطر الأول: التباعد بين النقاط (م). السطر الثاني: عدد النقاط N. ثم N سطرًا للأعماق (سم). كلها أعداد صحيحة. استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطر واحد بالشكل `Luas: A m2` حيث A بمنزلتين عشريتين (تبقى الكلمة بالإندونيسية).",
+          "constraints": "التباعد من 1 إلى 5؛ N من 3 إلى 20؛ الأعماق من 0 إلى 450 ومن مضاعفات 10.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = r.randint(3, 20)\nv = [r.randint(1, 45) * 10 for _ in range(n)]\nif i % 2 == 0:\n    v[0] = 0\n    v[-1] = 0\nprint(r.randint(1, 5))\nprint(n)\nfor x in v:\n    print(x)\n",
+      "reference_solution": "jarak = int(input())\nbanyak_titik = int(input())\nsebelumnya = int(input())\njumlah_cm = 0\nfor _ in range(banyak_titik - 1):\n    kedalaman = int(input())\n    jumlah_cm = jumlah_cm + (sebelumnya + kedalaman) / 2\n    sebelumnya = kedalaman\nluas = jarak * jumlah_cm / 100\nprint(f\"Luas: {luas:.2f} m2\")\n"
+    },
+    {
+      "slug": "truk-bersamaan",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Dua Truk Tiba Bersamaan",
+          "statement": "Dua truk mixer berangkat bersama pada menit 0 dan bolak-balik ke lokasi pengecoran. Truk A tiba setiap beberapa menit sekali, truk B setiap beberapa menit yang lain. Bila keduanya tiba pada menit yang sama, pompa beton harus antre. Cetak semua menit (setelah menit 0, sampai batas waktu) saat keduanya tiba bersamaan, satu per baris, lalu banyaknya.\n\nContoh: selang A `12`, selang B `18`, batas `100` menghasilkan\n\n```\n36\n72\nJumlah: 2\n```\n\nBila tidak pernah bersamaan, keluarannya hanya `Jumlah: 0`.",
+          "input_format": "Tiga baris: selang kedatangan truk A, selang kedatangan truk B, batas waktu (menit, bilangan bulat). Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Satu baris untuk setiap menit kedatangan bersama, dari yang terkecil, lalu satu baris `Jumlah: K`.",
+          "constraints": "Selang 4 sampai 30; batas waktu 10 sampai 900."
+        },
+        "en": {
+          "title": "Two Trucks Arriving Together",
+          "statement": "Two mixer trucks leave together at minute 0 and shuttle to the pour. Truck A arrives every so many minutes, truck B every other number of minutes. When both arrive in the same minute, the concrete pump has a queue. Print every minute (after minute 0, up to the time limit) at which both arrive together, one per line, then how many there are.\n\nExample: interval A `12`, interval B `18`, limit `100` give\n\n```\n36\n72\nJumlah: 2\n```\n\nIf they never arrive together, the output is only `Jumlah: 0`.",
+          "input_format": "Three lines: the arrival interval of truck A, the arrival interval of truck B, the time limit (minutes, whole numbers). Call `input()` with nothing inside the brackets.",
+          "output_format": "One line for each common arrival minute, smallest first, then one line `Jumlah: K` (the word stays in Indonesian).",
+          "constraints": "Intervals 4 to 30; time limit 10 to 900.",
+          "machine": true
+        },
+        "ar": {
+          "title": "وصول شاحنتين معًا",
+          "statement": "تنطلق شاحنتان خلّاطتان معًا في الدقيقة 0 وتتردّدان على موقع الصبّ. تصل الشاحنة A كل عدد من الدقائق والشاحنة B كل عدد آخر. إذا وصلتا في الدقيقة نفسها اصطفّتا عند مضخة الخرسانة. اطبع كل دقيقة (بعد الدقيقة 0 وحتى المهلة) تصلان فيها معًا، كلٌّ في سطر، ثم عددها.\n\nمثال: فاصل A `12` وفاصل B `18` والمهلة `100` تعطي\n\n```\n36\n72\nJumlah: 2\n```\n\nإذا لم تصلا معًا أبدًا فالمخرج `Jumlah: 0` فقط.",
+          "input_format": "ثلاثة أسطر: فاصل وصول الشاحنة A، فاصل وصول الشاحنة B، المهلة (دقائق، أعداد صحيحة). استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطر لكل دقيقة وصول مشترك من الأصغر، ثم سطر `Jumlah: K` (تبقى الكلمة بالإندونيسية).",
+          "constraints": "الفواصل من 4 إلى 30؛ والمهلة من 10 إلى 900.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\na = r.randint(4, 30)\nb = r.randint(4, 30)\nif i == 2:\n    b = a\nt = [r.randint(30, 480), a * b - 1, a * b][i % 3]\nprint(a)\nprint(b)\nprint(max(10, t))\n",
+      "reference_solution": "selang_a = int(input())\nselang_b = int(input())\nbatas = int(input())\njumlah = 0\nfor menit in range(1, batas + 1):\n    if menit % selang_a == 0 and menit % selang_b == 0:\n        print(menit)\n        jumlah = jumlah + 1\nprint(f\"Jumlah: {jumlah}\")\n"
+    },
+    {
+      "slug": "penyusutan-alat",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Penyusutan Nilai Alat Berat",
+          "statement": "Nilai sebuah alat berat menyusut dengan persentase tetap setiap tahun. Setiap tahun nilai baru dibulatkan ke bawah: `nilai = nilai * (100 - persen) // 100`. Cetak nilai di akhir setiap tahun, dan berhenti setelah mencetak nilai pertama yang berada di bawah batas (saat itu alat dijual).\n\nContoh: nilai `1000`, susut `20`, batas `500` menghasilkan\n\n```\nTahun 1: 800\nTahun 2: 640\nTahun 3: 512\nTahun 4: 409\n```",
+          "input_format": "Tiga baris: nilai awal (juta rupiah), persen penyusutan per tahun, batas nilai jual (juta rupiah). Semuanya bilangan bulat. Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Satu baris untuk setiap tahun, berbentuk `Tahun K: N`; baris terakhir adalah nilai pertama yang di bawah batas.",
+          "constraints": "Nilai awal 200 sampai 5000; penyusutan 5 sampai 40; batas lebih kecil dari nilai awal."
+        },
+        "en": {
+          "title": "Depreciation of Heavy Equipment",
+          "statement": "The value of a machine depreciates by a fixed percentage every year. Each year the new value is rounded down: `nilai = nilai * (100 - persen) // 100`. Print the value at the end of each year, and stop after printing the first value that is below the limit (the machine is then sold).\n\nExample: value `1000`, depreciation `20`, limit `500` give\n\n```\nTahun 1: 800\nTahun 2: 640\nTahun 3: 512\nTahun 4: 409\n```",
+          "input_format": "Three lines: the initial value (million rupiah), the depreciation percent per year, the selling limit (million rupiah). All whole numbers. Call `input()` with nothing inside the brackets.",
+          "output_format": "One line for each year, of the form `Tahun K: N`; the last line is the first value below the limit (the word stays in Indonesian).",
+          "constraints": "Initial value 200 to 5000; depreciation 5 to 40; the limit is smaller than the initial value.",
+          "machine": true
+        },
+        "ar": {
+          "title": "اهتلاك قيمة آلة ثقيلة",
+          "statement": "تهتلك قيمة آلة ثقيلة بنسبة ثابتة كل سنة. في كل سنة تُقرَّب القيمة الجديدة إلى الأسفل: `nilai = nilai * (100 - persen) // 100`. اطبع القيمة في نهاية كل سنة وتوقف بعد طباعة أول قيمة دون الحد (عندها تُباع الآلة).\n\nمثال: قيمة `1000` واهتلاك `20` وحدّ `500` تعطي\n\n```\nTahun 1: 800\nTahun 2: 640\nTahun 3: 512\nTahun 4: 409\n```",
+          "input_format": "ثلاثة أسطر: القيمة الابتدائية (مليون روبية)، نسبة الاهتلاك السنوية، حدّ البيع (مليون روبية). كلها أعداد صحيحة. استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطر لكل سنة بالشكل `Tahun K: N`؛ والسطر الأخير هو أول قيمة دون الحد (تبقى الكلمة بالإندونيسية).",
+          "constraints": "القيمة الابتدائية من 200 إلى 5000؛ الاهتلاك من 5 إلى 40؛ والحد أصغر من القيمة الابتدائية.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nh = r.randint(200, 5000)\np = r.randint(5, 40)\nb = r.randint(h // 10, h - 1)\nprint(h)\nprint(p)\nprint(b)\n",
+      "reference_solution": "nilai = int(input())\npersen_susut = int(input())\nbatas = int(input())\ntahun = 0\nwhile nilai >= batas:\n    tahun = tahun + 1\n    nilai = nilai * (100 - persen_susut) // 100\n    print(f\"Tahun {tahun}: {nilai}\")\n"
+    },
+    {
+      "slug": "grid-tiang",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Koordinat Tiang Pancang",
+          "statement": "Tiang pancang sebuah pondasi disusun dalam beberapa baris dan kolom dengan jarak tetap. Tiang pertama berada di koordinat (0, 0). Cetak koordinat x dan y setiap tiang, baris demi baris: semua tiang di baris pertama (y = 0) dari kiri ke kanan, lalu baris berikutnya. Akhiri dengan banyaknya tiang.\n\nContoh: `2` baris, `3` kolom, jarak x `150`, jarak y `200` menghasilkan\n\n```\n0 0\n150 0\n300 0\n0 200\n150 200\n300 200\nJumlah: 6\n```",
+          "input_format": "Empat baris: banyaknya baris, banyaknya kolom, jarak arah x (cm), jarak arah y (cm). Semuanya bilangan bulat. Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Satu baris `X Y` untuk setiap tiang, lalu satu baris `Jumlah: N`.",
+          "constraints": "Baris 1 sampai 6; kolom 1 sampai 8; jarak 90 sampai 200."
+        },
+        "en": {
+          "title": "Pile Coordinates",
+          "statement": "The piles of a foundation are arranged in rows and columns at fixed spacings. The first pile is at coordinate (0, 0). Print the x and y coordinate of every pile, row by row: all piles of the first row (y = 0) from left to right, then the next row. End with the number of piles.\n\nExample: `2` rows, `3` columns, x spacing `150`, y spacing `200` give\n\n```\n0 0\n150 0\n300 0\n0 200\n150 200\n300 200\nJumlah: 6\n```",
+          "input_format": "Four lines: the number of rows, the number of columns, the spacing along x (cm), the spacing along y (cm). All whole numbers. Call `input()` with nothing inside the brackets.",
+          "output_format": "One line `X Y` for each pile, then one line `Jumlah: N` (the word stays in Indonesian).",
+          "constraints": "Rows 1 to 6; columns 1 to 8; spacings 90 to 200.",
+          "machine": true
+        },
+        "ar": {
+          "title": "إحداثيات الخوازيق",
+          "statement": "تُرتَّب خوازيق أساسٍ في صفوف وأعمدة بتباعد ثابت. الخازوق الأول عند الإحداثي (0، 0). اطبع الإحداثيين x و y لكل خازوق صفًّا صفًّا: كل خوازيق الصف الأول (y = 0) من اليسار إلى اليمين ثم الصف التالي. اختم بعدد الخوازيق.\n\nمثال: `2` صفّان و`3` أعمدة وتباعد x `150` وتباعد y `200` تعطي\n\n```\n0 0\n150 0\n300 0\n0 200\n150 200\n300 200\nJumlah: 6\n```",
+          "input_format": "أربعة أسطر: عدد الصفوف، عدد الأعمدة، التباعد باتجاه x (سم)، التباعد باتجاه y (سم). كلها أعداد صحيحة. استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطر `X Y` لكل خازوق ثم سطر `Jumlah: N` (تبقى الكلمة بالإندونيسية).",
+          "constraints": "الصفوف من 1 إلى 6؛ الأعمدة من 1 إلى 8؛ والتباعد من 90 إلى 200.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint(r.randint(1, 6))\nprint(r.randint(1, 8))\nprint(r.choice([90, 100, 120, 150, 180]))\nprint(r.choice([90, 100, 120, 150, 200]))\n",
+      "reference_solution": "baris = int(input())\nkolom = int(input())\njarak_x = int(input())\njarak_y = int(input())\nfor b in range(baris):\n    for k in range(kolom):\n        print(f\"{k * jarak_x} {b * jarak_y}\")\nprint(f\"Jumlah: {baris * kolom}\")\n"
+    },
+    {
+      "slug": "saring-sensor",
+      "difficulty": "mudah_sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Menyaring Bacaan Sensor Muka Air",
+          "statement": "Sensor muka air sungai mengirim bacaan tinggi air dalam sentimeter. Bila sensor gagal membaca, ia mengirim `-1`. Lewati bacaan yang gagal, lalu cetak banyaknya bacaan yang sah dan rata-ratanya (satu angka di belakang titik). Bila tidak ada bacaan yang sah, cetak `TIDAK ADA DATA` sebagai baris kedua.\n\nContoh: masukan `5`, lalu `120`, `-1`, `130`, `-1`, `125` menghasilkan\n\n```\nSah: 3\nRata-rata: 125.0 cm\n```",
+          "input_format": "Baris pertama: banyaknya bacaan N. Lalu N baris bacaan (cm, bilangan bulat; `-1` berarti gagal). Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Baris pertama `Sah: K`. Baris kedua `Rata-rata: R cm` (satu desimal) atau `TIDAK ADA DATA`.",
+          "constraints": "N 3 sampai 30; bacaan sah 20 sampai 400."
+        },
+        "en": {
+          "title": "Filtering Water-Level Sensor Readings",
+          "statement": "A river water-level sensor sends readings of the water height in centimetres. When the sensor fails to read, it sends `-1`. Skip the failed readings, then print the number of valid readings and their average (one digit after the point). If there is no valid reading, print `TIDAK ADA DATA` as the second line.\n\nExample: the input `5`, then `120`, `-1`, `130`, `-1`, `125` gives\n\n```\nSah: 3\nRata-rata: 125.0 cm\n```",
+          "input_format": "First line: the number of readings N. Then N lines of readings (cm, whole numbers; `-1` means failed). Call `input()` with nothing inside the brackets.",
+          "output_format": "First line `Sah: K`. Second line `Rata-rata: R cm` (one decimal) or `TIDAK ADA DATA` (Indonesian words).",
+          "constraints": "N is 3 to 30; valid readings are 20 to 400.",
+          "machine": true
+        },
+        "ar": {
+          "title": "تنقية قراءات حسّاس منسوب الماء",
+          "statement": "يرسل حسّاس منسوب ماء النهر قراءات ارتفاع الماء بالسنتيمتر. إذا فشل في القراءة أرسل `-1`. تجاوز القراءات الفاشلة ثم اطبع عدد القراءات الصحيحة ومتوسطها (بمنزلة عشرية واحدة). إذا لم توجد قراءة صحيحة فاطبع `TIDAK ADA DATA` سطرًا ثانيًا.\n\nمثال: المدخل `5` ثم `120` و`-1` و`130` و`-1` و`125` يعطي\n\n```\nSah: 3\nRata-rata: 125.0 cm\n```",
+          "input_format": "السطر الأول: عدد القراءات N. ثم N سطرًا للقراءات (سم، أعداد صحيحة؛ `-1` تعني الفشل). استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "السطر الأول `Sah: K`. السطر الثاني `Rata-rata: R cm` (منزلة واحدة) أو `TIDAK ADA DATA` (بالإندونيسية).",
+          "constraints": "N من 3 إلى 30؛ والقراءات الصحيحة من 20 إلى 400.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ndef aman(x, d):\n    y = abs(x) * 10 ** d\n    return abs(y - int(y) - 0.5) > 0.002\n\n\nwhile True:\n    n = r.randint(3, 30)\n    p = [0.25, 0.0, 1.0, 0.6][i % 4]\n    v = [-1 if r.random() < p else r.randint(20, 400) for _ in range(n)]\n    s = [x for x in v if x >= 0]\n    if not s or aman(sum(s) / len(s), 1):\n        break\nprint(n)\nfor x in v:\n    print(x)\n",
+      "reference_solution": "banyak = int(input())\nsah = 0\njumlah = 0\nfor _ in range(banyak):\n    bacaan = int(input())\n    if bacaan == -1:\n        continue\n    sah = sah + 1\n    jumlah = jumlah + bacaan\nprint(f\"Sah: {sah}\")\nif sah == 0:\n    print(\"TIDAK ADA DATA\")\nelse:\n    print(f\"Rata-rata: {jumlah / sah:.1f} cm\")\n"
+    },
+    {
+      "slug": "denah-kolom",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Denah Titik Kolom",
+          "statement": "Denah sebuah bangunan digambar sebagai kisi titik berjarak 1 m: titik (x, y) dengan x dari 0 sampai panjang dan y dari 0 sampai lebar. Kolom berdiri di setiap titik yang x dan y-nya sama-sama kelipatan jarak kolom (0 termasuk kelipatan). Gambar denah itu baris demi baris, mulai dari y = 0: huruf `K` untuk titik kolom dan `.` untuk titik lain, tanpa spasi. Lalu cetak banyaknya kolom.\n\nContoh: panjang `6`, lebar `3`, jarak `3` menghasilkan\n\n```\nK..K..K\n.......\n.......\nK..K..K\nKolom: 6\n```\n\nUntuk mencetak tanpa pindah baris pakai `print(\"K\", end=\"\")`; `print()` tanpa isi memindahkan baris.",
+          "input_format": "Tiga baris: panjang (m), lebar (m), jarak kolom (m). Semuanya bilangan bulat. Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Lebar + 1 baris gambar, masing-masing panjang + 1 karakter, lalu satu baris `Kolom: N`.",
+          "constraints": "Jarak 2 sampai 6; panjang dan lebar 2 sampai 35."
+        },
+        "en": {
+          "title": "Column Layout Plan",
+          "statement": "The plan of a building is drawn as a grid of points 1 m apart: point (x, y) with x from 0 to the length and y from 0 to the width. A column stands at every point whose x and y are both multiples of the column spacing (0 counts as a multiple). Draw the plan row by row, starting at y = 0: the letter `K` for a column point and `.` for any other point, without spaces. Then print the number of columns.\n\nExample: length `6`, width `3`, spacing `3` give\n\n```\nK..K..K\n.......\n.......\nK..K..K\nKolom: 6\n```\n\nTo print without moving to a new line use `print(\"K\", end=\"\")`; an empty `print()` moves to a new line.",
+          "input_format": "Three lines: the length (m), the width (m), the column spacing (m). All whole numbers. Call `input()` with nothing inside the brackets.",
+          "output_format": "Width + 1 lines of drawing, each of length + 1 characters, then one line `Kolom: N` (the word stays in Indonesian).",
+          "constraints": "Spacing 2 to 6; length and width 2 to 35.",
+          "machine": true
+        },
+        "ar": {
+          "title": "مخطط مواضع الأعمدة",
+          "statement": "يُرسم مخطط مبنى شبكةً من نقاط تتباعد 1 م: النقطة (x، y) حيث x من 0 إلى الطول و y من 0 إلى العرض. يقوم عمود عند كل نقطة يكون فيها x و y كلاهما من مضاعفات تباعد الأعمدة (والصفر من المضاعفات). ارسم المخطط سطرًا سطرًا ابتداءً من y = 0: الحرف `K` لنقطة العمود و`.` لغيرها، دون مسافات. ثم اطبع عدد الأعمدة.\n\nمثال: طول `6` وعرض `3` وتباعد `3` تعطي\n\n```\nK..K..K\n.......\n.......\nK..K..K\nKolom: 6\n```\n\nللطباعة دون الانتقال إلى سطر جديد استعمل `print(\"K\", end=\"\")`؛ و`print()` فارغة تنقل إلى سطر جديد.",
+          "input_format": "ثلاثة أسطر: الطول (م)، العرض (م)، تباعد الأعمدة (م). كلها أعداد صحيحة. استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "عدد (العرض + 1) من أسطر الرسم، في كل سطر (الطول + 1) حرفًا، ثم سطر `Kolom: N` (تبقى الكلمة بالإندونيسية).",
+          "constraints": "التباعد من 2 إلى 6؛ والطول والعرض من 2 إلى 35.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ns = r.randint(2, 6)\np = s * r.randint(1, 5) + (r.randint(1, s - 1) if i % 3 == 1 else 0)\nl = s * r.randint(1, 4) + (r.randint(1, s - 1) if i % 3 == 2 else 0)\nprint(p)\nprint(l)\nprint(s)\n",
+      "reference_solution": "panjang = int(input())\nlebar = int(input())\njarak = int(input())\nkolom = 0\nfor y in range(lebar + 1):\n    for x in range(panjang + 1):\n        if x % jarak == 0 and y % jarak == 0:\n            print(\"K\", end=\"\")\n            kolom = kolom + 1\n        else:\n            print(\".\", end=\"\")\n    print()\nprint(f\"Kolom: {kolom}\")\n"
+    },
+    {
+      "slug": "cicilan-alat",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Cicilan Pembelian Alat",
+          "statement": "Kontraktor membeli alat dengan pinjaman. Setiap bulan terjadi hal berikut, berurutan:\n\n1. bunga bulan itu ditambahkan ke sisa pinjaman: `tagihan = sisa + sisa * bunga // 100` (bunga dibulatkan ke bawah);\n2. bila tagihan tidak lebih dari angsuran tetap, kontraktor membayar tepat sebesar tagihan itu dan pinjaman lunas;\n3. bila lebih, ia membayar angsuran tetap dan sisanya dibawa ke bulan berikutnya.\n\nHitung berapa bulan sampai lunas dan besar pembayaran terakhir.\n\nContoh: pinjaman `1000`, bunga `2`, angsuran `300` menghasilkan\n\n```\nLunas dalam 4 bulan\nAngsuran terakhir: 144\n```\n\n(sisa setelah tiga bulan: 720, 434, 142; tagihan bulan keempat 142 + 2 = 144).",
+          "input_format": "Tiga baris: pinjaman (ribu rupiah), bunga per bulan (persen), angsuran tetap per bulan (ribu rupiah). Semuanya bilangan bulat. Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Dua baris: `Lunas dalam K bulan`, lalu `Angsuran terakhir: X`.",
+          "constraints": "Pinjaman 200 sampai 9000; bunga 1 sampai 3; angsuran selalu lebih besar dari bunga bulan pertama."
+        },
+        "en": {
+          "title": "Equipment Loan Instalments",
+          "statement": "A contractor buys a machine with a loan. Each month the following happens, in order:\n\n1. the interest of that month is added to the balance: `tagihan = sisa + sisa * bunga // 100` (interest rounded down);\n2. if this amount is not more than the fixed instalment, the contractor pays exactly that amount and the loan is settled;\n3. if it is more, the fixed instalment is paid and the rest is carried to the next month.\n\nCompute how many months it takes to settle the loan and the size of the last payment.\n\nExample: loan `1000`, interest `2`, instalment `300` give\n\n```\nLunas dalam 4 bulan\nAngsuran terakhir: 144\n```\n\n(balances after three months: 720, 434, 142; the amount due in month four is 142 + 2 = 144).",
+          "input_format": "Three lines: the loan (thousand rupiah), the interest per month (percent), the fixed monthly instalment (thousand rupiah). All whole numbers. Call `input()` with nothing inside the brackets.",
+          "output_format": "Two lines: `Lunas dalam K bulan`, then `Angsuran terakhir: X` (Indonesian words).",
+          "constraints": "Loan 200 to 9000; interest 1 to 3; the instalment is always larger than the interest of the first month.",
+          "machine": true
+        },
+        "ar": {
+          "title": "أقساط شراء آلة",
+          "statement": "يشتري مقاول آلة بقرض. في كل شهر يحدث ما يلي بالترتيب:\n\n1. تُضاف فائدة الشهر إلى الرصيد: `tagihan = sisa + sisa * bunga // 100` (تُقرَّب الفائدة إلى الأسفل)؛\n2. إذا لم يزد هذا المبلغ على القسط الثابت دفع المقاول ذلك المبلغ تمامًا وسُدِّد القرض؛\n3. إذا زاد دفع القسط الثابت ورُحِّل الباقي إلى الشهر التالي.\n\nاحسب عدد الأشهر حتى السداد ومقدار الدفعة الأخيرة.\n\nمثال: قرض `1000` وفائدة `2` وقسط `300` تعطي\n\n```\nLunas dalam 4 bulan\nAngsuran terakhir: 144\n```\n\n(الأرصدة بعد ثلاثة أشهر: 720، 434، 142؛ والمستحق في الشهر الرابع 142 + 2 = 144).",
+          "input_format": "ثلاثة أسطر: القرض (ألف روبية)، الفائدة الشهرية (بالمئة)، القسط الشهري الثابت (ألف روبية). كلها أعداد صحيحة. استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطران: `Lunas dalam K bulan` ثم `Angsuran terakhir: X` (بالإندونيسية).",
+          "constraints": "القرض من 200 إلى 9000؛ الفائدة من 1 إلى 3؛ والقسط أكبر دائمًا من فائدة الشهر الأول.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\np = r.randint(200, 9000)\nb = r.randint(1, 3)\na = p // r.randint(2, 30) + p * b // 100 + r.randint(5, 50)\nif i == 1:\n    a = p + p * b // 100\nif i == 2:\n    a = p + p * b // 100 + 40\nprint(p)\nprint(b)\nprint(a)\n",
+      "reference_solution": "sisa = int(input())\nbunga_persen = int(input())\nangsuran = int(input())\nbulan = 0\nterakhir = 0\nwhile sisa > 0:\n    bulan = bulan + 1\n    tagihan = sisa + sisa * bunga_persen // 100\n    if tagihan <= angsuran:\n        terakhir = tagihan\n        sisa = 0\n    else:\n        sisa = tagihan - angsuran\nprint(f\"Lunas dalam {bulan} bulan\")\nprint(f\"Angsuran terakhir: {terakhir}\")\n"
+    },
+    {
+      "slug": "hujan-tiga-hari",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Hujan Tiga Harian Maksimum",
+          "statement": "Perencanaan drainase memakai hujan tiga harian maksimum: jumlah curah hujan terbesar dari tiga hari yang berurutan. Dari catatan harian, cari jumlah itu dan hari pertama dari tiga hari tersebut. Bila ada beberapa deret tiga hari dengan jumlah terbesar yang sama, ambil yang paling awal. Pertemuan ini belum memakai list: simpan dua hari terakhir dalam variabel.\n\nContoh: masukan `6`, lalu `10`, `0`, `30`, `45`, `5`, `20` menghasilkan\n\n```\nMaksimum 3 hari: 80 mm\nMulai hari ke-3\n```\n\n(jumlah tiga harian: 40, 75, 80, 70).",
+          "input_format": "Baris pertama: banyaknya hari N. Lalu N baris curah hujan harian (mm, bilangan bulat). Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Dua baris: `Maksimum 3 hari: X mm`, lalu `Mulai hari ke-K`.",
+          "constraints": "N 3 sampai 31; curah hujan 0 sampai 130."
+        },
+        "en": {
+          "title": "Maximum Three-Day Rainfall",
+          "statement": "Drainage design uses the maximum three-day rainfall: the largest total of three consecutive days. From the daily record, find that total and the first day of those three. If several runs of three days share the largest total, take the earliest. This meeting does not use lists yet: keep the last two days in variables.\n\nExample: the input `6`, then `10`, `0`, `30`, `45`, `5`, `20` gives\n\n```\nMaksimum 3 hari: 80 mm\nMulai hari ke-3\n```\n\n(three-day totals: 40, 75, 80, 70).",
+          "input_format": "First line: the number of days N. Then N lines of daily rainfall (mm, whole numbers). Call `input()` with nothing inside the brackets.",
+          "output_format": "Two lines: `Maksimum 3 hari: X mm`, then `Mulai hari ke-K` (Indonesian words).",
+          "constraints": "N is 3 to 31; rainfall is 0 to 130.",
+          "machine": true
+        },
+        "ar": {
+          "title": "أقصى هطول لثلاثة أيام",
+          "statement": "يُستعمل في تصميم التصريف أقصى هطول لثلاثة أيام: أكبر مجموع لهطول ثلاثة أيام متتالية. من السجل اليومي أوجد ذلك المجموع واليوم الأول من تلك الثلاثة. إذا تساوت عدة فترات في المجموع الأكبر فخذ أبكرها. لم تُدرَس القوائم بعد: احتفظ باليومين الأخيرين في متغيرين.\n\nمثال: المدخل `6` ثم `10` و`0` و`30` و`45` و`5` و`20` يعطي\n\n```\nMaksimum 3 hari: 80 mm\nMulai hari ke-3\n```\n\n(مجاميع الأيام الثلاثة: 40، 75، 80، 70).",
+          "input_format": "السطر الأول: عدد الأيام N. ثم N سطرًا للهطول اليومي (مم، أعداد صحيحة). استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطران: `Maksimum 3 hari: X mm` ثم `Mulai hari ke-K` (بالإندونيسية).",
+          "constraints": "N من 3 إلى 31؛ والهطول من 0 إلى 130.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = 3 if i == 4 else r.randint(4, 31)\nv = [0 if r.random() < 0.3 else r.randint(1, 130) for _ in range(n)]\nif i == 5 and n >= 7:\n    v[1:4] = [50, 60, 70]\n    v[4:7] = [70, 60, 50]\n    v = [min(x, 60) if k > 6 else x for k, x in enumerate(v)]\nprint(n)\nfor x in v:\n    print(x)\n",
+      "reference_solution": "banyak_hari = int(input())\ndua_hari_lalu = int(input())\nkemarin = int(input())\nterbesar = -1\nmulai = 0\nfor hari in range(3, banyak_hari + 1):\n    hari_ini = int(input())\n    jumlah = dua_hari_lalu + kemarin + hari_ini\n    if jumlah > terbesar:\n        terbesar = jumlah\n        mulai = hari - 2\n    dua_hari_lalu = kemarin\n    kemarin = hari_ini\nprint(f\"Maksimum 3 hari: {terbesar} mm\")\nprint(f\"Mulai hari ke-{mulai}\")\n"
+    },
+    {
+      "slug": "pilih-tulangan",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Memilih Tulangan Balok",
+          "statement": "Perhitungan memberi luas tulangan perlu (mm²). Di gudang tersedia baja berdiameter 10, 13, 16, 19, 22, dan 25 mm, dan dalam satu lapis balok boleh dipasang 2 sampai 8 batang berdiameter sama. Luas n batang berdiameter d adalah n × π × d² / 4 (pakai `math.pi`).\n\nPeriksa semua pasangan diameter dan banyak batang, lalu pilih pasangan yang luasnya paling kecil di antara yang tidak kurang dari luas perlu. Tidak ada dua pasangan yang luasnya sama. Diameter 10, 13, …, 25 dapat dihasilkan dengan `range(10, 26, 3)`.\n\nContoh: luas perlu `750` menghasilkan\n\n```\n2 D22\nAs = 760.3 mm2\n```\n\nBila 8 batang D25 pun masih kurang, keluarannya satu baris `TIDAK ADA`.",
+          "input_format": "Satu baris: luas tulangan perlu (mm², bilangan bulat). Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Baris pertama `N Dd` (banyak batang, spasi, huruf D diikuti diameter). Baris kedua `As = L mm2` dengan L satu angka di belakang titik. Atau satu baris `TIDAK ADA`.",
+          "constraints": "Luas perlu 100 sampai 4500."
+        },
+        "en": {
+          "title": "Choosing Beam Reinforcement",
+          "statement": "A calculation gives the required steel area (mm²). The store has bars of diameter 10, 13, 16, 19, 22 and 25 mm, and one layer of a beam may hold 2 to 8 bars of the same diameter. The area of n bars of diameter d is n × π × d² / 4 (use `math.pi`).\n\nCheck every pair of diameter and number of bars, then choose the pair with the smallest area among those not below the required area. No two pairs have the same area. The diameters 10, 13, …, 25 can be produced with `range(10, 26, 3)`.\n\nExample: a required area of `750` gives\n\n```\n2 D22\nAs = 760.3 mm2\n```\n\nIf even 8 bars D25 are not enough, the output is the single line `TIDAK ADA`.",
+          "input_format": "One line: the required steel area (mm², a whole number). Call `input()` with nothing inside the brackets.",
+          "output_format": "First line `N Dd` (number of bars, a space, the letter D followed by the diameter). Second line `As = L mm2` with L having one digit after the point. Or the single line `TIDAK ADA`.",
+          "constraints": "The required area is 100 to 4500.",
+          "machine": true
+        },
+        "ar": {
+          "title": "اختيار تسليح الجائز",
+          "statement": "يعطي الحساب مساحة التسليح المطلوبة (مم²). في المخزن قضبان بأقطار 10 و13 و16 و19 و22 و25 مم، ويجوز في الطبقة الواحدة من الجائز وضع 2 إلى 8 قضبان من القطر نفسه. مساحة n قضيبًا قطرها d هي n × π × d² / 4 (استعمل `math.pi`).\n\nافحص كل أزواج القطر وعدد القضبان، ثم اختر الزوج ذا المساحة الصغرى من بين ما لا يقل عن المساحة المطلوبة. لا يتساوى زوجان في المساحة. يمكن توليد الأقطار 10، 13، …، 25 بـ `range(10, 26, 3)`.\n\nمثال: مساحة مطلوبة `750` تعطي\n\n```\n2 D22\nAs = 760.3 mm2\n```\n\nإذا لم تكفِ حتى 8 قضبان D25 فالمخرج سطر واحد `TIDAK ADA`.",
+          "input_format": "سطر واحد: مساحة التسليح المطلوبة (مم²، عدد صحيح). استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "السطر الأول `N Dd` (عدد القضبان ثم مسافة ثم الحرف D متبوعًا بالقطر). السطر الثاني `As = L mm2` حيث L بمنزلة عشرية واحدة. أو سطر واحد `TIDAK ADA`.",
+          "constraints": "المساحة المطلوبة من 100 إلى 4500.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ndef aman(x, d):\n    y = abs(x) * 10 ** d\n    return abs(y - int(y) - 0.5) > 0.002\n\n\nimport math\nwhile True:\n    a = [r.randint(100, 3900), r.randint(3930, 4500), r.randint(100, 160)][i % 3 if i < 6 else 0]\n    pilih = [n * math.pi * d * d / 4 for d in range(10, 26, 3) for n in range(2, 9) if n * math.pi * d * d / 4 >= a]\n    if not pilih or aman(min(pilih), 1):\n        break\nprint(a)\n",
+      "reference_solution": "import math\n\nluas_perlu = int(input())\nluas_terbaik = 0.0\nbanyak_terbaik = 0\ndiameter_terbaik = 0\nfor diameter in range(10, 26, 3):\n    for banyak in range(2, 9):\n        luas = banyak * math.pi * diameter * diameter / 4\n        if luas >= luas_perlu:\n            if banyak_terbaik == 0 or luas < luas_terbaik:\n                luas_terbaik = luas\n                banyak_terbaik = banyak\n                diameter_terbaik = diameter\nif banyak_terbaik == 0:\n    print(\"TIDAK ADA\")\nelse:\n    print(f\"{banyak_terbaik} D{diameter_terbaik}\")\n    print(f\"As = {luas_terbaik:.1f} mm2\")\n"
+    },
+    {
+      "slug": "potong-besi-berurutan",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Memotong Besi Berurutan",
+          "statement": "Tukang besi memotong potongan-potongan tulangan sesuai urutan daftar dari batang standar 1200 cm. Ia bekerja dengan aturan sederhana: potongan berikutnya diambil dari batang yang sedang dipakai bila sisanya masih cukup; bila tidak cukup, sisa batang itu disingkirkan dan batang baru dibuka. Ia tidak pernah kembali ke batang lama. Hitung banyaknya batang yang dibuka dan jumlah seluruh sisa (panjang semua batang yang dibuka dikurangi jumlah semua potongan).\n\nContoh: masukan `5`, lalu `500`, `400`, `400`, `700`, `300` menghasilkan\n\n```\nBatang: 3\nSisa total: 1300 cm\n```\n\n(batang 1: 500 + 400; batang 2: 400 + 700; batang 3: 300).",
+          "input_format": "Baris pertama: banyaknya potongan N. Lalu N baris panjang potongan sesuai urutan (cm, bilangan bulat). Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Dua baris: `Batang: K`, lalu `Sisa total: S cm`.",
+          "constraints": "N 1 sampai 30; panjang potongan 40 sampai 1200."
+        },
+        "en": {
+          "title": "Cutting Bars in Order",
+          "statement": "A steel fixer cuts reinforcement pieces in the order of a list from standard bars of 1200 cm. He follows a simple rule: the next piece is taken from the bar in use if what is left of it is enough; if not, the rest of that bar is put aside and a new bar is opened. He never goes back to an old bar. Compute the number of bars opened and the total waste (the length of all opened bars minus the sum of all pieces).\n\nExample: the input `5`, then `500`, `400`, `400`, `700`, `300` gives\n\n```\nBatang: 3\nSisa total: 1300 cm\n```\n\n(bar 1: 500 + 400; bar 2: 400 + 700; bar 3: 300).",
+          "input_format": "First line: the number of pieces N. Then N lines of piece lengths in order (cm, whole numbers). Call `input()` with nothing inside the brackets.",
+          "output_format": "Two lines: `Batang: K`, then `Sisa total: S cm` (Indonesian words).",
+          "constraints": "N is 1 to 30; piece lengths are 40 to 1200.",
+          "machine": true
+        },
+        "ar": {
+          "title": "قصّ الحديد بالترتيب",
+          "statement": "يقصّ الحدّاد قطع التسليح بترتيب القائمة من قضبان قياسية طولها 1200 سم. يتبع قاعدة بسيطة: تؤخذ القطعة التالية من القضيب المستعمل إذا كان الباقي منه كافيًا؛ وإلا يُنحّى باقي ذلك القضيب ويُفتح قضيب جديد. لا يعود إلى قضيب قديم أبدًا. احسب عدد القضبان المفتوحة ومجموع الهدر (طول كل القضبان المفتوحة ناقص مجموع القطع).\n\nمثال: المدخل `5` ثم `500` و`400` و`400` و`700` و`300` يعطي\n\n```\nBatang: 3\nSisa total: 1300 cm\n```\n\n(القضيب 1: 500 + 400؛ القضيب 2: 400 + 700؛ القضيب 3: 300).",
+          "input_format": "السطر الأول: عدد القطع N. ثم N سطرًا لأطوال القطع بالترتيب (سم، أعداد صحيحة). استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطران: `Batang: K` ثم `Sisa total: S cm` (بالإندونيسية).",
+          "constraints": "N من 1 إلى 30؛ وأطوال القطع من 40 إلى 1200.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = r.randint(1, 30)\nv = [r.randint(4, 120) * 10 for _ in range(n)]\nif i == 3:\n    v = [600] * n\nif i == 4:\n    v = [1200] * n\nprint(n)\nfor x in v:\n    print(x)\n",
+      "reference_solution": "banyak = int(input())\nbatang = 0\nsisa_batang = 0\ntotal_potongan = 0\nfor _ in range(banyak):\n    potongan = int(input())\n    total_potongan = total_potongan + potongan\n    if potongan > sisa_batang:\n        batang = batang + 1\n        sisa_batang = 1200\n    sisa_batang = sisa_batang - potongan\nprint(f\"Batang: {batang}\")\nprint(f\"Sisa total: {batang * 1200 - total_potongan} cm\")\n"
+    },
+    {
+      "slug": "ubin-terbesar",
+      "difficulty": "sedang",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Ubin Persegi Terbesar",
+          "statement": "Sebuah lantai berbentuk persegi panjang akan ditutup ubin persegi yang semuanya utuh, tanpa dipotong. Cari sisi ubin terbesar yang memungkinkan itu, yaitu faktor persekutuan terbesar dari panjang dan lebar lantai, lalu hitung banyaknya ubin.\n\nFaktor persekutuan terbesar dapat dicari dengan perulangan: selama b bukan 0, ganti (a, b) dengan (b, sisa a dibagi b); jawabannya nilai a yang terakhir.\n\nContoh: lantai `360` × `240` menghasilkan\n\n```\nSisi ubin: 120 cm\nJumlah: 6\n```",
+          "input_format": "Dua baris: panjang lantai, lalu lebar lantai (cm, bilangan bulat). Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Dua baris: `Sisi ubin: S cm`, lalu `Jumlah: N`.",
+          "constraints": "Panjang dan lebar 10 sampai 2400."
+        },
+        "en": {
+          "title": "The Largest Square Tile",
+          "statement": "A rectangular floor is to be covered with whole square tiles, none of them cut. Find the largest tile side that allows this, which is the greatest common divisor of the floor length and width, then compute the number of tiles.\n\nThe greatest common divisor can be found with a loop: while b is not 0, replace (a, b) by (b, the remainder of a divided by b); the answer is the last value of a.\n\nExample: a floor of `360` × `240` gives\n\n```\nSisi ubin: 120 cm\nJumlah: 6\n```",
+          "input_format": "Two lines: the floor length, then the floor width (cm, whole numbers). Call `input()` with nothing inside the brackets.",
+          "output_format": "Two lines: `Sisi ubin: S cm`, then `Jumlah: N` (Indonesian words).",
+          "constraints": "Length and width are 10 to 2400.",
+          "machine": true
+        },
+        "ar": {
+          "title": "أكبر بلاطة مربعة",
+          "statement": "تُغطّى أرضية مستطيلة ببلاط مربع كامل لا يُقصّ منه شيء. أوجد أكبر ضلع بلاطة يتيح ذلك، وهو القاسم المشترك الأكبر لطول الأرضية وعرضها، ثم احسب عدد البلاطات.\n\nيمكن إيجاد القاسم المشترك الأكبر بحلقة: ما دام b لا يساوي 0 استبدل (a، b) بـ (b، باقي قسمة a على b)؛ والجواب آخر قيمة لـ a.\n\nمثال: أرضية `360` × `240` تعطي\n\n```\nSisi ubin: 120 cm\nJumlah: 6\n```",
+          "input_format": "سطران: طول الأرضية ثم عرضها (سم، عددان صحيحان). استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطران: `Sisi ubin: S cm` ثم `Jumlah: N` (بالإندونيسية).",
+          "constraints": "الطول والعرض من 10 إلى 2400.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ng = r.choice([5, 10, 15, 20, 25, 30, 40, 60])\na = r.randint(2, 40)\nb = r.randint(2, 40)\nif i == 2:\n    b = a\nif i == 3:\n    b = a * r.randint(2, 4)\nprint(g * a)\nprint(g * b)\n",
+      "reference_solution": "panjang = int(input())\nlebar = int(input())\na = panjang\nb = lebar\nwhile b != 0:\n    sisa = a % b\n    a = b\n    b = sisa\nprint(f\"Sisi ubin: {a} cm\")\nprint(f\"Jumlah: {(panjang // a) * (lebar // a)}\")\n"
+    },
+    {
+      "slug": "routing-waduk",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Simulasi Tampungan Embung",
+          "statement": "Sebuah embung mempunyai kapasitas tertentu dan tampungan awal. Setiap jam terjadi hal berikut, berurutan:\n\n1. air masuk jam itu ditambahkan ke tampungan;\n2. embung melepas air untuk kebutuhan irigasi: bila tampungan tidak kurang dari kebutuhan, kebutuhan dipenuhi seluruhnya; bila kurang, semua air yang ada dilepas (tampungan menjadi 0) dan jam itu dihitung sebagai jam kekurangan;\n3. bila setelah itu tampungan melebihi kapasitas, kelebihannya melimpas lewat pelimpah, tampungan menjadi sama dengan kapasitas, dan jam itu dihitung sebagai jam melimpas.\n\nCetak tampungan akhir, jumlah seluruh limpasan, banyaknya jam melimpas, dan banyaknya jam kekurangan.\n\nContoh: kapasitas `100`, tampungan awal `60`, kebutuhan `20`, `4` jam dengan air masuk `50`, `80`, `0`, `5` menghasilkan\n\n```\nTampungan akhir: 65\nTotal limpasan: 50\nJam melimpas: 1\nJam kekurangan: 0\n```\n\n(tampungan di akhir tiap jam: 90, 100 dengan limpasan 50, 80, 65).",
+          "input_format": "Baris pertama: kapasitas. Baris kedua: tampungan awal. Baris ketiga: kebutuhan per jam. Baris keempat: banyaknya jam N. Lalu N baris air masuk per jam. Semuanya bilangan bulat dalam ribu m³. Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Empat baris: `Tampungan akhir: S`, `Total limpasan: L`, `Jam melimpas: A`, `Jam kekurangan: B`.",
+          "constraints": "Kapasitas 80 sampai 600; tampungan awal tidak melebihi kapasitas; kebutuhan 5 sampai 60; N 3 sampai 30; air masuk 0 sampai 180."
+        },
+        "en": {
+          "title": "Simulating a Small Reservoir",
+          "statement": "A small reservoir has a given capacity and an initial storage. Every hour the following happens, in order:\n\n1. the inflow of that hour is added to the storage;\n2. the reservoir releases water for irrigation: if the storage is not less than the demand, the demand is met in full; if it is less, all the water is released (the storage becomes 0) and the hour counts as a shortage hour;\n3. if the storage then exceeds the capacity, the excess spills over the spillway, the storage becomes equal to the capacity, and the hour counts as a spill hour.\n\nPrint the final storage, the total spill, the number of spill hours and the number of shortage hours.\n\nExample: capacity `100`, initial storage `60`, demand `20`, `4` hours with inflows `50`, `80`, `0`, `5` give\n\n```\nTampungan akhir: 65\nTotal limpasan: 50\nJam melimpas: 1\nJam kekurangan: 0\n```\n\n(storage at the end of each hour: 90, 100 with a spill of 50, 80, 65).",
+          "input_format": "First line: the capacity. Second line: the initial storage. Third line: the demand per hour. Fourth line: the number of hours N. Then N lines of inflow per hour. All whole numbers in thousand m³. Call `input()` with nothing inside the brackets.",
+          "output_format": "Four lines: `Tampungan akhir: S`, `Total limpasan: L`, `Jam melimpas: A`, `Jam kekurangan: B` (Indonesian words).",
+          "constraints": "Capacity 80 to 600; the initial storage does not exceed the capacity; demand 5 to 60; N is 3 to 30; inflow 0 to 180.",
+          "machine": true
+        },
+        "ar": {
+          "title": "محاكاة خزّان صغير",
+          "statement": "لخزّان صغير سعة محددة ومخزون ابتدائي. في كل ساعة يحدث ما يلي بالترتيب:\n\n1. يُضاف الوارد في تلك الساعة إلى المخزون؛\n2. يُطلق الخزّان الماء لحاجة الري: إذا لم يقلّ المخزون عن الحاجة لُبّيت كاملة؛ وإذا قلّ أُطلق كل الماء الموجود (يصير المخزون 0) وعُدّت الساعة ساعة نقص؛\n3. إذا تجاوز المخزون بعد ذلك السعة فاض الزائد عبر المفيض وصار المخزون مساويًا للسعة وعُدّت الساعة ساعة فيضان.\n\nاطبع المخزون النهائي ومجموع الفيضان وعدد ساعات الفيضان وعدد ساعات النقص.\n\nمثال: سعة `100` ومخزون ابتدائي `60` وحاجة `20` و`4` ساعات بوارد `50` و`80` و`0` و`5` تعطي\n\n```\nTampungan akhir: 65\nTotal limpasan: 50\nJam melimpas: 1\nJam kekurangan: 0\n```\n\n(المخزون في نهاية كل ساعة: 90، ثم 100 مع فيضان 50، ثم 80، ثم 65).",
+          "input_format": "السطر الأول: السعة. الثاني: المخزون الابتدائي. الثالث: الحاجة في الساعة. الرابع: عدد الساعات N. ثم N سطرًا للوارد في كل ساعة. كلها أعداد صحيحة بألف م³. استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "أربعة أسطر: `Tampungan akhir: S` و`Total limpasan: L` و`Jam melimpas: A` و`Jam kekurangan: B` (بالإندونيسية).",
+          "constraints": "السعة من 80 إلى 600؛ المخزون الابتدائي لا يتجاوز السعة؛ الحاجة من 5 إلى 60؛ N من 3 إلى 30؛ والوارد من 0 إلى 180.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nc = r.randint(80, 600)\ns = r.randint(0, c)\nrel = r.randint(5, 60)\nn = r.randint(3, 30)\nm = [3 * rel, rel // 2, 2 * rel, 0][i % 4]\nprint(c)\nprint(s)\nprint(rel)\nprint(n)\nfor _ in range(n):\n    print(r.randint(0, m) if m else 0)\n",
+      "reference_solution": "kapasitas = int(input())\ntampungan = int(input())\nkebutuhan = int(input())\nbanyak_jam = int(input())\ntotal_limpasan = 0\njam_melimpas = 0\njam_kekurangan = 0\nfor _ in range(banyak_jam):\n    masuk = int(input())\n    tampungan = tampungan + masuk\n    if tampungan >= kebutuhan:\n        tampungan = tampungan - kebutuhan\n    else:\n        tampungan = 0\n        jam_kekurangan = jam_kekurangan + 1\n    if tampungan > kapasitas:\n        total_limpasan = total_limpasan + tampungan - kapasitas\n        tampungan = kapasitas\n        jam_melimpas = jam_melimpas + 1\nprint(f\"Tampungan akhir: {tampungan}\")\nprint(f\"Total limpasan: {total_limpasan}\")\nprint(f\"Jam melimpas: {jam_melimpas}\")\nprint(f\"Jam kekurangan: {jam_kekurangan}\")\n"
+    },
+    {
+      "slug": "kedalaman-biseksi",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Kedalaman Normal dengan Metode Bagi Dua",
+          "statement": "Debit saluran persegi menurut Manning adalah Q = A × R^(2/3) × S^(1/2) / n, dengan A = b × h, keliling basah P = b + 2h, dan R = A / P. Bila Q diketahui dan kedalaman h yang dicari, rumus itu tidak dapat dibalik secara langsung. Karena debit selalu bertambah bila h bertambah, h dapat dicari dengan metode bagi dua:\n\n1. mulai dengan batas bawah 0 dan batas atas 10 (meter);\n2. ulangi 50 kali: ambil titik tengah kedua batas dan hitung debit pada kedalaman itu; bila debit itu lebih kecil dari debit rencana, titik tengah menjadi batas bawah yang baru; bila tidak, ia menjadi batas atas yang baru;\n3. jawabannya titik tengah kedua batas terakhir.\n\nCetak kedalaman dengan tiga angka di belakang titik.\n\nContoh: b = `2`, n = `0.015`, S = `0.001`, Q = `3.00` menghasilkan `h = 1.096 m`.",
+          "input_format": "Empat baris: lebar b (m, bilangan bulat), koefisien kekasaran n, kemiringan dasar S, debit rencana Q (m³/detik). Tiga yang terakhir bilangan pecahan. Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Satu baris berbentuk `h = H m`, dengan H tiga angka di belakang titik.",
+          "constraints": "b 1 sampai 8; n 0.013 sampai 0.03; S 0.0005 sampai 0.01; kedalaman yang dicari selalu di antara 0 dan 10 m."
+        },
+        "en": {
+          "title": "Normal Depth by Bisection",
+          "statement": "The discharge of a rectangular channel by Manning is Q = A × R^(2/3) × S^(1/2) / n, with A = b × h, wetted perimeter P = b + 2h, and R = A / P. When Q is known and the depth h is wanted, the formula cannot be inverted directly. Because the discharge always grows when h grows, h can be found by bisection:\n\n1. start with a lower bound of 0 and an upper bound of 10 (metres);\n2. repeat 50 times: take the midpoint of the two bounds and compute the discharge at that depth; if it is smaller than the design discharge, the midpoint becomes the new lower bound; otherwise it becomes the new upper bound;\n3. the answer is the midpoint of the last two bounds.\n\nPrint the depth with three digits after the point.\n\nExample: b = `2`, n = `0.015`, S = `0.001`, Q = `3.00` give `h = 1.096 m`.",
+          "input_format": "Four lines: the width b (m, a whole number), the roughness coefficient n, the bed slope S, the design discharge Q (m³/s). The last three are decimal numbers. Call `input()` with nothing inside the brackets.",
+          "output_format": "One line of the form `h = H m`, with H having three digits after the point.",
+          "constraints": "b is 1 to 8; n is 0.013 to 0.03; S is 0.0005 to 0.01; the depth sought is always between 0 and 10 m.",
+          "machine": true
+        },
+        "ar": {
+          "title": "العمق الطبيعي بطريقة التنصيف",
+          "statement": "تصريف قناة مستطيلة وفق مانينغ هو Q = A × R^(2/3) × S^(1/2) / n، حيث A = b × h والمحيط المبتلّ P = b + 2h و R = A / P. إذا عُلم Q وطُلب العمق h فلا يمكن عكس الصيغة مباشرة. ولأن التصريف يزداد دائمًا بازدياد h يمكن إيجاد h بطريقة التنصيف:\n\n1. ابدأ بحدّ أدنى 0 وحدّ أعلى 10 (أمتار)؛\n2. كرِّر 50 مرة: خذ منتصف الحدّين واحسب التصريف عند ذلك العمق؛ إذا كان أصغر من التصريف التصميمي صار المنتصف الحدّ الأدنى الجديد؛ وإلا صار الحدّ الأعلى الجديد؛\n3. الجواب هو منتصف الحدّين الأخيرين.\n\nاطبع العمق بثلاث منازل عشرية.\n\nمثال: b = `2` و n = `0.015` و S = `0.001` و Q = `3.00` تعطي `h = 1.096 m`.",
+          "input_format": "أربعة أسطر: العرض b (م، عدد صحيح)، معامل الخشونة n، ميل القاع S، التصريف التصميمي Q (م³/ث). الثلاثة الأخيرة أعداد عشرية. استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "سطر واحد بالشكل `h = H m` حيث H بثلاث منازل عشرية.",
+          "constraints": "b من 1 إلى 8؛ n من 0.013 إلى 0.03؛ S من 0.0005 إلى 0.01؛ والعمق المطلوب بين 0 و10 م دائمًا.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\ndef aman(x, d):\n    y = abs(x) * 10 ** d\n    return abs(y - int(y) - 0.5) > 0.002\n\n\ndef debit(h, b, n, s):\n    a = b * h\n    return a * (a / (b + 2 * h)) ** (2 / 3) * s ** 0.5 / n\n\n\nwhile True:\n    b = r.randint(1, 8)\n    n = r.choice([0.013, 0.015, 0.02, 0.025, 0.03])\n    s = r.choice([0.0005, 0.001, 0.002, 0.004, 0.01])\n    q = round(debit(r.uniform(0.2, 4.0), b, n, s), 2)\n    if q < 0.05 or q >= debit(10, b, n, s) * 0.9:\n        continue\n    lo, hi = 0.0, 10.0\n    for _ in range(200):\n        m = (lo + hi) / 2\n        if debit(m, b, n, s) < q:\n            lo = m\n        else:\n            hi = m\n    if aman((lo + hi) / 2, 3):\n        break\nprint(b)\nprint(n)\nprint(s)\nprint(f'{q:.2f}')\n",
+      "reference_solution": "lebar = int(input())\nkekasaran = float(input())\nkemiringan = float(input())\ndebit_rencana = float(input())\nbawah = 0.0\natas = 10.0\nfor _ in range(50):\n    tengah = (bawah + atas) / 2\n    luas = lebar * tengah\n    keliling = lebar + 2 * tengah\n    jari_hidraulis = luas / keliling\n    debit = luas * jari_hidraulis ** (2 / 3) * kemiringan ** 0.5 / kekasaran\n    if debit < debit_rencana:\n        bawah = tengah\n    else:\n        atas = tengah\nkedalaman = (bawah + atas) / 2\nprint(f\"h = {kedalaman:.3f} m\")\n"
+    },
+    {
+      "slug": "kombinasi-truk",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Kombinasi Truk Bermuatan Penuh",
+          "statement": "Tanah galian harus diangkut habis dengan truk yang semuanya bermuatan penuh. Tersedia tiga ukuran truk: kecil 5 m³, sedang 8 m³, dan besar 12 m³; setiap ukuran boleh dipakai berapa kali pun, termasuk tidak dipakai. Sebuah cara adalah tiga bilangan (kecil, sedang, besar) yang total muatannya tepat sama dengan volume tanah.\n\nHitung banyaknya cara. Lalu cetak cara dengan jumlah truk paling sedikit; bila ada beberapa, pilih yang truk besarnya paling banyak, dan bila masih sama, yang truk sedangnya paling banyak. Bila tidak ada cara, cetak `TIDAK BISA`.\n\nContoh: volume `29` menghasilkan\n\n```\nCara: 2\nTersedikit: 3 truk (1 kecil, 0 sedang, 2 besar)\n```\n\n(cara lainnya 1 kecil dan 3 sedang, 4 truk). Volume `3` menghasilkan `Cara: 0` lalu `TIDAK BISA`.",
+          "input_format": "Satu baris: volume tanah (m³, bilangan bulat). Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Baris pertama `Cara: C`. Baris kedua `Tersedikit: T truk (K kecil, S sedang, B besar)` atau `TIDAK BISA`.",
+          "constraints": "Volume 1 sampai 300."
+        },
+        "en": {
+          "title": "Combinations of Full Trucks",
+          "statement": "Excavated soil must be hauled away completely with trucks that are all fully loaded. Three truck sizes are available: small 5 m³, medium 8 m³ and large 12 m³; each size may be used any number of times, including not at all. A way is three numbers (small, medium, large) whose total load is exactly the soil volume.\n\nCount the ways. Then print the way with the fewest trucks; if there are several, choose the one with the most large trucks, and if still equal, the one with the most medium trucks. If there is no way, print `TIDAK BISA`.\n\nExample: a volume of `29` gives\n\n```\nCara: 2\nTersedikit: 3 truk (1 kecil, 0 sedang, 2 besar)\n```\n\n(the other way is 1 small and 3 medium, 4 trucks). A volume of `3` gives `Cara: 0` then `TIDAK BISA`.",
+          "input_format": "One line: the soil volume (m³, a whole number). Call `input()` with nothing inside the brackets.",
+          "output_format": "First line `Cara: C`. Second line `Tersedikit: T truk (K kecil, S sedang, B besar)` or `TIDAK BISA` (Indonesian words: kecil small, sedang medium, besar large).",
+          "constraints": "The volume is 1 to 300.",
+          "machine": true
+        },
+        "ar": {
+          "title": "تراكيب الشاحنات الممتلئة",
+          "statement": "يجب نقل تربة الحفر كلها بشاحنات ممتلئة تمامًا. تتوفر ثلاثة مقاسات: صغيرة 5 م³ ومتوسطة 8 م³ وكبيرة 12 م³؛ ويجوز استعمال كل مقاس أي عدد من المرات أو عدم استعماله. الطريقة هي ثلاثة أعداد (صغيرة، متوسطة، كبيرة) مجموع حمولتها يساوي حجم التربة تمامًا.\n\nاحسب عدد الطرق. ثم اطبع الطريقة ذات أقل عدد من الشاحنات؛ وإذا تعددت فاختر ذات أكثر عدد من الشاحنات الكبيرة، وإذا تساوت أيضًا فذات أكثر عدد من المتوسطة. إذا لم توجد طريقة فاطبع `TIDAK BISA`.\n\nمثال: حجم `29` يعطي\n\n```\nCara: 2\nTersedikit: 3 truk (1 kecil, 0 sedang, 2 besar)\n```\n\n(الطريقة الأخرى صغيرة واحدة و3 متوسطة، أي 4 شاحنات). وحجم `3` يعطي `Cara: 0` ثم `TIDAK BISA`.",
+          "input_format": "سطر واحد: حجم التربة (م³، عدد صحيح). استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "السطر الأول `Cara: C`. السطر الثاني `Tersedikit: T truk (K kecil, S sedang, B besar)` أو `TIDAK BISA` (بالإندونيسية: kecil صغيرة، sedang متوسطة، besar كبيرة).",
+          "constraints": "الحجم من 1 إلى 300.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nprint([29, 3, 60, 7, 120][i] if i < 5 else r.randint(1, 300))\n",
+      "reference_solution": "volume = int(input())\ncara = 0\ntersedikit = 0\nkecil_terbaik = 0\nsedang_terbaik = 0\nbesar_terbaik = 0\nfor besar in range(volume // 12, -1, -1):\n    for sedang in range((volume - 12 * besar) // 8, -1, -1):\n        sisa = volume - 12 * besar - 8 * sedang\n        if sisa % 5 != 0:\n            continue\n        kecil = sisa // 5\n        cara = cara + 1\n        banyak = kecil + sedang + besar\n        if tersedikit == 0 or banyak < tersedikit:\n            tersedikit = banyak\n            kecil_terbaik = kecil\n            sedang_terbaik = sedang\n            besar_terbaik = besar\nprint(f\"Cara: {cara}\")\nif cara == 0:\n    print(\"TIDAK BISA\")\nelse:\n    print(f\"Tersedikit: {tersedikit} truk ({kecil_terbaik} kecil, {sedang_terbaik} sedang, {besar_terbaik} besar)\")\n"
+    },
+    {
+      "slug": "antrean-mixer",
+      "difficulty": "sulit",
+      "comparison_mode": "trimmed",
+      "time_limit_ms": 5000,
+      "samples_count": 2,
+      "hidden_count": 10,
+      "required_concepts_in_submission": [],
+      "translations": {
+        "id": {
+          "title": "Antrean Truk Mixer di Pompa Beton",
+          "statement": "Satu pompa beton melayani truk mixer satu per satu sesuai urutan kedatangan. Menuang satu truk selalu memakan waktu yang sama. Untuk setiap truk:\n\n1. truk mulai menuang pada menit ia tiba bila pompa sedang bebas, atau pada menit pompa selesai dengan truk sebelumnya bila pompa masih sibuk;\n2. waktu tunggunya adalah menit mulai dikurangi menit tiba;\n3. bila waktu tunggu itu melebihi batas tunggu, beton di truk itu sudah terlalu lama: truk ditolak, langsung pergi, dan tidak memakai pompa sama sekali;\n4. bila tidak, truk dilayani dan pompa baru bebas lagi setelah lama menuang berlalu.\n\nCetak banyaknya truk yang dilayani, banyaknya yang ditolak, waktu tunggu terlama di antara truk yang dilayani, dan menit pompa selesai dengan truk terakhir yang dilayani.\n\nContoh: `4` truk, lama menuang `20`, batas tunggu `15`, tiba pada menit `0`, `10`, `15`, `50` menghasilkan\n\n```\nDilayani: 3\nDitolak: 1\nTunggu terlama: 10 menit\nSelesai: menit 70\n```\n\n(truk kedua menunggu 10 menit; truk ketiga harus menunggu 25 menit sehingga ditolak; truk keempat langsung dilayani).",
+          "input_format": "Baris pertama: banyaknya truk N. Baris kedua: lama menuang (menit). Baris ketiga: batas tunggu (menit). Lalu N baris menit kedatangan, tidak menurun. Semuanya bilangan bulat. Panggil `input()` tanpa teks di dalam kurungnya.",
+          "output_format": "Empat baris: `Dilayani: A`, `Ditolak: B`, `Tunggu terlama: W menit`, `Selesai: menit T`.",
+          "constraints": "N 2 sampai 25; lama menuang 8 sampai 30; batas tunggu 5 sampai 45. Truk pertama selalu dilayani."
+        },
+        "en": {
+          "title": "Mixer Truck Queue at the Concrete Pump",
+          "statement": "One concrete pump serves mixer trucks one at a time in their order of arrival. Unloading a truck always takes the same time. For each truck:\n\n1. the truck starts unloading at the minute it arrives if the pump is free, or at the minute the pump finishes the previous truck if the pump is still busy;\n2. its waiting time is the start minute minus the arrival minute;\n3. if that waiting time exceeds the waiting limit, the concrete in the truck is too old: the truck is rejected, leaves at once, and does not use the pump at all;\n4. otherwise the truck is served and the pump becomes free again only after the unloading time has passed.\n\nPrint the number of trucks served, the number rejected, the longest waiting time among the trucks served, and the minute the pump finishes the last truck served.\n\nExample: `4` trucks, unloading time `20`, waiting limit `15`, arriving at minutes `0`, `10`, `15`, `50` give\n\n```\nDilayani: 3\nDitolak: 1\nTunggu terlama: 10 menit\nSelesai: menit 70\n```\n\n(the second truck waits 10 minutes; the third would wait 25 minutes and is rejected; the fourth is served at once).",
+          "input_format": "First line: the number of trucks N. Second line: the unloading time (minutes). Third line: the waiting limit (minutes). Then N lines of arrival minutes, never decreasing. All whole numbers. Call `input()` with nothing inside the brackets.",
+          "output_format": "Four lines: `Dilayani: A`, `Ditolak: B`, `Tunggu terlama: W menit`, `Selesai: menit T` (Indonesian words).",
+          "constraints": "N is 2 to 25; unloading time 8 to 30; waiting limit 5 to 45. The first truck is always served.",
+          "machine": true
+        },
+        "ar": {
+          "title": "طابور الشاحنات الخلّاطة عند مضخة الخرسانة",
+          "statement": "تخدم مضخة خرسانة واحدة الشاحنات الخلّاطة واحدة تلو الأخرى بترتيب وصولها. تفريغ الشاحنة يستغرق الزمن نفسه دائمًا. لكل شاحنة:\n\n1. تبدأ الشاحنة التفريغ في دقيقة وصولها إذا كانت المضخة حرّة، أو في الدقيقة التي تنتهي فيها المضخة من الشاحنة السابقة إذا كانت مشغولة؛\n2. زمن انتظارها هو دقيقة البدء ناقص دقيقة الوصول؛\n3. إذا تجاوز زمن الانتظار حدّ الانتظار فخرسانة الشاحنة قد قدُمت: تُرفض الشاحنة وتغادر فورًا ولا تستعمل المضخة إطلاقًا؛\n4. وإلا تُخدَم الشاحنة ولا تصير المضخة حرّة إلا بعد انقضاء زمن التفريغ.\n\nاطبع عدد الشاحنات المخدومة، وعدد المرفوضة، وأطول زمن انتظار بين المخدومة، والدقيقة التي تنتهي فيها المضخة من آخر شاحنة مخدومة.\n\nمثال: `4` شاحنات وزمن تفريغ `20` وحدّ انتظار `15` ووصول في الدقائق `0` و`10` و`15` و`50` تعطي\n\n```\nDilayani: 3\nDitolak: 1\nTunggu terlama: 10 menit\nSelesai: menit 70\n```\n\n(الشاحنة الثانية تنتظر 10 دقائق؛ الثالثة كانت ستنتظر 25 دقيقة فرُفضت؛ الرابعة خُدمت فورًا).",
+          "input_format": "السطر الأول: عدد الشاحنات N. الثاني: زمن التفريغ (دقائق). الثالث: حدّ الانتظار (دقائق). ثم N سطرًا لدقائق الوصول غير متناقصة. كلها أعداد صحيحة. استدعِ `input()` دون أي نص بين القوسين.",
+          "output_format": "أربعة أسطر: `Dilayani: A` و`Ditolak: B` و`Tunggu terlama: W menit` و`Selesai: menit T` (بالإندونيسية).",
+          "constraints": "N من 2 إلى 25؛ زمن التفريغ من 8 إلى 30؛ حدّ الانتظار من 5 إلى 45. الشاحنة الأولى تُخدَم دائمًا.",
+          "machine": true
+        }
+      },
+      "generator": "import os\nimport random\n\nr = random.Random(int(os.environ[\"SEED\"]) * 1000 + int(os.environ[\"INDEX\"]))\ni = int(os.environ[\"INDEX\"])\nn = r.randint(2, 25)\nd = r.randint(8, 30)\nw = r.randint(5, 45)\nt = 0\nprint(n)\nprint(d)\nprint(w)\nfor k in range(n):\n    print(t)\n    t += r.randint(0, [d // 2, 2 * d, d, 3][i % 4])\n",
+      "reference_solution": "banyak = int(input())\nlama_tuang = int(input())\nbatas_tunggu = int(input())\npompa_bebas = 0\ndilayani = 0\nditolak = 0\ntunggu_terlama = 0\nfor _ in range(banyak):\n    tiba = int(input())\n    mulai = tiba\n    if pompa_bebas > tiba:\n        mulai = pompa_bebas\n    tunggu = mulai - tiba\n    if tunggu > batas_tunggu:\n        ditolak = ditolak + 1\n        continue\n    dilayani = dilayani + 1\n    if tunggu > tunggu_terlama:\n        tunggu_terlama = tunggu\n    pompa_bebas = mulai + lama_tuang\nprint(f\"Dilayani: {dilayani}\")\nprint(f\"Ditolak: {ditolak}\")\nprint(f\"Tunggu terlama: {tunggu_terlama} menit\")\nprint(f\"Selesai: menit {pompa_bebas}\")\n"
+    }
+  ]
+}
