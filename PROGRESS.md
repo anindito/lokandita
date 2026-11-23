@@ -1372,9 +1372,9 @@ Steps:
 | Step | State |
 |---|---|
 | 1 — meeting layout | **Applied 2026-11-23** on the owner's "go": one transaction on the 16 TS-PY meeting rows (titles per Rev2; 6, 9, 10 switched off; concepts of 6–16 removed), 14 audit rows `pertemuan.diubah` with `lewat: sql …`; DDP101 and PBO301 rows untouched (read back, output in the session). `benih.json`, `BenihKurikulumTest` (4 tests pass) and `docs/PETA-KONSEP.md` §4, §6 are in the same commit. Meeting 8 stays switched on, because a switched-off meeting cannot get a class window; it is still an ordinary practice meeting until step 2 is deployed. The deployed container still carries the old `benih.json` until the next deploy; nobody runs the seed in between. |
-| 2 — exam-type meeting | **Deployed 2026-11-23, 20:04–20:06 WIB** (commit `6298a26`, migration `2026-11-23-000008` applied). Meeting 8 is still `latihan` in production: the type is the owner's to set on the meeting page. **No exam page has been seen in a browser.** See "Exam-type meeting" below. |
+| 2 — exam-type meeting | **Deployed 2026-11-23, 20:04–20:06 WIB** (commit `6298a26`, migration `2026-11-23-000008` applied). Meeting 8 was set to `ujian` on the owner's order at 21:49 WIB by one audited SQL statement (read back: `ujian`, not published, no window, 47 other meetings `latihan`). **No exam page has been seen in a browser.** See "Exam-type meeting" below. |
 | 3 — practice problems, meetings 1–5 | see table |
-| 4 — mid-term problems, meeting 8 | not started; composition and points must be proposed to the owner first |
+| 4 — mid-term problems, meeting 8 | Composition approved by the owner 2026-11-23 (6 problems, 3 + 5 + 8 + 10 + 10 + 15 = 51 points). Written and checked; **not imported, not committed**. See "TS-PY meeting 8" below. |
 
 | Course | Meeting | Built | Imported | Review sheet | Reviewed by owner | Approved |
 |---|---|---|---|---|---|---|
@@ -1383,7 +1383,7 @@ Steps:
 | TS-PY | 3 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-3.md` | no | no |
 | TS-PY | 4 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-4.md` | no | no |
 | TS-PY | 5 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-5.md` | no | no |
-| TS-PY | 8 (UTS) | no | no | — (every statement in full) | no | no |
+| TS-PY | 8 (UTS) | yes, 6 problems, 51 points; judge check passed 2026-11-23; **files on the server only, not in Git** | **no — held** | `docs/soal/tinjauan/ts-py-pertemuan-8.md` on the server (all six statements in full) | no | no |
 
 How one meeting is made: as in "Stage 13 — problem production" above, with `buat-ts-py-pertemuan-<n>.py`, `cek-ts-py-pertemuan-<n>.py`, and `waktu_ms=5000`.
 
@@ -1453,6 +1453,19 @@ How one meeting is made: as in "Stage 13 — problem production" above, with `bu
   - The concept check only sees that a `def` exists and is used; it cannot tell whether the function is the one the statement names.
   - `sorted()` on tuples and on dictionary keys is used for ordering; `lambda` and `key=` are avoided, so `log-ritase` sorts by `(-volume, plate)`.
   - `inersia-komposit` and `luas-poligon` are the only problems of this meeting with structural or surveying formulas; most of the rest is data handling, which is what the meeting teaches.
+
+### TS-PY meeting 8 — UTS Praktik (2026-11-23)
+
+- Six problems, 51 points, in id, en, ar, levels mudah sekali / mudah / mudah-sedang / sedang / sedang / sulit; the fifth requires a function. Nothing from meeting 6. None repeats the task of a practice problem.
+- `periksa.py` with the thirteen concepts → `6 dari 6 soal lulus`; 8 quoted examples equal. Locally 152 comparisons with the separate calculation, 0 different.
+- **The exam files are not in Git.** `docs/soal/buat-ts-py-pertemuan-8.py`, `cek-ts-py-pertemuan-8.py`, `ts-py-pertemuan-8.json` and `tinjauan/ts-py-pertemuan-8.md` exist only in the working tree on the server, untracked: committing and pushing statements and reference solutions of an exam was refused by the session's permission layer, and the agent did not try another way. The owner decides whether they go into the repository before or after the exam. Until then `git status` shows them, and `infra/deploy.sh` refuses to run while they are there.
+- **Not imported**: at 22:20 WIB four submissions had arrived in the last ten minutes, and the importer in production still queues at normal priority.
+- The agent's choices where the owner did not answer (`DECISIONS.md`): one problem set for everyone; problem 5 refuses a submission without `def`.
+- Weaker than it looks: nobody but the agent has read the statements or solved the problems under time, so the 150-minute sizing (about 130 minutes of work) is an estimate; every student gets the same six tasks with different test data; `target_points` of meeting 8 still shows 60 and follows the approved problems (51) when they are approved.
+
+### Importer priority (2026-11-23) — committed, NOT deployed
+
+`0b8e7ed`: the importer's `VALIDATE` jobs get priority `low` and enter at the front of that queue (`KONTRAK.md` §6, §7). `infra/tes.sh lokakode tests/Soal/ImporTest.php` → 8 tests, 89 assertions, pass (one new assertion: the job is `low`); `tests/Soal/BankSoalTest.php` → 10 tests, 212 assertions, pass. The full suite was not run. **The deploy was refused by the session's permission layer** and was not attempted another way; production runs `6298a26` and still imports at normal priority.
 
 ### Imports held (2026-11-23)
 
