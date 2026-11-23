@@ -37,7 +37,7 @@
                     <td><span class="lencana mode-<?= esc($p['mode']) ?>"><?= lang(in_array($p['jenis'], ['telat', 'latihan'], true) ? 'Latihan.jenis.' . $p['jenis'] : 'Latihan.mode.' . $p['mode']) ?></span>
                         <?php if ($p['mode'] === 'tunggu'): ?><br><small class="redup" data-sebab="<?= esc($p['sebab']) ?>"><?= $p['sebab'] === 'terjadwal' ? lang('Latihan.nilai.bukaPada', [esc(\App\Libraries\Waktu::lokal($p['open_at']))]) : lang('Latihan.sebab.' . $p['sebab'] . 'Pendek') ?></small><?php endif ?></td>
                     <td><?= esc(\App\Libraries\Waktu::lokal($p['close_at'])) ?></td>
-                    <td><?= angka($p['score']) ?></td>
+                    <td><?= $p['score'] === null ? '—' : angka($p['score']) ?></td>
                 </tr>
             <?php endforeach ?>
             </tbody>

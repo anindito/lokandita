@@ -45,8 +45,13 @@ $tanda   = $akses->identitas()->nomorInduk . ' · ' . $akses->identitas()->nama 
                 </span>
             <?php endif ?>
         </header>
-        <p class="skor-soal" data-skor-soal><?= $skor === null ? lang('Latihan.soal.belumKirim') : lang('Latihan.soal.terbaik', [angka($skor['best_score']), $poin]) ?></p>
-        <?= view('_ringkasan_nilai', ['nilai' => $nilai]) ?>
+        <?php if ($nilai['rahasia']): ?>
+            <?php // Ujian yang nilainya belum dirilis: tidak ada nilai atau ringkasan di halaman ini (SPEC.md §6). ?>
+            <p class="petunjuk" data-ujian><span class="lencana"><?= lang('Latihan.ujian.lencana') ?></span> <?= lang('Latihan.ujian.mhsInfo') ?></p>
+        <?php else: ?>
+            <p class="skor-soal" data-skor-soal><?= $skor === null ? lang('Latihan.soal.belumKirim') : lang('Latihan.soal.terbaik', [angka($skor['best_score']), $poin]) ?></p>
+            <?= view('_ringkasan_nilai', ['nilai' => $nilai]) ?>
+        <?php endif ?>
         <?= view('_jenis_kerja', ['p' => $soal]) ?>
 
         <?php // Soal tidak bisa disalin atau dicetak, dan ditutupi tanda air (SPEC.md §11). ?>

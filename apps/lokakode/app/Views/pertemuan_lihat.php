@@ -91,7 +91,12 @@ use App\Libraries\Waktu;
             </tbody>
         </table>
     </div>
-    <p>
+    <?php if ($siap['ujian']): ?>
+        <p data-ujian-terbit><span class="lencana"><?= lang('Latihan.ujian.lencana') ?></span>
+            <?= lang('Latihan.ujian.terbitInfo', [$siap['poin']]) ?>
+            <?php if ($siap['poin'] < 1): ?><strong class="teks-bahaya"><?= lang('Latihan.ujian.terbitKosong') ?></strong><?php endif ?></p>
+    <?php endif ?>
+    <p <?= $siap['ujian'] ? 'hidden' : '' ?>>
         <?= lang('Latihan.terbit.poinTersedia', [$siap['poin'], $siap['target'], $siap['butuh']]) ?>
         <?php if ($siap['kurangPoin'] > 0): ?>
             <strong class="teks-bahaya"><?= lang('Latihan.terbit.kurangPoin', [$siap['kurangPoin']]) ?></strong>
@@ -123,6 +128,7 @@ use App\Libraries\Waktu;
 <div class="kartu">
     <form method="post" action="/pertemuan/<?= (int) $p['id'] ?>/latihan">
         <?= csrf_field() ?>
+        <?php if ($siap['ujian']): ?><p class="petunjuk"><strong><?= lang('Latihan.ujian.atur') ?></strong></p><?php endif ?>
         <label for="target_points"><?= lang('Latihan.atur.target') ?></label>
         <input type="number" id="target_points" name="target_points" class="ltr" min="1" max="1000" value="<?= esc($latihan['target_points']) ?>" required>
         <p class="petunjuk"><?= lang('Latihan.atur.targetInfo') ?></p>
@@ -200,6 +206,14 @@ use App\Libraries\Waktu;
             <?= lang('Soal.pertemuan.aktif') ?>
         </label>
         <p class="petunjuk"><?= lang('Soal.pertemuan.aktifInfo') ?></p>
+
+        <label for="kind"><?= lang('Soal.pertemuan.jenis') ?></label>
+        <select id="kind" name="kind">
+            <option value="latihan" <?= $isi['kind'] === 'latihan' ? 'selected' : '' ?>><?= lang('Soal.pertemuan.jenisLatihan') ?></option>
+            <option value="ujian" <?= $isi['kind'] === 'ujian' ? 'selected' : '' ?>><?= lang('Soal.pertemuan.jenisUjian') ?></option>
+        </select>
+        <p class="petunjuk"><?= lang('Soal.pertemuan.jenisInfo') ?></p>
+        <?= view('_galat_soal', ['galat' => $galat, 'kolom' => 'kind']) ?>
 
         <h3><?= lang('Soal.konsep.judul') ?></h3>
         <p class="petunjuk"><?= lang('Soal.konsep.info') ?></p>

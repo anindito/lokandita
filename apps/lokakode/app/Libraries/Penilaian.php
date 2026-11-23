@@ -59,8 +59,14 @@ final class Penilaian
      *
      * @return array{total: float, terhitung: float, nilai: float, surplus: float, mudahSekali: int}
      */
-    public static function nilaiPertemuan(array $soal, int $target): array
+    public static function nilaiPertemuan(array $soal, int $target, bool $ujian = false): array
     {
+        // Ujian (SPEC.md §7): semua soal dihitung, tanpa kuota Mudah sekali dan tanpa surplus.
+        if ($ujian) {
+            $total = round(array_sum(array_column($soal, 'nilai')), 2);
+
+            return ['total' => $total, 'terhitung' => $total, 'nilai' => round(min($total / $target, 1) * 100, 2), 'surplus' => 0.0, 'mudahSekali' => 0];
+        }
         $total       = 0.0;
         $terhitung   = 0.0;
         $mudahSekali = [];
@@ -179,10 +185,12 @@ final class Penilaian
      */
     public static function hitungUlang(BaseConnection $db, string $userId, int $pertemuanId): void
     {
-        $target = (int) ($db->query('SELECT target_points FROM meetings WHERE id = ?', [$pertemuanId])->getRowArray()['target_points'] ?? 0);
+        $p      = $db->query('SELECT target_points, kind FROM meetings WHERE id = ?', [$pertemuanId])->getRowArray();
+        $target = (int) ($p['target_points'] ?? 0);
         if ($target < 1) {
             return;
         }
+        $ujian = Latihan::ujian($p);
         $kiriman = $db->query("
             SELECT s.id, s.meeting_problem_id, s.score, s.judged_at, v.difficulty
             FROM submissions s
@@ -205,7 +213,7 @@ final class Penilaian
                 $soal[$mp] = ['nilai' => $nilai, 'kiriman' => (int) $k['id'], 'pada' => $k['judged_at']] + $soal[$mp];
             }
             $soal[$mp]['percobaan']++;
-            $kini = self::nilaiPertemuan(array_values($soal), $target)['nilai'];
+            $kini = self::nilaiPertemuan(array_values($soal), $target, $ujian)['nilai'];
             if ($kini !== $nilaiTerakhir) {
                 $nilaiTerakhir = $kini;
                 $tercapai      = $k['judged_at'];
@@ -226,7 +234,7 @@ final class Penilaian
         if ($soal === []) {
             return;
         }
-        $n = self::nilaiPertemuan(array_values($soal), $target);
+        $n = self::nilaiPertemuan(array_values($soal), $target, $ujian);
         $db->table('meeting_scores')->insert([
             'user_id' => $userId, 'meeting_id' => $pertemuanId, 'total_points' => $n['total'], 'counted_points' => $n['terhitung'],
             'target_points' => $target, 'score' => $n['nilai'], 'surplus' => $n['surplus'], 'very_easy_counted' => $n['mudahSekali'],

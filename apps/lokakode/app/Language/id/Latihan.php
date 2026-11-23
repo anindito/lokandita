@@ -4,6 +4,8 @@
 // mahasiswa, penilaian (SPEC.md §6, §7, §11).
 return [
     'pesan' => [
+        'nilaiDirilis' => 'Nilai ujian dirilis untuk kelas ini. Mahasiswanya sekarang melihat nilainya.',
+        'rilisDitarik' => 'Rilis nilai ditarik. Mahasiswa kelas ini tidak lagi melihat nilainya.',
         'terbit'          => 'Pertemuan diterbitkan. Mahasiswa melihatnya begitu jendela kelasnya dibuka.',
         'ditarik'         => 'Pertemuan ditarik. Mahasiswa tidak lagi melihatnya; kiriman dan nilai yang sudah ada tetap tersimpan.',
         'jendelaDisimpan' => 'Jadwal disimpan.',
@@ -110,6 +112,7 @@ return [
     ],
 
     'galat' => [
+        'menit' => 'Isi lama ujian dalam menit, 10 sampai 600.',
         'target'          => 'Target poin harus angka 1 sampai 1000.',
         'minimum'         => 'Isi dengan angka 0 sampai 50.',
         'templat'         => 'Templat paling panjang 20.000 karakter.',
@@ -129,6 +132,36 @@ return [
     'saya' => [
         'judul'  => 'Latihan',
         'kosong' => 'Belum ada pertemuan yang dijadwalkan untuk kelas Anda.',
+    ],
+
+    // Pertemuan berjenis ujian (SPEC.md §6).
+    'ujian' => [
+        'lencana' => 'Ujian',
+        'ditolak' => 'Tidak berlaku untuk pertemuan ini',
+        'tanpaJadwal' => 'Pertemuan ujian tidak dijadwalkan dan tidak punya kebijakan terlambat. Buka dengan tombol "Buka sekarang" atau "Buka selama … menit" pada hari ujian.',
+        'bukanUjian' => 'Tindakan ini hanya untuk pertemuan berjenis ujian.',
+        'belumPernahDibuka' => 'Kelas ini belum pernah membuka ujian ini, jadi belum ada nilai yang bisa dirilis.',
+        'aturan' => 'Ini pertemuan ujian: soal hanya terlihat selama jendela terbuka, kiriman terlambat ditolak, tidak ada latihan sesudah tutup, dan mahasiswa tidak melihat nilai atau papan peringkat sampai nilainya dirilis.',
+        'bukaSelamaJudul' => 'Buka selama waktu tertentu',
+        'bukaSelamaInfo' => 'Ujian dibuka sekarang dan ditutup sendiri oleh server setelah waktu ini habis. Mahasiswa melihat hitung mundur. "Tutup sekarang" tetap bisa dipakai lebih awal; menekan tombol ini lagi memulai rentang baru dari saat itu.',
+        'menit' => 'Lama ujian (menit)',
+        'bukaSelama' => 'Buka selama waktu ini',
+        'rilisJudul' => 'Rilis nilai',
+        'belumDirilis' => 'Nilai belum dirilis: mahasiswa kelas ini belum melihat nilai apa pun.',
+        'sudahDirilis' => 'Nilai dirilis {0}. Mahasiswa kelas ini melihat nilai total dan poin tiap nomor soal; soalnya tetap tersembunyi.',
+        'rilis' => 'Rilis nilai untuk kelas ini',
+        'tarikRilis' => 'Tarik rilis nilai',
+        'rilisPengampu' => 'Hanya pengampu mata kuliah yang bisa merilis nilai.',
+        'terbitInfo' => 'Ujian: nilai = poin yang didapat dari seluruh {0} poin yang tersedia. Komposisi minimum dan aturan 2 × target tidak berlaku; cukup ada soal yang disetujui.',
+        'terbitKosong' => 'Belum ada soal yang disetujui.',
+        'mhsInfo' => 'Ini ujian. Nilai dan hasil penilaian tidak ditampilkan sampai dosen merilisnya.',
+        'mhsTutup' => 'Ujian sudah ditutup. Soalnya tidak ditampilkan lagi.',
+        'mhsBelumRilis' => 'Nilai ujian belum dirilis oleh dosen.',
+        'mhsNilai' => 'Nilai ujian Anda: {0} dari 100 ({1} dari {2} poin).',
+        'mhsNomor' => 'Soal nomor {0}',
+        'mhsPoin' => '{0} dari {1} poin',
+        'mhsTidakDikirim' => 'tidak dikirim',
+        'atur' => 'Pertemuan ujian: target selalu sama dengan jumlah poin soalnya, komposisi minimum tidak dipakai, dan tidak ada latihan sesudah tutup. Isian untuk ketiganya diabaikan.',
     ],
 
     'mode' => [
@@ -181,6 +214,7 @@ return [
     ],
 
     'kartu' => [
+        'terkirim' => 'Sudah dikirim',
         'belum'   => 'Belum dicoba',
         'dicoba'  => 'Sudah dicoba',
         'selesai' => 'Selesai',
@@ -245,6 +279,7 @@ return [
 
     // Teks yang dipakai skrip halaman soal (public/js/soal.js).
     'js' => [
+        'ujianDiterima' => 'Kiriman Anda diterima. Hasil penilaian ujian tidak ditampilkan sampai dosen merilis nilainya. Anda boleh mengirim lagi; yang dihitung adalah kiriman terbaik.',
         'klarKosong' => 'Belum ada pertanyaan untuk soal ini.',
         'klarSaya' => 'Pertanyaan Anda',
         'klarDari' => 'Pertanyaan {0}',
@@ -301,6 +336,7 @@ return [
     ],
 
     'verdict' => [
+        'TERKIRIM' => 'Kiriman diterima',
         'AC'              => 'Benar',
         'WA'              => 'Keluaran salah',
         'CE'              => 'Galat kompilasi',

@@ -5,6 +5,7 @@ use App\Libraries\Waktu;
 
 $alamat = '/kelas/' . (int) $kelas['id'] . '/pertemuan/' . (int) $j['pertemuan_id'];
 $terbit = $j['published_at'] !== null;
+$ujian  = \App\Libraries\Latihan::ujian($j);
 ?>
 <?= view('_nav', ['akses' => $akses]) ?>
 <p><a href="/kelas/<?= (int) $kelas['id'] ?>/pertemuan"><span class="panah-balik" aria-hidden="true"></span> <?= lang('Latihan.jendela.judul') ?> — <span class="ltr"><?= esc($kelas['matkul_kode']) ?></span> <?= esc($kelas['name']) ?></a></p>
@@ -34,6 +35,52 @@ $terbit = $j['published_at'] !== null;
     <?php endif ?>
 </div>
 
+<?php if ($ujian): ?>
+    <div class="kartu" data-ujian>
+        <p><span class="lencana"><?= lang('Latihan.ujian.lencana') ?></span> <?= lang('Latihan.ujian.aturan') ?></p>
+    </div>
+<?php endif ?>
+
+<?php if ($bolehUbah && $ujian): ?>
+    <h2><?= lang('Latihan.ujian.bukaSelamaJudul') ?></h2>
+    <div class="kartu">
+        <form method="post" action="<?= $alamat ?>/buka-selama">
+            <?= csrf_field() ?>
+            <label for="menit"><?= lang('Latihan.ujian.menit') ?></label>
+            <input type="number" id="menit" name="menit" class="ltr" min="10" max="600" value="<?= \App\Controllers\Jendela::MENIT_BAWAAN ?>" required>
+            <?= view('_galat_latihan', ['galat' => $galat, 'kolom' => 'menit']) ?>
+            <p class="petunjuk"><?= lang('Latihan.ujian.bukaSelamaInfo') ?></p>
+            <?php if ($keadaan === 'buka' && $j['override'] === 'none' && $j['close_at'] !== null): ?>
+                <p><strong><?= lang('Latihan.nilai.tutupPada', [esc(Waktu::lokal($j['close_at']))]) ?></strong></p>
+            <?php endif ?>
+            <div class="baris-tombol">
+                <button type="submit" class="tombol"><?= lang('Latihan.ujian.bukaSelama') ?></button>
+            </div>
+        </form>
+    </div>
+<?php endif ?>
+
+<?php if ($ujian): ?>
+    <h2><?= lang('Latihan.ujian.rilisJudul') ?></h2>
+    <div class="kartu" data-rilis="<?= $j['scores_released_at'] === null ? 'belum' : 'sudah' ?>">
+        <p><?= $j['scores_released_at'] === null ? lang('Latihan.ujian.belumDirilis') : lang('Latihan.ujian.sudahDirilis', [esc(Waktu::lokal($j['scores_released_at']))]) ?></p>
+        <?php if ($bolehUbah && (int) $kelas['boleh_kelola'] === 1 && $j['jendela_id'] !== null): ?>
+            <form method="post" action="<?= $alamat ?>/rilis">
+                <?= csrf_field() ?>
+                <div class="baris-tombol">
+                    <?php if ($j['scores_released_at'] === null): ?>
+                        <button type="submit" name="rilis" value="1" class="tombol"><?= lang('Latihan.ujian.rilis') ?></button>
+                    <?php else: ?>
+                        <button type="submit" name="rilis" value="0" class="tombol tombol-sekunder"><?= lang('Latihan.ujian.tarikRilis') ?></button>
+                    <?php endif ?>
+                </div>
+            </form>
+        <?php elseif ((int) $kelas['boleh_kelola'] !== 1): ?>
+            <p class="petunjuk"><?= lang('Latihan.ujian.rilisPengampu') ?></p>
+        <?php endif ?>
+    </div>
+<?php endif ?>
+
 <?php if ($bolehUbah): ?>
     <h2><?= lang('Latihan.jendela.manualJudul') ?></h2>
     <div class="kartu">
@@ -49,8 +96,9 @@ $terbit = $j['published_at'] !== null;
         </form>
     </div>
 
-    <h2><?= lang('Latihan.jendela.jadwal') ?></h2>
-    <div class="kartu">
+    <?php // Ujian tidak dijadwalkan dan tidak punya kebijakan terlambat: formulirnya tidak ditampilkan (dan ditolak server). ?>
+    <h2 <?= $ujian ? 'hidden' : '' ?>><?= lang('Latihan.jendela.jadwal') ?></h2>
+    <div class="kartu" <?= $ujian ? 'hidden' : '' ?>>
         <form method="post" action="<?= $alamat ?>">
             <?= csrf_field() ?>
             <label for="open_at"><?= lang('Latihan.jendela.buka') ?> (WIB)</label>

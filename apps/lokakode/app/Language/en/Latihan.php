@@ -4,6 +4,8 @@
 // pages, scoring (SPEC.md §6, §7, §11).
 return [
     'pesan' => [
+        'nilaiDirilis' => 'Exam scores released for this class. Its students now see their scores.',
+        'rilisDitarik' => 'Release withdrawn. Students of this class no longer see their scores.',
         'terbit'          => 'Meeting published. Students see it once their class window opens.',
         'ditarik'         => 'Meeting withdrawn. Students no longer see it; existing submissions and scores are kept.',
         'jendelaDisimpan' => 'Schedule saved.',
@@ -110,6 +112,7 @@ return [
     ],
 
     'galat' => [
+        'menit' => 'Enter the exam length in minutes, 10 to 600.',
         'target'          => 'Target points must be a number from 1 to 1000.',
         'minimum'         => 'Enter a number from 0 to 50.',
         'templat'         => 'The template can be at most 20,000 characters.',
@@ -129,6 +132,36 @@ return [
     'saya' => [
         'judul'  => 'Practice',
         'kosong' => 'No meeting has been scheduled for your class yet.',
+    ],
+
+    // Pertemuan berjenis ujian (SPEC.md §6).
+    'ujian' => [
+        'lencana' => 'Exam',
+        'ditolak' => 'Not available for this meeting',
+        'tanpaJadwal' => 'An exam meeting is not scheduled and has no late policy. Open it with "Open now" or "Open for … minutes" on the day of the exam.',
+        'bukanUjian' => 'This action is only for meetings of the exam type.',
+        'belumPernahDibuka' => 'This class has never opened this exam, so there are no scores to release yet.',
+        'aturan' => 'This is an exam meeting: problems are visible only while the window is open, late submissions are refused, there is no practice after closing, and students see no scores and no leaderboard until the scores are released.',
+        'bukaSelamaJudul' => 'Open for a fixed time',
+        'bukaSelamaInfo' => 'The exam opens now and the server closes it when this time is up. Students see a countdown. "Close now" still works earlier; pressing this button again starts a new period from that moment.',
+        'menit' => 'Exam length (minutes)',
+        'bukaSelama' => 'Open for this long',
+        'rilisJudul' => 'Release scores',
+        'belumDirilis' => 'Scores are not released: students of this class see no score yet.',
+        'sudahDirilis' => 'Scores released {0}. Students of this class see their total and the points per problem number; the problems stay hidden.',
+        'rilis' => 'Release scores for this class',
+        'tarikRilis' => 'Withdraw the release',
+        'rilisPengampu' => 'Only the course coordinator can release scores.',
+        'terbitInfo' => 'Exam: the score is the points earned out of all {0} points available. The minimum composition and the 2 × target rule do not apply; one approved problem is enough.',
+        'terbitKosong' => 'No approved problem yet.',
+        'mhsInfo' => 'This is an exam. Scores and judging results are not shown until the lecturer releases them.',
+        'mhsTutup' => 'The exam is closed. Its problems are no longer shown.',
+        'mhsBelumRilis' => 'The lecturer has not released the exam scores yet.',
+        'mhsNilai' => 'Your exam score: {0} out of 100 ({1} of {2} points).',
+        'mhsNomor' => 'Problem {0}',
+        'mhsPoin' => '{0} of {1} points',
+        'mhsTidakDikirim' => 'not submitted',
+        'atur' => 'Exam meeting: the target always equals the total points of its problems, the minimum composition is not used, and there is no practice after closing. Entries for these three are ignored.',
     ],
 
     'mode' => [
@@ -181,6 +214,7 @@ return [
     ],
 
     'kartu' => [
+        'terkirim' => 'Submitted',
         'belum'   => 'Not tried',
         'dicoba'  => 'Tried',
         'selesai' => 'Done',
@@ -245,6 +279,7 @@ return [
 
     // Texts used by the problem page script (public/js/soal.js).
     'js' => [
+        'ujianDiterima' => 'Your submission was received. Exam results are not shown until the lecturer releases the scores. You may submit again; the best submission counts.',
         'klarKosong' => 'No questions for this problem yet.',
         'klarSaya' => 'Your question',
         'klarDari' => 'Question from {0}',
@@ -301,6 +336,7 @@ return [
     ],
 
     'verdict' => [
+        'TERKIRIM' => 'Submission received',
         'AC'              => 'Correct',
         'WA'              => 'Wrong output',
         'CE'              => 'Compile error',

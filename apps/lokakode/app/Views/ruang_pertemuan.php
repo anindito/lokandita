@@ -25,11 +25,31 @@ $tutupIso = $p['jenis'] === 'biasa' && $p['override'] === 'none' && $p['close_at
         <p data-sebab="<?= esc($p['sebab']) ?>"><strong><?= lang('Latihan.sebab.' . $p['sebab']) ?></strong></p>
         <p><?= $p['sebab'] === 'terjadwal' ? lang('Latihan.nilai.bukaPada', [esc(Waktu::lokal($p['open_at']))]) : lang('Latihan.sebab.' . $p['sebab'] . 'Info', [esc($p['kelas_nama'])]) ?></p>
     </div>
+<?php elseif ($p['ujian'] && $mode === 'nilai'): ?>
+    <?php // Ujian yang sudah tutup: soal tersembunyi; nilai hanya sesudah dirilis, per NOMOR soal (SPEC.md §6). ?>
+    <div class="kartu" data-ujian="tutup">
+        <p><span class="lencana"><?= lang('Latihan.ujian.lencana') ?></span> <strong><?= lang('Latihan.ujian.mhsTutup') ?></strong></p>
+        <?php if (! $p['nilai_tampak']): ?>
+            <p data-ujian-rilis="belum"><?= lang('Latihan.ujian.mhsBelumRilis') ?></p>
+        <?php else: ?>
+            <p data-ujian-rilis="sudah"><strong><?= lang('Latihan.ujian.mhsNilai', [angka($nilai['nilai']), angka($nilai['total']), (int) $nilai['target']]) ?></strong></p>
+            <ol class="tes-daftar">
+                <?php foreach ($rincian as $r): ?>
+                    <li><?= lang('Latihan.ujian.mhsNomor', [(int) $r['nomor']]) ?>:
+                        <span class="ltr"><?= $r['nilai'] === null ? lang('Latihan.ujian.mhsTidakDikirim') : lang('Latihan.ujian.mhsPoin', [angka($r['nilai']), (int) $r['poin']]) ?></span></li>
+                <?php endforeach ?>
+            </ol>
+        <?php endif ?>
+    </div>
 <?php else: ?>
     <div class="kartu">
+        <?php if ($nilai['rahasia']): ?>
+            <p data-ujian="buka"><span class="lencana"><?= lang('Latihan.ujian.lencana') ?></span> <?= lang('Latihan.ujian.mhsInfo') ?></p>
+        <?php else: ?>
         <?= view('_ringkasan_nilai', ['nilai' => $nilai]) ?>
         <?php if ($nilai['surplus'] > 0): ?>
             <p class="petunjuk"><?= lang('Latihan.nilai.surplus', [angka($nilai['surplus'])]) ?>. <?= lang('Latihan.nilai.surplusInfo') ?></p>
+        <?php endif ?>
         <?php endif ?>
         <p class="sisa-waktu">
             <?php if ($mode === 'kerja' && $tutupIso !== null): ?>
@@ -49,7 +69,7 @@ $tutupIso = $p['jenis'] === 'biasa' && $p['override'] === 'none' && $p['close_at
     </div>
 <?php endif ?>
 
-<?php if ($mode !== 'tunggu'): ?>
+<?php if ($mode !== 'tunggu' && ! $p['ujian']): ?>
     <p><a href="/latihan/<?= (int) $p['pertemuan_id'] ?>/papan"><?= lang('Papan.lihat') ?></a></p>
 <?php endif ?>
 
@@ -70,7 +90,7 @@ $tutupIso = $p['jenis'] === 'biasa' && $p['override'] === 'none' && $p['close_at
                 <label for="saring-status"><?= lang('Latihan.ruang.status') ?></label>
                 <select id="saring-status" data-saring="status">
                     <option value=""><?= lang('Latihan.ruang.semuaStatus') ?></option>
-                    <?php foreach (['belum', 'dicoba', 'selesai', 'dinilai'] as $s): ?><option value="<?= $s ?>"><?= lang('Latihan.kartu.' . $s) ?></option><?php endforeach ?>
+                    <?php foreach ($p['nilai_tampak'] ? ['belum', 'dicoba', 'selesai', 'dinilai'] : ['belum', 'terkirim'] as $s): ?><option value="<?= $s ?>"><?= lang('Latihan.kartu.' . $s) ?></option><?php endforeach ?>
                 </select>
             </div>
             <div>

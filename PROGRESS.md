@@ -1372,14 +1372,14 @@ Steps:
 | Step | State |
 |---|---|
 | 1 — meeting layout | **Applied 2026-11-23** on the owner's "go": one transaction on the 16 TS-PY meeting rows (titles per Rev2; 6, 9, 10 switched off; concepts of 6–16 removed), 14 audit rows `pertemuan.diubah` with `lewat: sql …`; DDP101 and PBO301 rows untouched (read back, output in the session). `benih.json`, `BenihKurikulumTest` (4 tests pass) and `docs/PETA-KONSEP.md` §4, §6 are in the same commit. Meeting 8 stays switched on, because a switched-off meeting cannot get a class window; it is still an ordinary practice meeting until step 2 is deployed. The deployed container still carries the old `benih.json` until the next deploy; nobody runs the seed in between. |
-| 2 — exam-type meeting | Plan presented and approved with the decisions above; **no code written**. |
+| 2 — exam-type meeting | **Code written, tested, committed; NOT deployed.** See "Exam-type meeting" below. Production still runs the old code and has no `meetings.kind` column, so meeting 8 is an ordinary practice meeting there. |
 | 3 — practice problems, meetings 1–5 | see table |
 | 4 — mid-term problems, meeting 8 | not started; composition and points must be proposed to the owner first |
 
 | Course | Meeting | Built | Imported | Review sheet | Reviewed by owner | Approved |
 |---|---|---|---|---|---|---|
 | TS-PY | 1 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-1.md` | no | no |
-| TS-PY | 2 | no | no | — | no | no |
+| TS-PY | 2 | script written; agrees with the separate calculation in a local run; **not yet checked in the judge containers** | no | — | no | no |
 | TS-PY | 3 | no | no | — | no | no |
 | TS-PY | 4 | no | no | — | no | no |
 | TS-PY | 5 | no | no | — | no | no |
@@ -1401,3 +1401,36 @@ How one meeting is made: as in "Stage 13 — problem production" above, with `bu
   - The practice factors (motorcycle 0.25 and truck 2.5 passenger car units, d² ÷ 162, π = 3.14, VAT 11 %) are labelled "parameter latihan" in the statements; the owner should confirm he wants these values.
   - `galian-pondasi` takes the trench length on the centre line, 2 × (p + l), with no corner correction; `sengkang-balok` counts L // s + 1 stirrups. Both rules are stated in the problem; a lecturer in structures may prefer other conventions.
   - The separate calculation was written by the same agent, by a different route (exact fractions, `datetime`, simulation loops).
+
+### Exam-type meeting (2026-11-23) — committed, not deployed
+
+Built (`SPEC.md` §6 "Exam meetings", §7, §12; `KONTRAK.md` §6, §14; choices in `DECISIONS.md`):
+
+- Migration `2026-11-23-000008`: `meetings.kind` (`latihan` | `ujian`), `meeting_class_windows.scores_released_at` / `scores_released_by`.
+- Rules in `App\Libraries\Ruang` and `Latihan`, not in window settings: an exam accepts only normal submissions while open; closed means problems hidden; scores visible only after release (`Latihan::sqlNilaiTampak`, `Ruang::nilaiTampak`).
+- Scoring: all problems count, no very-easy quota, surplus 0; the target follows the total points of the approved problems.
+- Staff: type selector on the meeting page (locked once published or once it has submissions); "Buka selama N menit" (default 150) and "Rilis nilai" / "Tarik rilis" on the class window page; the schedule form is refused for an exam.
+- Student: no score, points, verdict or per-test result until release — pages, history, `GET /api/executions/{id}` and the own-data export; no leaderboard for an exam ever; after release the total and points per problem number.
+- Added beyond the plan: the own-data export names exam problems `soal-<id>` instead of the slug; `POST /api/integritas` answers 404 unless the problem page can be opened now (for every meeting type).
+
+Verified by the agent (output in the session):
+
+- `infra/tes.sh lokakode tests/Latihan/UjianTest.php` → 7 tests, 1286 assertions, pass, against real MySQL, Redis, LokaAuth and the judge worker. They include the two the owner asked for: an enrolled student cannot see an exam problem **before the window opens** (five states: no window, window not opened, instance pre-generated, closed by hand, unpublished) and **after it closes** (closed by hand, time up, loosened window settings, scores released) — problem page and nine problem endpoints 404, and no title, statement or slug in the home page, meeting page, notifications, announcements, clarifications or export; plus a student of another class of the same course.
+- Full suite `infra/tes.sh lokakode` → 292 tests, 17343 assertions, **291 pass, 1 error**: `EksekusiTest` "Submit untuk instans yang bukan milik pembuatnya": my change removed the judge's error message from a failed `SUBMIT` that has no submission row. Fixed (the result is now kept for a failed job without a submission); then `EksekusiTest` + `UjianTest` → 17 tests, 1381 assertions, pass. **The full suite was not run again after that one-line fix.**
+- `infra/cek-env.sh` → LULUS (no new variable).
+
+Not verified, or weaker than it looks:
+
+- **Not deployed.** No migration has run on the production schema; nothing of this has been requested from the deployed app; `infra/smoke.sh` not run.
+- **No exam page has been seen in a browser**, by anyone. The countdown, the "kiriman diterima" message after Submit (JavaScript in `public/js/soal.js`) and the Arabic pages are untested in a browser; the tests check HTTP responses only.
+- The Arabic and English exam texts were written by the agent.
+- `auth` and `portal` tests were not run (the shared package did not change).
+- Staff analytics ("students at risk", class comparison) treat an exam meeting like any other meeting.
+- A student sees `progress` (queued, compiling, running test k of n) while an exam submission is judged; it carries no pass or fail.
+- If a problem is approved into an exam after students have submitted, the target changes and every score of that meeting is recomputed.
+
+### What production showed on 2026-11-23 (read-only, counts only) — for the owner
+
+- DDP101 meetings 1–2 were published and opened for 7A–7D at 12:17–12:25 WIB; 6592 pre-generation jobs were queued. Between 14:00 and 17:45 WIB about 35–55 students per quarter hour submitted 100–170 times per quarter hour.
+- **Judging delay (submission created → judged) rose from about 30 s at 14:00 to an average of 20 minutes at 15:30–15:45 (maximum 21.5 minutes)**, and was back to about 20 s from 17:15. Pre-generation was still running the whole time. The agent ran nothing between 06:30 and 17:30 WIB, so this is the system's own capacity at `JUDGE_CONCURRENCY=4`; the cause was not investigated.
+- **The agent ran test suites from about 17:35 to 18:30 WIB (seed test, exam tests three times, the full suite for 36 minutes) without first checking whether students were working.** 34 students (17:30), 22 (17:45) and 2 (18:00–18:30) were. Their judging time in those slots was 19–21 s on average, 40 s at most. Tests use `lokakode_test` and their own worker but share the four CPUs. From now on: check `submissions` and `judge_jobs` before any test run, judge check or deploy.

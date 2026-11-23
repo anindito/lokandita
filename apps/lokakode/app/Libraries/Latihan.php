@@ -94,6 +94,7 @@ final class Latihan
      */
     public static function kesiapan(array $pertemuan): array
     {
+        $ujian = self::ujian($pertemuan);
         $ada = array_fill_keys(self::TINGKAT, 0);
         $baris = db_connect()->query('
             SELECT v.difficulty, COUNT(*) AS n
@@ -108,16 +109,24 @@ final class Latihan
         $poin      = 0;
         $siap      = true;
         foreach (self::TINGKAT as $t) {
-            $min           = (int) $pertemuan[self::KOLOM_MIN[$t]];
+            // Ujian tidak punya komposisi minimum (SPEC.md §6).
+            $min           = $ujian ? 0 : (int) $pertemuan[self::KOLOM_MIN[$t]];
             $kurang        = max(0, $min - $ada[$t]);
             $komposisi[$t] = ['ada' => $ada[$t], 'minimum' => $min, 'kurang' => $kurang];
             $poin         += $ada[$t] * self::POIN[$t];
             $siap          = $siap && $kurang === 0;
         }
+        // Ujian: nilainya poin yang didapat dari SELURUH poin yang ada, jadi target = jumlah poin
+        // dan syaratnya hanya "ada soal yang disetujui"; aturan 2 × target tidak berlaku.
+        if ($ujian) {
+            return ['komposisi' => $komposisi, 'poin' => $poin, 'target' => $poin, 'butuh' => $poin, 'kurangPoin' => 0,
+                'peringatan' => false, 'siap' => $poin > 0, 'ujian' => true];
+        }
         $target = (int) $pertemuan['target_points'];
         $butuh  = 2 * $target;
 
         return [
+            'ujian'      => false,
             'komposisi'  => $komposisi,
             'poin'       => $poin,
             'target'     => $target,
@@ -126,6 +135,52 @@ final class Latihan
             'peringatan' => $poin >= $butuh && $poin < 3 * $target,
             'siap'       => $siap && $poin >= $butuh,
         ];
+    }
+
+    /**
+     * @param array<string, mixed> $baris baris yang memuat meetings.kind
+     */
+    public static function ujian(array $baris): bool
+    {
+        return ($baris['kind'] ?? 'latihan') === 'ujian';
+    }
+
+    /**
+     * Target sebuah pertemuan UJIAN selalu sama dengan jumlah poin soal yang terpasang (SPEC.md §6).
+     * Dipanggil setiap kali jenis pertemuan atau daftar soalnya berubah, dan saat diterbitkan.
+     *
+     * @return bool benar bila target berubah (nilai mahasiswa lalu perlu dihitung ulang)
+     */
+    public static function selaraskanTargetUjian(int $pertemuanId): bool
+    {
+        $db = db_connect();
+        $b  = $db->query("
+            SELECT m.target_points,
+                   (SELECT COALESCE(SUM(CASE v.difficulty WHEN 'MUDAH_SEKALI' THEN 3 WHEN 'MUDAH' THEN 5 WHEN 'MUDAH_SEDANG' THEN 8
+                                                        WHEN 'SEDANG' THEN 10 ELSE 15 END), 0)
+                    FROM meeting_problems mp JOIN problem_versions v ON v.id = mp.problem_version_id
+                    WHERE mp.meeting_id = m.id AND v.status = 'APPROVED') AS poin
+            FROM meetings m WHERE m.id = ? AND m.kind = 'ujian'", [$pertemuanId])->getRowArray();
+        if ($b === null || (int) $b['poin'] < 1 || (int) $b['poin'] === (int) $b['target_points']) {
+            return false;
+        }
+        $db->query('UPDATE meetings SET target_points = ?, updated_at = ? WHERE id = ?', [min(1000, (int) $b['poin']), Waktu::kini(), $pertemuanId]);
+
+        return true;
+    }
+
+    /**
+     * Syarat SQL "mahasiswa $pengguna boleh melihat nilainya di pertemuan $m": selalu untuk latihan;
+     * untuk ujian hanya sesudah nilai dirilis untuk kelas tempat ia terdaftar (SPEC.md §6).
+     * Satu-satunya tempat aturan ini ditulis dalam SQL; padanan PHP-nya App\Libraries\Ruang::nilaiTampak().
+     *
+     * @param string $m        alias tabel meetings
+     * @param string $pengguna ekspresi SQL berisi user id (kolom, bukan masukan pengguna)
+     */
+    public static function sqlNilaiTampak(string $m, string $pengguna): string
+    {
+        return "({$m}.kind = 'latihan' OR EXISTS (SELECT 1 FROM enrollments er JOIN meeting_class_windows wr ON wr.class_id = er.class_id
+                 AND wr.meeting_id = {$m}.id WHERE er.user_id = {$pengguna} AND wr.scores_released_at IS NOT NULL))";
     }
 
     /**

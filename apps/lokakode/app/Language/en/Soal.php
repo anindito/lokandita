@@ -19,6 +19,10 @@ return [
     ],
 
     'pertemuan' => [
+        'jenis' => 'Meeting type',
+        'jenisLatihan' => 'Practice',
+        'jenisUjian' => 'Exam',
+        'jenisInfo' => 'Exam: the score counts all points, problems are visible only while the window is open, and scores stay hidden until released. The type can be changed only while the meeting is unpublished and has no submissions.',
         'judul'        => 'Meetings',
         'semua'        => 'All meetings',
         'ke'           => 'Meeting {0}',
@@ -153,6 +157,8 @@ return [
     ],
 
     'galat' => [
+        'jenis' => 'Choose the meeting type: practice or exam.',
+        'jenisTerkunci' => 'The type cannot be changed: this meeting is published or already has submissions. Withdraw the meeting first.',
         'bukanMenunggu'  => 'That version was already reviewed; nothing was changed.',
         'catatan'        => 'Write the reason for rejection, 3 to 500 characters.',
         'nomor'          => 'The meeting number must be 1 to 16.',

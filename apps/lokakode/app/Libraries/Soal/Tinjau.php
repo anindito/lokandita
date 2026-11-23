@@ -45,6 +45,10 @@ final class Tinjau
             Audit::catat('soal.disetujui', 'problem_version', (int) $versi['id'], $detail, (int) $soal['course_id'], null, $pelakuId);
         }
         $db->transComplete();
+        // Pertemuan ujian: targetnya selalu jumlah poin soal yang terpasang; nilai yang sudah ada mengikuti.
+        if ($berubah && \App\Libraries\Latihan::selaraskanTargetUjian((int) $soal['meeting_id'])) {
+            \App\Libraries\Penilaian::hitungUlangPertemuan((int) $soal['meeting_id']);
+        }
 
         return $berubah;
     }

@@ -39,6 +39,13 @@ use CodeIgniter\Database\BaseConnection;
  *   latihan  sesudah tutup, pertemuan mengizinkan latihan: dinilai judge tetapi
  *            tidak pernah dihitung ke nilai, percobaan atau papan peringkat
  * Penutupan manual mengakhiri masa terlambat. Di luar `kerja`, jenis adalah ''.
+ *
+ * Pertemuan UJIAN (meetings.kind = 'ujian', SPEC.md §6) lebih ketat, dan aturannya ada DI SINI,
+ * bukan di kolom pengaturan yang bisa diubah pengajar:
+ *   - hanya `biasa` selama jendela terbuka: tidak pernah `telat`, tidak pernah `latihan`;
+ *   - sesudah tutup selalu `nilai` (soal tersembunyi), apa pun post_close_visibility;
+ *   - selama nilai belum dirilis untuk kelasnya (`nilai_tampak` salah), tidak ada nilai, poin,
+ *     verdict atau hasil tes yang keluar dari kelas ini ke mahasiswa.
  */
 final class Ruang
 {
@@ -61,7 +68,7 @@ final class Ruang
         LEFT JOIN meeting_class_windows w ON w.meeting_id = m.id AND w.class_id = k.id';
 
     private const KOLOM = 'm.published_at, m.id AS pertemuan_id, m.number, m.title, m.language, m.target_points, m.starter_template,
-        m.compiler_flags, m.autocomplete, m.practice_after_close, m.anonymize_leaderboard,
+        m.compiler_flags, m.autocomplete, m.practice_after_close, m.anonymize_leaderboard, m.kind, w.scores_released_at,
         w.late_policy, w.late_factor, w.late_until, c.code AS matkul_kode, c.name AS matkul_nama, k.id AS kelas_id, k.name AS kelas_nama,
         e.status AS status_daftar, t.status AS tahun_status, w.open_at, w.close_at, w.override, w.post_close_visibility';
 
@@ -91,7 +98,22 @@ final class Ruang
             return 'kerja';
         }
 
+        if (Latihan::ujian($baris)) {
+            return $keadaan === 'buka' ? 'baca' : 'nilai';
+        }
+
         return $baris['post_close_visibility'] === 'review_only' || $keadaan === 'buka' ? 'baca' : 'nilai';
+    }
+
+    /**
+     * Apakah mahasiswa ini boleh melihat nilainya di pertemuan itu: selalu untuk latihan; untuk
+     * ujian hanya sesudah nilai dirilis untuk kelasnya. Padanan SQL-nya Latihan::sqlNilaiTampak().
+     *
+     * @param array<string, mixed> $baris baris berisi kind dan scores_released_at
+     */
+    public static function nilaiTampak(array $baris): bool
+    {
+        return ! Latihan::ujian($baris) || ($baris['scores_released_at'] ?? null) !== null;
     }
 
     /**
@@ -115,7 +137,8 @@ final class Ruang
         if ($keadaan === 'buka') {
             return 'biasa';
         }
-        if ($keadaan !== 'tutup') {
+        // Ujian: tidak ada kiriman terlambat dan tidak ada latihan sesudah tutup.
+        if ($keadaan !== 'tutup' || Latihan::ujian($baris)) {
             return '';
         }
         if ($baris['override'] === 'none' && $baris['late_policy'] === 'multiplier'
@@ -155,7 +178,8 @@ final class Ruang
      */
     private static function denganMode(array $b): array
     {
-        return $b + ['mode' => self::mode($b), 'jenis' => self::jenis($b), 'sebab' => self::sebab($b)];
+        return $b + ['mode' => self::mode($b), 'jenis' => self::jenis($b), 'sebab' => self::sebab($b),
+            'ujian' => Latihan::ujian($b), 'nilai_tampak' => self::nilaiTampak($b)];
     }
 
     /**
@@ -173,6 +197,10 @@ final class Ruang
             ORDER BY " . self::URUT . ', c.code, m.number')->getResultArray();
         $hasil = [];
         foreach ($baris as $b) {
+            // Nilai ujian yang belum dirilis tidak ikut keluar dari sini.
+            if (! self::nilaiTampak($b)) {
+                $b['score'] = $b['counted_points'] = $b['total_points'] = null;
+            }
             $hasil[(int) $b['pertemuan_id']] ??= self::denganMode($b);
         }
 
@@ -197,10 +225,15 @@ final class Ruang
      *
      * @param array<string, mixed> $p baris dari pertemuan()
      *
-     * @return array{nilai: float, terhitung: float, total: float, target: int, kurang: float, surplus: float, mudahSekali: int, kiriman: int}
+     * @return array{nilai: float, terhitung: float, total: float, target: int, kurang: float, surplus: float, mudahSekali: int, kiriman: int, rahasia: bool}
+     *               `rahasia` benar = ujian yang nilainya belum dirilis: semua angka nol dan tidak boleh ditampilkan
      */
     public function nilai(array $p): array
     {
+        if (! self::nilaiTampak($p)) {
+            return ['nilai' => 0.0, 'terhitung' => 0.0, 'total' => 0.0, 'target' => (int) $p['target_points'], 'kurang' => 0.0,
+                'surplus' => 0.0, 'mudahSekali' => 0, 'kiriman' => 0, 'rahasia' => true];
+        }
         $n = $this->db->query("
             SELECT ms.* FROM meeting_scores ms
             WHERE ms.meeting_id = ? AND {$this->akses->milikSendiri('ms')}", [(int) $p['pertemuan_id']])->getRowArray();
@@ -216,6 +249,7 @@ final class Ruang
             'surplus'     => (float) ($n['surplus'] ?? 0),
             'mudahSekali' => (int) ($n['very_easy_counted'] ?? 0),
             'kiriman'     => (int) ($n['submissions'] ?? 0),
+            'rahasia'     => false,
         ];
     }
 
@@ -242,10 +276,19 @@ final class Ruang
             WHERE mp.meeting_id = ?
             ORDER BY FIELD(v.difficulty, 'MUDAH_SEKALI', 'MUDAH', 'MUDAH_SEDANG', 'SEDANG', 'SULIT'), p.slug", [(int) $p['pertemuan_id']])->getResultArray();
 
-        $kartu = [];
+        $kartu  = [];
+        $tampak = self::nilaiTampak($p);
         foreach ($baris as $i => $b) {
             $poin  = Latihan::POIN[$b['difficulty']];
             $nilai = $b['best_score'] === null ? null : (float) $b['best_score'];
+            // Ujian yang belum dirilis: mahasiswa hanya tahu sudah mengirim atau belum.
+            if (! $tampak) {
+                $kartu[] = ['id' => (int) $b['id'], 'nomor' => $i + 1, 'tingkat' => $b['difficulty'], 'poin' => $poin, 'nilai' => null, 'percobaan' => 0,
+                    'judul'  => self::terjemahan(json_decode((string) $b['translations'], true) ?? [])['title'] ?? $b['slug'],
+                    'status' => $nilai !== null || (int) $b['menunggu'] > 0 ? 'terkirim' : 'belum'];
+
+                continue;
+            }
             $kartu[] = [
                 'id'        => (int) $b['id'],
                 'nomor'     => $i + 1,
@@ -380,8 +423,11 @@ final class Ruang
     {
         return $this->db->query("
             SELECT s.id, s.meeting_problem_id, s.status, s.verdict, s.passed, s.total, s.score, s.duration_ms,
-                   s.compile_log, s.tests, s.missing_concepts, s.late, s.late_factor, s.practice, v.difficulty
+                   s.compile_log, s.tests, s.missing_concepts, s.late, s.late_factor, s.practice, v.difficulty,
+                   " . Latihan::sqlNilaiTampak('m', 's.user_id') . " AS nilai_tampak
             FROM submissions s JOIN problem_versions v ON v.id = s.problem_version_id
+            JOIN meeting_problems mp ON mp.id = s.meeting_problem_id
+            JOIN meetings m ON m.id = mp.meeting_id
             WHERE s.job_id = ? AND {$this->akses->milikSendiri('s')}", [$jobId])->getRowArray();
     }
 

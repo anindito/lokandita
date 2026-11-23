@@ -19,6 +19,10 @@ return [
     ],
 
     'pertemuan' => [
+        'jenis' => 'Jenis pertemuan',
+        'jenisLatihan' => 'Latihan',
+        'jenisUjian' => 'Ujian',
+        'jenisInfo' => 'Ujian: nilai dihitung dari seluruh poin, soal hanya terlihat selama jendela terbuka, dan nilai tersembunyi sampai dirilis. Jenis hanya bisa diubah selama pertemuan belum terbit dan belum punya kiriman.',
         'judul'        => 'Pertemuan',
         'semua'        => 'Semua pertemuan',
         'ke'           => 'Pertemuan {0}',
@@ -153,6 +157,8 @@ return [
     ],
 
     'galat' => [
+        'jenis' => 'Pilih jenis pertemuan: latihan atau ujian.',
+        'jenisTerkunci' => 'Jenis tidak bisa diubah: pertemuan ini sudah terbit atau sudah punya kiriman. Tarik dulu pertemuannya.',
         'bukanMenunggu'  => 'Versi itu sudah ditinjau sebelumnya; tidak ada yang diubah.',
         'catatan'        => 'Tulis alasan penolakan, 3 sampai 500 karakter.',
         'nomor'          => 'Nomor pertemuan harus angka 1 sampai 16.',

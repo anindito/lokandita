@@ -108,6 +108,10 @@ $routes->group('', ['filter' => 'masuk:superadmin,dosen'], static function (Rout
     $routes->post('kelas/(:num)/pertemuan/(:num)', 'Jendela::simpan/$1/$2');
     $routes->post('kelas/(:num)/pertemuan/(:num)/status', 'Jendela::status/$1/$2');
     $routes->post('kelas/(:num)/pertemuan/(:num)/siapkan', 'Jendela::siapkan/$1/$2');
+    // Pertemuan ujian (SPEC.md §6): buka selama N menit — siapa pun yang melihat kelas itu;
+    // merilis nilai — superadmin dan pengampu saja (pengajar 403).
+    $routes->post('kelas/(:num)/pertemuan/(:num)/buka-selama', 'Jendela::bukaSelama/$1/$2');
+    $routes->post('kelas/(:num)/pertemuan/(:num)/rilis', 'Jendela::rilis/$1/$2');
     // Papan peringkat (SPEC.md §3, §12): per kelas untuk siapa pun yang melihat kelas itu;
     // per mata kuliah untuk superadmin dan pengampu (pengajar 403).
     $routes->get('kelas/(:num)/pertemuan/(:num)/papan', 'Peringkat::kelas/$1/$2');

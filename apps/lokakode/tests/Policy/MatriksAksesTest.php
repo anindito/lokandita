@@ -122,6 +122,10 @@ final class MatriksAksesTest extends KodeCase
             'POST kelas/{n}/pertemuan/{n}'          => ['/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'], $lihatXA],
             'POST kelas/{n}/pertemuan/{n}/status'   => ['/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'] . '/status', $lihatXA],
             'POST kelas/{n}/pertemuan/{n}/siapkan'  => ['/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'] . '/siapkan', $lihatXA],
+            // Pertemuan ujian (SPEC.md §6): buka selama N menit seperti jendela; merilis nilai hanya superadmin dan
+            // pengampu — pengajar A melihat kelasnya tetapi mendapat 403. Rincian di tests/Latihan/UjianTest.php.
+            'POST kelas/{n}/pertemuan/{n}/buka-selama' => ['/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'] . '/buka-selama', $lihatXA],
+            'POST kelas/{n}/pertemuan/{n}/rilis'       => ['/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'] . '/rilis', $kelolaXA],
             // Papan peringkat (SPEC.md §3): kelas XA untuk yang melihat kelas itu; seluruh mata kuliah
             // hanya superadmin dan pengampu — pengajar A dan B melihat mata kuliahnya tetapi mendapat 403.
             'GET kelas/{n}/pertemuan/{n}/papan' => ['/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'] . '/papan', $lihatXA],
@@ -331,6 +335,8 @@ final class MatriksAksesTest extends KodeCase
                 'starter_template' => 'DIBAJAK', 'compiler_flags' => '-Wall', 'autocomplete' => '1'],
             'POST kelas/{n}/pertemuan/{n}'         => ['open_at' => '2026-11-20T08:00', 'close_at' => '2026-11-20T10:00', 'post_close_visibility' => 'review_only'],
             'POST kelas/{n}/pertemuan/{n}/status'  => ['override' => 'open'],
+            'POST kelas/{n}/pertemuan/{n}/buka-selama' => ['menit' => '150'],
+            'POST kelas/{n}/pertemuan/{n}/rilis'   => ['rilis' => '1'],
             'POST api/soal/{n}/draf'     => ['source' => 'int main(){return 1;}'],
             'POST api/soal/{n}/jalankan' => ['source' => 'int main(){return 1;}'],
             'POST api/soal/{n}/kirim'    => ['source' => 'int main(){return 1;}'],

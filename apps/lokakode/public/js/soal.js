@@ -320,6 +320,14 @@
       keluaran.appendChild(el('p', 'teks-bahaya', T.judgeGagal));
       return;
     }
+    // Ujian yang nilainya belum dirilis: server hanya mengirim "diterima" atau galat kompilasi.
+    if (k.rahasia) {
+      keluaran.appendChild(kepalaHasil(T.hasilKirim, k.verdict || 'TERKIRIM'));
+      if (k.verdict === 'CE') { keluaran.appendChild(blokTeks(T.logKompilasi, k.compile_log || '')); }
+      keluaran.appendChild(el('p', '', T.ujianDiterima));
+      if (tambahan) { keluaran.appendChild(tambahan); }
+      return;
+    }
     keluaran.appendChild(kepalaHasil(T.hasilKirim, k.verdict));
     keluaran.appendChild(el('p', 'hasil-nilai', isi(T.nilaiKirim, angka(k.score), k.points)));
     if (k.practice) { keluaran.appendChild(el('p', 'teks-peringatan', T.kirimanLatihan)); }

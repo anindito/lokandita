@@ -69,6 +69,10 @@ final class RuangLatihan extends BaseController
             'p'     => $p,
             'nilai' => $ruang->nilai($p),
             'kartu' => in_array($p['mode'], ['kerja', 'baca'], true) ? $ruang->kartu($p) : [],
+            // Ujian yang sudah tutup dan sudah dirilis: poin per NOMOR soal saja — tanpa judul, tanpa tautan (SPEC.md §6).
+            'rincian' => $p['ujian'] && $p['mode'] === 'nilai' && $p['nilai_tampak']
+                ? array_map(static fn (array $k): array => ['nomor' => $k['nomor'], 'poin' => $k['poin'], 'nilai' => $k['nilai']], $ruang->kartu($p))
+                : [],
         ]);
     }
 
@@ -80,8 +84,8 @@ final class RuangLatihan extends BaseController
     public function papan(int $id): ResponseInterface
     {
         $p = $this->ruang()->pertemuan($id);
-        // Sebelum pertemuan dibuka untuk kelasnya belum ada papan.
-        if ($p === null || $p['mode'] === 'tunggu') {
+        // Sebelum pertemuan dibuka untuk kelasnya belum ada papan. Ujian tidak pernah punya papan untuk mahasiswa.
+        if ($p === null || $p['mode'] === 'tunggu' || $p['ujian']) {
             return $this->tidakDitemukan('meeting');
         }
         Penilaian::selesaikan($this->pengguna());
@@ -130,7 +134,7 @@ final class RuangLatihan extends BaseController
             }
         }
         $locale = service('request')->getLocale();
-        $skor   = db_connect()->query(
+        $skor   = ! $soal['nilai_tampak'] ? null : db_connect()->query(
             "SELECT ps.best_score, ps.attempts FROM problem_scores ps WHERE ps.meeting_problem_id = ? AND {$this->akses()->milikSendiri('ps')}",
             [$mpId],
         )->getRowArray();
@@ -153,6 +157,7 @@ final class RuangLatihan extends BaseController
                 'mp'        => $mpId,
                 'bahasa'    => $soal['versi_bahasa'],
                 'mode'      => $soal['mode'],
+                'rahasia'   => ! $soal['nilai_tampak'],
                 'templat'   => Latihan::templat(['starter_template' => $soal['starter_template'], 'language' => $soal['versi_bahasa']]),
                 'draf'      => $ruang->draf($mpId),
                 'lengkapi'  => (int) $soal['autocomplete'] === 1,
@@ -361,12 +366,13 @@ final class RuangLatihan extends BaseController
             return $this->galat(404, 'tidak_ada');
         }
         Penilaian::selesaikan($this->pengguna());
-        $poin = Latihan::POIN[$soal['difficulty']];
+        $poin    = Latihan::POIN[$soal['difficulty']];
+        $rahasia = ! $soal['nilai_tampak'];
 
         return $this->json(['points' => $poin, 'submissions' => array_map(static fn (array $k): array => [
-            'id' => (int) $k['id'], 'status' => $k['status'], 'verdict' => $k['verdict'],
-            'passed' => $k['passed'] === null ? null : (int) $k['passed'], 'total' => $k['total'] === null ? null : (int) $k['total'],
-            'score' => $k['score'] === null ? null : (float) $k['score'], 'at' => Waktu::lokal($k['created_at']),
+            'id' => (int) $k['id'], 'status' => $k['status'], 'verdict' => $rahasia ? self::verdictRahasia($k) : $k['verdict'],
+            'passed' => $rahasia || $k['passed'] === null ? null : (int) $k['passed'], 'total' => $rahasia || $k['total'] === null ? null : (int) $k['total'],
+            'score' => $rahasia || $k['score'] === null ? null : (float) $k['score'], 'at' => Waktu::lokal($k['created_at']),
             'job' => $k['status'] === 'MENUNGGU' ? $k['job_id'] : null,
             'late' => (int) $k['late'] === 1, 'practice' => (int) $k['practice'] === 1,
         ], $ruang->riwayat($mpId))]);
@@ -384,7 +390,7 @@ final class RuangLatihan extends BaseController
             return $this->galat(404, 'tidak_ada');
         }
 
-        return $this->json(self::bentukKiriman($k, Latihan::POIN[$soal['difficulty']]) + ['source' => $k['source'], 'at' => Waktu::lokal($k['created_at'])]);
+        return $this->json(self::bentukKiriman($k, Latihan::POIN[$soal['difficulty']], ! $soal['nilai_tampak']) + ['source' => $k['source'], 'at' => Waktu::lokal($k['created_at'])]);
     }
 
     /**
@@ -394,8 +400,20 @@ final class RuangLatihan extends BaseController
      *
      * @return array<string, mixed>
      */
-    public static function bentukKiriman(array $k, int $poin): array
+    public static function bentukKiriman(array $k, int $poin, bool $rahasia = false): array
     {
+        // Ujian yang nilainya belum dirilis (SPEC.md §6): mahasiswa hanya tahu kirimannya diterima,
+        // atau gagal dikompilasi (beserta log kompilernya). Tidak ada verdict, jumlah tes, atau nilai.
+        if ($rahasia) {
+            $ce = ($k['verdict'] ?? null) === 'CE';
+
+            return [
+                'id' => (int) $k['id'], 'status' => $k['status'], 'verdict' => self::verdictRahasia($k), 'passed' => null, 'total' => null,
+                'score' => null, 'points' => $poin, 'duration_ms' => null, 'compile_log' => $ce ? (string) ($k['compile_log'] ?? '') : '',
+                'tests' => [], 'missing' => [], 'late' => false, 'late_factor' => null, 'practice' => false, 'rahasia' => true,
+            ];
+        }
+
         return [
             'id'          => (int) $k['id'],
             'status'      => $k['status'],
@@ -416,6 +434,20 @@ final class RuangLatihan extends BaseController
     }
 
     /**
+     * Verdict yang boleh dilihat mahasiswa selama nilai ujian belum dirilis: galat kompilasi, atau "terkirim".
+     *
+     * @param array<string, mixed> $k
+     */
+    private static function verdictRahasia(array $k): ?string
+    {
+        if ($k['status'] !== 'DINILAI') {
+            return $k['status'] === 'GAGAL' ? 'FAILED' : null;
+        }
+
+        return $k['verdict'] === 'CE' ? 'CE' : 'TERKIRIM';
+    }
+
+    /**
      * Percobaan tempel yang diblokir editor (SPEC.md §11): dicatat sebagai peristiwa integritas.
      */
     public function integritas(): ResponseInterface
@@ -429,7 +461,10 @@ final class RuangLatihan extends BaseController
         if ($ketik ? ! Integritas::ketikanTakWajar($karakter, $ms) : ! in_array($jalur, self::JALUR_TEMPEL, true)) {
             return $this->galat(422, 'isian_salah');
         }
-        if ($this->ruang()->soal($mpId) === null) {
+        // Hanya soal yang halamannya memang bisa dibuka sekarang: sebelum jendela dibuka dan sesudah
+        // tutup jawabannya sama dengan soal yang tidak ada, supaya id soal tidak bisa ditebak dari sini.
+        $soal = $this->ruang()->soal($mpId);
+        if ($soal === null || ! in_array($soal['mode'], ['kerja', 'baca'], true)) {
             return $this->galat(404, 'tidak_ada');
         }
         // Pengguna yang diizinkan menempel (alat bantu) memang memasukkan teks sekaligus: tidak dicatat.

@@ -25,7 +25,16 @@ final class Jendela extends BaseController
         'disimpan'  => ['sukses', 'Latihan.pesan.jendelaDisimpan'],
         'status'    => ['sukses', 'Latihan.pesan.statusDiubah'],
         'disiapkan' => ['sukses', 'Latihan.pesan.disiapkan'],
+        'dirilis'   => ['sukses', 'Latihan.pesan.nilaiDirilis'],
+        'rilisDitarik' => ['sukses', 'Latihan.pesan.rilisDitarik'],
     ];
+
+    // "Buka selama N menit" untuk ujian (SPEC.md §6).
+    private const MENIT_MIN = 10;
+
+    private const MENIT_MAKS = 600;
+
+    public const MENIT_BAWAAN = 150;
 
     private const TAMPAK = ['hidden', 'review_only'];
 
@@ -140,6 +149,11 @@ final class Jendela extends BaseController
             return $s;
         }
         [$kelas, $j] = $s;
+        // Ujian tidak dijadwalkan dan tidak punya kebijakan terlambat atau tinjauan sesudah tutup (SPEC.md §6):
+        // jendelanya dibuka pengajar pada hari ujian, dengan tombol buka atau "buka selama N menit".
+        if (Latihan::ujian($j)) {
+            return $this->tolakUjian('Latihan.ujian.tanpaJadwal');
+        }
         $isi = [
             'open_at'  => trim((string) $this->request->getPost('open_at')),
             'close_at' => trim((string) $this->request->getPost('close_at')),
@@ -244,6 +258,83 @@ final class Jendela extends BaseController
         }
 
         return redirect()->to("/kelas/{$kelasId}/pertemuan/{$pertemuanId}?pesan=status");
+    }
+
+    private function tolakUjian(string $kunci): ResponseInterface
+    {
+        return $this->response->setStatusCode(409)->setBody(view('Lokandita\Auth\Views\pesan', [
+            'judul' => lang('Latihan.ujian.ditolak'),
+            'teks'  => lang($kunci),
+        ]));
+    }
+
+    /**
+     * Ujian: buka SEKARANG selama N menit (SPEC.md §6). Server yang menutupnya — waktu tutup
+     * tersimpan di jendela, jadi kiriman sesudahnya ditolak walaupun tidak ada yang menekan Tutup —
+     * dan mahasiswa melihat hitung mundur. Menekannya lagi memulai rentang baru dari saat itu.
+     */
+    public function bukaSelama(int $kelasId, int $pertemuanId): ResponseInterface
+    {
+        $s = $this->sasaran($kelasId, $pertemuanId);
+        if ($s instanceof ResponseInterface) {
+            return $s;
+        }
+        [$kelas, $j] = $s;
+        if (! Latihan::ujian($j)) {
+            return $this->tolakUjian('Latihan.ujian.bukanUjian');
+        }
+        $menit = trim((string) $this->request->getPost('menit'));
+        if (preg_match('/^\d{1,3}$/', $menit) !== 1 || (int) $menit < self::MENIT_MIN || (int) $menit > self::MENIT_MAKS) {
+            return $this->tampil($kelas, $j, [], ['menit' => 'menit'], 422);
+        }
+        $buka  = Waktu::kini();
+        $tutup = gmdate('Y-m-d H:i:s', strtotime($buka . ' UTC') + 60 * (int) $menit);
+        $baru  = ['open_at' => $buka, 'close_at' => $tutup, 'override' => 'none', 'late_policy' => 'reject', 'late_until' => null,
+            'post_close_visibility' => 'hidden'];
+
+        $db = db_connect();
+        $db->transStart();
+        (new PustakaJendela($this->akses()))->simpan($kelasId, $j, $baru);
+        Audit::catat('jendela.dibukaSelama', 'meeting', $pertemuanId,
+            ['menit' => (int) $menit, 'open_at' => $buka, 'close_at' => $tutup, 'sebelum' => ['override' => $j['override'], 'open_at' => $j['open_at'], 'close_at' => $j['close_at']]],
+            (int) $kelas['course_id'], $kelasId);
+        $db->transComplete();
+
+        $this->siapkanBilaTerbit($j, $kelasId);
+
+        return redirect()->to("/kelas/{$kelasId}/pertemuan/{$pertemuanId}?pesan=status");
+    }
+
+    /**
+     * Ujian: merilis nilai untuk kelas ini, atau menarik rilisnya (SPEC.md §6). Hanya superadmin dan
+     * pengampu mata kuliah; pengajar kelas yang bukan pengampu mendapat 403.
+     */
+    public function rilis(int $kelasId, int $pertemuanId): ResponseInterface
+    {
+        $s = $this->sasaran($kelasId, $pertemuanId);
+        if ($s instanceof ResponseInterface) {
+            return $s;
+        }
+        [$kelas, $j] = $s;
+        if ((int) $kelas['boleh_kelola'] !== 1) {
+            return $this->terlarang();
+        }
+        if (! Latihan::ujian($j) || $j['jendela_id'] === null) {
+            return $this->tolakUjian(Latihan::ujian($j) ? 'Latihan.ujian.belumPernahDibuka' : 'Latihan.ujian.bukanUjian');
+        }
+        $rilis = $this->request->getPost('rilis') === '1';
+
+        $db = db_connect();
+        $db->transStart();
+        (new PustakaJendela($this->akses()))->simpan($kelasId, $j, [
+            'scores_released_at' => $rilis ? Waktu::kini() : null,
+            'scores_released_by' => $rilis ? $this->akses()->identitas()->userId : null,
+        ]);
+        Audit::catat($rilis ? 'ujian.nilaiDirilis' : 'ujian.rilisDitarik', 'meeting', $pertemuanId,
+            ['sebelum' => $j['scores_released_at']], (int) $kelas['course_id'], $kelasId);
+        $db->transComplete();
+
+        return redirect()->to("/kelas/{$kelasId}/pertemuan/{$pertemuanId}?pesan=" . ($rilis ? 'dirilis' : 'rilisDitarik'));
     }
 
     /**

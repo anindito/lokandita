@@ -11,7 +11,8 @@ use Lokandita\Auth\Ekspor;
  *
  * Setiap kueri terikat pada satu user id. Yang tidak pernah diambil: isi tes
  * (problem_instances.tests), generator dan solusi referensi, dan baris milik orang lain.
- * Soal disebut dengan kode mata kuliah, nomor pertemuan dan slug-nya saja.
+ * Soal disebut dengan kode mata kuliah, nomor pertemuan dan slug-nya saja; soal pertemuan UJIAN
+ * disebut `soal-<nomor>` tanpa slug, karena soal ujian tersembunyi di luar jendelanya (SPEC.md §6).
  */
 final class DataSaya
 {
@@ -20,6 +21,8 @@ final class DataSaya
         JOIN problems p ON p.id = mp.problem_id
         JOIN meetings m ON m.id = mp.meeting_id
         JOIN courses c ON c.id = m.course_id';
+
+    private const NAMA_SOAL = "IF(m.kind = 'ujian', CONCAT('soal-', mp.id), p.slug) AS soal";
 
     /**
      * @return array{0: array<string, mixed>, 1: list<string>} isi berkas dan nama daftar yang terpotong
@@ -30,6 +33,10 @@ final class DataSaya
         $ambil     = Ekspor::BATAS + 1;
         $terpotong = [];
         $kelas     = 'JOIN classes k ON k.id = x.class_id JOIN courses c ON c.id = k.course_id JOIN academic_years t ON t.id = k.academic_year_id';
+
+        // Nilai ujian yang belum dirilis untuk kelasnya tidak ikut diekspor (SPEC.md §6): baris nilainya
+        // dilewati, dan kirimannya tetap ada (kode sumbernya miliknya) tetapi tanpa verdict dan nilai.
+        $tampak = Latihan::sqlNilaiTampak('m', 'x.user_id');
 
         $pendaftaran = $db->query(
             "SELECT c.code AS mata_kuliah, k.name AS kelas, t.label AS tahun_ajaran, x.status, x.graduated_on, x.created_at
@@ -47,29 +54,30 @@ final class DataSaya
             "SELECT c.code AS mata_kuliah, m.number AS pertemuan, x.score AS nilai, x.total_points, x.counted_points, x.target_points,
                     x.surplus, x.very_easy_counted, x.submissions AS kiriman, x.reached_at, x.updated_at
              FROM meeting_scores x JOIN meetings m ON m.id = x.meeting_id JOIN courses c ON c.id = m.course_id
-             WHERE x.user_id = ? ORDER BY x.updated_at DESC LIMIT {$ambil}",
+             WHERE x.user_id = ? AND {$tampak} ORDER BY x.updated_at DESC LIMIT {$ambil}",
             [$userId],
         )->getResultArray();
         $nilaiSoal = $db->query(
-            'SELECT c.code AS mata_kuliah, m.number AS pertemuan, p.slug AS soal, x.difficulty, x.points, x.best_score, x.attempts, x.reached_at, x.updated_at
-             FROM problem_scores x ' . self::SOAL . " WHERE x.user_id = ? ORDER BY x.updated_at DESC LIMIT {$ambil}",
+            'SELECT c.code AS mata_kuliah, m.number AS pertemuan, ' . self::NAMA_SOAL . ', x.difficulty, x.points, x.best_score, x.attempts, x.reached_at, x.updated_at
+             FROM problem_scores x ' . self::SOAL . " WHERE x.user_id = ? AND {$tampak} ORDER BY x.updated_at DESC LIMIT {$ambil}",
             [$userId],
         )->getResultArray();
         $kiriman = $db->query(
-            'SELECT x.id, x.created_at, x.judged_at, c.code AS mata_kuliah, m.number AS pertemuan, p.slug AS soal, x.language, x.status, x.verdict,
-                    x.passed, x.total, x.score, x.late, x.late_factor, x.practice, x.duration_ms, x.source
-             FROM submissions x ' . self::SOAL . " WHERE x.user_id = ? ORDER BY x.id DESC LIMIT {$ambil}",
+            "SELECT x.id, x.created_at, x.judged_at, c.code AS mata_kuliah, m.number AS pertemuan, " . self::NAMA_SOAL . ", x.language, x.status,
+                    IF({$tampak}, x.verdict, NULL) AS verdict, IF({$tampak}, x.passed, NULL) AS passed, IF({$tampak}, x.total, NULL) AS total,
+                    IF({$tampak}, x.score, NULL) AS score, x.late, x.late_factor, x.practice, IF({$tampak}, x.duration_ms, NULL) AS duration_ms, x.source
+             FROM submissions x " . self::SOAL . " WHERE x.user_id = ? ORDER BY x.id DESC LIMIT {$ambil}",
             [$userId],
         )->getResultArray();
         $draf = $db->query(
-            'SELECT c.code AS mata_kuliah, m.number AS pertemuan, p.slug AS soal, x.updated_at, x.source
+            'SELECT c.code AS mata_kuliah, m.number AS pertemuan, ' . self::NAMA_SOAL . ', x.updated_at, x.source
              FROM drafts x ' . self::SOAL . " WHERE x.user_id = ? ORDER BY x.updated_at DESC LIMIT {$ambil}",
             [$userId],
         )->getResultArray();
         // Peristiwa integritas tidak selalu menunjuk soal, jadi LEFT JOIN; `detail` tidak diambil.
         $integritas = $db->query(
-            "SELECT x.created_at, x.kind, p.slug AS soal
-             FROM integrity_events x LEFT JOIN meeting_problems mp ON mp.id = x.meeting_problem_id LEFT JOIN problems p ON p.id = mp.problem_id
+            "SELECT x.created_at, x.kind, " . self::NAMA_SOAL . "
+             FROM integrity_events x LEFT JOIN meeting_problems mp ON mp.id = x.meeting_problem_id LEFT JOIN problems p ON p.id = mp.problem_id LEFT JOIN meetings m ON m.id = mp.meeting_id
              WHERE x.user_id = ? ORDER BY x.id DESC LIMIT {$ambil}",
             [$userId],
         )->getResultArray();
@@ -77,14 +85,14 @@ final class DataSaya
         $notifikasi = $db->query("SELECT created_at, kind, read_at FROM notifications WHERE user_id = ? ORDER BY id DESC LIMIT {$ambil}", [$userId])->getResultArray();
         // Pertanyaan klarifikasinya sendiri beserta jawaban untuknya; penjawabnya tidak disebut.
         $klarifikasi = $db->query(
-            "SELECT x.created_at, c.code AS mata_kuliah, m.number AS pertemuan, p.slug AS soal, x.question AS pertanyaan, x.answer AS jawaban,
+            "SELECT x.created_at, c.code AS mata_kuliah, m.number AS pertemuan, " . self::NAMA_SOAL . ", x.question AS pertanyaan, x.answer AS jawaban,
                     x.answered_at, (x.visibility = 'class') AS terbit_ke_kelas
              FROM clarifications x " . self::SOAL . " WHERE x.user_id = ? ORDER BY x.id DESC LIMIT {$ambil}",
             [$userId],
         )->getResultArray();
         // Jawaban yang ia tulis sebagai dosen: jawabannya saja — pertanyaannya milik orang lain.
         $jawaban = $db->query(
-            "SELECT x.answered_at, c.code AS mata_kuliah, m.number AS pertemuan, p.slug AS soal, x.answer AS jawaban, (x.visibility = 'class') AS terbit_ke_kelas
+            "SELECT x.answered_at, c.code AS mata_kuliah, m.number AS pertemuan, " . self::NAMA_SOAL . ", x.answer AS jawaban, (x.visibility = 'class') AS terbit_ke_kelas
              FROM clarifications x " . self::SOAL . " WHERE x.answered_by = ? ORDER BY x.id DESC LIMIT {$ambil}",
             [$userId],
         )->getResultArray();

@@ -26,6 +26,7 @@ final class Eksekusi extends BaseController
         $this->response->setHeader('Cache-Control', 'no-store');
         $pengguna = $this->akses()->identitas()->userId;
         $baris    = Antrean::uuidSah($id) ? Antrean::milik($id, $pengguna) : null;
+        $k        = null;
         if ($baris === null) {
             // Milik orang lain dan tidak ada sengaja tidak dibedakan.
             Log::event('access.denied', ['user' => $pengguna, 'reason' => 'outside_scope_or_missing', 'what' => 'execution']);
@@ -40,11 +41,21 @@ final class Eksekusi extends BaseController
             $ruang = new Ruang($this->akses());
             $k     = $ruang->kirimanDariJob($id);
             if ($k !== null) {
-                $baris['submission'] = RuangLatihan::bentukKiriman($k, Latihan::POIN[$k['difficulty']]);
+                $rahasia             = (int) $k['nilai_tampak'] !== 1;
+                $baris['submission'] = RuangLatihan::bentukKiriman($k, Latihan::POIN[$k['difficulty']], $rahasia);
                 $soal                = $ruang->soal((int) $k['meeting_problem_id']);
-                if ($soal !== null) {
+                if ($soal !== null && ! $rahasia) {
                     $baris['meeting'] = $ruang->nilai($soal);
                 }
+            }
+        }
+        // Ujian yang nilainya belum dirilis (SPEC.md §6): hasil mentah judge untuk SUBMIT tidak pernah
+        // dikirim, juga selama masih berjalan. Tertutup bila kirimannya tidak ditemukan — kecuali pekerjaan
+        // yang GAGAL tanpa kiriman: `result`-nya hanya memuat sebab kegagalan judge, bukan hasil penilaian.
+        if ($baris['kind'] === 'SUBMIT') {
+            $k ??= (new Ruang($this->akses()))->kirimanDariJob($id);
+            if ($k === null ? $baris['status'] !== 'FAILED' : (int) $k['nilai_tampak'] !== 1) {
+                $baris['result'] = null;
             }
         }
 

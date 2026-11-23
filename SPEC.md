@@ -137,6 +137,15 @@ Append-only log: actor, action, target, app, time, IP, user agent. Covers user c
 - Publishing a meeting is refused when the minimum composition is not met, or when available points are below 2 × target. A warning is shown below 3 × target. The message lists exactly what is missing.
 - Minimum composition is **per meeting**, default 8 / 8 / 6 / 6 / 4 (very easy → hard). The pengampu may lower it for a meeting as long as the 2 × target rule still holds.
 
+**Exam meetings** (owner's decision 2026-11-23). A meeting has a type, `latihan` (default) or `ujian`, set by the pengampu while the meeting is unpublished and has no submissions. For an exam:
+- The score is the points earned out of **all** points available: the target always equals the total points of the approved problems attached. Publishing needs at least one approved problem; the minimum composition and the 2 × target rule do not apply.
+- Problems are visible to a student only while the window of their class is open. Before it opens and after it closes the problem page and every problem endpoint answer as for a problem that does not exist, and no list, notification, announcement, clarification or export shows a title, statement or slug of an exam problem. `post_close_visibility` is ignored.
+- Late submissions are refused and there is no practice after close, whatever the window settings say.
+- The window is not scheduled. The pengajar opens and closes it by hand on the day, or opens it **for N minutes** (default 150, 10–600): the server closes it at that time and students see a countdown.
+- **Until the pengampu (or a superadmin) releases the scores for a class**, its students see no score, no points earned, no verdict, no per-test result and no leaderboard. After Submit a student is told only that the submission was received, or that it failed to compile (with the compiler log). Run on sample tests and custom input works as in practice.
+- After release a student sees the total and the points per problem **number**. The problems stay hidden, and students never get a leaderboard for an exam. A release can be withdrawn. Release and withdrawal are audited.
+- Staff pages (leaderboard, analytics, submissions, exports) are unchanged.
+
 ## 7. LokaKode — scoring
 
 Five difficulty levels:
@@ -169,6 +178,7 @@ surplus        = total points earned − min(counted_points, target_points)
 ```
 - The 4 counted very-easy problems are re-selected on every new submission, never by order of attempt.
 - Surplus never raises the score. It is used only for ranking and analytics.
+- **Exam meetings (§6):** every problem counts — the very-easy quota does not apply — and `meeting_score = total points earned / total points available × 100`; surplus is always 0.
 - The student always sees: points toward target, very-easy quota used ("Mudah sekali: 3/4 terhitung"), points still needed.
 - **There is no course final grade and no letter grade.** Lecturers aggregate outside the system from exports.
 
@@ -276,7 +286,7 @@ Acceptance tests (automated, and run by the owner on this host):
 
 ## 12. LokaKode — leaderboard and analytics
 
-- Leaderboard per meeting per class, and per meeting per course.
+- Leaderboard per meeting per class, and per meeting per course. Students never see a leaderboard of an exam meeting (§6).
 - Order: meeting score, then surplus (higher first), then time the final score was reached (earlier first), then submission count (fewer first).
 - Columns show score and total points. Optional anonymisation per meeting. Cached, refreshed when a submission is judged.
 - Pengajar: grade distribution per class (histogram, mean, median, standard deviation), per-problem statistics, students at risk (no submission, repeated low scores), any submission's source and per-test result.

@@ -198,7 +198,8 @@ final class Pertemuan extends BaseController
      */
     private static function isiPokok(array $p): array
     {
-        return ['number' => (string) $p['number'], 'title' => (string) $p['title'], 'language' => (string) $p['language'], 'enabled' => (string) $p['enabled']];
+        return ['number' => (string) $p['number'], 'title' => (string) $p['title'], 'language' => (string) $p['language'], 'enabled' => (string) $p['enabled'],
+            'kind' => (string) ($p['kind'] ?? 'latihan')];
     }
 
     /**
@@ -239,6 +240,16 @@ final class Pertemuan extends BaseController
         ];
         foreach (Latihan::KOLOM_MIN as $kolom) {
             $isi[$kolom] = trim((string) $this->request->getPost($kolom));
+        }
+
+        // Ujian (SPEC.md §6): target selalu jumlah poin soalnya, tidak ada komposisi minimum, dan
+        // tidak ada latihan sesudah tutup. Isian form untuk ketiganya diabaikan.
+        if (Latihan::ujian($p)) {
+            $isi['target_points']        = (string) $p['target_points'];
+            $isi['practice_after_close'] = '0';
+            foreach (Latihan::KOLOM_MIN as $kolom) {
+                $isi[$kolom] = (string) $p[$kolom];
+            }
         }
 
         $galat = [];
@@ -309,6 +320,10 @@ final class Pertemuan extends BaseController
         if ($p['published_at'] !== null) {
             return redirect()->to('/pertemuan/' . $id);
         }
+        // Ujian: target disamakan dengan jumlah poin soal yang terpasang sebelum terbit.
+        if (Latihan::selaraskanTargetUjian($id)) {
+            Penilaian::hitungUlangPertemuan($id);
+        }
         if ((int) $p['enabled'] !== 1 || ! Latihan::kesiapan($p)['siap']) {
             return $this->tampil($p, self::isiPokok($p), [], 422, null, [], true);
         }
@@ -366,8 +381,18 @@ final class Pertemuan extends BaseController
             'title'    => trim((string) $this->request->getPost('title')),
             'language' => (string) $this->request->getPost('language'),
             'enabled'  => $this->request->getPost('enabled') === '1' ? '1' : '0',
+            // Permintaan tanpa isian jenis tidak mengubah jenisnya.
+            'kind'     => (string) ($this->request->getPost('kind') ?? $p['kind']),
         ];
         $galat = $this->periksa($isi, (int) $p['course_id'], $p);
+        // Jenis (latihan atau ujian) menentukan cara nilai dihitung dan apa yang dilihat mahasiswa:
+        // hanya bisa diubah selama pertemuan belum terbit dan belum punya kiriman.
+        if (! in_array($isi['kind'], ['latihan', 'ujian'], true)) {
+            $galat['kind'] = 'jenis';
+        } elseif ($isi['kind'] !== $p['kind'] && ($p['published_at'] !== null || db_connect()->query(
+            'SELECT COUNT(*) AS n FROM submissions s JOIN meeting_problems mp ON mp.id = s.meeting_problem_id WHERE mp.meeting_id = ?', [$id])->getRow()->n > 0)) {
+            $galat['kind'] = 'jenisTerkunci';
+        }
         if ($galat !== []) {
             return $this->tampil($p, $isi, $galat, 422);
         }
@@ -384,17 +409,18 @@ final class Pertemuan extends BaseController
         $db->transStart();
         $db->table('meetings')->where('id', $id)->update([
             'number' => (int) $isi['number'], 'title' => $isi['title'], 'language' => $isi['language'],
-            'enabled' => (int) $isi['enabled'], 'updated_at' => Waktu::kini(),
-        ]);
+            'enabled' => (int) $isi['enabled'], 'kind' => $isi['kind'], 'updated_at' => Waktu::kini(),
+        ] + ($isi['kind'] === 'ujian' ? ['practice_after_close' => 0, 'anonymize_leaderboard' => 0] : []));
         $db->table('meeting_concepts')->where('meeting_id', $id)->delete();
         foreach ($dipilih as $kode) {
             $db->table('meeting_concepts')->insert(['meeting_id' => $id, 'concept_code' => $kode]);
         }
         Audit::catat('pertemuan.diubah', 'meeting', $id, [
-            'sebelum' => ['number' => (int) $p['number'], 'title' => $p['title'], 'language' => $p['language'], 'enabled' => (int) $p['enabled'], 'konsep' => $sebelum],
-            'sesudah' => ['number' => (int) $isi['number'], 'title' => $isi['title'], 'language' => $isi['language'], 'enabled' => (int) $isi['enabled'], 'konsep' => $dipilih],
+            'sebelum' => ['number' => (int) $p['number'], 'title' => $p['title'], 'language' => $p['language'], 'enabled' => (int) $p['enabled'], 'kind' => $p['kind'], 'konsep' => $sebelum],
+            'sesudah' => ['number' => (int) $isi['number'], 'title' => $isi['title'], 'language' => $isi['language'], 'enabled' => (int) $isi['enabled'], 'kind' => $isi['kind'], 'konsep' => $dipilih],
         ], (int) $p['course_id']);
         $db->transComplete();
+        Latihan::selaraskanTargetUjian($id);
 
         return redirect()->to('/pertemuan/' . $id . '?pesan=disimpan');
     }
