@@ -63,22 +63,22 @@
       "kelas": ["TS-6"],
       "konsep_dasar": [],
       "pertemuan": [
-        {"nomor": 1,  "judul": "Pengenalan Pemrograman, Algoritma, Python",          "latihan": true,  "konsep": ["IO_DASAR", "ARITMETIKA", "VARIABEL_TIPE"]},
-        {"nomor": 2,  "judul": "Variabel, Tipe Data, Operasi Matematika, Satuan",    "latihan": true,  "konsep": ["KONVERSI_TIPE", "FORMAT_OUTPUT"]},
-        {"nomor": 3,  "judul": "Logika dan Percabangan",                             "latihan": true,  "konsep": ["PERCABANGAN"]},
-        {"nomor": 4,  "judul": "Perulangan",                                         "latihan": true,  "konsep": ["PERULANGAN", "NESTED_LOOP", "BREAK_CONTINUE"]},
-        {"nomor": 5,  "judul": "Struktur Data dan Fungsi",                           "latihan": true,  "konsep": ["PY_LIST", "PY_DICT_SET", "FUNGSI", "STRING"]},
-        {"nomor": 6,  "judul": "Pengolahan Data dan Visualisasi Awal",               "latihan": true,  "konsep": ["FILE_IO", "PY_COMPREHENSION", "PY_MATPLOTLIB"]},
-        {"nomor": 7,  "judul": "UTS Teori + Praktik",                                "latihan": false, "konsep": []},
-        {"nomor": 8,  "judul": "NumPy dan Komputasi Numerik",                        "latihan": true,  "konsep": ["PY_NUMPY"]},
-        {"nomor": 9,  "judul": "Pengantar Metode Numerik",                           "latihan": true,  "konsep": []},
-        {"nomor": 10, "judul": "Penerapan, Desain Program, Pengujian",               "latihan": true,  "konsep": ["MODUL", "EXCEPTION"]},
-        {"nomor": 11, "judul": "GUI Desktop I — Tkinter",                            "latihan": false, "konsep": ["PY_TKINTER"]},
-        {"nomor": 12, "judul": "GUI Desktop II — Aplikasi Teknik Sipil",             "latihan": false, "konsep": []},
-        {"nomor": 13, "judul": "Integrasi dan Capstone",                             "latihan": false, "konsep": []},
-        {"nomor": 14, "judul": "Validasi Model dan Klinik Capstone",                 "latihan": false, "konsep": []},
-        {"nomor": 15, "judul": "Finalisasi dan Presentasi",                          "latihan": false, "konsep": []},
-        {"nomor": 16, "judul": "UAS Teori + Capstone",                               "latihan": false, "konsep": []}
+        { "nomor": 1, "judul": "Pengenalan Pemrograman, Algoritma, dan Python", "latihan": true, "konsep": ["IO_DASAR", "ARITMETIKA", "VARIABEL_TIPE"] },
+        { "nomor": 2, "judul": "Variabel, Tipe Data, Operasi Matematika, dan Satuan", "latihan": true, "konsep": ["KONVERSI_TIPE", "FORMAT_OUTPUT"] },
+        { "nomor": 3, "judul": "Logika dan Percabangan", "latihan": true, "konsep": ["PERCABANGAN"] },
+        { "nomor": 4, "judul": "Perulangan (Iteration) dengan for dan while", "latihan": true, "konsep": ["PERULANGAN", "NESTED_LOOP", "BREAK_CONTINUE"] },
+        { "nomor": 5, "judul": "Struktur Data dan Fungsi", "latihan": true, "konsep": ["PY_LIST", "PY_DICT_SET", "FUNGSI", "STRING"] },
+        { "nomor": 6, "judul": "Pengolahan Data Sederhana dan Visualisasi Awal", "latihan": false, "konsep": [] },
+        { "nomor": 7, "judul": "Review Integratif dan Simulasi UTS", "latihan": false, "konsep": [] },
+        { "nomor": 8, "judul": "Ujian Tengah Semester (UTS) — Praktik", "latihan": true, "konsep": [] },
+        { "nomor": 9, "judul": "NumPy dan Komputasi Data Numerik", "latihan": false, "konsep": [] },
+        { "nomor": 10, "judul": "Pengantar Metode Numerik Praktis", "latihan": false, "konsep": [] },
+        { "nomor": 11, "judul": "Penerapan Komputasi Teknik Sipil, Desain Program, dan Pengujian", "latihan": false, "konsep": [] },
+        { "nomor": 12, "judul": "GUI Desktop I — Dasar Tkinter", "latihan": false, "konsep": [] },
+        { "nomor": 13, "judul": "GUI Desktop II — Aplikasi Komputasi Teknik Sipil", "latihan": false, "konsep": [] },
+        { "nomor": 14, "judul": "Integrasi dan Pengembangan Capstone", "latihan": false, "konsep": [] },
+        { "nomor": 15, "judul": "Validasi Model, Finalisasi Capstone, Dokumentasi, dan Gladi Presentasi", "latihan": false, "konsep": [] },
+        { "nomor": 16, "judul": "Ujian Akhir Semester (UAS)", "latihan": false, "konsep": [] }
       ]
     }
   ]

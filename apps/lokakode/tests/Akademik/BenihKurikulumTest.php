@@ -91,7 +91,7 @@ final class BenihKurikulumTest extends KodeCase
             SELECT CONCAT(c.code, " ", m.number) AS k FROM meetings m JOIN courses c ON c.id = m.course_id
             WHERE m.enabled = 0 ORDER BY c.code, m.number')->fetch_all(MYSQLI_ASSOC), 'k');
         $this->assertSame(['DDP101 8', 'DDP101 15', 'DDP101 16', 'PBO301 8', 'PBO301 15', 'PBO301 16',
-            'TS-PY 7', 'TS-PY 11', 'TS-PY 12', 'TS-PY 13', 'TS-PY 14', 'TS-PY 15', 'TS-PY 16'], $mati);
+            'TS-PY 6', 'TS-PY 7', 'TS-PY 9', 'TS-PY 10', 'TS-PY 11', 'TS-PY 12', 'TS-PY 13', 'TS-PY 14', 'TS-PY 15', 'TS-PY 16'], $mati);
         $this->assertSame(0, $this->hitung('SELECT COUNT(*) FROM meetings WHERE published_at IS NOT NULL'));
 
         // Beberapa baris peta konsep, dibaca dari docs/PETA-KONSEP.md, bukan dari benih.
@@ -101,7 +101,9 @@ final class BenihKurikulumTest extends KodeCase
         $this->assertSame([], $konsep['DDP101 8']);
         $this->assertSame(['SMART_POINTER', 'STL_ALGORITMA', 'STL_CONTAINER'], $konsep['PBO301 13']);
         $this->assertSame(['FUNGSI', 'PY_DICT_SET', 'PY_LIST', 'STRING'], $konsep['TS-PY 5']);
-        $this->assertSame(['PY_TKINTER'], $konsep['TS-PY 11']);
+        // TS-PY sesudah pertemuan 5 tidak membawa konsep: UTS (pertemuan 8) hanya mewarisi pertemuan 1–5.
+        $this->assertSame([], $konsep['TS-PY 6']);
+        $this->assertSame([], $konsep['TS-PY 8']);
 
         // PBO301 berangkat dari konsep DDP101; yang diajarkannya sendiri tidak termasuk.
         $dasar = array_column($this->db->query("

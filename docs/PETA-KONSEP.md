@@ -149,30 +149,35 @@ Baseline pertemuan 1 = **seluruh konsep DDP101** (prasyarat DDP + SDA).
 
 ## 4. PEMETAAN — TS-PY (Python, Semester 3, Teknik Sipil)
 
-| Pert. | Topik | Tambahan | Dapat dinilai otomatis |
+Mengikuti RPS Rev2 (`docs/silabus/RPS_SIP113TE3D_…_Rev2.docx`, tahun akademik 2026/2027) dan keputusan pengampu 2026-11-23: LokaKode dipakai untuk **latihan pertemuan 1–5** dan untuk **UTS Praktik di pertemuan 8**. Pertemuan lain tetap ada di daftar sebagai acuan, dimatikan untuk latihan, tanpa soal dan tanpa konsep.
+
+| Pert. | Topik | Tambahan | Dipakai di LokaKode |
 |:---:|---|---|:---:|
-| 1 | Pengenalan Pemrograman, Algoritma, Python | `IO_DASAR`, `ARITMETIKA`, `VARIABEL_TIPE` | ya |
-| 2 | Variabel, Tipe Data, Operasi Matematika, Satuan | `KONVERSI_TIPE`, `FORMAT_OUTPUT` | ya |
-| 3 | Logika dan Percabangan | `PERCABANGAN` | ya |
-| 4 | Perulangan | `PERULANGAN`, `NESTED_LOOP`, `BREAK_CONTINUE` | ya |
-| 5 | Struktur Data dan Fungsi | `PY_LIST`, `PY_DICT_SET`, `FUNGSI`, `STRING` | ya |
-| 6 | Pengolahan Data dan Visualisasi Awal | `FILE_IO`, `PY_COMPREHENSION`, `PY_MATPLOTLIB` | sebagian |
-| 7 | **UTS Teori + Praktik** | — | — |
-| 8 | NumPy dan Komputasi Numerik | `PY_NUMPY` | ya |
-| 9 | Pengantar Metode Numerik | — | ya |
-| 10 | Penerapan, Desain Program, Pengujian | `MODUL`, `EXCEPTION` | ya |
-| 11 | GUI Desktop I — Tkinter | `PY_TKINTER` | **tidak** |
-| 12 | GUI Desktop II — Aplikasi Teknik Sipil | `PY_TKINTER` | **tidak** |
-| 13 | Integrasi dan Capstone | — | **tidak** |
-| 14 | Validasi Model dan Klinik Capstone | — | **tidak** |
-| 15 | Finalisasi dan Presentasi | — | **tidak** |
-| 16 | **UAS Teori + Capstone** | — | **tidak** |
+| 1 | Pengenalan Pemrograman, Algoritma, dan Python | `IO_DASAR`, `ARITMETIKA`, `VARIABEL_TIPE` | latihan |
+| 2 | Variabel, Tipe Data, Operasi Matematika, dan Satuan | `KONVERSI_TIPE`, `FORMAT_OUTPUT` | latihan |
+| 3 | Logika dan Percabangan | `PERCABANGAN` | latihan |
+| 4 | Perulangan (Iteration) dengan for dan while | `PERULANGAN`, `NESTED_LOOP`, `BREAK_CONTINUE` | latihan |
+| 5 | Struktur Data dan Fungsi | `PY_LIST`, `PY_DICT_SET`, `FUNGSI`, `STRING` | latihan |
+| 6 | Pengolahan Data Sederhana dan Visualisasi Awal | — | tidak |
+| 7 | Review Integratif dan Simulasi UTS | — | tidak |
+| 8 | **Ujian Tengah Semester (UTS) — Praktik** | — | **ujian** |
+| 9 | NumPy dan Komputasi Data Numerik | — | tidak |
+| 10 | Pengantar Metode Numerik Praktis | — | tidak |
+| 11 | Penerapan Komputasi Teknik Sipil, Desain Program, dan Pengujian | — | tidak |
+| 12 | GUI Desktop I — Dasar Tkinter | — | tidak |
+| 13 | GUI Desktop II — Aplikasi Komputasi Teknik Sipil | — | tidak |
+| 14 | Integrasi dan Pengembangan Capstone | — | tidak |
+| 15 | Validasi Model, Finalisasi Capstone, Dokumentasi, dan Gladi Presentasi | — | tidak |
+| 16 | **Ujian Akhir Semester (UAS)** | — | tidak |
 
-**Pertemuan 1–10 cocok untuk LokaKode. Pertemuan 11–16 tidak.**
+Catatan:
 
-Dua hal yang perlu disiapkan bila mata kuliah ini dijalankan di LokaKode:
-- Sandbox `judge-python` saat ini **tanpa paket pihak ketiga**. NumPy dan Matplotlib harus ditambahkan ke image untuk pertemuan 6 dan 8–10, dan itu menambah ukuran image serta permukaan serangan. Perlu whitelist paket yang eksplisit.
-- Matplotlib tidak boleh mencoba membuka jendela. Paksa backend `Agg` di image, dan nilai soal dari data numeriknya, bukan dari gambarnya.
+- **Konsep yang diizinkan di UTS (pertemuan 8) adalah gabungan pertemuan 1–5**, tiga belas konsep. Karena konsep bersifat kumulatif atas semua pertemuan bernomor lebih kecil — dipakai untuk latihan atau tidak — pertemuan 6 dan 7 sengaja tidak membawa konsep: kalau pertemuan 6 masih membawa `FILE_IO`, `PY_COMPREHENSION` dan `PY_MATPLOTLIB`, ketiganya ikut diizinkan di soal ujian.
+- Pertemuan 6 (CSV, pandas, Matplotlib) tidak dikerjakan di LokaKode. **Tidak ada pandas di image `judge-python`, dan image itu tidak diubah.** Soal mata kuliah ini hanya memakai pustaka standar Python: tanpa pandas, NumPy, maupun Matplotlib.
+- Comprehension dan `try`/`except` tidak diizinkan di pertemuan 1–5 dan di UTS; "validasi input" di pertemuan 3 berarti pemeriksaan rentang dengan `if`.
+- `PY_DICT_SET` mencakup tuple, dictionary dan set; RPS pertemuan 5 hanya menyebut list, tuple dan dictionary, dan soal mengikuti RPS.
+- `PY_NUMPY`, `PY_MATPLOTLIB`, `PY_TKINTER`, `FILE_IO`, `PY_COMPREHENSION`, `MODUL` dan `EXCEPTION` tetap ada di katalog (§1) tetapi tidak terpasang di pertemuan mana pun mata kuliah ini.
+- UTS berperilaku sebagai ujian, bukan latihan: lihat `SPEC.md` §6.
 
 ---
 
@@ -202,6 +207,6 @@ Ini kebalikan dari pembatasan konsep: yang satu **melarang** konstruksi yang bel
 |---|---|---|
 | DDP101 | 1–14 dari 16 | Kesesuaian terbaik. Bisa dipakai penuh. |
 | PBO301 | 2–14, **butuh validasi AST kode mahasiswa** | Tanpa itu, penilaian OOP tidak bermakna. |
-| TS-PY | 1–10 dari 16 | Butuh NumPy/Matplotlib di image. GUI dan capstone di luar jangkauan. |
+| TS-PY | 1–5 untuk latihan, 8 untuk UTS Praktik | Keputusan pengampu 2026-11-23 mengikuti RPS Rev2; hanya pustaka standar. |
 
 Saran urutan pemakaian: **mulai dari DDP101**. Mata kuliah itu tidak butuh fitur tambahan apa pun, sehingga dapat dipakai semester ini juga sementara fitur untuk PBO dan Python disiapkan.

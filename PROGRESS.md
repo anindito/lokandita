@@ -1,6 +1,6 @@
 # Progress
 
-**Stage 13, second task (2026-11-23) — TS-PY: practice problems for meetings 1–5 and the practical mid-term at meeting 8 (owner's decision B: numbering follows RPS Rev2). Meeting 1 is built, imported and awaits review. The meeting layout is prepared in the repository but NOT yet applied to production; the exam type is approved and not started. See "Stage 13 — TS-PY" at the end of this file; the next session continues from the table there.**
+**Stage 13, second task (2026-11-23) — TS-PY: practice problems for meetings 1–5 and the practical mid-term at meeting 8 (owner's decision B: numbering follows RPS Rev2). Meeting 1 is built, imported and awaits review. The meeting layout (Rev2 numbering) is applied in production; the exam type is approved and in progress. See "Stage 13 — TS-PY" at the end of this file; the next session continues from the table there.**
 
 **Stage 13 — problem production — all eleven meetings of the task (DDP101 4–7, PBO301 1–7) are built, imported and, on the owner's word of 2026-11-23 ("setujui semua soal yang sudah dibuat"), approved: 352 problems `APPROVED`. No meeting of the eleven is published and no class window is open — that is the owner's to do. No tag yet. See "Stage 13" at the end of this file.**
 
@@ -1371,7 +1371,7 @@ Steps:
 
 | Step | State |
 |---|---|
-| 1 — meeting layout | **Repository ready, production NOT changed.** `benih.json`, `BenihKurikulumTest` and `docs/PETA-KONSEP.md` are edited but uncommitted (they must go in with the row change). The agent's SQL transaction was refused by the permission layer of the agent's own tool; nothing was written. |
+| 1 — meeting layout | **Applied 2026-11-23** on the owner's "go": one transaction on the 16 TS-PY meeting rows (titles per Rev2; 6, 9, 10 switched off; concepts of 6–16 removed), 14 audit rows `pertemuan.diubah` with `lewat: sql …`; DDP101 and PBO301 rows untouched (read back, output in the session). `benih.json`, `BenihKurikulumTest` (4 tests pass) and `docs/PETA-KONSEP.md` §4, §6 are in the same commit. Meeting 8 stays switched on, because a switched-off meeting cannot get a class window; it is still an ordinary practice meeting until step 2 is deployed. The deployed container still carries the old `benih.json` until the next deploy; nobody runs the seed in between. |
 | 2 — exam-type meeting | Plan presented and approved with the decisions above; **no code written**. |
 | 3 — practice problems, meetings 1–5 | see table |
 | 4 — mid-term problems, meeting 8 | not started; composition and points must be proposed to the owner first |

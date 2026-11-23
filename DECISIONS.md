@@ -2,6 +2,7 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-23 — Stage 13, TS-PY: meetings 6–16 carry no concepts — concepts are inherited from every lower-numbered meeting whether it is used or not, so anything left on meeting 6 or 7 would be allowed in the mid-term at meeting 8; the layout was changed by one audited SQL transaction with the owner's approval because `benih:kurikulum` only fills empty rows and retitles.
 - 2026-11-23 — Stage 13, TS-PY: before `FORMAT_OUTPUT` is allowed (meeting 1) a fractional result is printed as Python prints it and compared in `float` mode; inputs are whole numbers and the reference divides once, at the end — rounding or formatting would need a concept the meeting does not allow, and a single final division keeps the sample outputs readable (`0.6`, not `0.6000000000000001`).
 - 2026-11-23 — Stage 13, TS-PY: meeting 1 reads one value per line, and every statement tells students to call `input()` without a prompt — first-week students know `input()` and `int(input())` only, and a prompt text lands in the judged output.
 - 2026-11-23 — Stage 13, TS-PY: the separate calculation in `cek-ts-py-pertemuan-<n>.py` is also Python (the course language), so it is written by another route: exact fractions converted to metres first, `math.ceil`, `datetime`, and loops that simulate "how many fit" — the same formula typed twice would prove nothing.
