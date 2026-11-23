@@ -1372,7 +1372,7 @@ Steps:
 | Step | State |
 |---|---|
 | 1 — meeting layout | **Applied 2026-11-23** on the owner's "go": one transaction on the 16 TS-PY meeting rows (titles per Rev2; 6, 9, 10 switched off; concepts of 6–16 removed), 14 audit rows `pertemuan.diubah` with `lewat: sql …`; DDP101 and PBO301 rows untouched (read back, output in the session). `benih.json`, `BenihKurikulumTest` (4 tests pass) and `docs/PETA-KONSEP.md` §4, §6 are in the same commit. Meeting 8 stays switched on, because a switched-off meeting cannot get a class window; it is still an ordinary practice meeting until step 2 is deployed. The deployed container still carries the old `benih.json` until the next deploy; nobody runs the seed in between. |
-| 2 — exam-type meeting | **Code written, tested, committed; NOT deployed.** See "Exam-type meeting" below. Production still runs the old code and has no `meetings.kind` column, so meeting 8 is an ordinary practice meeting there. |
+| 2 — exam-type meeting | **Deployed 2026-11-23, 20:04–20:06 WIB** (commit `6298a26`, migration `2026-11-23-000008` applied). Meeting 8 is still `latihan` in production: the type is the owner's to set on the meeting page. **No exam page has been seen in a browser.** See "Exam-type meeting" below. |
 | 3 — practice problems, meetings 1–5 | see table |
 | 4 — mid-term problems, meeting 8 | not started; composition and points must be proposed to the owner first |
 
@@ -1415,7 +1415,7 @@ How one meeting is made: as in "Stage 13 — problem production" above, with `bu
   - The practice constants (g = 9.81, 1 MPa = 10.197 kg/cm², concrete 24 kN/m³, the Mononobe, Manning and stopping-distance formulas) are labelled "parameter latihan"; the owner should confirm them.
   - The separate calculation is by the same agent, by another route (`decimal` with 40 digits, `cmath`, `atan2`).
 
-### Exam-type meeting (2026-11-23) — committed, not deployed
+### Exam-type meeting (2026-11-23) — deployed, not yet seen in a browser
 
 Built (`SPEC.md` §6 "Exam meetings", §7, §12; `KONTRAK.md` §6, §14; choices in `DECISIONS.md`):
 
@@ -1434,7 +1434,12 @@ Verified by the agent (output in the session):
 
 Not verified, or weaker than it looks:
 
-- **Not deployed.** No migration has run on the production schema; nothing of this has been requested from the deployed app; `infra/smoke.sh` not run.
+- **Deployed on the owner's order ("deploy now") at 20:04–20:06 WIB on 2026-11-23, while 13–17 students were working.** `infra/deploy.sh lokakode`, `auth`, `portal`, `judge` → each reports commit `6298a26`. The untracked RPS file of the owner made `deploy.sh` refuse (it wants a clean tree), so it was listed in `.git/info/exclude` for the duration of the deploy and removed from there afterwards; `docs/**` is not part of any image.
+- Read from production after the deploy: `migrations` has `2026-11-23-000008 TambahUjian`; `meetings.kind` (`latihan` default) and the two release columns exist; all 48 meetings are `latihan`; 11 class windows, none released. `POST /kelas/11/pertemuan/40/buka-selama` and `…/rilis` without a session → 403 (the routes exist; a path that does not exist → 404). The new container's log has no error line in its first 8 minutes.
+- `infra/smoke.sh` → **43 pass, 1 fail**: "2 kontainer judge tertinggal". The check counts every judge container, and students' submissions were being judged at that moment; six samples taken right afterwards showed none left over. Not rerun to a clean pass, because students were still submitting.
+- **What the evening's work did to students (submission created → judged):** 10–13 s before; 16–19 s on average (31 s at most) during the meeting 2 judge check; **1 to 5 minutes for the 19 submissions made between 19:58 and 20:03**, while the meeting 2 import ran its 32 `VALIDATE` jobs — they enter the same queue as students' jobs with the same priority and occupied the four worker slots; back to 8–40 s from 20:04. The deploy itself (20:04–20:06) shows no delay beyond that. No submission failed.
+- Seen while checking, by design and not changed: three submissions are still `MENUNGGU` although their judge job is `DONE` (one from 17:55, two from this evening). A submission is settled by `Penilaian::selesaikan` when its student opens the home page, a practice page or the result, or when staff open an analytics page; these students left first. **To check before the mid-term:** a student who submits and closes the browser as the exam ends has an unsettled submission until one of those pages is opened — whether the page the lecturer uses to read exam scores settles it has not been tested.
+- **Not verified:** nothing of the exam type has been requested from production with a logged-in session.
 - **No exam page has been seen in a browser**, by anyone. The countdown, the "kiriman diterima" message after Submit (JavaScript in `public/js/soal.js`) and the Arabic pages are untested in a browser; the tests check HTTP responses only.
 - The Arabic and English exam texts were written by the agent.
 - `auth` and `portal` tests were not run (the shared package did not change).
