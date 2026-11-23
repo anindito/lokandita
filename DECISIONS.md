@@ -2,6 +2,8 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-23 — Stage 13, TS-PY meeting 5: the five problems whose statement asks for a function carry `required_concepts_in_submission: FUNGSI`, and reference solutions use no list comprehension, `lambda` or `try` — as the DDP101 recursion problems require `REKURSI`; without it nothing makes a student write a function. The owner may widen or drop it.
+- 2026-11-23 — Stage 13, TS-PY meeting 4: data arrive one value per line with the count first or a closing `0`, and from meeting 5 several values may share a line — `input().split()` is a string method and lists arrive at meeting 5.
 - 2026-11-23 — Stage 13, TS-PY: an import is run only when no student has submitted for ten minutes — the importer's `VALIDATE` jobs share the normal judge queue with students' jobs, and the meeting 2 import made 19 submissions wait 1 to 5 minutes.
 - 2026-11-23 — Stage 13, TS-PY meeting 3: generators never produce a fractional result exactly on a class limit, and use the test index so that every branch appears among the 12 tests — at a limit the binary fraction depends on the order of operations, and random inputs alone often miss a branch.
 - 2026-11-23 — Stage 13, TS-PY: from meeting 2 on a fractional result is printed with the number of decimals the statement gives and compared as text (`trimmed`), and the generator rejects any input whose result lies within 0.002 of a rounding boundary of the last printed decimal (or within 0.001 of a whole number where the answer is rounded up) — formatting is what the meeting teaches, and without that margin two correct orders of operations could print different last digits.

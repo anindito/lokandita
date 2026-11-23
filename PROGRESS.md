@@ -1380,9 +1380,9 @@ Steps:
 |---|---|---|---|---|---|---|
 | TS-PY | 1 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-1.md` | no | no |
 | TS-PY | 2 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-2.md` | no | no |
-| TS-PY | 3 | yes; judge check passed 2026-11-23 | **no — held until no student is submitting** (see "Imports held") | `docs/soal/tinjauan/ts-py-pertemuan-3.md` | no | no |
-| TS-PY | 4 | yes; judge check passed 2026-11-23 | **no — held** (see "Imports held") | `docs/soal/tinjauan/ts-py-pertemuan-4.md` | no | no |
-| TS-PY | 5 | no | no | — | no | no |
+| TS-PY | 3 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-3.md` | no | no |
+| TS-PY | 4 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-4.md` | no | no |
+| TS-PY | 5 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-5.md` | no | no |
 | TS-PY | 8 (UTS) | no | no | — (every statement in full) | no | no |
 
 How one meeting is made: as in "Stage 13 — problem production" above, with `buat-ts-py-pertemuan-<n>.py`, `cek-ts-py-pertemuan-<n>.py`, and `waktu_ms=5000`.
@@ -1420,7 +1420,7 @@ How one meeting is made: as in "Stage 13 — problem production" above, with `bu
 - 32 problems, 8 / 8 / 6 / 6 / 4, 232 points, in id, en, ar. Reference solutions add `if` / `elif` / `else`, `and` / `or` / `not` and nested branching; no loop, function, list or string operation.
 - Contexts: strength and slump acceptance, column stress against the allowable stress, cut or fill, road class from daily traffic, rainfall category, slope class, tiered water bill, overtime pay, Reynolds number, squareness check with three stakes, azimuth to quadrant bearing, reinforcement ratio limits, simplified USCS soil classification, channel velocity and freeboard, governing load combination, shear and moment at a section (two point loads), specimen age from two dates, strength reduction factor and flexural strength, winning bid.
 - `periksa.py` with the six allowed concepts → `32 dari 32 soal lulus` on the first run; 52 quoted examples equal. Locally 820 comparisons with the separate calculation, 0 different.
-- **Not imported yet** (see "Imports held").
+- `spark soal:impor` at about 21:13–21:23 WIB on 2026-11-23, when no student had submitted for ten minutes → `32 diterima, 0 ditolak, 0 tidak berubah`.
 - Weaker than it looks:
   - **Nobody but the agent has read these statements**; English and Arabic carry the machine-translation badge.
   - Class limits, tariffs and acceptance rules are simplified and labelled "parameter latihan" (rain categories, road classes by daily traffic, the three load combinations, ρ max = 0.025, strain limits 0.002 / 0.005 for φ, the USCS rules without dual symbols). A lecturer in the subject may want other values.
@@ -1433,7 +1433,7 @@ How one meeting is made: as in "Stage 13 — problem production" above, with `bu
 - 32 problems, 8 / 8 / 6 / 6 / 4, 232 points, in id, en, ar. Reference solutions add `for` with `range()`, `while`, counters and accumulators, a sentinel value, nested loops, `break` and `continue`, and `print(..., end="")`; no list, function or string operation — data are read and processed one value at a time.
 - Contexts: haul trips, stake positions, conversion tables, average strength, rainy days, largest axle load, stair heights, rainfall summary, pumping a flooded pit, pass percentage, peak traffic hour, cement reorder day, traffic growth, total rise and fall, longest dry spell, river cross-section by the trapezoid rule, two trucks arriving together, depreciation, pile grid coordinates, sensor readings with failures, column layout drawing, loan instalments, maximum three-day rainfall, choosing bars for a required steel area, cutting bars in order, largest square tile (GCD), reservoir simulation, normal depth by bisection, combinations of full trucks, mixer queue at one pump.
 - `periksa.py` with the nine allowed concepts → `32 dari 32 soal lulus` on the first run; 35 quoted examples equal. Locally 803 comparisons, 0 different.
-- **Not imported yet** (see "Imports held").
+- `spark soal:impor` at about 21:13–21:23 WIB on 2026-11-23, when no student had submitted for ten minutes → `32 diterima, 0 ditolak, 0 tidak berubah`.
 - Weaker than it looks:
   - **Nobody but the agent has read these statements**; English and Arabic carry the machine-translation badge.
   - Input is one value per line with the count first (or a closing `0`); a student who already knows lists may use them and will be refused by the concept check, since `PY_LIST` arrives at meeting 5.
@@ -1441,9 +1441,22 @@ How one meeting is made: as in "Stage 13 — problem production" above, with `bu
   - `pilih-tulangan` and `kombinasi-truk` are exhaustive searches with nested loops; their rules (2 to 8 bars in a layer, truck sizes 5 / 8 / 12 m³) are exercise parameters.
   - `denah-kolom` prints characters with `end=""`, which the RPS may not have shown by meeting 4; the statement explains it.
 
+### TS-PY meeting 5 — Struktur Data dan Fungsi (2026-11-23)
+
+- 32 problems, 8 / 8 / 6 / 6 / 4, 232 points, in id, en, ar. Reference solutions add lists (and a list of lists), tuples, dictionaries, sets, string methods and slices, and functions with parameters and `return`; several values may now share one input line. No list comprehension, `lambda`, `try` / `except`, or anything outside the standard library.
+- **Five problems require a function in the student's code** (`required_concepts_in_submission: FUNGSI`): `fungsi-luas-pelat`, `fungsi-volume-telapak`, `fungsi-kemiringan`, `interpolasi-tabel`, `luas-poligon`. Their statements say so. This is the agent's choice, after the DDP101 recursion problems; the owner may want it on more problems, or on none.
+- Contexts: reversed elevation list, point loads, project name and abbreviation, specimen and drawing codes, a material price dictionary, staff readings, results above the average, median, pad footing volumes, vehicle class counts, bar diameters in use, station text to metres, as-built against design elevations, bar length per diameter, rainfall mass curve, failed specimens, steepest grade, average without the extremes, reservoir storage table interpolation, rainfall histogram, materials in short supply, centroid and moment of inertia of a built-up section, excavation volume from a grid, ranking bids, area and perimeter of a polygonal plot, results per concrete grade, forward pass of a project schedule, truck trip log.
+- `periksa.py` with the thirteen allowed concepts: first run `31 dari 32` — `harga-material` was refused because its generator printed the same input for every seed (one of five material names by test index). The problem now also reads a quantity and prints unit price × quantity. Second run → `32 dari 32 soal lulus`; 37 quoted examples equal. Locally 805 comparisons, 0 different.
+- `spark soal:impor` at about 21:35 WIB, when no student had submitted for ten minutes → `32 diterima, 0 ditolak, 0 tidak berubah`.
+- Weaker than it looks:
+  - **Nobody but the agent has read these statements**; English and Arabic carry the machine-translation badge.
+  - The concept check only sees that a `def` exists and is used; it cannot tell whether the function is the one the statement names.
+  - `sorted()` on tuples and on dictionary keys is used for ordering; `lambda` and `key=` are avoided, so `log-ritase` sorts by `(-volume, plate)`.
+  - `inersia-komposit` and `luas-poligon` are the only problems of this meeting with structural or surveying formulas; most of the rest is data handling, which is what the meeting teaches.
+
 ### Imports held (2026-11-23)
 
-The meeting 2 import delayed students' verdicts by 1 to 5 minutes, because the importer's `VALIDATE` jobs share the normal queue with students' jobs. The owner ordered the deploy and the judge checks to run now; he was not told about this effect of an import before it happened. So meetings 3–5 are checked in the judge containers (which costs students about 6 s per verdict) but **imported only when no student has submitted for ten minutes**. Proposal for the owner, not done: let the importer queue its `VALIDATE` jobs with priority `low`, like pre-generation, so an import never stands in front of a student.
+The meeting 2 import delayed students' verdicts by 1 to 5 minutes, because the importer's `VALIDATE` jobs share the normal queue with students' jobs. The owner ordered the deploy and the judge checks to run now; he was not told about this effect of an import before it happened. So meetings 3–5 are checked in the judge containers (which costs students about 6 s per verdict) but **imported only when no student has submitted for ten minutes**. That happened from about 21:13 WIB; meetings 3, 4 and 5 were imported then, with no student submission during any of the three imports. Proposal for the owner, not done: let the importer queue its `VALIDATE` jobs with priority `low`, like pre-generation, so an import never stands in front of a student.
 
 ### Exam-type meeting (2026-11-23) — deployed, not yet seen in a browser
 
