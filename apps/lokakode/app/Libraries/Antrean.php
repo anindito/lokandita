@@ -31,8 +31,12 @@ final class Antrean
      * @param string|null          $pembuat   users.id, atau null untuk pekerjaan sistem
      * @param string|null          $kunciUnik idempotency_key: permintaan yang sama dua kali
      *                                        menghasilkan satu pekerjaan saja
+     * @param bool                 $diDepan   masuk di depan antreannya (dikerjakan sebelum yang
+     *                                        sudah menunggu di antrean itu); dipakai impor soal di
+     *                                        antrean low supaya tidak berdiri di depan mahasiswa
+     *                                        dan tidak menunggu di belakang pra-pembuatan instans
      */
-    public static function kirim(string $jenis, array $payload, ?string $pembuat, string $prioritas = 'normal', ?string $kunciUnik = null): string
+    public static function kirim(string $jenis, array $payload, ?string $pembuat, string $prioritas = 'normal', ?string $kunciUnik = null, bool $diDepan = false): string
     {
         if (! in_array($jenis, self::JENIS, true)) {
             throw new \InvalidArgumentException("jenis pekerjaan tidak dikenal: {$jenis}");
@@ -63,7 +67,7 @@ final class Antrean
             return (string) $ada['id'];
         }
 
-        self::dorong($prioritas, $id);
+        self::dorong($prioritas, $id, $diDepan);
 
         return $id;
     }
@@ -116,10 +120,15 @@ final class Antrean
         }
     }
 
-    private static function dorong(string $prioritas, string $id): void
+    private static function dorong(string $prioritas, string $id, bool $diDepan = false): void
     {
         try {
-            self::redis()->lPush(self::KUNCI[$prioritas], $id);
+            // Worker mengambil dari ujung kanan (BRPOP): LPUSH = belakang antrean, RPUSH = depan.
+            if ($diDepan) {
+                self::redis()->rPush(self::KUNCI[$prioritas], $id);
+            } else {
+                self::redis()->lPush(self::KUNCI[$prioritas], $id);
+            }
         } catch (\RedisException $e) {
             self::$redis = null;
             Log::event('judge.lpush_failed', ['job' => $id, 'reason' => $e->getMessage()]);

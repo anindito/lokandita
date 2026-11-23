@@ -262,7 +262,7 @@ final class Impor
                 'language' => $impor['language'], 'generator' => $soal['generator'], 'reference_solution' => $soal['reference_solution'],
                 'samples_count' => $soal['samples_count'], 'hidden_count' => $soal['hidden_count'], 'time_limit_ms' => $soal['time_limit_ms'],
                 'allowed_concepts' => $diizinkan, 'comparison_mode' => $soal['comparison_mode'],
-            ], $impor['actor_id'], 'normal', "impor:{$id}:{$b['urutan']}");
+            ], $impor['actor_id'], 'low', "impor:{$id}:{$b['urutan']}", true);
             $this->db->query('UPDATE import_items SET job_id = ? WHERE id = ? AND job_id IS NULL', [$job, $b['id']]);
         }
     }

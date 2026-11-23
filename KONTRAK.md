@@ -187,7 +187,7 @@ lokakode.judge_jobs
   created_by CHAR(36)       created_at, started_at, finished_at
 ```
 
-- Web inserts the row, commits, then `LPUSH` the id to `lokandita:judge:normal` or `lokandita:judge:low` (Redis DB 0).
+- Web inserts the row, commits, then `LPUSH` the id to `lokandita:judge:normal` or `lokandita:judge:low` (Redis DB 0). One exception: the `VALIDATE` jobs of a problem import are `RPUSH`ed to `lokandita:judge:low`, so the worker takes them after every `normal` job (students' `RUN` and `SUBMIT`) and before the pre-generation jobs already waiting on `low`.
 - Worker `BRPOP`s normal before low, claims the row with a conditional update `QUEUED → RUNNING`, writes `progress` while working, then `result` and `DONE`/`FAILED`.
 - Every 5 s the worker also scans for `QUEUED` rows older than 10 s that are not in Redis and re-queues them.
 - `attempts` > 2 on infrastructure failure → `FAILED` with `result.error = "judge_unavailable"`.
@@ -403,7 +403,7 @@ Rules of an import (`SPEC.md` §8.3):
 
 - At most 8 MB and 200 problems per file. Unknown keys are refused, at the top level and inside a problem: a misspelt key must not be silently ignored.
 - A mistake above the problems (not JSON, wrong `course`, `meeting` or `language`, unknown key) refuses the whole file; nothing is validated or stored. A mistake inside one problem refuses that problem only.
-- Every problem that passes this check is sent to the judge as one `VALIDATE` job (§6) with the meeting's allowed concepts, and is stored only when the judge answers `ok`. It is stored as a new `problem_versions` row with status `PENDING_REVIEW`.
+- Every problem that passes this check is sent to the judge as one `VALIDATE` job (§6) with the meeting's allowed concepts, and is stored only when the judge answers `ok`. It is stored as a new `problem_versions` row with status `PENDING_REVIEW`. These jobs have priority `low` and enter at the front of that queue (§6): an import waits while students are being judged.
 - Idempotent by `slug` within the meeting: a problem whose content equals the latest stored version (any status) is reported "unchanged" and creates nothing; changed content creates the next version. The meeting keeps using its approved version until the new one is approved.
 - The report names, per problem: accepted, rejected or unchanged; for each reason the part (`generator`, reference solution, or the field), line and column inside that source, and the line of that key in the JSON file.
 - Ways in: `php spark soal:impor [file] --oleh <nomor induk of an active superadmin>` (without a file argument it reads the file from standard input; exit code 0 only when the file is accepted and no problem is rejected), the web upload at `POST /impor` (superadmin only, field `berkas`, `.json`), and the edit form of one problem (superadmin and the pengampu), which sends that one problem through the same check and validation. `php spark soal:ekspor <course> <meeting>` prints the latest version of every problem of a meeting in this format; importing that output changes nothing.

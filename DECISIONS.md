@@ -2,6 +2,9 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-23 — Problem import: its `VALIDATE` jobs get priority `low` and enter at the front of that queue (`RPUSH`) — the owner left the choice to the agent after the meeting 2 import made students wait up to 5 minutes; at the front, because behind thousands of pre-generation jobs an import could take hours. The single `VALIDATE` of an edited problem and of `judge:coba` stays `normal`.
+- 2026-11-23 — TS-PY mid-term (meeting 8): one problem set for all students (each student still gets own test data from the seed), and problem 5 refuses a submission without a function — the owner approved the composition without answering these two questions, so the agent took the simpler set and the rule the statement already states; both can be changed before approval.
+- 2026-11-23 — TS-PY meeting 8 was set to `ujian` by one audited SQL statement on the owner's order ("you set to ujian"), with the same side effects as the form: `practice_after_close = 0`, `anonymize_leaderboard = 0`.
 - 2026-11-23 — Stage 13, TS-PY meeting 5: the five problems whose statement asks for a function carry `required_concepts_in_submission: FUNGSI`, and reference solutions use no list comprehension, `lambda` or `try` — as the DDP101 recursion problems require `REKURSI`; without it nothing makes a student write a function. The owner may widen or drop it.
 - 2026-11-23 — Stage 13, TS-PY meeting 4: data arrive one value per line with the count first or a closing `0`, and from meeting 5 several values may share a line — `input().split()` is a string method and lists arrive at meeting 5.
 - 2026-11-23 — Stage 13, TS-PY: an import is run only when no student has submitted for ten minutes — the importer's `VALIDATE` jobs share the normal judge queue with students' jobs, and the meeting 2 import made 19 submissions wait 1 to 5 minutes.

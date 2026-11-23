@@ -147,6 +147,8 @@ final class ImporTest extends KodeCase
         $this->assertStringContainsString('translations, baris JSON ' . $this->barisDari($json, '"translations"', 3) . ': translations harus obyek dan wajib memuat bahasa Indonesia', $keluar);
         $this->assertStringContainsString('slug «kembar» sudah dipakai soal nomor 4 di berkas ini.', $keluar);
         $this->assertSame(1, $this->hitung("SELECT COUNT(*) FROM judge_jobs WHERE kind = 'VALIDATE'"));
+        // Pekerjaan impor berprioritas low (KONTRAK.md §6, §7): tidak berdiri di depan kiriman mahasiswa.
+        $this->assertSame(1, $this->hitung("SELECT COUNT(*) FROM judge_jobs WHERE kind = 'VALIDATE' AND priority = 'low'"));
         $this->assertSame(['kembar'], array_column($this->db->query("SELECT slug FROM problems WHERE slug <> 'jumlah-dua'")->fetch_all(), 0));
     }
 
