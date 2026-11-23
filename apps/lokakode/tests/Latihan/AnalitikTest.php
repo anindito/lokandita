@@ -393,6 +393,39 @@ final class AnalitikTest extends KodeCase
     }
 
     /**
+     * Mahasiswa menutup peramban sebelum hasil judge disalin ke kirimannya: kiriman itu masih
+     * MENUNGGU walau pekerjaannya DONE. Halaman tempat dosen membaca nilai menyelesaikannya dulu,
+     * jadi nilai yang dibaca dosen (juga nilai ujian) tidak bergantung pada mahasiswa membuka halaman lagi.
+     */
+    public function testHalamanNilaiDosenMenyelesaikanKirimanYangTertinggal(): void
+    {
+        $d   = $this->duniaAnalitik();
+        $mhs = $d['mhsA']['id'];
+        $this->db->query("INSERT INTO problem_instances (user_id, meeting_problem_id, problem_version_id, seed, tests, created_at)
+            VALUES ('{$mhs}', {$d['soal']['mp']}, {$d['soal']['versi']}, 1, '[]', UTC_TIMESTAMP())");
+        $ins   = $this->db->insert_id;
+        $job   = Fixtures::uuid();
+        $hasil = $this->db->real_escape_string(json_encode([
+            'verdict' => 'AC', 'compile_log' => '', 'passed' => 2, 'total' => 2, 'concepts' => null, 'missing' => [],
+            'tests'   => [['index' => 0, 'verdict' => 'AC', 'duration_ms' => 3], ['index' => 1, 'verdict' => 'AC', 'duration_ms' => 4]],
+        ]));
+        $this->db->query("INSERT INTO judge_jobs (id, kind, priority, status, payload, result, created_by, created_at, finished_at)
+            VALUES ('{$job}', 'SUBMIT', 'normal', 'DONE', '{}', '{$hasil}', '{$mhs}', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
+        $this->db->query("INSERT INTO submissions (user_id, meeting_problem_id, problem_version_id, instance_id, language, source, job_id, created_at)
+            VALUES ('{$mhs}', {$d['soal']['mp']}, {$d['soal']['versi']}, {$ins}, 'cpp', 'int main(){}', '{$job}', UTC_TIMESTAMP())");
+        $kiriman = $this->db->insert_id;
+        $this->assertSame('MENUNGGU', $this->row("SELECT status FROM submissions WHERE id = {$kiriman}")['status']);
+
+        $r = $this->sebagai($d['pengampuX'])->get('/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'] . '/analitik');
+        $this->assertSame(200, $r->status);
+
+        $this->assertNotSame('MENUNGGU', $this->row("SELECT status FROM submissions WHERE id = {$kiriman}")['status']);
+        $nilai = $this->row("SELECT submissions FROM meeting_scores WHERE user_id = '{$mhs}' AND meeting_id = {$d['pertemuanX1']}");
+        $this->assertNotNull($nilai, 'nilai pertemuan tertulis setelah dosen membuka analitik');
+        $this->assertSame('1', (string) $nilai['submissions']);
+    }
+
+    /**
      * @param list<string> $a
      *
      * @return list<string>

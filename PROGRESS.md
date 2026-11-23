@@ -1374,7 +1374,7 @@ Steps:
 | 1 — meeting layout | **Applied 2026-11-23** on the owner's "go": one transaction on the 16 TS-PY meeting rows (titles per Rev2; 6, 9, 10 switched off; concepts of 6–16 removed), 14 audit rows `pertemuan.diubah` with `lewat: sql …`; DDP101 and PBO301 rows untouched (read back, output in the session). `benih.json`, `BenihKurikulumTest` (4 tests pass) and `docs/PETA-KONSEP.md` §4, §6 are in the same commit. Meeting 8 stays switched on, because a switched-off meeting cannot get a class window; it is still an ordinary practice meeting until step 2 is deployed. The deployed container still carries the old `benih.json` until the next deploy; nobody runs the seed in between. |
 | 2 — exam-type meeting | **Deployed 2026-11-23, 20:04–20:06 WIB** (commit `6298a26`, migration `2026-11-23-000008` applied). Meeting 8 was set to `ujian` on the owner's order at 21:49 WIB by one audited SQL statement (read back: `ujian`, not published, no window, 47 other meetings `latihan`). **No exam page has been seen in a browser.** See "Exam-type meeting" below. |
 | 3 — practice problems, meetings 1–5 | see table |
-| 4 — mid-term problems, meeting 8 | Composition approved by the owner 2026-11-23 (6 problems, 3 + 5 + 8 + 10 + 10 + 15 = 51 points). Written and checked; **not imported, not committed**. See "TS-PY meeting 8" below. |
+| 4 — mid-term problems, meeting 8 | Composition approved by the owner 2026-11-23 (6 problems, 3 + 5 + 8 + 10 + 10 + 15 = 51 points). Written and checked; **imported 2026-11-23 23:05 WIB, `PENDING_REVIEW`; kept out of Git until after the exam**. See "TS-PY meeting 8" below. |
 
 | Course | Meeting | Built | Imported | Review sheet | Reviewed by owner | Approved |
 |---|---|---|---|---|---|---|
@@ -1383,7 +1383,7 @@ Steps:
 | TS-PY | 3 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-3.md` | no | no |
 | TS-PY | 4 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-4.md` | no | no |
 | TS-PY | 5 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-5.md` | no | no |
-| TS-PY | 8 (UTS) | yes, 6 problems, 51 points; judge check passed 2026-11-23; **files on the server only, not in Git** | **no — held** | `docs/soal/tinjauan/ts-py-pertemuan-8.md` on the server (all six statements in full) | no | no |
+| TS-PY | 8 (UTS) | yes, 6 problems, 51 points; judge check passed 2026-11-23; **files on the server only, not in Git** | yes, 23:05 WIB: `6 diterima, 0 ditolak` | `docs/soal/tinjauan/ts-py-pertemuan-8.md` on the server (all six statements in full) | no | no |
 
 How one meeting is made: as in "Stage 13 — problem production" above, with `buat-ts-py-pertemuan-<n>.py`, `cek-ts-py-pertemuan-<n>.py`, and `waktu_ms=5000`.
 
@@ -1462,6 +1462,14 @@ How one meeting is made: as in "Stage 13 — problem production" above, with `bu
 - **Not imported**: at 22:20 WIB four submissions had arrived in the last ten minutes, and the importer in production still queues at normal priority.
 - The agent's choices where the owner did not answer (`DECISIONS.md`): one problem set for everyone; problem 5 refuses a submission without `def`.
 - Weaker than it looks: nobody but the agent has read the statements or solved the problems under time, so the 150-minute sizing (about 130 minutes of work) is an estimate; every student gets the same six tasks with different test data; `target_points` of meeting 8 still shows 60 and follows the approved problems (51) when they are approved.
+
+### Late on 2026-11-23 — the owner's "do your recommendations"
+
+- **Exam files stay out of Git until the exam is over** (agent's recommendation, accepted). The four meeting 8 files and the owner's RPS `.docx` are listed in `.git/info/exclude` on the server, so `git status` is clean and `infra/deploy.sh` runs. They exist only in `/srv/lokandita/docs/soal/` on this server: **there is no second copy.** After the exam, remove the four lines from `.git/info/exclude` and commit the files.
+- **Deployed** at 23:02–23:03 WIB: `infra/cek-env.sh` → LULUS; `infra/deploy.sh lokakode`, `auth`, `portal`, `judge` → each reports commit `b7b5b85` (contains the importer priority change `0b8e7ed`). `infra/smoke.sh` → **44 pass, 0 fail**.
+- **Exam imported** at 23:05 WIB, 608 s after the last student submission: `spark soal:impor` → `6 diterima, 0 ditolak, 0 tidak berubah`. Read from production: 6 versions `PENDING_REVIEW`; the six `VALIDATE` jobs have priority `low`; meeting 8 is `ujian`, not published, 0 problems attached, 0 windows; one `soal.impor` audit row. One student submitted during the import and was judged in 14 s.
+- **Unsettled submissions:** new test `AnalitikTest::testHalamanNilaiDosenMenyelesaikanKirimanYangTertinggal` — a submission still `MENUNGGU` with its job `DONE` is settled and its meeting score written when the lecturer opens the meeting analytics page. `infra/tes.sh lokakode --filter AnalitikTest` → 9 tests, 275 assertions, pass. By reading the code, the same call is in every analytics page, the submission list and both exports; it is **not** in the class window page or in "Rilis nilai" — releasing does not need it, because the student's own pages settle their submissions before showing a score. Production had 14 such submissions at 23:07 WIB; they settle when their students or a lecturer open one of those pages.
+- Still not done: the full suite was not rerun; no exam page has been seen in a browser; `target_points` of meeting 8 shows 60 until the 51 points are approved.
 
 ### Importer priority (2026-11-23) — committed, NOT deployed
 
