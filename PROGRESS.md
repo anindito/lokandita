@@ -1380,7 +1380,7 @@ Steps:
 |---|---|---|---|---|---|---|
 | TS-PY | 1 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-1.md` | no | no |
 | TS-PY | 2 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-2.md` | no | no |
-| TS-PY | 3 | no | no | — | no | no |
+| TS-PY | 3 | yes; judge check passed 2026-11-23 | **no — held until no student is submitting** (see "Imports held") | `docs/soal/tinjauan/ts-py-pertemuan-3.md` | no | no |
 | TS-PY | 4 | no | no | — | no | no |
 | TS-PY | 5 | no | no | — | no | no |
 | TS-PY | 8 (UTS) | no | no | — (every statement in full) | no | no |
@@ -1414,6 +1414,23 @@ How one meeting is made: as in "Stage 13 — problem production" above, with `bu
   - **Every answer is compared as text** with a fixed number of decimals. The generators never produce a result within 0.002 of a rounding boundary, so the order of operations cannot change the printed digits; a student who prints a different number of decimals is marked wrong, and each statement gives the format.
   - The practice constants (g = 9.81, 1 MPa = 10.197 kg/cm², concrete 24 kN/m³, the Mononobe, Manning and stopping-distance formulas) are labelled "parameter latihan"; the owner should confirm them.
   - The separate calculation is by the same agent, by another route (`decimal` with 40 digits, `cmath`, `atan2`).
+
+### TS-PY meeting 3 — Logika dan Percabangan (2026-11-23)
+
+- 32 problems, 8 / 8 / 6 / 6 / 4, 232 points, in id, en, ar. Reference solutions add `if` / `elif` / `else`, `and` / `or` / `not` and nested branching; no loop, function, list or string operation.
+- Contexts: strength and slump acceptance, column stress against the allowable stress, cut or fill, road class from daily traffic, rainfall category, slope class, tiered water bill, overtime pay, Reynolds number, squareness check with three stakes, azimuth to quadrant bearing, reinforcement ratio limits, simplified USCS soil classification, channel velocity and freeboard, governing load combination, shear and moment at a section (two point loads), specimen age from two dates, strength reduction factor and flexural strength, winning bid.
+- `periksa.py` with the six allowed concepts → `32 dari 32 soal lulus` on the first run; 52 quoted examples equal. Locally 820 comparisons with the separate calculation, 0 different.
+- **Not imported yet** (see "Imports held").
+- Weaker than it looks:
+  - **Nobody but the agent has read these statements**; English and Arabic carry the machine-translation badge.
+  - Class limits, tariffs and acceptance rules are simplified and labelled "parameter latihan" (rain categories, road classes by daily traffic, the three load combinations, ρ max = 0.025, strain limits 0.002 / 0.005 for φ, the USCS rules without dual symbols). A lecturer in the subject may want other values.
+  - The generators never put a fractional result exactly on a class limit (for example a slope of exactly 8 %), because the binary fraction at the limit depends on the order of operations; whole-number limits are tested.
+  - `umur-benda-uji` needs twenty-two `if` statements without loops or lists; it is labelled sulit for its length, and students who know arithmetic tricks can shorten it.
+  - `faktor-reduksi` produces unrealistically heavy reinforcement in its compression-controlled tests.
+
+### Imports held (2026-11-23)
+
+The meeting 2 import delayed students' verdicts by 1 to 5 minutes, because the importer's `VALIDATE` jobs share the normal queue with students' jobs. The owner ordered the deploy and the judge checks to run now; he was not told about this effect of an import before it happened. So meetings 3–5 are checked in the judge containers (which costs students about 6 s per verdict) but **imported only when no student has submitted for ten minutes**. Proposal for the owner, not done: let the importer queue its `VALIDATE` jobs with priority `low`, like pre-generation, so an import never stands in front of a student.
 
 ### Exam-type meeting (2026-11-23) — deployed, not yet seen in a browser
 
