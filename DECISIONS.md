@@ -2,6 +2,8 @@
 
 Technical choices made during the build, newest first. One line each: date, decision, reason.
 
+- 2026-11-23 — Stage 13, TS-PY: from meeting 2 on a fractional result is printed with the number of decimals the statement gives and compared as text (`trimmed`), and the generator rejects any input whose result lies within 0.002 of a rounding boundary of the last printed decimal (or within 0.001 of a whole number where the answer is rounded up) — formatting is what the meeting teaches, and without that margin two correct orders of operations could print different last digits.
+- 2026-11-23 — Stage 13, TS-PY: judge checks and imports were run on the evening of 2026-11-23 while students were working, on the owner's order; they run at low CPU priority (`nice -n 15`) and the agent reads the students' submission-to-verdict time before, during and after, and stops the check if it passes one minute.
 - 2026-11-23 — Exam meetings: the strictness lives in `Ruang::mode` / `Ruang::jenis` and in one visibility rule (`Latihan::sqlNilaiTampak`, `Ruang::nilaiTampak`), not in the window columns — a pengajar can still edit `late_policy` or `post_close_visibility` rows through old forms or a crafted request, and an exam must not depend on nobody doing so.
 - 2026-11-23 — Exam meetings: points stay the fixed points per level (3/5/8/10/15); there is no per-problem weight — the exam score is a percentage of the total, and custom weights would need a schema change and a second scoring path.
 - 2026-11-23 — Exam meetings: after release a student sees points per problem number, not per title, and the own-data export names exam problems `soal-<id>` — the owner wants exam problems hidden after close, and a title or slug in a list is a way back to them.

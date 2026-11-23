@@ -1379,7 +1379,7 @@ Steps:
 | Course | Meeting | Built | Imported | Review sheet | Reviewed by owner | Approved |
 |---|---|---|---|---|---|---|
 | TS-PY | 1 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-1.md` | no | no |
-| TS-PY | 2 | script written; agrees with the separate calculation in a local run; **not yet checked in the judge containers** | no | — | no | no |
+| TS-PY | 2 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-2.md` | no | no |
 | TS-PY | 3 | no | no | — | no | no |
 | TS-PY | 4 | no | no | — | no | no |
 | TS-PY | 5 | no | no | — | no | no |
@@ -1401,6 +1401,19 @@ How one meeting is made: as in "Stage 13 — problem production" above, with `bu
   - The practice factors (motorcycle 0.25 and truck 2.5 passenger car units, d² ÷ 162, π = 3.14, VAT 11 %) are labelled "parameter latihan" in the statements; the owner should confirm he wants these values.
   - `galian-pondasi` takes the trench length on the centre line, 2 × (p + l), with no corner correction; `sengkang-balok` counts L // s + 1 stirrups. Both rules are stated in the problem; a lecturer in structures may prefer other conventions.
   - The separate calculation was written by the same agent, by a different route (exact fractions, `datetime`, simulation loops).
+
+### TS-PY meeting 2 — Variabel, Tipe Data, Operasi Matematika, dan Satuan (2026-11-23)
+
+- 32 problems, 8 / 8 / 6 / 6 / 4, 232 points, in id, en, ar. Reference solutions add `float(input())`, `int()` / `float()` / `round()` on values, `import math` (`sqrt`, `pi`, `sin`, `cos`, `atan`, `degrees`, `radians`, `ceil`) and f-strings with a format, printed directly. No `if`, loop, function, list or string operation.
+- Contexts: unit conversion (mm ↔ m, km/h ↔ m/s, MPa ↔ kg/cm², m² ↔ ha, decimal hours and degrees), self-weight of a beam and hydrostatic pressure (the RPS practicum), cylinder strength, water content, map scale, slope angle, pipe and Manning discharge, the rational formula, Mononobe intensity, deflection and bending stress, polar coordinates, stopping distance, required reinforcement, a triangular plot, travel time.
+- `periksa.py` with `IO_DASAR,ARITMETIKA,VARIABEL_TIPE,KONVERSI_TIPE,FORMAT_OUTPUT` → `32 dari 32 soal lulus` on the first run; 34 quoted examples equal.
+- `spark soal:impor` → `32 diterima, 0 ditolak, 0 tidak berubah`. Production shows 32 more versions `PENDING_REVIEW`; meeting not published.
+- **Run while students were working** (the owner's order "run judge checks now"): 13–18 students were submitting during the check. Their time from submission to verdict went from 10–13 s before to 16–19 s on average during it (31 s at most), and no submission was left waiting. The check ran at low CPU priority with two parallel problems.
+- Weaker than it looks:
+  - **Nobody but the agent has read these statements**; English and Arabic carry the machine-translation badge.
+  - **Every answer is compared as text** with a fixed number of decimals. The generators never produce a result within 0.002 of a rounding boundary, so the order of operations cannot change the printed digits; a student who prints a different number of decimals is marked wrong, and each statement gives the format.
+  - The practice constants (g = 9.81, 1 MPa = 10.197 kg/cm², concrete 24 kN/m³, the Mononobe, Manning and stopping-distance formulas) are labelled "parameter latihan"; the owner should confirm them.
+  - The separate calculation is by the same agent, by another route (`decimal` with 40 digits, `cmath`, `atan2`).
 
 ### Exam-type meeting (2026-11-23) — committed, not deployed
 
