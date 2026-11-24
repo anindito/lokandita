@@ -9,6 +9,8 @@ namespace App\Libraries;
  *
  * Keputusan pemilik (2026-11-15): kunci 1, 5, 15, lalu 60 menit setiap kali
  * genap 5 kegagalan; batas per IP 100 kegagalan per 15 menit.
+ * Keputusan pemilik (2026-11-24): akun mahasiswa tidak lagi dikunci makin lama;
+ * setiap genap 5 kegagalan selalu 5 menit. Akun lain tetap bertahap.
  */
 final class LoginGuard
 {
@@ -17,6 +19,8 @@ final class LoginGuard
     public const JENDELA = 900; // 15 menit
 
     public const KUNCI_MENIT = [1, 5, 15, 60];
+
+    public const KUNCI_MAHASISWA_MENIT = 5;
 
     public const BATAS_IP = 100;
 
@@ -105,7 +109,8 @@ final class LoginGuard
     }
 
     /**
-     * Menambah hitungan gagal; setiap genap 5 akun dikunci lebih lama dari sebelumnya.
+     * Menambah hitungan gagal; setiap genap 5 akun dikunci: mahasiswa selalu 5 menit,
+     * akun lain lebih lama dari sebelumnya.
      * Dipakai juga untuk kode verifikasi yang salah.
      *
      * @param array<string, mixed> $user
@@ -130,7 +135,8 @@ final class LoginGuard
         $kunci = null;
         if ($gagal % self::PER_PUTARAN === 0) {
             $putaran = min(intdiv($gagal, self::PER_PUTARAN), count(self::KUNCI_MENIT));
-            $kunci   = Clock::now(self::KUNCI_MENIT[$putaran - 1] * 60);
+            $menit   = $user['global_role'] === 'mahasiswa' ? self::KUNCI_MAHASISWA_MENIT : self::KUNCI_MENIT[$putaran - 1];
+            $kunci   = Clock::now($menit * 60);
         }
         $db->table('users')->where('id', $user['id'])->update(['failed_attempts' => $gagal, 'locked_until' => $kunci]);
     }

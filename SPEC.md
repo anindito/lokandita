@@ -88,7 +88,7 @@ Every new endpoint needs an IDOR test: a pengajar of class A requesting class B 
 - Minimum 10 characters, rejected if in a common-password list or equal to one of the last 3.
 - First login and every reset force a password change before anything else.
 - Changing password revokes all other sessions of that user.
-- 5 failures in 15 minutes locks the account progressively. Lock state is stored in the database (`locked_until`), not only in Redis. A separate per-IP limit protects against spraying.
+- 5 failures in 15 minutes locks the account: a student account for 5 minutes every time (owner's decision 2026-11-24), any other account progressively (1, 5, 15, then 60 minutes). Lock state is stored in the database (`locked_until`), not only in Redis. A separate per-IP limit protects against spraying.
 - Error text for wrong password, locked account and wrong TOTP is identical to the user; the real reason is logged.
 
 ### 4.3 MFA

@@ -137,12 +137,25 @@ final class LoginTest extends AuthCase
         $this->assertSame('locked', $this->lastAudit('login.failed', $user['id'])['detail']['reason']);
     }
 
-    public function testKunciBertahapSatuLimaLimaBelasEnamPuluhMenit(): void
+    /**
+     * @return iterable<string, array{string, list<int>}>
+     */
+    public static function kunciPerPeran(): iterable
     {
-        $user = $this->user();
+        yield 'mahasiswa: selalu 5 menit' => ['mahasiswa', [5, 5, 5, 5, 5]];
+        yield 'dosen: bertahap' => ['dosen', [1, 5, 15, 60, 60]];
+    }
+
+    /**
+     * @param list<int> $kunciMenit
+     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('kunciPerPeran')]
+    public function testKunciSetiapLimaKegagalanMenurutPeran(string $peran, array $kunciMenit): void
+    {
+        $user = $this->user(['global_role' => $peran]);
         $http = $this->http();
 
-        foreach ([1, 5, 15, 60, 60] as $putaran => $menit) {
+        foreach ($kunciMenit as $putaran => $menit) {
             for ($i = 1; $i <= 5; $i++) {
                 $kunci = $this->userRow($user['id'])['locked_until'];
                 $this->assertTrue($kunci === null || strtotime($kunci . ' UTC') < time(), "belum terkunci sebelum gagal ke-{$i} putaran {$putaran}");
