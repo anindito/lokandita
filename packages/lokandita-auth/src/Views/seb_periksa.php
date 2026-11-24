@@ -3,7 +3,7 @@
  * Halaman periksa SEB (publik, tidak diindeks). Variabel: $adaKonfig, $adaPeramban (bool: header
  * diterima), $hasil (Seb::periksa), $url. Tidak pernah menampilkan kunci.
  */
-$ya = static fn (bool $b): string => '<strong class="' . ($b ? 'teks-sukses' : 'teks-bahaya') . '">' . lang($b ? 'Kode.ya' : 'Kode.tidak') . '</strong>';
+$ya = static fn (bool $b): string => '<strong class="' . ($b ? 'teks-sukses' : 'teks-bahaya') . '">' . lang($b ? 'Seb.periksa.ya' : 'Seb.periksa.tidak') . '</strong>';
 $cocok = static fn (bool $b): string => '<strong class="' . ($b ? 'teks-sukses' : 'teks-bahaya') . '">' . lang($b ? 'Seb.periksa.cocok' : 'Seb.periksa.tidakCocok') . '</strong>';
 ?>
 <?= $this->extend('Lokandita\Auth\Views\tata_letak') ?>

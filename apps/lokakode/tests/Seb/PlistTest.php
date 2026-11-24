@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Seb;
 
-use App\Libraries\Seb\Plist;
-use App\Libraries\Seb\Setelan;
+use Lokandita\Auth\Seb\Plist;
+use Lokandita\Auth\Seb\Setelan;
 use PHPUnit\Framework\TestCase;
 
 /**

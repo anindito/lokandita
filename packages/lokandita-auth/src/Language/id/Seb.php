@@ -1,12 +1,13 @@
 <?php
 
-// Safe Exam Browser (SPEC.md §13.1).
+// Safe Exam Browser (SPEC.md §13.1, KONTRAK.md §8), sama untuk semua aplikasi. {0} = nama aplikasi
+// (Lokandita\Auth\Aplikasi::nama()). Kalimat yang khas satu aplikasi ada di SebApl.php aplikasi itu.
 return [
     'modeUji' => 'MODE UJI: penegakan SEB dinonaktifkan',
     'nav'     => 'Petunjuk SEB',
     'wajib'   => [
-        'judul' => 'LokaKode harus dibuka melalui Safe Exam Browser',
-        'teks'  => 'Akun mahasiswa hanya dapat memakai LokaKode dari dalam Safe Exam Browser (SEB) dengan berkas konfigurasi mata kuliahnya. Draf terakhir Anda tersimpan, dan kiriman yang sudah diterima tetap berlaku.',
+        'judul' => '{0} harus dibuka melalui Safe Exam Browser',
+        'teks'  => 'Akun mahasiswa hanya dapat memakai {0} dari dalam Safe Exam Browser (SEB) dengan berkas konfigurasi mata kuliahnya.',
         'alasan' => [
             'tanpa_header'      => 'Peramban ini tidak mengirim tanda pengenal SEB. Tutup peramban ini, lalu buka berkas konfigurasi mata kuliah Anda.',
             'tanpa_konfigurasi' => 'Mata kuliah Anda belum memiliki konfigurasi SEB. Hubungi dosen pengampu.',
@@ -17,9 +18,9 @@ return [
     ],
     'petunjuk' => [
         'judul'     => 'Petunjuk Safe Exam Browser',
-        'deskripsi' => 'Cara memasang Safe Exam Browser dan membuka LokaKode dengan berkas konfigurasi mata kuliah.',
-        'belum'     => 'Kewajiban memakai SEB saat ini belum diberlakukan: LokaKode masih bisa dibuka dengan peramban biasa. Anda sudah boleh mencoba langkah-langkah di bawah.',
-        'berlaku'   => 'Mahasiswa wajib membuka LokaKode melalui SEB. Dosen dan pengelola memakai peramban biasa.',
+        'deskripsi' => 'Cara memasang Safe Exam Browser dan membuka {0} dengan berkas konfigurasi mata kuliah.',
+        'belum'     => 'Kewajiban memakai SEB saat ini belum diberlakukan: {0} masih bisa dibuka dengan peramban biasa. Anda sudah boleh mencoba langkah-langkah di bawah.',
+        'berlaku'   => 'Mahasiswa wajib membuka {0} melalui SEB. Dosen dan pengelola memakai peramban biasa.',
         'batasJudul' => 'Yang didukung',
         'batas'     => 'Hanya Safe Exam Browser versi 3.10.x untuk Windows 64-bit (x64). Versi lain, macOS, iPad dan Windows 32-bit atau ARM tidak dapat dipakai.',
         'langkahJudul' => 'Langkah-langkah',
@@ -28,7 +29,6 @@ return [
             'Unduh berkas konfigurasi mata kuliah Anda di bawah ini. Jangan mengubah isinya.',
             'Tutup semua aplikasi lain, lalu klik dua kali berkas itu. SEB terbuka dan menampilkan halaman masuk Lokandita.',
             'Masuk dengan nomor induk dan kata sandi Anda seperti biasa.',
-            'Selesai berlatih, pilih "Keluar dari Safe Exam Browser" di beranda LokaKode.',
         ],
         'unduhSeb'  => 'Unduh Safe Exam Browser dari situs resminya (safeexambrowser.org)',
         'berkasJudul' => 'Berkas konfigurasi',
@@ -36,9 +36,8 @@ return [
         'berkasUnduh'  => 'Unduh berkas konfigurasi {0}',
         'selamaJudul'  => 'Selama SEB berjalan',
         'selama'    => [
-            'Komputer hanya menampilkan LokaKode. Peramban lain, aplikasi percakapan, perekam layar dan alat kendali jarak jauh ditutup paksa; simpan pekerjaan Anda di aplikasi itu sebelum memulai.',
+            'Komputer hanya menampilkan {0}. Peramban lain, aplikasi percakapan, perekam layar dan alat kendali jarak jauh ditutup paksa; simpan pekerjaan Anda di aplikasi itu sebelum memulai.',
             'SEB tidak mau berjalan di mesin virtual, dan hanya satu layar yang boleh tersambung.',
-            'Bila SEB ditutup atau sambungan terputus, draf terakhir Anda tetap tersimpan di server.',
         ],
         'periksa'   => 'Periksa apakah SEB Anda dikenali',
     ],
@@ -57,6 +56,8 @@ return [
         'versi'     => 'Versi SEB menurut peramban',
         'versiTidakAda' => 'tidak dilaporkan (bukan SEB, atau SEB lama)',
         'catatan'   => 'Halaman ini tidak menampilkan kunci apa pun, hanya cocok atau tidaknya.',
+        'ya'        => 'Ya',
+        'tidak'     => 'Tidak',
     ],
     'keluar' => [
         'judul' => 'Keluar dari Safe Exam Browser',
@@ -70,6 +71,7 @@ return [
         'judul'     => 'Safe Exam Browser',
         'tautan'    => 'Safe Exam Browser',
         'modeUji'   => 'Penegakan SEB sedang dinonaktifkan di server (MODE UJI): mahasiswa masih bisa memakai peramban biasa. Konfigurasi dan kunci di halaman ini sudah bisa disiapkan dan dicoba.',
+        'tidakDitemukan' => 'Data yang Anda cari tidak ada, atau Anda tidak berhak melihatnya.',
         'belumAda'  => 'Mata kuliah ini belum memiliki konfigurasi SEB.',
         'keadaan'   => 'Konfigurasi versi {0}, dibuat {1}.',
         'kunciKonfig' => 'Config Key',

@@ -1,13 +1,14 @@
 <?php
 /**
  * Panel SEB satu mata kuliah (SPEC.md §13.1). Variabel: $matkul, $aktif (baris seb_configs atau null),
- * $kunci (list hex), $isianKunci, $galat (kolom => kunci Seb.galat.*), $diberlakukan, $asal (list asal).
+ * $kunci (list hex), $isianKunci, $galat (kolom => kunci Seb.galat.*), $diberlakukan, $asal (list asal),
+ * $nav (HTML navigasi aplikasi ini, dari Sumber::navigasi).
  */
 $id = (int) $matkul['id'];
 ?>
 <?= $this->extend('Lokandita\Auth\Views\tata_letak') ?>
 <?= $this->section('isi') ?>
-<?= view('_nav', ['akses' => $akses]) ?>
+<?= $nav ?>
 <h1><?= lang('Seb.kelola.judul') ?> — <span class="ltr"><?= esc($matkul['code']) ?></span></h1>
 <p class="redup"><a href="/mata-kuliah/<?= $id ?>"><?= esc($matkul['name']) ?></a> · <a href="/seb"><?= lang('Seb.nav') ?></a> · <a href="/seb/periksa"><?= lang('Seb.periksa.judul') ?></a></p>
 
@@ -19,7 +20,7 @@ $id = (int) $matkul['id'];
     <?php if ($aktif === null): ?>
         <p data-seb-versi="0"><?= lang('Seb.kelola.belumAda') ?></p>
     <?php else: ?>
-        <p data-seb-versi="<?= (int) $aktif['version'] ?>"><?= lang('Seb.kelola.keadaan', [(int) $aktif['version'], esc(\App\Libraries\Waktu::lokal($aktif['created_at']))]) ?></p>
+        <p data-seb-versi="<?= (int) $aktif['version'] ?>"><?= lang('Seb.kelola.keadaan', [(int) $aktif['version'], esc(\Lokandita\Auth\Waktu::lokal($aktif['created_at']))]) ?></p>
         <p><?= lang('Seb.kelola.kunciKonfig') ?>: <code class="ltr" data-kunci-konfig><?= esc($aktif['config_key']) ?></code></p>
         <div class="baris-tombol">
             <a class="tombol" href="/seb/unduh/<?= esc($matkul['code']) ?>.seb"><?= lang('Seb.kelola.unduh') ?></a>

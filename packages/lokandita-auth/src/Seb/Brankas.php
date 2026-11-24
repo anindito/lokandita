@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Libraries\Seb;
+namespace Lokandita\Auth\Seb;
 
 /**
  * Enkripsi konfigurasi SEB yang disimpan (KONTRAK.md §8): XSalsa20-Poly1305 (libsodium

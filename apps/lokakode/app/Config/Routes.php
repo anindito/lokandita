@@ -20,12 +20,11 @@ $routes->get('/', 'Depan::index');
 RuteBersama::publik($routes);
 // Safe Exam Browser (SPEC.md §13.1), tanpa sesi: petunjuk, berkas .seb per mata kuliah, halaman
 // periksa header, dan alamat keluar (quitURL). Yang dibaca hanya konfigurasi SEB (KONTRAK.md §8).
-$routes->get('seb', 'Seb::petunjuk');
-$routes->get('seb/periksa', 'Seb::periksa');
-$routes->get('seb/keluar', 'Seb::keluar');
-$routes->get('seb/unduh/(:segment)', 'Seb::unduh/$1');
+// Juga denyut SEB (mahasiswa) dan panel SEB mata kuliah (superadmin dan pengampu; pengajar 403).
+// Rute, pengendali dan filternya ada di paket bersama, sama untuk setiap aplikasi (KONTRAK.md §8).
+RuteBersama::seb($routes);
 
-// Filter `seb` (App\Filters\WajibSeb, KONTRAK.md §8) selalu SESUDAH `masuk`: ia hanya berlaku bagi
+// Filter `seb` (Lokandita\Auth\Filters\WajibSeb, KONTRAK.md §8) selalu SESUDAH `masuk`: ia hanya berlaku bagi
 // peran mahasiswa dan melewatkan staf. Setiap rute yang bisa dibuka mahasiswa memakainya, kecuali
 // ekspor data sendiri di bawah — hak atas data sendiri tidak bergantung pada SEB, dan SEB melarang unduhan.
 
@@ -44,8 +43,6 @@ $routes->group('', ['filter' => 'masuk'], static function (RouteCollection $rout
 // Mahasiswa saja (SPEC.md §11): ruang latihan. Lingkupnya — pertemuan kelasnya sendiri,
 // kiriman dan drafnya sendiri — diperiksa App\Libraries\Ruang di dalam kueri.
 $routes->group('', ['filter' => ['masuk:mahasiswa', 'seb']], static function (RouteCollection $routes): void {
-    // Denyut SEB tiap 25 detik (KONTRAK.md §8): filter `seb` yang memeriksa dan memperpanjang sewa.
-    $routes->post('api/seb/denyut', 'RuangLatihan::denyutSeb');
     $routes->get('latihan/(:num)', 'RuangLatihan::pertemuan/$1');
     // Papan peringkat kelasnya sendiri saja (SPEC.md §3).
     $routes->get('latihan/(:num)/papan', 'RuangLatihan::papan/$1');
@@ -135,10 +132,6 @@ $routes->group('', ['filter' => 'masuk:superadmin,dosen'], static function (Rout
     $routes->get('kelas/(:num)/pengumuman', 'Pengumuman::index/$1');
     $routes->post('kelas/(:num)/pengumuman', 'Pengumuman::simpan/$1');
     $routes->post('kelas/(:num)/pengumuman/(:num)/tarik', 'Pengumuman::tarik/$1/$2');
-    // Konfigurasi SEB mata kuliah (SPEC.md §13.1): superadmin dan pengampu; pengajar 403.
-    $routes->get('mata-kuliah/(:num)/seb', 'SebKelola::lihat/$1');
-    $routes->post('mata-kuliah/(:num)/seb', 'SebKelola::simpan/$1');
-    $routes->post('mata-kuliah/(:num)/seb/kunci', 'SebKelola::kunci/$1');
     // Bank soal (SPEC.md §8.1): superadmin dan pengampu; pengajar 403.
     $routes->get('soal/(:num)', 'Soal::lihat/$1');
     $routes->post('soal/(:num)/setujui', 'Soal::setujui/$1');

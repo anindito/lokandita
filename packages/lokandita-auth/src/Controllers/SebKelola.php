@@ -2,17 +2,25 @@
 
 declare(strict_types=1);
 
-namespace App\Controllers;
+namespace Lokandita\Auth\Controllers;
 
-use App\Libraries\Seb\Seb;
+use CodeIgniter\Controller;
 use CodeIgniter\HTTP\ResponseInterface;
+use Lokandita\Auth\Current;
+use Lokandita\Auth\Identity;
+use Lokandita\Auth\Log;
+use Lokandita\Auth\Seb\Seb;
 
 /**
  * Panel SEB satu mata kuliah (SPEC.md §13.1): superadmin dan pengampunya. Pengajar yang
- * melihat mata kuliah itu mendapat 403; yang tidak melihatnya 404.
+ * melihat mata kuliah itu mendapat 403; yang tidak melihatnya 404. Siapa melihat dan siapa
+ * mengelola diputuskan aplikasi (Sumber::matkulUntukPanel), bukan di sini.
+ * Sama di setiap aplikasi yang memakai SEB; rutenya didaftarkan Lokandita\Auth\Routes::seb().
  */
-final class SebKelola extends BaseController
+final class SebKelola extends Controller
 {
+    protected $helpers = ['form'];
+
     private const PESAN = [
         'dibuat'   => ['sukses', 'Seb.kelola.pesanDibuat'],
         'dirotasi' => ['sukses', 'Seb.kelola.pesanDirotasi'],
@@ -76,38 +84,64 @@ final class SebKelola extends BaseController
         return redirect()->to('/mata-kuliah/' . $matkulId . '/seb?pesan=kunci');
     }
 
-    /**
-     * @return array<string, mixed>|ResponseInterface
-     */
-    private function matkulUntukDikelola(int $id): array|ResponseInterface
+    private function identitas(): Identity
     {
-        $matkul = $this->akademik()->matkul($id);
-        if ($matkul === null) {
-            return $this->tidakDitemukan('course');
+        $identitas = Current::identity();
+        if ($identitas === null) {
+            throw new \LogicException('Rute ini tidak dipasangi filter masuk.');
         }
 
-        return (int) $matkul['boleh_kelola'] === 1 ? $matkul : $this->terlarang();
+        return $identitas;
     }
 
     /**
-     * @param array<string, mixed>  $matkul
-     * @param array<string, string> $galat  kolom => kunci Seb.galat.*
+     * @return array{id: int, code: string, name: string, boleh_kelola: bool}|ResponseInterface
+     */
+    private function matkulUntukDikelola(int $id): array|ResponseInterface
+    {
+        $matkul = Seb::sumber()->matkulUntukPanel($this->identitas(), $id);
+        if ($matkul === null) {
+            // Tidak ada ATAU di luar hak pengguna: sengaja tidak dibedakan.
+            return $this->tolak(404, 'outside_scope_or_missing', 'Lokandita.tidakDitemukan', 'Seb.kelola.tidakDitemukan', ['what' => 'course']);
+        }
+
+        return $matkul['boleh_kelola'] ? $matkul : $this->tolak(403, 'role', 'Lokandita.tidakBerhak', 'Lokandita.tidakBerhak');
+    }
+
+    /**
+     * @param array<string, string> $lain butir tambahan untuk log
+     */
+    private function tolak(int $status, string $alasan, string $kunciJudul, string $kunciTeks, array $lain = []): ResponseInterface
+    {
+        Log::event('access.denied', ['user' => $this->identitas()->userId, 'reason' => $alasan] + $lain + ['path' => $this->request->getUri()->getPath()]);
+
+        return $this->response->setStatusCode($status)->setBody(view('Lokandita\Auth\Views\pesan', [
+            'judul' => lang($kunciJudul),
+            'teks'  => lang($kunciTeks),
+        ]));
+    }
+
+    /**
+     * @param array{id: int, code: string, name: string, boleh_kelola: bool} $matkul
+     * @param array<string, string>                                          $galat  kolom => kunci Seb.galat.*
      */
     private function tampil(array $matkul, array $galat, string $isianKunci, int $status = 200): ResponseInterface
     {
-        $aktif = Seb::aktif((int) $matkul['id']);
+        $aktif = Seb::aktif($matkul['id']);
         $kunci = $aktif === null ? [] : Seb::kunciTerdaftar((int) $aktif['id']);
+        $k     = (string) $this->request->getGet('pesan');
 
-        return $this->halaman('seb_kelola', [
+        return $this->response->setStatusCode($status)->setBody(view('Lokandita\Auth\Views\seb_kelola', [
             'judul'       => lang('Seb.kelola.judul'),
+            'nav'         => Seb::sumber()->navigasi($this->identitas()),
             'matkul'      => $matkul,
             'aktif'       => $aktif,
             'kunci'       => $kunci,
             'isianKunci'  => $galat === [] ? implode("\n", $kunci) : $isianKunci,
             'galat'       => $galat,
-            'pesan'       => $this->pesanDariQuery(self::PESAN),
+            'pesan'       => isset(self::PESAN[$k]) ? [['jenis' => self::PESAN[$k][0], 'teks' => lang(self::PESAN[$k][1])]] : [],
             'diberlakukan' => Seb::diberlakukan(),
             'asal'        => Seb::asal(),
-        ], $status);
+        ]));
     }
 }

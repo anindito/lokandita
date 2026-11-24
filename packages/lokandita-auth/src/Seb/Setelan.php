@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Libraries\Seb;
+namespace Lokandita\Auth\Seb;
 
 /**
  * Setelan SEB yang dibuat server untuk satu mata kuliah (SPEC.md §13.1, KONTRAK.md §8).

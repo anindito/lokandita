@@ -541,15 +541,6 @@ final class RuangLatihan extends BaseController
     }
 
     /**
-     * Denyut SEB (KONTRAK.md §8). Pemeriksaan header dan perpanjangan sewa dilakukan filter
-     * `seb` sebelum sampai di sini; yang tidak lolos sudah dijawab 403 oleh filter itu.
-     */
-    public function denyutSeb(): ResponseInterface
-    {
-        return $this->json(['ok' => true, 'sewa' => \App\Libraries\Seb\Seb::SEWA_DETIK]);
-    }
-
-    /**
      * Ukuran panel halaman soal, disimpan per pengguna (SPEC.md §11).
      */
     public function panel(): ResponseInterface

@@ -2,7 +2,7 @@
 <?= $this->section('isi') ?>
 <?= view('_nav', ['akses' => $akses, 'notifBelum' => $notifBelum ?? 0]) ?>
 <h1><?= lang('Lokandita.halo', [esc($akses->identitas()->nama)]) ?></h1>
-<?php if (service('request')->getHeaderLine(\App\Libraries\Seb\Seb::HEADER_KONFIG) !== ''): ?>
+<?php if (service('request')->getHeaderLine(\Lokandita\Auth\Seb\Seb::HEADER_KONFIG) !== ''): ?>
     <?php // Hanya di dalam SEB: membuka alamat ini menutup SEB (quitURL konfigurasi). ?>
     <p class="baris-tombol"><a class="tombol tombol-sekunder" href="/seb/keluar" data-seb-keluar><?= lang('Seb.keluar.tautan') ?></a>
         <a href="/seb/periksa" data-seb-periksa-tautan><?= lang('Seb.periksa.judul') ?></a></p>

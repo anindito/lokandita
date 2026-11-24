@@ -1,12 +1,13 @@
 <?php
 
-// Safe Exam Browser (SPEC.md §13.1).
+// Safe Exam Browser (SPEC.md §13.1, KONTRAK.md §8), sama untuk semua aplikasi. {0} = nama aplikasi
+// (Lokandita\Auth\Aplikasi::nama()). Kalimat yang khas satu aplikasi ada di SebApl.php aplikasi itu.
 return [
     'modeUji' => 'TEST MODE: SEB enforcement is disabled',
     'nav'     => 'SEB instructions',
     'wajib'   => [
-        'judul' => 'LokaKode must be opened in Safe Exam Browser',
-        'teks'  => 'Student accounts can use LokaKode only from inside Safe Exam Browser (SEB) with the configuration file of their course. Your last draft is saved, and submissions already accepted remain valid.',
+        'judul' => '{0} must be opened in Safe Exam Browser',
+        'teks'  => 'Student accounts can use {0} only from inside Safe Exam Browser (SEB) with the configuration file of their course.',
         'alasan' => [
             'tanpa_header'      => 'This browser does not identify itself as SEB. Close it, then open the configuration file of your course.',
             'tanpa_konfigurasi' => 'Your course has no SEB configuration yet. Contact the course lecturer.',
@@ -17,9 +18,9 @@ return [
     ],
     'petunjuk' => [
         'judul'     => 'Safe Exam Browser instructions',
-        'deskripsi' => 'How to install Safe Exam Browser and open LokaKode with the configuration file of a course.',
-        'belum'     => 'Using SEB is not required yet: LokaKode can still be opened in an ordinary browser. You may already try the steps below.',
-        'berlaku'   => 'Students must open LokaKode through SEB. Lecturers and administrators use an ordinary browser.',
+        'deskripsi' => 'How to install Safe Exam Browser and open {0} with the configuration file of a course.',
+        'belum'     => 'Using SEB is not required yet: {0} can still be opened in an ordinary browser. You may already try the steps below.',
+        'berlaku'   => 'Students must open {0} through SEB. Lecturers and administrators use an ordinary browser.',
         'batasJudul' => 'What is supported',
         'batas'     => 'Only Safe Exam Browser 3.10.x for 64-bit Windows (x64). Other versions, macOS, iPad and 32-bit or ARM Windows cannot be used.',
         'langkahJudul' => 'Steps',
@@ -28,7 +29,6 @@ return [
             'Download the configuration file of your course below. Do not change it.',
             'Close every other application, then double-click the file. SEB opens and shows the Lokandita login page.',
             'Log in with your ID number and password as usual.',
-            'When you are done, choose "Quit Safe Exam Browser" on the LokaKode home page.',
         ],
         'unduhSeb'  => 'Download Safe Exam Browser from its official site (safeexambrowser.org)',
         'berkasJudul' => 'Configuration files',
@@ -36,9 +36,8 @@ return [
         'berkasUnduh'  => 'Download the configuration file for {0}',
         'selamaJudul'  => 'While SEB is running',
         'selama'    => [
-            'The computer shows only LokaKode. Other browsers, chat applications, screen recorders and remote-control tools are closed by force; save your work in them before you start.',
+            'The computer shows only {0}. Other browsers, chat applications, screen recorders and remote-control tools are closed by force; save your work in them before you start.',
             'SEB refuses to run in a virtual machine, and only one display may be connected.',
-            'If SEB is closed or the connection drops, your last draft stays saved on the server.',
         ],
         'periksa'   => 'Check whether your SEB is recognised',
     ],
@@ -57,6 +56,8 @@ return [
         'versi'     => 'SEB version reported by the browser',
         'versiTidakAda' => 'not reported (not SEB, or an old SEB)',
         'catatan'   => 'This page never shows a key, only whether it matches.',
+        'ya'        => 'Yes',
+        'tidak'     => 'No',
     ],
     'keluar' => [
         'judul' => 'Quit Safe Exam Browser',
@@ -70,6 +71,7 @@ return [
         'judul'     => 'Safe Exam Browser',
         'tautan'    => 'Safe Exam Browser',
         'modeUji'   => 'SEB enforcement is currently disabled on the server (TEST MODE): students can still use an ordinary browser. The configuration and keys on this page can already be prepared and tried.',
+        'tidakDitemukan' => 'What you are looking for does not exist, or you are not allowed to see it.',
         'belumAda'  => 'This course has no SEB configuration yet.',
         'keadaan'   => 'Configuration version {0}, created {1}.',
         'kunciKonfig' => 'Config Key',

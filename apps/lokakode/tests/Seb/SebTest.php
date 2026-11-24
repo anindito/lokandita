@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Seb;
 
-use App\Libraries\Seb\Plist;
+use Lokandita\Auth\Seb\Plist;
 use Lokandita\Auth\Testing\Fixtures;
 use Lokandita\Auth\Testing\Http;
 use Tests\Support\KodeCase;

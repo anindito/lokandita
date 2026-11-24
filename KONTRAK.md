@@ -413,7 +413,9 @@ Rules of an import (`SPEC.md` §8.3):
 
 ## 8. Safe Exam Browser verification
 
-Applies to requests of a user whose global role is `mahasiswa`, after §4 has identified the user: filter `seb` (`App\Filters\WajibSeb`) always follows filter `masuk`. Staff are never checked. The User-Agent is never read.
+There is **one implementation**, in `packages/lokandita-auth` (namespace `Lokandita\Auth\Seb`), used by every app that requires SEB; today that is LokaKode. What an app supplies is listed under "Shared package and what each app supplies" below. Everything else in this section is the same for every such app.
+
+Applies to requests of a user whose global role is `mahasiswa`, after §4 has identified the user: filter `seb` (`Lokandita\Auth\Filters\WajibSeb`) always follows filter `masuk`. Staff are never checked. The User-Agent is never read.
 
 For each such request, with `url` = `APP_URL` origin + the raw path and query of the request line (no fragment; the client's `Host` header is not trusted):
 
@@ -434,7 +436,7 @@ seb_configs    (id, course_id, version, config_enc MEDIUMBLOB, config_key CHAR(6
 seb_exam_keys  (id, seb_config_id, exam_key CHAR(64), created_by, created_at)      UNIQUE(seb_config_id, exam_key)
 ```
 
-- One settings array (`App\Libraries\Seb\Setelan::bangun`) is written twice by `App\Libraries\Seb\Plist`: as the XML plist of the file, and as the "SEB-JSON" whose SHA-256 is the Config Key. `config_enc` is that XML, encrypted (libsodium secretbox, key = SHA-256 of `SEB_ENCRYPTION_KEY`, stored as nonce + ciphertext).
+- One settings array (`Lokandita\Auth\Seb\Setelan::bangun`) is written twice by `Lokandita\Auth\Seb\Plist`: as the XML plist of the file, and as the "SEB-JSON" whose SHA-256 is the Config Key. `config_enc` is that XML, encrypted (libsodium secretbox, key = SHA-256 of `SEB_ENCRYPTION_KEY`, stored as nonce + ciphertext).
 - SEB-JSON follows SEB for Windows 3.10.2 (`Json.cs`): keys sorted without regard to case (lower case first on a tie), no whitespace, no escaping, binary data as quoted Base64, `originatorVersion` left out. The generated settings hold only booleans, integers, ASCII strings, one data value, arrays and dictionaries.
 - The **Browser Exam Key cannot be computed by the server**: since SEB 3.4 it comes from the client's own integrity module. The pengampu reads it from the SEB Configuration Tool of the client version in use and registers it (lower-case hex, 64 characters, at most 20 per configuration). Keys belong to one configuration row.
 - **Rotation** retires the current row and inserts the next `version` with a new `examKeySalt`; the old file and every key registered for it stop matching at once.
@@ -443,14 +445,14 @@ seb_exam_keys  (id, seb_config_id, exam_key CHAR(64), created_by, created_at)   
 
 Settings written (key names of SEB for Windows 3.10.2): `startURL` = `APP_URL/beranda`; `quitURL` = `APP_URL/seb/keluar` with `quitURLConfirm`; `allowQuit`, `hashedQuitPassword`; `sendBrowserExamKey` (switches on both headers), `examKeySalt`; `createNewDesktop` = true, `killExplorerShell` = false; `monitorProcesses` = true, `permittedProcesses` = empty, `prohibitedProcesses` (other browsers, remote-control tools, screen recorders, screen-sharing and chat applications; each `os` = 1, `active`, `strongKill`; no system process); `allowVirtualMachine`, `enablePrintScreen`, `allowScreenCapture`, `allowScreenSharing` = false; `allowedDisplaysMaxNumber` = 1; `URLFilterEnable` with one allow rule per origin of `APP_URL`, `AUTH_PUBLIC_URL` and `PORTAL_URL` (exact host, `https://.<host>`); `allowDeveloperConsole`, `allowDownloads`, `allowUploads`, `allowSpellCheck`, `allowPDFReaderToolbar`, `allowApplicationLog` = false; `clipboardPolicy` = 2 (isolated); cookies cleared at start and end. The allowed-URL list is never taken from a form.
 
-The `.seb` file is `gzip( "plnd" + gzip( plist XML ) )`: not password-protected, so a double click opens it.
+The `.seb` file is `gzip( "plnd" + gzip( plist XML ) )`: not password-protected, so a double click opens it. Its download name is `<app name>-<course code>.seb` (`LokaKode-DDP101.seb`).
 
 ### Lease, heartbeat and refusal
 
-- A request that passes sets the Redis key `lokakode:seb:sewa:<user id>:<SHA-256 of the session cookie>` for 30 s (DB 0) and the page loads `/js/seb.js`, which sends `POST /api/seb/denyut` every 25 s. The heartbeat is an ordinary checked request; it answers `{ "ok": true, "sewa": 30 }`.
-- A request that fails is answered `403`: for a path under `/api/` as `{ "error": "seb_wajib", "message": … }`, otherwise as a page that names the reason (`tanpa_header`, `tanpa_konfigurasi`, `kunci_konfigurasi`, `kunci_peramban`) and links to `/seb`. On a refused heartbeat the page reloads itself and so shows that page: a lost or invalid header ends the LokaKode session within 30 s.
-- Nothing is revoked in LokaAuth: the student's session stays alive, and LokaKode simply answers `403` until the headers match again. Drafts and accepted submissions are untouched.
-- Integrity events (`integrity_events.kind`): `seb_terminated` when the refused request still held a lease (it was inside a valid SEB a moment ago; always recorded, lease deleted), otherwise `seb_rejected` (at most one per user per minute). `detail` is `{ alasan, jalur }`.
+- A request that passes sets the Redis key `<app>:seb:sewa:<user id>:<SHA-256 of the session cookie>` for 30 s, in the app's own Redis DB (`<app>` is `LOKANDITA_APP`; for LokaKode `lokakode:seb:sewa:…`, DB 0), and the page loads `/js/seb.js`, which sends `POST /api/seb/denyut` every 25 s. The heartbeat is an ordinary checked request; it answers `{ "ok": true, "sewa": 30 }`.
+- A request that fails is answered `403`: for a path under `/api/` as `{ "error": "seb_wajib", "message": … }`, otherwise as a page that names the reason (`tanpa_header`, `tanpa_konfigurasi`, `kunci_konfigurasi`, `kunci_peramban`) and links to `/seb`. On a refused heartbeat the page reloads itself and so shows that page: a lost or invalid header ends the session in that app within 30 s.
+- Nothing is revoked in LokaAuth: the student's session stays alive, and the app simply answers `403` until the headers match again. In LokaKode, drafts and accepted submissions are untouched.
+- Integrity events (`integrity_events.kind`): `seb_terminated` when the refused request still held a lease (it was inside a valid SEB a moment ago; always recorded, lease deleted), otherwise `seb_rejected` (at most one per user per minute; Redis key `<app>:laju:seb:<user id>`). `detail` is `{ alasan, jalur }`. The row is written by the app (`Sumber::catatPeristiwa`) into its own `integrity_events`.
 - Without Redis the check itself still works; only the lease, and with it the difference between the two kinds, is lost (`seb.sewa_gagal` in the log).
 
 ### `SEB_ENFORCEMENT`
@@ -472,7 +474,41 @@ The `.seb` file is `gzip( "plnd" + gzip( plist XML ) )`: not password-protected,
 
 Filter `seb` is on every route a mahasiswa can open **except** `GET /data-saya` and `POST /data-saya/unduh` (§14): the right to one's own data does not depend on SEB, and the SEB configuration forbids downloads. The account routes of §4 (`/keluar`, `/sesi/perpanjang`, `/preferensi`) are not checked either, so logging out always works.
 
-Audit (`audit_log` of LokaKode): `seb.dibuat`, `seb.dirotasi` (`{ versi }`), `seb.kunci` (`{ versi, jumlah }`) — never a key or a password.
+Audit (the app's own `audit_log`, through `Sumber::catatAudit`, in the transaction of the change): `seb.dibuat`, `seb.dirotasi` (`{ versi }`), `seb.kunci` (`{ versi, jumlah }`) — never a key or a password.
+
+### Shared package and what each app supplies
+
+In `packages/lokandita-auth` (moved out of LokaKode in LokaUjian stage U0, behaviour unchanged):
+
+| Part | Does |
+|---|---|
+| `Lokandita\Auth\Seb\Seb` | `diberlakukan()`, `asal()`, `url()`, `kandidat($userId)`, `semuaAktif()`, `periksa($request, $kandidat)`, `perpanjangSewa()`, `akhiriSewa()`; the configuration store `aktif()`, `buat()`, `daftarkanKunci()`, `kunciTerdaftar()`, `berkas()`; constants for headers, lease, heartbeat, minimum quit password |
+| `Seb\Setelan`, `Seb\Plist`, `Seb\Brankas` | the settings array; XML plist, SEB-JSON and Config Key; encryption with `SEB_ENCRYPTION_KEY` |
+| `Filters\WajibSeb` | the filter; the app gives it the alias `seb` |
+| `Controllers\Seb`, `Controllers\SebKelola`, `Routes::seb()` | every route of the table above, with the same paths and filters in every app |
+| views `seb_*`, language file `Seb` (`id`, `en`, `ar`; `{0}` is the app's name), `js/seb.js`, `js/seb-periksa.js` | pages, texts, heartbeat script. The image build copies `js/` to `public/js/` of every app |
+
+Supplied by the app:
+
+- `app/Config/Seb.php` with `public string $sumber`: the class that implements `Lokandita\Auth\Seb\Sumber`. The package never reads a course, class or enrollment itself.
+
+| Method of `Sumber` | Returns or does |
+|---|---|
+| `matkulMahasiswa(string $userId): list<int>` | course ids whose configuration counts for this student: `AKTIF` enrollment in the active academic year |
+| `matkul(list<int> $ids): list<{id, code, name}>` | code and name of courses, **ordered by code by the database** |
+| `matkulDariKode(string $kode): ?{id, code, name}` | the course of a code, for the download |
+| `matkulUntukPanel(Identity $siapa, int $id): ?{id, code, name, boleh_kelola}` | `null` = does not exist or outside what this user may see (`404`); `boleh_kelola` false = visible but not its manager (`403`); true = superadmin or the pengampu |
+| `navigasi(Identity $siapa): string` | the app's navigation HTML for the panel page |
+| `redis(): \Redis` | the app's Redis connection, for the lease and the rate limit |
+| `catatPeristiwa(string $userId, string $jenis, array $detail, RequestInterface $request): void` | writes `seb_rejected` / `seb_terminated` with IP and user agent |
+| `catatAudit(string $aksi, int $matkulId, array $detail): void` | writes the audit rows above |
+
+- Tables `seb_configs` and `seb_exam_keys` in the app's own schema, created by the app's own migration and read by the package through the app's default connection. A configuration belongs to one app: `startURL`, `quitURL` and the URL filter come from that app's `APP_URL`.
+- `SEB_ENCRYPTION_KEY` and `SEB_ENFORCEMENT`, one value per app in its own `.env`.
+- Language file `SebApl` with the three sentences that differ per app: `tersimpan` (refusal page: what stays saved), `selesai` (last step of the instructions), `putus` (what happens when SEB closes or the connection drops).
+- Which routes carry filter `seb`.
+
+LokaKode's implementation is `App\Libraries\SumberSeb`, which reads LokaKode's own tables.
 
 ## 9. Docker networks and names
 

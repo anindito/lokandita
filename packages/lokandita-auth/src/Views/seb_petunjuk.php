@@ -2,14 +2,20 @@
 /**
  * Petunjuk SEB, publik (SPEC.md §13.1). Variabel: $matkul (list of code, name — hanya yang punya
  * konfigurasi), $unduhSeb (alamat situs resmi), $diberlakukan (bool).
+ * Langkah terakhir dan butir terakhir "selama SEB berjalan" milik aplikasi: SebApl.selesai, SebApl.putus.
  */
+use Lokandita\Auth\Aplikasi;
 use Lokandita\Auth\Ikon;
+
+$apl     = Aplikasi::nama();
+$langkah = [...lang('Seb.petunjuk.langkah'), lang('SebApl.selesai')];
+$selama  = [...lang('Seb.petunjuk.selama', [$apl]), lang('SebApl.putus')];
 ?>
 <?= $this->extend('Lokandita\Auth\Views\tata_letak') ?>
 <?= $this->section('isi') ?>
 <div class="isi-sempit">
     <h1><?= lang('Seb.petunjuk.judul') ?></h1>
-    <div class="kartu"><p data-seb-keadaan="<?= $diberlakukan ? 'berlaku' : 'belum' ?>"><?= lang($diberlakukan ? 'Seb.petunjuk.berlaku' : 'Seb.petunjuk.belum') ?></p></div>
+    <div class="kartu"><p data-seb-keadaan="<?= $diberlakukan ? 'berlaku' : 'belum' ?>"><?= lang($diberlakukan ? 'Seb.petunjuk.berlaku' : 'Seb.petunjuk.belum', [$apl]) ?></p></div>
 
     <h2><?= lang('Seb.petunjuk.batasJudul') ?></h2>
     <p><?= lang('Seb.petunjuk.batas') ?></p>
@@ -17,7 +23,7 @@ use Lokandita\Auth\Ikon;
 
     <h2><?= lang('Seb.petunjuk.langkahJudul') ?></h2>
     <ol>
-        <?php foreach (lang('Seb.petunjuk.langkah') as $l): ?>
+        <?php foreach ($langkah as $l): ?>
             <li><?= esc($l) ?></li>
         <?php endforeach ?>
     </ol>
@@ -35,7 +41,7 @@ use Lokandita\Auth\Ikon;
 
     <h2><?= lang('Seb.petunjuk.selamaJudul') ?></h2>
     <ul>
-        <?php foreach (lang('Seb.petunjuk.selama') as $s): ?>
+        <?php foreach ($selama as $s): ?>
             <li><?= esc($s) ?></li>
         <?php endforeach ?>
     </ul>

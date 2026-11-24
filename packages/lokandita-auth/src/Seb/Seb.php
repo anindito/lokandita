@@ -2,17 +2,23 @@
 
 declare(strict_types=1);
 
-namespace App\Libraries\Seb;
+namespace Lokandita\Auth\Seb;
 
-use App\Libraries\Antrean;
-use App\Libraries\Audit;
-use App\Libraries\Waktu;
 use CodeIgniter\HTTP\RequestInterface;
+use Lokandita\Auth\Aplikasi;
+use Lokandita\Auth\Current;
 use Lokandita\Auth\Log;
+use Lokandita\Auth\Waktu;
 
 /**
- * Safe Exam Browser di LokaKode (SPEC.md §13.1, KONTRAK.md §8): konfigurasi per mata
- * kuliah, berkas .seb, dan pemeriksaan kedua header pada permintaan mahasiswa.
+ * Safe Exam Browser, satu pelaksanaan untuk semua aplikasi (SPEC.md §13.1, KONTRAK.md §8):
+ * konfigurasi per mata kuliah, berkas .seb, dan pemeriksaan kedua header pada permintaan
+ * mahasiswa.
+ *
+ * Tabel `seb_configs` dan `seb_exam_keys` ada di skema aplikasi yang memakai kelas ini dan
+ * dibaca lewat koneksi bawaannya. Mata kuliah, pendaftaran, Redis, peristiwa integritas dan
+ * log audit datang dari aplikasi itu lewat Sumber. Kunci Redis diawali nama aplikasi
+ * (LOKANDITA_APP), jadi sewa LokaKode dan LokaUjian tidak pernah bercampur.
  */
 final class Seb
 {
@@ -24,6 +30,24 @@ final class Seb
     public const DENYUT_DETIK = 25;
 
     public const SANDI_KELUAR_MIN = 12;
+
+    private static ?Sumber $sumber = null;
+
+    /**
+     * Pelaksana Sumber aplikasi ini, dari app/Config/Seb.php.
+     */
+    public static function sumber(): Sumber
+    {
+        if (self::$sumber === null) {
+            $kelas = config('Seb')->sumber ?? null;
+            if (! is_string($kelas) || ! is_a($kelas, Sumber::class, true)) {
+                throw new \LogicException('app/Config/Seb.php harus menyebut kelas yang melaksanakan Lokandita\\Auth\\Seb\\Sumber.');
+            }
+            self::$sumber = new $kelas();
+        }
+
+        return self::$sumber;
+    }
 
     public static function diberlakukan(): bool
     {
@@ -96,9 +120,9 @@ final class Seb
         $db->query('UPDATE seb_configs SET retired_at = ? WHERE course_id = ? AND retired_at IS NULL', [Waktu::kini(), $matkulId]);
         $db->query(
             'INSERT INTO seb_configs (course_id, version, config_enc, config_key, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-            [$matkulId, $versi, Brankas::kunci(Plist::xml($setelan)), Plist::kunciKonfig($setelan), \Lokandita\Auth\Current::identity()?->userId, Waktu::kini()],
+            [$matkulId, $versi, Brankas::kunci(Plist::xml($setelan)), Plist::kunciKonfig($setelan), Current::identity()?->userId, Waktu::kini()],
         );
-        Audit::catat($versi === 1 ? 'seb.dibuat' : 'seb.dirotasi', 'course', $matkulId, ['versi' => $versi], $matkulId);
+        self::sumber()->catatAudit($versi === 1 ? 'seb.dibuat' : 'seb.dirotasi', $matkulId, ['versi' => $versi]);
         $db->transComplete();
 
         return $versi;
@@ -122,11 +146,11 @@ final class Seb
         foreach (array_values(array_unique($kunci)) as $k) {
             $db->query(
                 'INSERT INTO seb_exam_keys (seb_config_id, exam_key, created_by, created_at) VALUES (?, ?, ?, ?)',
-                [$aktif['id'], $k, \Lokandita\Auth\Current::identity()?->userId, Waktu::kini()],
+                [$aktif['id'], $k, Current::identity()?->userId, Waktu::kini()],
             );
         }
         // Kunci itu sendiri tidak ditulis ke audit; jumlahnya cukup.
-        Audit::catat('seb.kunci', 'course', $matkulId, ['versi' => (int) $aktif['version'], 'jumlah' => count(array_unique($kunci))], $matkulId);
+        self::sumber()->catatAudit('seb.kunci', $matkulId, ['versi' => (int) $aktif['version'], 'jumlah' => count(array_unique($kunci))]);
         $db->transComplete();
     }
 
@@ -146,16 +170,17 @@ final class Seb
      */
     public static function berkas(string $kodeMatkul): ?array
     {
-        $baris = db_connect()->query(
-            'SELECT c.code, s.config_enc FROM seb_configs s JOIN courses c ON c.id = s.course_id WHERE c.code = ? AND s.retired_at IS NULL',
-            [$kodeMatkul],
+        $matkul = self::sumber()->matkulDariKode($kodeMatkul);
+        $baris  = $matkul === null ? null : db_connect()->query(
+            'SELECT config_enc FROM seb_configs WHERE course_id = ? AND retired_at IS NULL',
+            [$matkul['id']],
         )->getRowArray();
         if ($baris === null) {
             return null;
         }
 
         return [
-            'nama' => 'LokaKode-' . preg_replace('/[^A-Za-z0-9-]/', '', (string) $baris['code']) . '.seb',
+            'nama' => Aplikasi::nama() . '-' . preg_replace('/[^A-Za-z0-9-]/', '', $matkul['code']) . '.seb',
             'isi'  => (string) gzencode('plnd' . gzencode(Brankas::buka((string) $baris['config_enc']), 9), 9),
         ];
     }
@@ -164,36 +189,66 @@ final class Seb
 
     /**
      * Konfigurasi yang berlaku bagi seorang mahasiswa: milik mata kuliah tempat ia AKTIF
-     * pada tahun ajaran aktif.
+     * pada tahun ajaran aktif. Urut menurut id konfigurasi.
      *
      * @return list<array{id: int, code: string, config_key: string}>
      */
     public static function kandidat(string $userId): array
     {
-        $baris = db_connect()->query(
-            "SELECT s.id, c.code, s.config_key
-             FROM enrollments e
-             JOIN academic_years ay ON ay.id = e.academic_year_id AND ay.status = 'active'
-             JOIN courses c ON c.id = e.course_id
-             JOIN seb_configs s ON s.course_id = e.course_id AND s.retired_at IS NULL
-             WHERE e.user_id = ? AND e.status = 'AKTIF'
-             ORDER BY s.id",
-            [$userId],
-        )->getResultArray();
+        $konfig = self::konfigBerlaku(self::sumber()->matkulMahasiswa($userId));
+        $kode   = array_column(self::sumber()->matkul(array_column($konfig, 'course_id')), 'code', 'id');
+        $hasil  = [];
+        foreach ($konfig as $k) {
+            if (isset($kode[$k['course_id']])) {
+                $hasil[] = ['id' => $k['id'], 'code' => (string) $kode[$k['course_id']], 'config_key' => $k['config_key']];
+            }
+        }
 
-        return array_map(static fn ($b) => ['id' => (int) $b['id'], 'code' => (string) $b['code'], 'config_key' => (string) $b['config_key']], $baris);
+        return $hasil;
     }
 
     /**
-     * Semua konfigurasi yang berlaku (halaman periksa publik).
+     * Semua konfigurasi yang berlaku (halaman periksa publik), urut menurut kode mata kuliah.
      *
      * @return list<array{id: int, code: string, config_key: string}>
      */
     public static function semuaAktif(): array
     {
-        $baris = db_connect()->query('SELECT s.id, c.code, s.config_key FROM seb_configs s JOIN courses c ON c.id = s.course_id WHERE s.retired_at IS NULL ORDER BY c.code')->getResultArray();
+        $konfig = array_column(self::konfigBerlaku(null), null, 'course_id');
+        $hasil  = [];
+        foreach (self::sumber()->matkul(array_keys($konfig)) as $m) {
+            $hasil[] = ['id' => $konfig[$m['id']]['id'], 'code' => $m['code'], 'config_key' => $konfig[$m['id']]['config_key']];
+        }
 
-        return array_map(static fn ($b) => ['id' => (int) $b['id'], 'code' => (string) $b['code'], 'config_key' => (string) $b['config_key']], $baris);
+        return $hasil;
+    }
+
+    /**
+     * Mata kuliah yang punya konfigurasi yang berlaku (halaman petunjuk), urut menurut kode.
+     *
+     * @return list<array{id: int, code: string, name: string}>
+     */
+    public static function matkulBerkonfigurasi(): array
+    {
+        return self::sumber()->matkul(array_column(self::konfigBerlaku(null), 'course_id'));
+    }
+
+    /**
+     * Baris seb_configs yang berlaku, urut menurut id; $matkulIds null = semua mata kuliah.
+     *
+     * @param list<int>|null $matkulIds
+     *
+     * @return list<array{id: int, course_id: int, config_key: string}>
+     */
+    private static function konfigBerlaku(?array $matkulIds): array
+    {
+        if ($matkulIds === []) {
+            return [];
+        }
+        $syarat = $matkulIds === null ? '' : ' AND course_id IN (' . implode(',', array_map('intval', $matkulIds)) . ')';
+        $baris  = db_connect()->query('SELECT id, course_id, config_key FROM seb_configs WHERE retired_at IS NULL' . $syarat . ' ORDER BY id')->getResultArray();
+
+        return array_map(static fn ($b) => ['id' => (int) $b['id'], 'course_id' => (int) $b['course_id'], 'config_key' => (string) $b['config_key']], $baris);
     }
 
     /**
@@ -239,7 +294,7 @@ final class Seb
 
     private static function kunciSewa(string $userId): string
     {
-        return 'lokakode:seb:sewa:' . $userId . ':' . hash('sha256', (string) ($_COOKIE['lokandita_sid'] ?? ''));
+        return Aplikasi::kode() . ':seb:sewa:' . $userId . ':' . hash('sha256', (string) ($_COOKIE['lokandita_sid'] ?? ''));
     }
 
     /**
@@ -248,7 +303,7 @@ final class Seb
     public static function perpanjangSewa(string $userId): void
     {
         try {
-            Antrean::redis()->setex(self::kunciSewa($userId), self::SEWA_DETIK, '1');
+            self::sumber()->redis()->setex(self::kunciSewa($userId), self::SEWA_DETIK, '1');
         } catch (\RedisException $e) {
             Log::event('seb.sewa_gagal', ['reason' => $e->getMessage()]);
         }
@@ -261,7 +316,7 @@ final class Seb
     public static function akhiriSewa(string $userId): bool
     {
         try {
-            return (int) Antrean::redis()->del(self::kunciSewa($userId)) > 0;
+            return (int) self::sumber()->redis()->del(self::kunciSewa($userId)) > 0;
         } catch (\RedisException $e) {
             Log::event('seb.sewa_gagal', ['reason' => $e->getMessage()]);
 

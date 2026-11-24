@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Libraries\Seb;
+namespace Lokandita\Auth\Seb;
 
 /**
  * Setelan SEB dalam dua bentuk dari SATU larik yang sama (KONTRAK.md §8):

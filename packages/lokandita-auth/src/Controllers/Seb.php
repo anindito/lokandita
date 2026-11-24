@@ -2,18 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Controllers;
+namespace Lokandita\Auth\Controllers;
 
-use App\Libraries\Seb\Seb as Pustaka;
 use CodeIgniter\Controller;
 use CodeIgniter\HTTP\ResponseInterface;
+use Lokandita\Auth\Aplikasi;
 use Lokandita\Auth\Locale;
 use Lokandita\Auth\Publik;
+use Lokandita\Auth\Seb\Seb as Pustaka;
 
 /**
  * Halaman publik Safe Exam Browser (SPEC.md §13.1): petunjuk, unduhan berkas .seb, halaman
  * periksa, dan tautan keluar. Tanpa sesi. Yang dibaca dari basis data hanya kode dan nama
  * mata kuliah yang punya konfigurasi, dan konfigurasi itu sendiri (KONTRAK.md §4, §8).
+ * Juga denyut SEB, satu-satunya rute di sini yang berada di belakang `masuk` dan `seb`.
+ * Sama di setiap aplikasi yang memakai SEB; rutenya didaftarkan Lokandita\Auth\Routes::seb().
  */
 final class Seb extends Controller
 {
@@ -22,10 +25,9 @@ final class Seb extends Controller
     public function petunjuk(): ResponseInterface
     {
         Locale::apply($this->request);
-        $matkul = db_connect()->query('SELECT c.code, c.name FROM seb_configs s JOIN courses c ON c.id = s.course_id WHERE s.retired_at IS NULL ORDER BY c.code')->getResultArray();
 
-        return $this->response->setBody(view('seb_petunjuk', Publik::data(lang('Seb.petunjuk.judul'), lang('Seb.petunjuk.deskripsi')) + [
-            'matkul'      => $matkul,
+        return $this->response->setBody(view('Lokandita\Auth\Views\seb_petunjuk', Publik::data(lang('Seb.petunjuk.judul'), lang('Seb.petunjuk.deskripsi', [Aplikasi::nama()])) + [
+            'matkul'      => Pustaka::matkulBerkonfigurasi(),
             'unduhSeb'    => self::UNDUH_SEB,
             'diberlakukan' => Pustaka::diberlakukan(),
         ]));
@@ -61,7 +63,7 @@ final class Seb extends Controller
         Locale::apply($this->request);
         $hasil = Pustaka::periksa($this->request, Pustaka::semuaAktif());
 
-        return $this->response->setHeader('Cache-Control', 'no-store')->setBody(view('seb_periksa', [
+        return $this->response->setHeader('Cache-Control', 'no-store')->setBody(view('Lokandita\Auth\Views\seb_periksa', [
             'judul'      => lang('Seb.periksa.judul'), // tanpa $publik: tata letak menandainya noindex
             'adaKonfig'  => $this->request->getHeaderLine(Pustaka::HEADER_KONFIG) !== '',
             'adaPeramban' => $this->request->getHeaderLine(Pustaka::HEADER_PERAMBAN) !== '',
@@ -81,5 +83,14 @@ final class Seb extends Controller
         return $this->response->setBody(view('Lokandita\Auth\Views\pesan', [
             'judul' => lang('Seb.keluar.judul'), 'teks' => lang('Seb.keluar.teks'),
         ]));
+    }
+
+    /**
+     * Denyut SEB tiap 25 detik (KONTRAK.md §8). Permintaan ini sudah melewati filter `seb`
+     * sebelum sampai di sini; yang tidak lolos sudah dijawab 403 oleh filter itu.
+     */
+    public function denyut(): ResponseInterface
+    {
+        return $this->response->setHeader('Cache-Control', 'no-store')->setJSON(['ok' => true, 'sewa' => Pustaka::SEWA_DETIK]);
     }
 }

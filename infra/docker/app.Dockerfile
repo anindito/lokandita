@@ -102,6 +102,8 @@ COPY apps/${APP} /srv/lokandita/apps/${APP}
 COPY --from=vendor /srv/lokandita/apps/${APP}/vendor /srv/lokandita/apps/${APP}/vendor
 # Aset bersama (CSS, JS) disajikan dari host aplikasi itu sendiri: tidak ada CDN.
 COPY packages/lokandita-auth/aset /srv/lokandita/apps/${APP}/public/aset
+# Skrip halaman SEB bersama (KONTRAK.md §8), di jalur yang sama di setiap aplikasi: /js/seb.js, /js/seb-periksa.js.
+COPY packages/lokandita-auth/js /srv/lokandita/apps/${APP}/public/js
 COPY --from=gaya /keluar/lokandita.css /srv/lokandita/apps/${APP}/public/aset/lokandita.css
 COPY --from=monaco /keluar/monaco /srv/lokandita/apps/${APP}/public/monaco
 COPY --from=grafik /keluar/grafik /srv/lokandita/apps/${APP}/public/grafik
