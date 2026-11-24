@@ -1,6 +1,6 @@
 # Progress
 
-**Stage 13, second task (2026-11-23) — TS-PY: practice problems for meetings 1–5 and the practical mid-term at meeting 8 (owner's decision B: numbering follows RPS Rev2). Meeting 1 is built, imported and awaits review. The meeting layout (Rev2 numbering) is applied in production; the exam type is approved and in progress. See "Stage 13 — TS-PY" at the end of this file; the next session continues from the table there.**
+**Stage 13 is closed and tagged `tahap-13` (2026-11-24, owner's order). TS-PY meetings 1–5 (32 problems each) and the practical mid-term at meeting 8 (6 problems, 51 points) are built, imported and approved on the owner's order; no TS-PY meeting is published and no window is open — publishing is the owner's. Left for later: the owner's rehearsal of the mid-term with a test student (no person has seen an exam page, none opened in Safe Exam Browser), and committing the exam files after the exam (they are outside Git, listed in `.git/info/exclude`, on this server only). See "Stage 13 — TS-PY" at the end of this file.**
 
 **Stage 13 — problem production — all eleven meetings of the task (DDP101 4–7, PBO301 1–7) are built, imported and, on the owner's word of 2026-11-23 ("setujui semua soal yang sudah dibuat"), approved: 352 problems `APPROVED`. No meeting of the eleven is published and no class window is open — that is the owner's to do. No tag yet. See "Stage 13" at the end of this file.**
 
@@ -1479,6 +1479,8 @@ How one meeting is made: as in "Stage 13 — problem production" above, with `bu
 
 - **Full suites rerun on 2026-11-24, 18:45–19:25 WIB, no student submitting:** `infra/tes.sh auth` → 110 tests, 1691 assertions, pass; `portal` → 89 tests, 9048 assertions, pass; `judge` → 259 passed; `lokakode` → 295 tests, 16926 assertions, **294 pass, 1 error** — the error was in the new browser test below, a flaw of the test itself (it read the previous submission's result still on the page). Fixed and rerun alone; the full `lokakode` suite was not run a third time.
 - **Exam page in a real browser** (headless Chromium of the test setup, real judge): new `tests/Peramban/UjianPerambanTest.php` → 2 tests, 23 assertions, pass. Shown: the countdown on the meeting page counts down from 150 minutes; after Submit a correct and a wrong submission give exactly the same panel ("Kiriman diterima", no score, no test list); a compile error shows the compiler log and no score; the Arabic page is right-to-left with Latin digits in the countdown and the Arabic "received" text; no script error, no CSP violation. **Still not done by anyone: looking at these pages with human eyes, and any exam page in Safe Exam Browser.**
+
+- **Stage closed 2026-11-24:** tag `tahap-13` on the commit that holds this line, then `infra/deploy.sh` for all four components so production runs the tagged commit. The three students whose passwords were set have changed them (`must_change_password = 0` for all three, read from production).
 
 ### Importer priority (2026-11-23) — committed, NOT deployed
 
