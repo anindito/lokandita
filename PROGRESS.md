@@ -1378,12 +1378,12 @@ Steps:
 
 | Course | Meeting | Built | Imported | Review sheet | Reviewed by owner | Approved |
 |---|---|---|---|---|---|---|
-| TS-PY | 1 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-1.md` | no | no |
-| TS-PY | 2 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-2.md` | no | no |
-| TS-PY | 3 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-3.md` | no | no |
-| TS-PY | 4 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-4.md` | no | no |
-| TS-PY | 5 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-5.md` | no | no |
-| TS-PY | 8 (UTS) | yes, 6 problems, 51 points; judge check passed 2026-11-23; **files on the server only, not in Git** | yes, 23:05 WIB: `6 diterima, 0 ditolak` | `docs/soal/tinjauan/ts-py-pertemuan-8.md` on the server (all six statements in full) | no | no |
+| TS-PY | 1 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-1.md` | not stated | **yes, 2026-11-24, on his order** |
+| TS-PY | 2 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-2.md` | not stated | **yes, 2026-11-24, on his order** |
+| TS-PY | 3 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-3.md` | not stated | **yes, 2026-11-24, on his order** |
+| TS-PY | 4 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-4.md` | not stated | **yes, 2026-11-24, on his order** |
+| TS-PY | 5 | yes | yes, 2026-11-23, 32 accepted | `docs/soal/tinjauan/ts-py-pertemuan-5.md` | not stated | **yes, 2026-11-24, on his order** |
+| TS-PY | 8 (UTS) | yes, 6 problems, 51 points; judge check passed 2026-11-23; **files on the server only, not in Git** | yes, 23:05 WIB: `6 diterima, 0 ditolak` | `docs/soal/tinjauan/ts-py-pertemuan-8.md` on the server (all six statements in full) | not stated | **yes, 2026-11-24, on his order** |
 
 How one meeting is made: as in "Stage 13 — problem production" above, with `buat-ts-py-pertemuan-<n>.py`, `cek-ts-py-pertemuan-<n>.py`, and `waktu_ms=5000`.
 
@@ -1470,6 +1470,12 @@ How one meeting is made: as in "Stage 13 — problem production" above, with `bu
 - **Exam imported** at 23:05 WIB, 608 s after the last student submission: `spark soal:impor` → `6 diterima, 0 ditolak, 0 tidak berubah`. Read from production: 6 versions `PENDING_REVIEW`; the six `VALIDATE` jobs have priority `low`; meeting 8 is `ujian`, not published, 0 problems attached, 0 windows; one `soal.impor` audit row. One student submitted during the import and was judged in 14 s.
 - **Unsettled submissions:** new test `AnalitikTest::testHalamanNilaiDosenMenyelesaikanKirimanYangTertinggal` — a submission still `MENUNGGU` with its job `DONE` is settled and its meeting score written when the lecturer opens the meeting analytics page. `infra/tes.sh lokakode --filter AnalitikTest` → 9 tests, 275 assertions, pass. By reading the code, the same call is in every analytics page, the submission list and both exports; it is **not** in the class window page or in "Rilis nilai" — releasing does not need it, because the student's own pages settle their submissions before showing a score. Production had 14 such submissions at 23:07 WIB; they settle when their students or a lecturer open one of those pages.
 - Still not done: the full suite was not rerun; no exam page has been seen in a browser; `target_points` of meeting 8 shows 60 until the 51 points are approved.
+
+### 2026-11-24 — lock rule, password resets, approval (owner's orders)
+
+- **Login lock for students: 5 minutes after every 5 failures**, no longer growing (commit `9961833`; `dosen` and `superadmin` keep 1/5/15/60). `infra/tes.sh auth --filter 'LoginTest|MfaLogin'` → 16 tests, 212 assertions, pass. Deployed at about 18:38 WIB on the owner's order: `infra/deploy.sh auth`, `lokakode`, `portal`, `judge` → each reports `9961833`; `infra/smoke.sh` → 44 pass, 0 fail. Not tested with a real failed login in production.
+- **Three student passwords set to a value the owner chose** (LokaAuth can only generate a random one): written by SQL the way `UserAdmin::resetPassword` writes it — hash, `password_history`, lock cleared, sessions revoked, audit `password.reset` with `lewat: sql`. `must_change_password = 1` kept. Stored hashes verified; no real login tried.
+- **All TS-PY problems approved on the owner's order ("approve all problems but let me publish them myself")**, without the owner having said he read the sheets: `spark soal:setujui TS-PY <n>` for 1, 2, 3, 4, 5 → `32 disetujui, 0 dilewati` each; for 8 → `6 disetujui, 0 dilewati`. Read from production: 32 approved and attached per practice meeting, 6 for the exam, meeting 8 `target_points` now 51, **no meeting published, no window**; 166 `soal.disetujui` audit rows. Publishing and opening are the owner's.
 
 ### Importer priority (2026-11-23) — committed, NOT deployed
 
