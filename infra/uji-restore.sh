@@ -48,7 +48,7 @@ daftar() { # <kontainer>
 SELECT CONCAT(s.schema_name, IFNULL(CONCAT('.', t.table_name), ' (tanpa tabel)'))
   FROM information_schema.schemata s
   LEFT JOIN information_schema.tables t ON t.table_schema = s.schema_name
- WHERE s.schema_name IN ('identity','lokakode','portal')
+ WHERE s.schema_name IN ('identity','lokakode','portal','lokaujian')
  ORDER BY 1;
 SQL
 }

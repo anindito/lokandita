@@ -6,7 +6,7 @@
 //
 //   php buat-merek.php <direktori brands/> <direktori keluaran>
 //
-// Keluaran: <keluaran>/<auth|portal|lokakode>/ = isi direktori public/ aplikasi itu.
+// Keluaran: <keluaran>/<auth|portal|lokakode|lokaujian>/ = isi direktori public/ aplikasi itu.
 
 declare(strict_types=1);
 
@@ -20,6 +20,8 @@ const SITUS = [
     'auth'     => ['merek' => 'Lokandita', 'nama' => 'Akun Lokandita', 'singkat' => 'Lokandita', 'og' => true,  'pembuka' => false, 'kartu' => false],
     'portal'   => ['merek' => 'Lokandita', 'nama' => 'Lokandita',      'singkat' => 'Lokandita', 'og' => false, 'pembuka' => false, 'kartu' => true],
     'lokakode' => ['merek' => 'LokaKode',  'nama' => 'LokaKode',       'singkat' => 'LokaKode',  'og' => true,  'pembuka' => true,  'kartu' => false],
+    // LokaUjian tidak punya halaman yang boleh diindeks atau dibagikan: tanpa gambar Open Graph, tanpa logo pembuka.
+    'lokaujian' => ['merek' => 'LokaUjian', 'nama' => 'LokaUjian',     'singkat' => 'LokaUjian', 'og' => false, 'pembuka' => false, 'kartu' => false],
 ];
 // Warna latar yang dianjurkan README berkas merek. Dipakai hanya di tempat yang TIDAK boleh
 // tembus pandang: ikon iOS (iOS mengecat bagian tembus pandang dengan hitam) dan gambar Open Graph.

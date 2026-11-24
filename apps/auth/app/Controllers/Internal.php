@@ -114,6 +114,13 @@ final class Internal extends Controller
 
     public function passwordReset(): ResponseInterface
     {
+        // LokaUjian tidak mereset kata sandi (KONTRAK.md §5): itu tetap di LokaAuth dan LokaKode.
+        // Tokennya sah untuk sesi, tetapi tidak untuk rute ini — ditolak dan dicatat, tidak diam-diam.
+        if (ServiceToken::app() === 'lokaujian') {
+            Audit::log('internal.denied', null, null, ['reason' => 'app_not_allowed', 'path' => '/internal/password-reset'], ServiceToken::app());
+
+            return $this->gagal(403, 'app_not_allowed');
+        }
         [$body, $galat] = $this->body(['requested_by' => 'uuid', 'user_id' => 'uuid']);
         if ($galat !== null) {
             return $galat;

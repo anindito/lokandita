@@ -2,7 +2,8 @@
 # Satu-satunya cara men-deploy (KONTRAK.md §11).
 #
 #   infra/deploy.sh infra                    MySQL, Redis, Caddy, skema dan pengguna
-#   infra/deploy.sh <auth|lokakode|portal>   build image dari commit sekarang, jalankan,
+#   infra/deploy.sh <auth|lokakode|portal|lokaujian>
+#                                            build image dari commit sekarang, jalankan,
 #                                            lalu GAGAL kecuali /healthz melaporkan commit itu
 #   infra/deploy.sh judge                    venv, image judge, layanan systemd pengguna;
 #                                            GAGAL kecuali denyut worker melaporkan commit itu
@@ -58,7 +59,7 @@ if [ "${1:-}" = "--verifikasi" ]; then
 fi
 
 sasaran="${1:-}"
-case "$sasaran" in infra | auth | lokakode | portal | judge) ;; *) gagal "pemakaian: $0 <infra|auth|lokakode|portal|judge>" ;; esac
+case "$sasaran" in infra | auth | lokakode | portal | lokaujian | judge) ;; *) gagal "pemakaian: $0 <infra|auth|lokakode|portal|lokaujian|judge>" ;; esac
 
 kotor="$(git status --porcelain)"
 if [ -n "$kotor" ]; then
@@ -155,7 +156,11 @@ if ls "apps/$sasaran/app/Database/Migrations/"*.php > /dev/null 2>&1; then
 	[ "$ada" = "1" ] || gagal "migrasi $sasaran: tabel migrations tidak ada di skema $skema"
 	echo "migrasi $sasaran pada skema $skema: selesai"
 	if [ "$sasaran" = "auth" ]; then "$AKAR/infra/mysql-hak-reader.sh" identity; fi
-	if [ "$sasaran" = "lokakode" ]; then "$AKAR/infra/mysql-hak-judge.sh" lokakode; fi
+	if [ "$sasaran" = "lokakode" ]; then
+		"$AKAR/infra/mysql-hak-judge.sh" lokakode
+		# View roster (KONTRAK.md §18) dibuat migrasi LokaKode; hak bacanya diberikan di sini.
+		"$AKAR/infra/mysql-hak-roster.sh" lokakode
+	fi
 fi
 
 compose up -d --no-build --force-recreate --no-deps "$sasaran"

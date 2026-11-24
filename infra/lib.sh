@@ -6,8 +6,8 @@ AKAR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 export AKAR
 
 # Komponen yang punya .env sendiri (KONTRAK.md §10).
-KOMPONEN=(infra apps/auth apps/lokakode apps/portal judge)
-APLIKASI=(auth lokakode portal)
+KOMPONEN=(infra apps/auth apps/lokakode apps/portal apps/lokaujian judge)
+APLIKASI=(auth lokakode portal lokaujian)
 
 gagal() {
 	echo "GAGAL: $*" >&2
@@ -24,21 +24,21 @@ nilai_env() {
 	sed -n "s/^$2=//p" "$1" | head -n 1
 }
 
-# Host publik: portal, www, auth, lokakode.
+# Host publik: portal, www, auth, lokakode, lokaujian.
 daftar_host() {
 	local domain
 	domain="$(nilai_env "$AKAR/infra/.env" DOMAIN)"
 	[ -n "$domain" ] || gagal "DOMAIN kosong di infra/.env"
-	echo "$domain www.$domain auth.$domain lokakode.$domain"
+	echo "$domain www.$domain auth.$domain lokakode.$domain lokaujian.$domain"
 }
 
-# host_aplikasi <auth|lokakode|portal>
+# host_aplikasi <auth|lokakode|portal|lokaujian>
 host_aplikasi() {
 	local domain
 	domain="$(nilai_env "$AKAR/infra/.env" DOMAIN)"
 	case "$1" in
 		portal) echo "$domain" ;;
-		auth | lokakode) echo "$1.$domain" ;;
+		auth | lokakode | lokaujian) echo "$1.$domain" ;;
 		*) gagal "aplikasi tidak dikenal: $1" ;;
 	esac
 }

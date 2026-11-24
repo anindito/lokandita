@@ -109,6 +109,13 @@ services:
     networks: [edge, internal, data]
     <<: *app
 
+  lokaujian:
+    image: lokandita/lokaujian:aktif
+    container_name: lokaujian
+    env_file: ../apps/lokaujian/.env
+    networks: [edge, internal, data]
+    <<: *app
+
   portal:
     image: lokandita/portal:aktif
     container_name: portal

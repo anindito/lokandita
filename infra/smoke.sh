@@ -64,9 +64,9 @@ sentuh() { # <kontainer> <benar|salah>
 	' 2>&1 || true
 }
 
-echo "3. lokakode dan portal mencapai API internal LokaAuth dengan token masing-masing"
+echo "3. lokakode, portal dan lokaujian mencapai API internal LokaAuth dengan token masing-masing"
 if [ "$CEK_AUTH_AKTIF" = "1" ]; then
-	for a in lokakode portal; do
+	for a in lokakode portal lokaujian; do
 		j="$(sentuh "$a" benar)"
 		case "$j" in "422 json" | "404 json") ok "$a -> $j" ;; *) tidak "$a -> $j (seharusnya 422, atau 404 berisi JSON; 401 berarti token salah)" ;; esac
 	done
@@ -76,7 +76,7 @@ fi
 
 echo "4. token yang salah ditolak 401"
 if [ "$CEK_AUTH_AKTIF" = "1" ]; then
-	for a in lokakode portal; do
+	for a in lokakode portal lokaujian; do
 		j="$(sentuh "$a" salah)"
 		case "$j" in "401 json") ok "$a -> $j" ;; *) tidak "$a -> $j (seharusnya 401)" ;; esac
 	done
@@ -86,7 +86,8 @@ fi
 
 echo "5. identity_reader bisa membaca session_identity dan tidak bisa membaca users"
 if [ "$CEK_AUTH_AKTIF" = "1" ]; then
-	j="$(docker exec -i lokakode php <<'PHP' 2>&1 || true
+	for a in lokakode lokaujian; do
+	j="$(docker exec -i "$a" php <<'PHP' 2>&1 || true
 <?php
 mysqli_report(MYSQLI_REPORT_OFF);
 $u = parse_url(getenv('IDENTITY_READER_DSN'));
@@ -97,7 +98,8 @@ $b = $m->query('SELECT 1 FROM users LIMIT 1') === false ? 'users-ditolak-' . $m-
 echo $a, ' ', $b;
 PHP
 )"
-	case "$j" in "view-terbaca users-ditolak-1142") ok "$j" ;; *) tidak "$j" ;; esac
+	case "$j" in "view-terbaca users-ditolak-1142") ok "$a: $j" ;; *) tidak "$a: $j" ;; esac
+	done
 else
 	belum "menunggu skema identity dan view-nya (tahap 5)"
 fi
@@ -237,7 +239,7 @@ echo "12. merek (KONTRAK.md §16 \"Brand files\")"
 # Setiap situs menyajikan ikon, manifest dan logo kepalanya dari kode yang BERJALAN; halaman depan
 # Portal memuat keenam kartu aplikasi dalam urutannya; nama lama "LokaAuth" tidak tampil — juga
 # tidak lewat teks pengganti dari /admin/teks.
-for pasangan in "lokakode auth" "lokakode portal" "portal lokakode"; do
+for pasangan in "lokakode auth" "lokakode portal" "portal lokakode" "portal lokaujian"; do
 	read -r penanya a <<< "$pasangan"
 	kurang=""
 	for jalur in /favicon.ico /merek/icon-16.png /merek/icon-32.png /merek/icon-180.png /merek/icon-192.png /merek/icon-512.png /merek/logo-terang.webp /merek/logo-gelap.webp; do
@@ -259,6 +261,47 @@ done
 tanya portal lokakode / > /dev/null
 if isi portal | grep -qi 'lokaauth'; then sisa="$sisa lokakode:/"; fi
 if [ -z "$sisa" ]; then ok "halaman publik tidak memuat nama lama LokaAuth"; else tidak "nama lama LokaAuth masih tampil di:$sisa (bila dari /admin/teks, betulkan di sana)"; fi
+
+echo "13. view roster (KONTRAK.md §18): lokaujian membaca kelima view sebagai roster_reader, dan tidak lebih"
+# Dari dalam kontainer lokaujian, lewat ROSTER_READER_DSN miliknya. Hanya jumlah baris yang dicetak.
+j="$(docker exec -i lokaujian php <<'PHP' 2>&1 || true
+<?php
+mysqli_report(MYSQLI_REPORT_OFF);
+$u = parse_url(getenv('ROSTER_READER_DSN'));
+$m = @new mysqli($u['host'], $u['user'], $u['pass'], ltrim($u['path'], '/'), $u['port']);
+if ($m->connect_errno) { echo 'koneksi gagal: ', $m->connect_errno; exit; }
+$n = [];
+foreach (['roster_academic_years', 'roster_courses', 'roster_classes', 'roster_class_teachers', 'roster_enrollments'] as $v) {
+    $r = $m->query("SELECT COUNT(*) FROM $v");
+    $n[] = $r === false ? 'ditolak-' . $m->errno : $r->fetch_row()[0];
+}
+$tolak = [];
+foreach (['SELECT 1 FROM enrollments LIMIT 1', 'SELECT 1 FROM submissions LIMIT 1', "INSERT INTO roster_classes (course_id, academic_year_id, name) VALUES (1, 1, 'smoke')"] as $q) {
+    $tolak[] = $m->query($q) === false ? $m->errno : 'DITERIMA';
+}
+echo $u['user'], ' ', implode(',', $n), ' ', implode(',', $tolak);
+PHP
+)"
+read -r siapa hitung tolak <<< "$j"
+# Jumlah yang sama ditanyakan pada TABEL-nya, lewat lokakode (pemilik tabel itu).
+tabel="$(docker exec -i lokakode php <<'PHP' 2>&1 || true
+<?php
+mysqli_report(MYSQLI_REPORT_OFF);
+$u = parse_url(getenv('DB_DSN'));
+$m = @new mysqli($u['host'], $u['user'], $u['pass'], ltrim($u['path'], '/'), $u['port']);
+if ($m->connect_errno) { echo 'koneksi gagal: ', $m->connect_errno; exit; }
+$n = [];
+foreach (['academic_years', 'courses', 'classes', 'class_teachers', 'enrollments'] as $t) { $n[] = $m->query("SELECT COUNT(*) FROM $t")->fetch_row()[0]; }
+echo implode(',', $n);
+PHP
+)"
+if [ "$siapa" = "roster_reader" ] && [[ "$hitung" =~ ^[0-9]+(,[0-9]+){4}$ ]]; then
+	ok "roster_reader membaca kelima view (tahun, mata kuliah, kelas, pengajar, pendaftaran): $hitung baris"
+else
+	tidak "lokaujian tidak bisa membaca view roster: '$j' (deploy lokakode dulu: migrasi view dan infra/mysql-hak-roster.sh)"
+fi
+if [ "$tolak" = "1142,1142,1142" ]; then ok "roster_reader ditolak membaca tabel enrollments dan submissions, dan ditolak menulis ke view (1142)"; else tidak "roster_reader seharusnya ditolak tiga kali (1142,1142,1142): '$tolak'"; fi
+if [ -n "$hitung" ] && [ "$hitung" = "$tabel" ]; then ok "jumlah baris tiap view sama dengan tabelnya, ditanyakan lewat lokakode"; else tidak "jumlah baris view ($hitung) berbeda dari tabelnya ($tabel)"; fi
 
 echo
 echo "smoke: $lulus lulus, $gagal_n gagal, $tunda belum aktif"

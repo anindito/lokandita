@@ -13,11 +13,12 @@ Every item in this file must be covered by a test that runs against **real conta
 ├── apps/auth/                  CodeIgniter 4 — LokaAuth
 ├── apps/lokakode/              CodeIgniter 4 — LokaKode
 ├── apps/portal/                CodeIgniter 4 — Portal
-├── packages/lokandita-auth/    Composer path package used by all three apps
+├── apps/lokaujian/             CodeIgniter 4 — LokaUjian (`SPEC-LOKAUJIAN.md`)
+├── packages/lokandita-auth/    Composer path package used by all four apps (session check, account menu, SEB §8, roster connection §18)
 ├── judge/                      Python worker, images, seccomp profile, tests
 ├── infra/                      compose files, Caddyfile, scripts
 ├── docs/                       PETA-KONSEP.md, silabus/, branding/
-├── SPEC.md  KONTRAK.md  CLAUDE.md  PROGRESS.md  DECISIONS.md
+├── SPEC.md  SPEC-LOKAUJIAN.md  KONTRAK.md  CLAUDE.md  PROGRESS.md  DECISIONS.md
 
 /srv/lokandita-data/            NOT in Git: CSV of accounts, enrollments, backups
 ```
@@ -128,6 +129,7 @@ Routes that need no session. They never read the session or the identity databas
 |---|---|
 | Portal | `/`, `/tentang`, `/privasi`, `/ketentuan`, `/sitemap.xml`, `/robots.txt`; `/kontak` answers `301` to `/tentang` (the contact page became part of Tentang) |
 | LokaKode | `/` (public landing), `/robots.txt`, `/seb`, `/seb/periksa`, `/seb/keluar`, `/seb/unduh/<course code>.seb` (§8) |
+| LokaUjian | `/robots.txt` (static: disallows everything). Since stage U0 it has no page at all; `/`, `/beranda` and every other path answer `404` until stage U1 |
 | every app | `/healthz`, `GET /bahasa/{id\|en\|ar}` |
 
 - `GET /` in the Portal and in LokaKode looks only at whether a `lokandita_sid` cookie **is present**: with one it redirects to `/beranda` (where §4 decides whether the session is alive), without one it shows the landing page. The value of the cookie is not read.
@@ -143,7 +145,7 @@ Client apps read names and nomor induk from `user_directory`, and app access fro
 |---|---|
 | Base URL from other containers | `http://auth-internal:8080` (`AUTH_INTERNAL_URL`) |
 | Network | Docker network `internal` only |
-| Authentication | Header `X-Service-Token: <token>`; LokaAuth holds `SERVICE_TOKEN_PORTAL`, `SERVICE_TOKEN_LOKAKODE`, …; each client holds its own as `AUTH_SERVICE_TOKEN` |
+| Authentication | Header `X-Service-Token: <token>`; LokaAuth holds `SERVICE_TOKEN_PORTAL`, `SERVICE_TOKEN_LOKAKODE`, `SERVICE_TOKEN_LOKAUJIAN`; each client holds its own as `AUTH_SERVICE_TOKEN` |
 | Content type | `application/json` both ways |
 | From the internet | Edge Caddy answers `404` for `/internal/*` on every host |
 
@@ -171,7 +173,9 @@ Details that callers rely on:
 - A wrong HTTP method on a known path is answered like an unknown path.
 - Written to `audit_log`: every denial (`internal.denied`), `revoke` (`logout`), `prefs` (`prefs.changed`) and `password-reset` (`password.reset`). `touch`, `users/{id}` and `lookup` are read-like and only appear in the container log.
 
-The service token identifies the app; the audit log stores it as `app`.
+The service token identifies the app; the audit log stores it as `app` (`portal`, `lokakode`, `lokaujian`).
+
+LokaUjian uses only `session/touch`, `session/revoke` and `session/prefs`. It does not reset passwords: `POST /internal/password-reset` with LokaUjian's token is answered `403 {"error":"app_not_allowed"}` before the body is read, and written to `audit_log` as `internal.denied` with reason `app_not_allowed`.
 
 ## 6. Web ↔ judge worker
 
@@ -514,11 +518,11 @@ LokaKode's implementation is `App\Libraries\SumberSeb`, which reads LokaKode's o
 
 | Network | Members | Purpose |
 |---|---|---|
-| `edge` | caddy, auth, lokakode, portal | Public HTTP from Caddy to apps |
-| `internal` | auth (alias `auth-internal`), lokakode, portal | App-to-LokaAuth calls |
-| `data` | auth, lokakode, portal, mysql, redis | Database and cache |
+| `edge` | caddy, auth, lokakode, portal, lokaujian | Public HTTP from Caddy to apps |
+| `internal` | auth (alias `auth-internal`), lokakode, portal, lokaujian | App-to-LokaAuth calls |
+| `data` | auth, lokakode, portal, lokaujian, mysql, redis | Database and cache |
 
-- Container names: `caddy`, `mysql`, `redis`, `auth`, `lokakode`, `portal`.
+- Container names: `caddy`, `mysql`, `redis`, `auth`, `lokakode`, `portal`, `lokaujian`.
 - Every app container serves HTTP on port **8080**. No app publishes a port to the host.
 - Caddy reaches apps by container name on `edge`. Apps reach LokaAuth **only** by `auth-internal` on `internal`.
 - MySQL `3306` and Redis `6379` are published on `127.0.0.1` only, for the worker and for CLI use.
@@ -529,9 +533,9 @@ LokaKode's implementation is `App\Libraries\SumberSeb`, which reads LokaKode's o
 
 ### Edge (Caddy)
 
-- Public hosts are derived from `DOMAIN`: `DOMAIN` → `portal`, `www.DOMAIN` → 301 to `DOMAIN`, `auth.DOMAIN` → `auth`, `lokakode.DOMAIN` → `lokakode`.
-- `/internal` and `/internal/*` are answered `404` by Caddy on all four hosts before anything else, whether the host is open or in maintenance.
-- A host is in **maintenance** unless the file `infra/caddy/bendera/<app>.buka` exists (`infra/pemeliharaan.sh <app> on|off`, `status`). The flag is server state and is git-ignored. A fresh checkout is therefore fully in maintenance.
+- Public hosts are derived from `DOMAIN`: `DOMAIN` → `portal`, `www.DOMAIN` → 301 to `DOMAIN`, `auth.DOMAIN` → `auth`, `lokakode.DOMAIN` → `lokakode`, `lokaujian.DOMAIN` → `lokaujian`.
+- `/internal` and `/internal/*` are answered `404` by Caddy on all five hosts before anything else, whether the host is open or in maintenance.
+- A host is in **maintenance** unless the file `infra/caddy/bendera/<app>.buka` exists (`infra/pemeliharaan.sh <auth|lokakode|portal|lokaujian> on|off`, `status`). The flag is server state and is git-ignored. A fresh checkout is therefore fully in maintenance.
 - Maintenance answers every path with `503`, `Retry-After: 3600` and the static page in `infra/caddy/situs/`; its assets live under `/_pemeliharaan/`.
 - Caddy sets `Strict-Transport-Security` on every response. All other security headers are set by Caddy only on the maintenance page; on an open host they are the app's job (`SPEC.md` §16).
 
@@ -541,25 +545,28 @@ One `.env` per component, in the component's own directory, git-ignored, mode 60
 
 Each app validates its required variables at start and exits naming the missing one.
 
-| Variable | auth | lokakode | portal | judge |
-|---|---|---|---|---|
-| `APP_URL` | ✔ | ✔ | ✔ | |
-| `CONTACT_EMAIL` | ✔ | ✔ | ✔ | |
-| `COOKIE_DOMAIN` (`.lokandita.com`) | ✔ | ✔ | ✔ | |
-| `ALLOWED_HOSTS` (comma list) | ✔ | | | |
-| `PORTAL_URL` | ✔ | ✔ | ✔ | |
-| `LOKAKODE_URL` (address of LokaKode for links from the Portal) | | | ✔ | |
-| `DB_DSN` (own schema) | ✔ | ✔ | ✔ | ✔ |
-| `IDENTITY_READER_DSN` | | ✔ | ✔ | |
-| `REDIS_URL` | ✔ | ✔ | ✔ | ✔ |
-| `AUTH_PUBLIC_URL`, `AUTH_LOGIN_URL` | | ✔ | ✔ | |
-| `AUTH_INTERNAL_URL` (`http://auth-internal:8080`) | | ✔ | ✔ | |
-| `AUTH_SERVICE_TOKEN` | | ✔ | ✔ | |
-| `SERVICE_TOKEN_PORTAL`, `SERVICE_TOKEN_LOKAKODE` | ✔ | | | |
-| `MFA_ENCRYPTION_KEY` | ✔ | | | |
-| `INSTANCE_SECRET` | | ✔ | | |
-| `SEB_ENCRYPTION_KEY`, `SEB_ENFORCEMENT` | | ✔ | | |
-| `JUDGE_CONCURRENCY` | | | | ✔ |
+| Variable | auth | lokakode | portal | lokaujian | judge |
+|---|---|---|---|---|---|
+| `APP_URL` | ✔ | ✔ | ✔ | ✔ | |
+| `CONTACT_EMAIL` | ✔ | ✔ | ✔ | ✔ | |
+| `COOKIE_DOMAIN` (`.lokandita.com`) | ✔ | ✔ | ✔ | ✔ | |
+| `ALLOWED_HOSTS` (comma list; holds the host of every app) | ✔ | | | | |
+| `PORTAL_URL` | ✔ | ✔ | ✔ | ✔ | |
+| `LOKAKODE_URL` (address of LokaKode for links from the Portal) | | | ✔ | | |
+| `DB_DSN` (own schema) | ✔ | ✔ | ✔ | ✔ | ✔ |
+| `IDENTITY_READER_DSN` | | ✔ | ✔ | ✔ | |
+| `ROSTER_READER_DSN` (§18) | | | | ✔ | |
+| `REDIS_URL` | ✔ | ✔ | ✔ | ✔ | ✔ |
+| `AUTH_PUBLIC_URL`, `AUTH_LOGIN_URL` | | ✔ | ✔ | ✔ | |
+| `AUTH_INTERNAL_URL` (`http://auth-internal:8080`) | | ✔ | ✔ | ✔ | |
+| `AUTH_SERVICE_TOKEN` | | ✔ | ✔ | ✔ | |
+| `SERVICE_TOKEN_PORTAL`, `SERVICE_TOKEN_LOKAKODE`, `SERVICE_TOKEN_LOKAUJIAN` | ✔ | | | | |
+| `MFA_ENCRYPTION_KEY` | ✔ | | | | |
+| `INSTANCE_SECRET` | | ✔ | | | |
+| `SEB_ENCRYPTION_KEY`, `SEB_ENFORCEMENT` | | ✔ | | from U3/U4 | |
+| `JUDGE_CONCURRENCY` | | | | | ✔ |
+
+LokaUjian gets its own `SEB_ENCRYPTION_KEY` and `SEB_ENFORCEMENT` in the stage whose code first reads them; until then they are in no file.
 
 `infra/.env` (Caddy, MySQL, Redis, backup):
 
@@ -569,14 +576,14 @@ Each app validates its required variables at start and exits naming the missing 
 | `CONTACT_EMAIL` | Shown on the maintenance page |
 | `ACME_EMAIL`, `ACME_CA` | Let's Encrypt account address and directory URL |
 | `MYSQL_ROOT_PASSWORD` | MySQL root; used only by `infra/` scripts through `docker exec` |
-| `DB_PASSWORD_AUTH`, `DB_PASSWORD_LOKAKODE`, `DB_PASSWORD_PORTAL`, `DB_PASSWORD_IDENTITY_READER`, `DB_PASSWORD_JUDGE` | Passwords of the MySQL users below; each must equal the password inside the matching DSN |
+| `DB_PASSWORD_AUTH`, `DB_PASSWORD_LOKAKODE`, `DB_PASSWORD_PORTAL`, `DB_PASSWORD_LOKAUJIAN`, `DB_PASSWORD_IDENTITY_READER`, `DB_PASSWORD_JUDGE`, `DB_PASSWORD_ROSTER_READER` | Passwords of the MySQL users below; each must equal the password inside the matching DSN |
 | `REDIS_PASSWORD` | Redis `requirepass`; must equal the password inside every `REDIS_URL` |
 | `BACKUP_DIR`, `BACKUP_RETENTION_DAYS` | `infra/backup.sh` |
 
 Formats:
 
-- `DB_DSN`, `IDENTITY_READER_DSN`: `MySQLi://<user>:<password>@mysql:3306/<schema>`. Apps parse it with `Lokandita\Auth\Dsn`, never through CI4's own DSN parser.
-- `REDIS_URL`: `redis://:<password>@redis:6379/<db>`. Redis DB `0` = lokakode (and the judge queue, §6), `1` = auth, `2` = portal.
+- `DB_DSN`, `IDENTITY_READER_DSN`, `ROSTER_READER_DSN`: `MySQLi://<user>:<password>@mysql:3306/<schema>`. Apps parse it with `Lokandita\Auth\Dsn`, never through CI4's own DSN parser.
+- `REDIS_URL`: `redis://:<password>@redis:6379/<db>`. Redis DB `0` = lokakode (and the judge queue, §6), `1` = auth, `2` = portal, `3` = lokaujian, `15` = tests (§12).
 - Secrets are lowercase hex (`openssl rand -hex 32`), so they are safe inside a URL without escaping.
 
 MySQL schemas and users, created by `infra/mysql-init.sh` (idempotent, never touches tables):
@@ -586,8 +593,10 @@ MySQL schemas and users, created by `infra/mysql-init.sh` (idempotent, never tou
 | `auth_app` | all on `identity`, `identity_test` |
 | `lokakode_app` | all on `lokakode`, `lokakode_test` |
 | `portal_app` | all on `portal`, `portal_test` |
+| `lokaujian_app` | all on `lokaujian`, `lokaujian_test`; nothing on any other schema |
 | `identity_reader` | none from `mysql-init.sh`; `SELECT` on the three objects of §3 from `infra/mysql-hak-reader.sh` |
 | `judge_worker` | none from `mysql-init.sh`; `SELECT, UPDATE` on `judge_jobs` from `infra/mysql-hak-judge.sh` (§6) |
+| `roster_reader` | none from `mysql-init.sh`; `SELECT` on the five views of §18 from `infra/mysql-hak-roster.sh` |
 
 Rules:
 
@@ -601,36 +610,41 @@ Rules:
 
 `INSTANCE_SECRET` must never change once students have instances. It and `SEB_ENCRYPTION_KEY` are included in every backup.
 
+`ROSTER_READER_DSN` is `MySQLi://roster_reader:<password>@mysql:3306/<schema that holds the roster views>`; today that schema is `lokakode`. The schema name appears nowhere in a reader's code, which connects through `Lokandita\Auth\RosterDb` and names only the views.
+
 Values are written without quotes.
 
 ## 11. Deploy and verification
 
-- `infra/deploy.sh <app>` builds the image tagged with the current Git commit, runs the app's migrations from that image (and for `auth` the reader grants of §3), starts it, and fails unless the running container reports that commit at `GET /healthz` (`{ "app": "...", "commit": "..." }`).
+- `infra/deploy.sh <auth|lokakode|portal|lokaujian>` builds the image tagged with the current Git commit, runs the app's migrations from that image (and for `auth` the reader grants of §3), starts it, and fails unless the running container reports that commit at `GET /healthz` (`{ "app": "...", "commit": "..." }`).
 - `infra/deploy.sh infra` starts MySQL, Redis and Caddy, runs `infra/mysql-init.sh`, and reloads the Caddyfile.
+- `infra/deploy.sh lokakode` runs `infra/mysql-hak-judge.sh` and `infra/mysql-hak-roster.sh` after LokaKode's migrations, because `judge_jobs` and the roster views (§18) live in LokaKode's schema. `roster_reader` must exist first (`infra/deploy.sh infra`).
 - `deploy.sh` refuses to run when the working tree has uncommitted or untracked changes, runs `infra/cek-env.sh` first, and warns when the commit is not on `origin`.
 - `/healthz` is served by every app container on port 8080 with `Cache-Control: no-store`. `deploy.sh` reads it from inside the container, so it works while the host is in maintenance.
 - `infra/smoke.sh` checks, with real requests:
   1. each public host answers over HTTPS;
   2. `/internal/anything` returns 404 from the internet on every host;
-  3. from inside `lokakode` and `portal`, `POST auth-internal:8080/internal/session/touch` with the app's token and a bogus `sid` returns **422 or 404-with-JSON, not 401** — proving network, name and token are right;
+  3. from inside `lokakode`, `portal` and `lokaujian`, `POST auth-internal:8080/internal/session/touch` with the app's token and a bogus `sid` returns **422 or 404-with-JSON, not 401** — proving network, name and token are right;
   4. the same call with a wrong token returns 401;
-  5. `identity_reader` can select from `session_identity` and cannot select from `users`;
+  5. `identity_reader` can select from `session_identity` and cannot select from `users`, asked through `IDENTITY_READER_DSN` of `lokakode` and of `lokaujian`;
   6. the judge worker is running and a trivial `RUN` job completes.
   7. the judge validates a small built-in problem: one `VALIDATE` job through LokaKode (`php spark judge:coba --validasi`) answers `ok` after 240 tests; nothing is stored in the problem bank.
   8. public pages and the way in (stage 11), asked directly at the app container from another app container, with the `X-Forwarded-Proto: https` header Caddy sends, so that it also works while a host is in maintenance: `GET /` of `portal` and of `lokakode` without a cookie answers `200` with an indexable page; `GET /beranda` of both without a cookie redirects to `AUTH_LOGIN_URL` with `next` equal to that app's own `/beranda`; `GET /privasi` of `portal` answers `200`.
   9. the Portal's hero photo (stage 11c, §16), asked the same way: the first AVIF file named by the landing page answers `200 image/avif`, and `/media/hero/smoke.php` answers `403`.
   10. Safe Exam Browser (stage 10a, §8), asked the same way: `GET /seb` of `lokakode` answers `200` and names the state of enforcement that the running container has; `GET /seb/periksa` answers `200` and reports no SEB header; `SEB_ENFORCEMENT` in the running container equals the value in `apps/lokakode/.env`. `disabled` passes, with a warning line that says students are not required to use SEB.
   11. integrity and communication (stage 10b, §17): the `lokakode` schema has the tables `notifications`, `clarifications` and `announcements`; asked as in check 8, `GET /notifikasi`, `/pengumuman`, `/kelas/1/integritas`, `/kelas/1/klarifikasi` and `/kelas/1/pengumuman` of `lokakode` without a cookie each redirect to `AUTH_LOGIN_URL` with `next` equal to that address (the route exists in the running code); `GET /ketentuan` of `portal` in Indonesian holds the sentence on unusual typing — it fails when a text override (§15) of that page lacks the sentence.
-  12. brand (§16 "Brand files"), asked as in check 8: `auth`, `portal` and `lokakode` each answer `200` for `/favicon.ico`, `/merek/icon-{16,32,180,192,512}.png`, `/merek/logo-{terang,gelap}.webp` and a `/merek/site.webmanifest` that is JSON with a name and two icons; `GET /` of `portal` carries the six app cards in the order of §16; no public page of `portal` and not the landing of `lokakode` contains "LokaAuth" — it fails when a text override (§15) brings the name back.
+  12. brand (§16 "Brand files"), asked as in check 8: `auth`, `portal`, `lokakode` and `lokaujian` each answer `200` for `/favicon.ico`, `/merek/icon-{16,32,180,192,512}.png`, `/merek/logo-{terang,gelap}.webp` and a `/merek/site.webmanifest` that is JSON with a name and two icons; `GET /` of `portal` carries the six app cards in the order of §16; no public page of `portal` and not the landing of `lokakode` contains "LokaAuth" — it fails when a text override (§15) brings the name back.
+  13. roster views (§18), through `ROSTER_READER_DSN` from inside `lokaujian`: the user is `roster_reader`; `SELECT COUNT(*)` works on each of the five views; `SELECT` on `enrollments` and on `submissions` and `INSERT` into `roster_classes` are each refused with error 1142; the count of each view equals the count of its table, asked through `lokakode`. Only counts are printed.
 - `smoke.sh` additionally checks (as check 0) that every app container reports the current `HEAD` at `/healthz`.
 - In check 1 a host in maintenance must answer `503`, an open host `2xx`/`3xx`, and `www` a `301` to the apex; the certificate must validate.
 - Checks 3–5 become active in stage 5, check 6 in stage 7 and check 7 in stage 8, by a switch at the top of `smoke.sh`. Until then each prints `BELUM AKTIF`, is counted separately, and is not reported as passed.
 - `infra/tes-infra.sh` tests §9, §10 and the deploy verification against the running containers.
+- `infra/backup.sh` dumps the schemas `identity`, `lokakode`, `portal` and `lokaujian` and every `.env`; `infra/uji-restore.sh` compares the tables and views of the four schemas with the live database (`docs/RESTORE.md`).
 - A stage is not finished until `smoke.sh` passes after deploy.
 
 ## 12. Tests
 
-- `infra/tes.sh <app>` is the only way to run PHPUnit. It builds `lokandita/<app>:tes`, recreates the `*_test` schemas from nothing, runs the LokaAuth migrations on `identity_test`, and refuses any schema whose name does not end in `_test`.
+- `infra/tes.sh <auth|lokakode|portal|lokaujian>` is the only way to run PHPUnit. It builds `lokandita/<app>:tes`, recreates the `*_test` schemas from nothing, runs the LokaAuth migrations on `identity_test`, and refuses any schema whose name does not end in `_test`.
 - A second LokaAuth named `auth-tes` runs for the duration of the tests on `identity_test` and Redis DB `15`. Its alias on the `internal` network is `auth-internal-tes`; client apps under test use `AUTH_INTERNAL_URL=http://auth-internal-tes:8080`. When a client app is tested it is also served as `<app>-tes`.
 - Tests talk to these containers over real HTTP (`Lokandita\Auth\Testing\Http`) and to MySQL directly. Nothing is mocked.
 - Redis DB `15` is reserved for tests and is flushed at the start of every run.
@@ -638,6 +652,7 @@ Values are written without quotes.
 - For `lokakode`, `infra/tes.sh` also starts a headless Chromium (`peramban-tes`, image pinned by digest) and a second Caddy (`caddy-tes`) that serves `https://lokakode.lokandita.com` with Caddy's internal certificate and forwards to `lokakode-tes`, as the production edge does. The browser sits only on the Docker network `tes-peramban`; `lokakode.lokandita.com` is mapped to `caddy-tes` and every other host name is made unresolvable, so a browser test cannot reach a production site. PHPUnit drives it over the Chrome DevTools Protocol (`Lokandita\Auth\Testing\Peramban` in the shared package, address in `PERAMBAN_TES_URL`); the tests in `tests/Peramban/` fail, not skip, when it is missing.
 - For `portal`, `infra/tes.sh` also serves `lokakode-tes` on `lokakode_test` (the stage 11 gate needs three real apps; `LOKAKODE_TES_URL`) and starts the same browser with three host names mapped — `lokandita.com` → `portal-tes`, `lokakode.lokandita.com` → `lokakode-tes`, `auth.lokandita.com` → `auth-tes` — and every other name unresolvable. `apps/portal/tests/Peramban/ArabPublikTest.php` measures there that every public page of the three apps in Arabic is the mirror of its Indonesian version. `PembukaTest.php` measures the two landing pages in Indonesian and Arabic, light and dark, at 1280 and 390 pixels: the hero image loads as AVIF or WebP from the same origin, text never lies over it, no layout shift, WCAG AA contrast, and one size and stroke width for every icon.
 - With `TANGKAPAN=<host directory>` set, `infra/tes.sh` mounts that directory into the test container (`TANGKAPAN_DIR`) and the browser tests that take screenshots write them there; without it nothing is written.
+- For `lokaujian`, `infra/tes.sh` also builds LokaKode's image, recreates `lokakode_test` through the LokaKode migrations (so the views of §18 exist) and runs `infra/mysql-hak-roster.sh lokakode_test`; LokaKode itself is not served. `ROSTER_READER_DSN` of the app under test points at `lokakode_test`. Roster rows are written by the test code through `TES_ROSTER_TULIS_DSN` (user `lokakode_app`), which the app under test does not use. `apps/lokaujian/tests/RosterTest.php` proves that `roster_reader` reads the five views and nothing else, cannot write, and that `lokaujian_app` cannot touch the roster schema. The shared client test (`packages/lokandita-auth/tests`) joins LokaUjian's suite in stage U1, when it has `/beranda`.
 - `infra/tes.sh judge` is the only way to run the worker's tests (pytest, on the host, in `judge/.venv`). It recreates `lokakode_test` through the LokaKode migrations, gives `judge_worker` its grant there, and runs the tests against real MySQL, Redis DB `15` and real Docker. The tests refuse any schema not ending in `_test` and any Redis DB other than `15`, fail when Docker is unavailable, and fail when a test is skipped.
 
 ## 13. Production data (`SPEC.md` §17)
@@ -839,7 +854,7 @@ Originals are `docs/branding/baru/Lokandita-Brand-Family-Variation-1/brands/<Bra
 
 | File (one app) | What |
 |---|---|
-| `auth`, `lokakode`: `/merek/og-image.png` | 1200 × 630, the light logo centred on `#f4f7fb`. **The Portal's Open Graph image stays the photo crop `/merek/og-image.jpg` above** (the owner's decision) |
+| `auth`, `lokakode`: `/merek/og-image.png` (not `lokaujian`: none of its pages is indexable or meant to be shared) | 1200 × 630, the light logo centred on `#f4f7fb`. **The Portal's Open Graph image stays the photo crop `/merek/og-image.jpg` above** (the owner's decision) |
 | `lokakode`: `/merek/pembuka-{terang,gelap}.{webp,png}` | hero of the landing: "name below" original at 704 px |
 | `portal`: `/merek/aplikasi/<kode>-{terang,gelap}.{webp,png}` | app-card icons, 112 px (shown at 56), one set per brand folder that has a "logo only" file; `<kode>` is the brand name in lower case |
 
@@ -940,3 +955,65 @@ announcements (id, class_id, author_id, title VARCHAR(150), body, created_at, wi
 | `GET /pengumuman` | mahasiswa: own classes' announcements, newest first, at most 100; the newest three are also on `/beranda` |
 
 In an archived academic year a dosen can read these pages but not answer, post or withdraw (`403`), like every other change to a class.
+
+## 18. Academic roster views
+
+The academic structure of `SPEC.md` §5 as other apps read it (`SPEC-LOKAUJIAN.md` §4). **The views are the contract; the tables behind them are not.** A reader app queries these five views and nothing else of the roster.
+
+Created by a LokaKode migration in the `lokakode` schema (`SQL SECURITY DEFINER`, definer `lokakode_app`), because that schema is migrated only by LokaKode:
+
+```sql
+CREATE VIEW roster_academic_years AS
+SELECT id, label, starts_on, ends_on, status FROM academic_years;
+
+CREATE VIEW roster_courses AS
+SELECT id, code, name, owner_id FROM courses;
+
+CREATE VIEW roster_classes AS
+SELECT id, course_id, academic_year_id, name, archived_at FROM classes;
+
+CREATE VIEW roster_class_teachers AS
+SELECT class_id, user_id FROM class_teachers;
+
+CREATE VIEW roster_enrollments AS
+SELECT id, user_id, course_id, academic_year_id, class_id, status, graduated_on FROM enrollments;
+```
+
+| View | Column | Type | Meaning |
+|---|---|---|---|
+| `roster_academic_years` | `id` | BIGINT UNSIGNED | |
+| | `label` | VARCHAR(40) | unique |
+| | `starts_on`, `ends_on` | DATE | |
+| | `status` | `'active'` \| `'archived'` | at most one row is `active` |
+| `roster_courses` | `id` | BIGINT UNSIGNED | |
+| | `code` | VARCHAR(20) | unique |
+| | `name` | VARCHAR(190) | |
+| | `owner_id` | CHAR(36) | the pengampu; `users.id` of §3 |
+| `roster_classes` | `id` | BIGINT UNSIGNED | |
+| | `course_id`, `academic_year_id` | BIGINT UNSIGNED | |
+| | `name` | VARCHAR(60) | unique within course and year |
+| | `archived_at` | DATETIME NULL, UTC | `NULL` = in use |
+| `roster_class_teachers` | `class_id` | BIGINT UNSIGNED | |
+| | `user_id` | CHAR(36) | a pengajar of that class; `users.id` |
+| `roster_enrollments` | `id` | BIGINT UNSIGNED | |
+| | `user_id` | CHAR(36) | `users.id` |
+| | `course_id`, `academic_year_id`, `class_id` | BIGINT UNSIGNED | the class always belongs to that course and year |
+| | `status` | `'AKTIF'` \| `'LULUS'` \| `'MENGUNDURKAN_DIRI'` \| `'DIPINDAHKAN'` | |
+| | `graduated_on` | DATE NULL | |
+
+What a reader may rely on:
+
+- Ids are never reused and never change — also not when the tables move (stage A1).
+- One enrollment per student per course per academic year; a class move changes `class_id` on that row.
+- A row can disappear only where LokaKode allows a delete: a class without enrollments, a teacher assignment. A reader keeps working when an id it stored no longer appears.
+- Capacity, creation times, who created or assigned, and the history of class moves are **not** part of the contract and cannot be read through the views.
+
+Access:
+
+- MySQL user **`roster_reader`**: `SELECT` on these five views, nothing else, no write privilege. Granted by `infra/mysql-hak-roster.sh [lokakode|lokakode_test]` as MySQL root after LokaKode's migrations. It cannot read `enrollments`, `submissions` or any other table.
+- A reader app connects with `ROSTER_READER_DSN` (§10), a connection separate from its own schema's: `Lokandita\Auth\RosterDb` in the shared package. Today the only reader is LokaUjian.
+- A reader stores `class_id`, `course_id`, `academic_year_id` as plain BIGINT UNSIGNED and `user_id` as CHAR(36), without foreign keys, and never joins its own schema with the roster: it first reads the ids it may see, then binds its own queries to them.
+- LokaKode itself keeps reading and writing its tables; the views change nothing for it.
+- `apps/lokakode/tests/Schema/ViewRosterTest.php` holds the columns and types above against real MySQL.
+
+**When the tables move (stage A1):** the five views are redefined, with the same names, columns, types and guarantees, wherever the tables then live; `ROSTER_READER_DSN` and the grant script follow. No reader app changes.

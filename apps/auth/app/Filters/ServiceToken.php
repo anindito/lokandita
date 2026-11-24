@@ -16,7 +16,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 final class ServiceToken implements FilterInterface
 {
     // Nama aplikasi => variabel lingkungan yang memuat tokennya.
-    private const TOKEN = ['portal' => 'SERVICE_TOKEN_PORTAL', 'lokakode' => 'SERVICE_TOKEN_LOKAKODE'];
+    private const TOKEN = ['portal' => 'SERVICE_TOKEN_PORTAL', 'lokakode' => 'SERVICE_TOKEN_LOKAKODE', 'lokaujian' => 'SERVICE_TOKEN_LOKAUJIAN'];
 
     private static ?string $app = null;
 

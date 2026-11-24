@@ -15,7 +15,7 @@ final class MerekTest extends AuthCase
 {
     use MerekTes;
 
-    private const CSP = "default-src 'self'; script-src 'self' 'nonce-N'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self' https://auth.lokandita.com https://lokandita.com https://www.lokandita.com https://lokakode.lokandita.com";
+    private const CSP = "default-src 'self'; script-src 'self' 'nonce-N'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self' https://auth.lokandita.com https://lokandita.com https://www.lokandita.com https://lokakode.lokandita.com https://lokaujian.lokandita.com";
 
     public function testIkonLogoDanManifestSitusIdentitas(): void
     {

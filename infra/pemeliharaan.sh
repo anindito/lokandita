@@ -2,8 +2,8 @@
 # Mode pemeliharaan per host. Bawaan: pemeliharaan menyala (aman).
 #
 #   infra/pemeliharaan.sh status
-#   infra/pemeliharaan.sh <auth|lokakode|portal> on    -> halaman pemeliharaan (503)
-#   infra/pemeliharaan.sh <auth|lokakode|portal> off   -> Caddy meneruskan ke aplikasi
+#   infra/pemeliharaan.sh <auth|lokakode|portal|lokaujian> on    -> halaman pemeliharaan (503)
+#   infra/pemeliharaan.sh <auth|lokakode|portal|lokaujian> off   -> Caddy meneruskan ke aplikasi
 #
 # Berlaku langsung; Caddy memeriksa berkas bendera pada setiap permintaan.
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
@@ -23,7 +23,7 @@ fi
 
 app="${1:-}"
 aksi="${2:-}"
-case "$app" in auth | lokakode | portal) ;; *) gagal "pemakaian: $0 status | <auth|lokakode|portal> <on|off>" ;; esac
+case "$app" in auth | lokakode | portal | lokaujian) ;; *) gagal "pemakaian: $0 status | <auth|lokakode|portal|lokaujian> <on|off>" ;; esac
 
 case "$aksi" in
 	on)
@@ -34,6 +34,6 @@ case "$aksi" in
 		[ "$sehat" = "healthy" ] || gagal "kontainer $app tidak sehat (status: ${sehat:-tidak ada}); host tidak dibuka"
 		touch "$BENDERA/$app.buka"
 		;;
-	*) gagal "pemakaian: $0 status | <auth|lokakode|portal> <on|off>" ;;
+	*) gagal "pemakaian: $0 status | <auth|lokakode|portal|lokaujian> <on|off>" ;;
 esac
 status

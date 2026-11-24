@@ -2,7 +2,7 @@
 # Menjalankan PHPUnit sebuah aplikasi di dalam kontainer, terhadap MySQL, Redis
 # dan HTTP antar-kontainer yang sungguhan. Tidak ada mock.
 #
-#   infra/tes.sh <auth|lokakode|portal> [argumen phpunit…]
+#   infra/tes.sh <auth|lokakode|portal|lokaujian> [argumen phpunit…]
 #   infra/tes.sh judge [argumen pytest…]     worker Python: pytest di host, dengan
 #                                            Docker, lokakode_test dan Redis DB 15
 #
@@ -18,13 +18,16 @@
 # bisa dibuktikan di peramban: editor, CSP, blokir tempel, simpan draf otomatis.
 # Untuk portal, LokaKode tes (lokakode-tes, pada lokakode_test) juga dilayani:
 # gerbang tahap 11 menguji sesi yang sama di Portal dan LokaKode sungguhan.
+# Untuk lokaujian, skema lokakode_test dibuat oleh migrasi LokaKode (view roster,
+# KONTRAK.md §18) dan roster_reader diberi haknya di sana: LokaUjian membaca kelas
+# dan pendaftaran hanya lewat view itu. LokaKode sendiri tidak dilayani.
 #
 # Hanya skema berakhiran _test yang disentuh; skrip menolak nama lain.
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 cd "$AKAR"
 
 app="${1:-}"
-case "$app" in auth | lokakode | portal | judge) ;; *) gagal "pemakaian: $0 <auth|lokakode|portal|judge> [argumen]" ;; esac
+case "$app" in auth | lokakode | portal | lokaujian | judge) ;; *) gagal "pemakaian: $0 <auth|lokakode|portal|lokaujian|judge> [argumen]" ;; esac
 shift
 
 tmp="$(mktemp -d)"
@@ -53,6 +56,7 @@ env_tes() {
 	sed -E \
 		-e 's#^(DB_DSN=.*/[a-z]+)$#\1_test#' \
 		-e 's#^(IDENTITY_READER_DSN=.*/identity)$#\1_test#' \
+		-e 's#^(ROSTER_READER_DSN=.*/lokakode)$#\1_test#' \
 		-e 's#^(REDIS_URL=.*/)[0-9]+$#\115#' \
 		-e 's#^AUTH_INTERNAL_URL=.*#AUTH_INTERNAL_URL=http://auth-internal-tes:8080#' \
 		"apps/$1/.env" > "$tmp/$1.env"
@@ -66,6 +70,13 @@ env_tes() {
 		sed -n -E 's#^DB_DSN=(.*/identity)$#TES_IDENTITY_DSN=\1_test#p' apps/auth/.env >> "$tmp/$1.env"
 	fi
 	grep -q '^DB_DSN=.*_test$' "$tmp/$1.env" || gagal "env tes $1: DB_DSN tidak berakhiran _test"
+	# Pembaca roster (KONTRAK.md §18): view-nya ada di lokakode_test. Baris uji roster ditulis tes
+	# lewat koneksi khusus tes sebagai lokakode_app; aplikasi yang diuji tidak memakai DSN itu.
+	if grep -q '^ROSTER_READER_DSN=' "$tmp/$1.env"; then
+		grep -q '^ROSTER_READER_DSN=.*_test$' "$tmp/$1.env" || gagal "env tes $1: ROSTER_READER_DSN tidak berakhiran _test"
+		sed -n -E 's#^DB_DSN=(.*/lokakode)$#TES_ROSTER_TULIS_DSN=\1_test#p' apps/lokakode/.env >> "$tmp/$1.env"
+		grep -q '^TES_ROSTER_TULIS_DSN=.*_test$' "$tmp/$1.env" || gagal "env tes $1: TES_ROSTER_TULIS_DSN tidak terbentuk"
+	fi
 	grep -q '^REDIS_URL=.*/15$' "$tmp/$1.env" || gagal "env tes $1: REDIS_URL bukan DB 15"
 	# SEB (KONTRAK.md §8): tes LokaKode berjalan pada DUA kontainer sungguhan dari image yang sama —
 	# lokakode-tes dengan penegakan dinonaktifkan (klien tes bukan SEB), dan lokakode-seb-tes dengan
@@ -282,6 +293,15 @@ if [ "$app" != "auth" ]; then
 	buat_ulang_skema "$skema_app"
 	if ls "apps/$app/app/Database/Migrations/"*.php > /dev/null 2>&1; then
 		migrasi "$app" "$skema_app"
+	fi
+	# LokaUjian membaca roster dari view di skema LokaKode (KONTRAK.md §18): skema itu dibuat
+	# oleh migrasi LokaKode sendiri, lalu roster_reader diberi hak SELECT pada kelima view.
+	if [ "$app" = "lokaujian" ]; then
+		bangun lokakode
+		env_tes lokakode
+		buat_ulang_skema lokakode_test
+		migrasi lokakode lokakode_test
+		"$AKAR/infra/mysql-hak-roster.sh" lokakode_test
 	fi
 	layani "$app" "$app-tes"
 	if [ "$app" = "lokakode" ]; then

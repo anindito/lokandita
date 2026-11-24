@@ -259,6 +259,36 @@ final class InternalApiTest extends AuthCase
         $this->assertSame(404, $r->status);
     }
 
+    /**
+     * LokaUjian (KONTRAK.md §5): tokennya dikenali untuk sesi dan dicatat sebagai `lokaujian`;
+     * reset kata sandi lewat token itu ditolak 403 dan dicatat, dan kata sandinya tidak berubah.
+     */
+    public function testTokenLokaUjianUntukSesiTetapiBukanUntukResetKataSandi(): void
+    {
+        $this->assertNotSame('', (string) getenv('SERVICE_TOKEN_LOKAUJIAN'));
+        $this->assertNotSame(getenv('SERVICE_TOKEN_LOKAKODE'), getenv('SERVICE_TOKEN_LOKAUJIAN'), 'setiap aplikasi punya tokennya sendiri');
+
+        $dosen = $this->user(['global_role' => 'dosen']);
+        $sesi  = $this->login($dosen);
+        $r     = $this->api()->postJson('/internal/session/touch', ['sid' => $sesi->cookies['lokandita_sid']], $this->token('lokaujian'));
+        $this->assertSame(200, $r->status, $r->body);
+
+        $mhs = $this->user(['global_role' => 'mahasiswa']);
+        $r   = $this->api()->postJson('/internal/password-reset', ['requested_by' => $dosen['id'], 'user_id' => $mhs['id']], $this->token('lokaujian'));
+        $this->assertSame(403, $r->status);
+        $this->assertSame(['error' => 'app_not_allowed'], $r->json());
+        $this->assertSame($mhs['password_hash'], $this->userRow($mhs['id'])['password_hash'], 'kata sandi tidak berubah');
+        $this->assertSame('0', (string) $this->userRow($mhs['id'])['must_change_password']);
+        $catatan = $this->lastAudit('internal.denied');
+        $this->assertSame('app_not_allowed', $catatan['detail']['reason']);
+        $this->assertSame('/internal/password-reset', $catatan['detail']['path']);
+        $this->assertSame('lokaujian', $catatan['app']);
+
+        // Token yang sama tetap sah di LokaKode untuk rute itu: penolakannya menurut aplikasi, bukan rute.
+        $r = $this->api()->postJson('/internal/password-reset', ['requested_by' => $dosen['id'], 'user_id' => $mhs['id']], $this->token('lokakode'));
+        $this->assertSame(200, $r->status);
+    }
+
     public function testApiInternalTidakButuhCsrfDanTidakMemasangCookie(): void
     {
         // Panggilan antar-kontainer memakai HTTP biasa, tanpa header dari Caddy.

@@ -40,7 +40,7 @@ daftar() { # daftar <direktori public>: berkas kelolaan yang ada di sana, relati
 
 if [ "${1:-}" = "--periksa" ]; then
     beda=0
-    for app in auth portal lokakode; do
+    for app in auth portal lokakode lokaujian; do
         if ! diff <(daftar "$SEMENTARA/$app") <(daftar "$AKAR/apps/$app/public"); then
             echo "BEDA  $app: daftar berkas tidak sama (< hasil dari berkas asli, > repositori)"; beda=1
             continue
@@ -57,7 +57,7 @@ if [ "${1:-}" = "--periksa" ]; then
     exit 1
 fi
 
-for app in auth portal lokakode; do
+for app in auth portal lokakode lokaujian; do
     tujuan="$AKAR/apps/$app/public"
     # Berkas kelolaan lama dibuang dulu, supaya yang tidak dibuat lagi tidak tertinggal.
     while read -r b; do rm -f "${tujuan:?}/${b:?}"; done < <(daftar "$tujuan")

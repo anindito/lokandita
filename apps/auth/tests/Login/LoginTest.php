@@ -229,7 +229,8 @@ final class LoginTest extends AuthCase
     {
         $user = $this->user(['global_role' => 'dosen']);
 
-        foreach (['https://lokakode.lokandita.com/kelas/3?tab=nilai', 'https://auth.lokandita.com/', 'https://lokandita.com/apa'] as $next) {
+        // lokaujian.lokandita.com masuk ALLOWED_HOSTS sejak LokaUjian tahap U0 (KONTRAK.md §10).
+        foreach (['https://lokakode.lokandita.com/kelas/3?tab=nilai', 'https://auth.lokandita.com/', 'https://lokandita.com/apa', 'https://lokaujian.lokandita.com/beranda'] as $next) {
             $this->assertRedirect($this->login($user, $next), $next, $next);
         }
 
@@ -246,7 +247,9 @@ final class LoginTest extends AuthCase
             'https://lokandita.com:8443/',
             'https://LOKANDITA.COM.evil.example',
             "https://lokandita.com/\r\nSet-Cookie: x=1",
-            'https://lokaujian.lokandita.com/',
+            // Subdomain Lokandita yang aplikasinya belum ada tetap ditolak.
+            'https://lokasiber.lokandita.com/',
+            'https://lokaujian.lokandita.com.evil.example/',
         ];
         foreach ($jahat as $next) {
             $this->assertRedirect($this->login($user, $next), self::PORTAL, 'harus ke Portal: ' . json_encode($next));

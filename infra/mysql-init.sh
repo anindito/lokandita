@@ -6,10 +6,14 @@
 #   identity, identity_test  -> auth_app
 #   lokakode, lokakode_test  -> lokakode_app
 #   portal,   portal_test    -> portal_app
+#   lokaujian, lokaujian_test -> lokaujian_app (tidak ada hak pada skema lain; roster dibaca
+#                               sebagai roster_reader)
 #   identity_reader          -> dibuat TANPA hak; hak SELECT pada view
 #                               diberikan oleh infra/mysql-hak-reader.sh (KONTRAK.md §3)
 #   judge_worker             -> dibuat TANPA hak; hak pada judge_jobs diberikan
 #                               oleh infra/mysql-hak-judge.sh (KONTRAK.md §6)
+#   roster_reader            -> dibuat TANPA hak; hak SELECT pada lima view roster
+#                               diberikan oleh infra/mysql-hak-roster.sh (KONTRAK.md §18)
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 ENV="$AKAR/infra/.env"
 
@@ -24,7 +28,7 @@ buat_pengguna() { # <pengguna> <KUNCI kata sandi>
 	tambah "ALTER USER '$1'@'%' IDENTIFIED BY '$sandi';"
 }
 
-for pasangan in "identity:auth_app:DB_PASSWORD_AUTH" "lokakode:lokakode_app:DB_PASSWORD_LOKAKODE" "portal:portal_app:DB_PASSWORD_PORTAL"; do
+for pasangan in "identity:auth_app:DB_PASSWORD_AUTH" "lokakode:lokakode_app:DB_PASSWORD_LOKAKODE" "portal:portal_app:DB_PASSWORD_PORTAL" "lokaujian:lokaujian_app:DB_PASSWORD_LOKAUJIAN"; do
 	IFS=: read -r skema pengguna kunci <<< "$pasangan"
 	buat_pengguna "$pengguna" "$kunci"
 	for s in "$skema" "${skema}_test"; do
@@ -34,6 +38,7 @@ for pasangan in "identity:auth_app:DB_PASSWORD_AUTH" "lokakode:lokakode_app:DB_P
 done
 buat_pengguna identity_reader DB_PASSWORD_IDENTITY_READER
 buat_pengguna judge_worker DB_PASSWORD_JUDGE
+buat_pengguna roster_reader DB_PASSWORD_ROSTER_READER
 
 printf '%s' "$sql" | docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot' \
 	|| gagal "mysql-init: perintah SQL ditolak"
@@ -45,5 +50,5 @@ SELECT schema_name AS skema, default_collation_name AS kolasi
  WHERE schema_name NOT IN ('mysql','sys','information_schema','performance_schema')
  ORDER BY 1;
 SELECT user AS pengguna, host FROM mysql.user
- WHERE user IN ('auth_app','lokakode_app','portal_app','identity_reader','judge_worker') ORDER BY 1;
+ WHERE user IN ('auth_app','lokakode_app','portal_app','lokaujian_app','identity_reader','judge_worker','roster_reader') ORDER BY 1;
 SQL

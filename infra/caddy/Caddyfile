@@ -82,3 +82,7 @@ auth.{$DOMAIN} {
 lokakode.{$DOMAIN} {
 	import situs lokakode
 }
+
+lokaujian.{$DOMAIN} {
+	import situs lokaujian
+}

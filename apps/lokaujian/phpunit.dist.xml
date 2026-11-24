@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Dijalankan hanya lewat infra/tes.sh <app>, di dalam kontainer, terhadap skema *_test. -->
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+    bootstrap="vendor/codeigniter4/framework/system/Test/bootstrap.php"
+    backupGlobals="false"
+    beStrictAboutOutputDuringTests="true"
+    colors="false"
+    failOnRisky="true"
+    failOnWarning="true"
+    failOnSkipped="true"
+    failOnIncomplete="true"
+    cacheDirectory="writable/.phpunit.cache"
+>
+    <testsuites>
+        <testsuite name="App">
+            <directory>./tests</directory>
+            <!-- Tes kontrak paket bersama (./vendor/lokandita/auth/tests) ditambahkan di tahap U1,
+                 saat LokaUjian punya /beranda dan login; di U0 belum ada yang bisa diujinya. -->
+        </testsuite>
+    </testsuites>
+
+    <php>
+        <server name="CODEIGNITER_SCREAM_DEPRECATIONS" value="0"/>
+        <const name="HOMEPATH" value="./"/>
+        <const name="CONFIGPATH" value="./app/Config/"/>
+        <const name="PUBLICPATH" value="./public/"/>
+    </php>
+</phpunit>

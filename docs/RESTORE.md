@@ -25,13 +25,13 @@ infra/uji-restore.sh                 # newest backup
 infra/uji-restore.sh <backup folder>
 ```
 
-It verifies the checksums, loads the dump into a temporary MySQL container that has no network, compares the list of schemas and tables with the live database, and removes the container. It then unpacks `media.tar.gz` into a temporary directory and checks that it holds only server-generated photo files, that every photo named in the restored `portal.foto` table is complete there (12 files each), that the published photo is among them, and that every file equals the one in the live volume. It never writes to the live database or the live volume. Run it after each stage that adds tables. A backup made before the photos were included has no `media.tar.gz` and is refused; make a new backup first.
+It verifies the checksums, loads the dump into a temporary MySQL container that has no network, compares the list of schemas, tables and views (`identity`, `lokakode`, `portal`, `lokaujian`) with the live database, and removes the container. It then unpacks `media.tar.gz` into a temporary directory and checks that it holds only server-generated photo files, that every photo named in the restored `portal.foto` table is complete there (12 files each), that the published photo is among them, and that every file equals the one in the live volume. It never writes to the live database or the live volume. Run it after each stage that adds tables. A backup made before the photos were included has no `media.tar.gz` and is refused; make a new backup first.
 
 ## Real restore
 
 This overwrites live data. Do it only on purpose.
 
-1. Put every host in maintenance: `infra/pemeliharaan.sh auth on`, then `lokakode`, then `portal`.
+1. Put every host in maintenance: `infra/pemeliharaan.sh auth on`, then `lokakode`, `portal` and `lokaujian`.
 2. Take a fresh backup of the current state first: `infra/backup.sh`.
 3. Check the backup you want to restore: `cd <backup folder> && sha256sum -c SHA256SUMS`.
 4. If the `.env` files are lost too, restore them: `tar -C /srv/lokandita -xzf <backup folder>/env.tar.gz`, then `infra/cek-env.sh`.
@@ -40,7 +40,7 @@ This overwrites live data. Do it only on purpose.
    ```
    zcat <backup folder>/db.sql.gz | docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot'
    ```
-7. `infra/deploy.sh auth`, `lokakode`, `portal`, then `infra/smoke.sh`.
+7. `infra/deploy.sh auth`, `lokakode`, `portal`, `lokaujian`, then `infra/smoke.sh`. Deploying `lokakode` also gives `roster_reader` its right to read the roster views again (`infra/mysql-hak-roster.sh`); the views themselves come back with the dump.
 8. Restore the Portal's uploaded photos into the volume of the running `portal` container (after step 7, so that the container and its volume exist). Files that are already there are overwritten with the same content; nothing is deleted:
    ```
    docker exec -i -u www-data portal tar -C /srv/media -xzf - < <backup folder>/media.tar.gz

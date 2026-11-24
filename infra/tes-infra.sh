@@ -24,7 +24,7 @@ bersih() {
 trap bersih EXIT
 
 echo "A. kontainer, jaringan, port (§9)"
-for c in caddy mysql redis auth lokakode portal; do
+for c in caddy mysql redis auth lokakode portal lokaujian; do
 	sama "$c berjalan" "$(docker inspect -f '{{.State.Running}}' "$c" 2>/dev/null || echo tidak-ada)" "true"
 done
 jaringan() { docker inspect -f '{{range $k, $v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$1" | xargs -n 1 | sort | xargs; }
@@ -72,7 +72,7 @@ else
 fi
 
 echo "C. HTTP antar-kontainer (§5, §9)"
-for a in lokakode portal; do
+for a in lokakode portal lokaujian; do
 	sama "$a -> http://auth-internal:8080/healthz" "$(docker exec "$a" sh -c 'curl -fsS --max-time 3 "$AUTH_INTERNAL_URL/healthz"' 2>&1 | jq -r .app 2>&1 || true)" "auth"
 done
 if docker exec caddy sh -c 'nc -z -w 3 mysql 3306' > /dev/null 2>&1; then tidak "caddy bisa mencapai mysql"; else ok "caddy tidak bisa mencapai mysql"; fi
@@ -171,12 +171,12 @@ kode() { curl -sS -o /dev/null --max-time 15 -w '%{http_code}' "$1" 2>&1 || true
 harapan_host() { if sudah_buka "$1"; then echo 200; else echo 503; fi; }
 keadaan_host() { if sudah_buka "$1"; then echo dibuka; else echo pemeliharaan; fi; }
 declare -A sebelum
-for a in lokakode portal; do sebelum[$a]="$(kode "https://$(host_aplikasi "$a")/healthz")"; done
+for a in lokakode portal lokaujian; do sebelum[$a]="$(kode "https://$(host_aplikasi "$a")/healthz")"; done
 infra/pemeliharaan.sh auth off > /dev/null
 sleep 1
 sama "auth dibuka: https://$h/healthz" "$(curl -sS --max-time 15 "https://$h/healthz" 2>&1 | jq -r .app 2>&1 || true)" "auth"
 sama "auth dibuka: /internal/x tetap 404 dari internet" "$(kode "https://$h/internal/x")" "404"
-for a in lokakode portal; do
+for a in lokakode portal lokaujian; do
 	sesudah="$(kode "https://$(host_aplikasi "$a")/healthz")"
 	sama "auth dibuka: $a ($(keadaan_host "$a")) menjawab sesuai benderanya" "$sesudah" "$(harapan_host "$a")"
 	sama "auth dibuka: jawaban $a tidak berubah" "$sesudah" "${sebelum[$a]}"
