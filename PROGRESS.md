@@ -1,5 +1,7 @@
 # Progress
 
+**LokaUjian stage U0 — contract and groundwork (`SPEC-LOKAUJIAN.md` §15) — built and deployed 2026-11-24, production runs `fbb2ed6`; smoke 54 pass, 0 fail. NOT closed: no tag until the owner's gate — a student logs in to LokaKode inside real SEB, the same student is refused in Chrome, and `https://lokaujian.lokandita.com` shows the maintenance page. See "LokaUjian U0" at the end of this file. Next: U1 (access), not started; it begins in a new session with a plan.**
+
 **Stage 13 is closed and tagged `tahap-13` (2026-11-24, owner's order). TS-PY meetings 1–5 (32 problems each) and the practical mid-term at meeting 8 (6 problems, 51 points) are built, imported and approved on the owner's order; no TS-PY meeting is published and no window is open — publishing is the owner's. Left for later: the owner's rehearsal of the mid-term with a test student (no person has seen an exam page, none opened in Safe Exam Browser), and committing the exam files after the exam (they are outside Git, listed in `.git/info/exclude`, on this server only). See "Stage 13 — TS-PY" at the end of this file.**
 
 **Stage 13 — problem production — all eleven meetings of the task (DDP101 4–7, PBO301 1–7) are built, imported and, on the owner's word of 2026-11-23 ("setujui semua soal yang sudah dibuat"), approved: 352 problems `APPROVED`. No meeting of the eleven is published and no class window is open — that is the owner's to do. No tag yet. See "Stage 13" at the end of this file.**
@@ -1527,3 +1529,56 @@ Not verified, or weaker than it looks:
 - DDP101 meetings 1–2 were published and opened for 7A–7D at 12:17–12:25 WIB; 6592 pre-generation jobs were queued. Between 14:00 and 17:45 WIB about 35–55 students per quarter hour submitted 100–170 times per quarter hour.
 - **Judging delay (submission created → judged) rose from about 30 s at 14:00 to an average of 20 minutes at 15:30–15:45 (maximum 21.5 minutes)**, and was back to about 20 s from 17:15. Pre-generation was still running the whole time. The agent ran nothing between 06:30 and 17:30 WIB, so this is the system's own capacity at `JUDGE_CONCURRENCY=4`; the cause was not investigated.
 - **The agent ran test suites from about 17:35 to 18:30 WIB (seed test, exam tests three times, the full suite for 36 minutes) without first checking whether students were working.** 34 students (17:30), 22 (17:45) and 2 (18:00–18:30) were. Their judging time in those slots was 19–21 s on average, 40 s at most. Tests use `lokakode_test` and their own worker but share the four CPUs. From now on: check `submissions` and `judge_jobs` before any test run, judge check or deploy.
+
+## LokaUjian U0 — contract and groundwork (2026-11-24)
+
+Plan approved by the owner the same evening ("approve everything else", then "approve all" for both deploys). Two commits, two deploys: `5eced7b` (A, the SEB move) and `fbb2ed6` (B and C, roster views and the empty app). Choices are in `DECISIONS.md`.
+
+Built:
+
+- **SEB in the shared package** (`KONTRAK.md` §8): library, filter, both controllers, views, texts and scripts moved from `apps/lokakode` to `packages/lokandita-auth` (`Lokandita\Auth\Seb`). LokaKode supplies `App\Libraries\SumberSeb` and `app/Config/Seb.php`; paths, Redis keys, file names, reason codes and texts are the same.
+- **Roster views** (`KONTRAK.md` §18): migration `2026-11-24-000009` creates five `roster_*` views in `lokakode`; MySQL user `roster_reader` with `SELECT` on those five and nothing else (`infra/mysql-hak-roster.sh`); `Lokandita\Auth\RosterDb` is the connection, no queries yet.
+- **Empty LokaUjian**: `apps/lokaujian` answers `/healthz`, `/bahasa/…`, `/robots.txt` and brand files; everything else 404. Container `lokaujian`, schema `lokaujian` (no table), user `lokaujian_app`, Redis DB 3, `SERVICE_TOKEN_LOKAUJIAN`, host `lokaujian.lokandita.com` in maintenance.
+- LokaAuth: the new token; `/internal/password-reset` with it answers `403 app_not_allowed`; `ALLOWED_HOSTS` holds the new host.
+- Compose, Caddy, `deploy.sh`, `pemeliharaan.sh`, `cek-env.sh`, `buat-env.sh`, `backup.sh`, `uji-restore.sh`, `tes.sh`, `tes-infra.sh`, `buat-merek.sh`; smoke checks 0–5 and 12 extended, check 13 new.
+- `KONTRAK-LOKAUJIAN.md` now lists only what later stages add.
+
+Verified by the agent (commands and output shown in the session):
+
+- **LokaKode suite before and after the move:** at `692f5bf` → `OK (295 tests, 16936 assertions)`; at `5eced7b` alone → `OK (295 tests, 16702 assertions)`; the list of 295 tests and their results is identical. The assertion count varies between runs of the same code (tests that poll the judge). In `tests/Seb/` only three `use` lines changed.
+- **Texts:** every SEB text in `id`, `en`, `ar`, composed as the pages compose it, compared with the old file → 234 texts, 0 different.
+- **Real requests to production LokaKode, before, after deploy A and after deploy B/C:** `/seb`, `/seb/periksa`, `/seb/keluar`, a missing download (each in three languages), three redirects to login, three `.seb` files → 18 of 18 the same, ignoring only the nonce, the CSRF token and the `?v=<commit>` suffix of asset links. The `.seb` files are byte-identical. `/js/seb.js` and `/js/seb-periksa.js` unchanged.
+- **Config Key** of the three production configurations (DDP101, PBO301, TS-PY), recomputed by the moved code in the running container from the stored configuration → equal to the stored key for all three; no key printed.
+- Deploy A 21:19–21:21 WIB, deploy B/C 21:58–21:59 WIB, each with 0 submissions in the last 10 minutes and 0 active student sessions. `infra/deploy.sh` for every component reports the commit.
+- After B/C: `infra/tes.sh lokaujian` → 10 tests, 60 assertions; `auth` → 111 tests, 1706 assertions; `portal` → 89 tests, 9048 assertions; `lokakode` → 298 tests, 16781 assertions (the 295 with the same results, plus 3 view tests). All pass.
+- `infra/smoke.sh` → **54 pass, 0 fail**. Check 13 from inside `lokaujian`: `roster_reader` reads 1 year, 3 courses, 10 classes, 10 teacher assignments, 235 enrollments; refused (1142) on `enrollments`, `submissions` and on an insert into a view; counts equal the tables'.
+- `infra/tes-infra.sh` → 74 pass, 0 fail. `infra/cek-env.sh` → LULUS.
+- `https://lokaujian.lokandita.com/` → 503, maintenance page, Let's Encrypt certificate valid until 2027-02-22; `/internal/session/touch` → 404.
+- `infra/backup.sh` and `infra/uji-restore.sh` → pass; the restore holds the five views and the empty `lokaujian` schema; `env.tar.gz` holds `apps/lokaujian/.env`.
+
+Not verified, or weaker than it looks:
+
+- **No request with real SEB headers has reached production since the move.** Tests compute the headers themselves; nobody has opened LokaKode in Safe Exam Browser after 21:20 WIB. This is the owner's gate, and it should be done before the TS-PY mid-term is scheduled.
+- The staff SEB panel (`/mata-kuliah/{id}/seb`) was not requested in production with a session; it is covered by the tests only.
+- The maintenance page of the new host was requested with curl, not seen in a browser.
+- A 404 for an unknown path carries no `Content-Security-Policy` in any app (seen on live LokaKode too; pages that go through a route do carry it). Not changed.
+- `PROGRESS.md` is committed after the deploy, so `infra/smoke.sh` check 0 reports a different commit until the closing deploy at the tag, as at the end of stage 13.
+
+Mistakes of this session:
+
+- `infra/tes.sh` was edited while a run of it was in progress; bash read the changed file and the run ended with a syntax error after PHPUnit had printed `OK`. The result stands; from then on unfinished work was stashed for the length of a run.
+- `apps/auth/.env` got `ALLOWED_HOSTS` with the new host before deploy A, so LokaAuth accepted `lokaujian.lokandita.com` as a login target about 40 minutes before the commit that describes it. The owner had been told deploy A held only the SEB move.
+- `infra/mysql-init.sh` was run before the second deploy (the tests need the users and schemas), not as part of it.
+- Two expectations in the new LokaUjian test were wrong on the first run (exact `Cache-Control` text; CSP on a 404) and were corrected.
+
+Changed on the server outside Git (no value shown anywhere): `infra/.env` gained `DB_PASSWORD_LOKAUJIAN` and `DB_PASSWORD_ROSTER_READER`; `apps/auth/.env` gained `SERVICE_TOKEN_LOKAUJIAN` and the host in `ALLOWED_HOSTS`; `apps/lokaujian/.env` is new, mode 600. All are in the backup of 2026-11-24 15:01 UTC.
+
+Also to know: 238 accounts already have `lokaujian` in `app_access` (granted earlier, in LokaAuth). They will be let in on the day the host is opened; review that list before U6.
+
+Owner's gate for U0:
+
+1. In Safe Exam Browser 3.10.x with a course's `.seb` file: a student logs in to LokaKode, opens a practice page, and the page is still there after a minute (the heartbeat).
+2. The same student in ordinary Chrome is refused with the "harus dibuka melalui Safe Exam Browser" page; a lecturer in Chrome gets in and can open *Safe Exam Browser* on a course page.
+3. `https://lokaujian.lokandita.com` in a browser: valid certificate, maintenance page.
+
+After the gate: tag `lokaujian-u0` on the commit that records it, then `infra/deploy.sh` for all five components and `infra/smoke.sh`.
