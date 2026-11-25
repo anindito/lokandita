@@ -1722,3 +1722,26 @@ Carried into U3:
 - Students get pictures only from U3 (`Media::dariKunci` knows no attempt yet).
 - Reordering, settings, publishing and freezing of exams; a draft follows bank edits until then.
 - The Portal card stays "segera" until U6; 238 accounts have `lokaujian` access and get in whenever the host is open.
+
+### Gate result for LokaUjian U2 (2026-11-25)
+
+The agent opened the host on the owner's order ("do no 1") at 19:11 WIB and closed it at 19:25 WIB after he reported "have done no 1 to 9 - assume some skipped"; it answers 503 from the internet again. What the server recorded in that window (counts, routes and statuses only):
+
+- **Steps 2 and 3 (one question of each type; a group with a picture and two questions): done.** The bank of one course holds one question each of `benar_salah`, `pilihan_ganda`, `isian` and `uraian`, and one group with a picture and two `isian` questions. Six `POST …/bank/soal` → 303. One stored picture (a JPEG); no question picture and no option picture was tried.
+- **Step 4 (preview): done by request.** Six `GET …/bank/soal/N` → 200, five `GET …/bank/kelompok/N` → 200, four `GET /gambar/<kunci>` → 200. What the pages looked like is the owner's observation; he reported nothing wrong.
+- **Step 5 (picture without login): one `GET /gambar/<kunci>` → 302** to the login page. The log cannot tell whether this was his private window.
+- **Step 6 (draft and export): done.** One draft with five items, `ujian.dibuat`; one export, `ujian.diekspor`, `POST …/ekspor` → 200.
+- **Step 7 (import the file, export again, compare): not done.** No `POST …/ujian/impor`, no `ujian.diimpor`. **The half of the gate that says "exports and re-imports the file without change" has not happened on the deployed system**; it rests on `ImporEksporTest` only.
+- **Step 8 (sample file): not done.** **Step 9 (pengajar): not done** — one account acted in the whole window; the pengajar half of the U1 gate stays unseen.
+- The forms refused twice (`POST …/bank/kelompok` → 422, once on creating and once on editing the group) and then accepted. The log does not keep the reason; a missing alternative text is the likely one. Two `POST …/arsip` → 303 and nothing is archived now: archive and restore were tried once.
+- These were the first logged-in requests to the deployed bank: 25 routes answered as expected, none with 500.
+
+After closing:
+
+- `infra/smoke.sh` → 60 pass, **5 fail**, all check 0: `HEAD` is the commit that holds `PROGRESS.md`; `lokaujian` runs `d186408`, the others `f3134f4`.
+- `infra/backup.sh` → `media-lokaujian.tar.gz` with 1 picture.
+- **`infra/uji-restore.sh` failed on its first real picture**: it called the server's own file "not made by the server". The mistake was the agent's, in the file-name pattern of the new check (an interval that `find`'s default pattern syntax does not know); with no picture in production the first run had not exercised it. Corrected to `-regextype posix-extended`, tried on four names (one valid kept, three foreign refused), and run again → **LULUS**: 1 row in `lokaujian.images`, its file in the archive with the recorded size and SHA-256, archive equal to the live volume.
+
+Left in production by the gate: six questions, one group, one picture and one draft exam in one course's bank. Nothing of it reaches students.
+
+**Not closed, no tag.** Open for the owner: close U2 with step 7 skipped, or do step 7 first.

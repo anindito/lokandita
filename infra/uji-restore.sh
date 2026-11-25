@@ -117,7 +117,7 @@ jumlah_gambar="$(find "$bongkar_ujian" -type f | wc -l)"
 echo "gambar soal hasil restore: $jumlah_gambar berkas"
 
 # 2. Hanya berkas buatan server yang boleh ada di dalamnya: soal/<32 heks>.png|jpg.
-asing="$(find "$bongkar_ujian" -type f ! -regex '.*/soal/[0-9a-f]\{32\}\.\(png\|jpg\)' | sed "s#^$bongkar_ujian/##")"
+asing="$(find "$bongkar_ujian" -type f -regextype posix-extended ! -regex '.*/soal/[0-9a-f]{32}\.(png|jpg)' | sed "s#^$bongkar_ujian/##")"
 [ -z "$asing" ] || gagal "arsip gambar soal memuat berkas yang bukan buatan server: $asing"
 
 # 3. Setiap baris lokaujian.images di basis data HASIL RESTORE harus punya berkasnya di arsip,
