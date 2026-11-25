@@ -18,6 +18,13 @@
     </dl>
 </div>
 
+<?php if ((int) $matkul['diampu'] === 1): ?>
+    <div class="baris-tombol" data-kelola>
+        <a class="tombol" href="/mata-kuliah/<?= (int) $matkul['id'] ?>/bank"><?= lang('Bank.judul') ?></a>
+        <a class="tombol tombol-sekunder" href="/mata-kuliah/<?= (int) $matkul['id'] ?>/ujian"><?= lang('Bank.ujian.judul') ?></a>
+    </div>
+<?php endif ?>
+
 <h2><?= lang('Ujian.kelas.judul') ?></h2>
 <?php if ($tahun === null): ?>
     <div class="kartu"><p><?= lang('Ujian.tahun.belumAda') ?></p></div>

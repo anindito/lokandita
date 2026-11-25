@@ -106,7 +106,7 @@ The academic structure (academic years, courses, classes, teacher assignments, e
 - Every question has **points** (0.25–100, steps of 0.25, default 1), stored for all four types.
 - There is no list of accepted answers for `isian` and no key for `uraian`.
 - Question text, options and group text are Markdown; raw HTML is shown as text, never executed. A question is written in one language by its author; it is not translated. Text direction follows the content (`dir="auto"`), so an Arabic question reads right to left under any interface language.
-- A question may carry one picture (§5.3).
+- A question may carry one picture (§5.3). An option of a `pilihan_ganda` may carry one picture too, and its text may then be empty — an option can be a picture instead of text (the owner's decision of 2026-11-25).
 
 ### 5.2 Groups
 
@@ -382,7 +382,7 @@ After U6 come the platform stages **A1** (roster tables move to the Lokandita co
 | 7 | Extra time | Can only be added, never taken back (§7.3) | U5 |
 | 8 | A wrong key found after the exam | Key and points can be corrected with a full rescore; no annulling of a question in the app (§11) | U5 |
 | 9 | What a pengajar may do | Run sessions, extra time, reopening, CSV and events for own classes; no bank, no editing, no release (§3) | U1 |
-| 10 | Pictures | One per group and one per question; none on options (§5.1, §5.2) | U2 |
+| 10 | Pictures | One per group and one per question. **Changed by the owner on 2026-11-25, before U2:** an option may carry a picture, instead of or next to its text (§5.1, §5.2) | U2 |
 | 11 | SEB configuration | Per course, separate from LokaKode's: students get a second `.seb` file and the pengampu registers Browser Exam Keys again (§9.1) | U4 |
 | 12 | Two pages on one attempt | The newest takes over, the older stops, an event is recorded (§8) | U3 |
 | 13 | CSV separator | Semicolon by default, comma on request (§12) | U5 |

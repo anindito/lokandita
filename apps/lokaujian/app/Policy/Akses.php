@@ -30,6 +30,9 @@ final class Akses
 
     private readonly string $u; // id pengguna, sudah di-escape dan berkutip untuk SQL
 
+    /** @var list<int>|null id mata kuliah yang diampu; dibaca sekali per permintaan */
+    private ?array $idDiampu = null;
+
     public function __construct(private readonly Identity $identitas)
     {
         $this->u = "'" . RosterDb::conn()->real_escape_string($identitas->userId) . "'";
@@ -122,5 +125,41 @@ final class Akses
         }
 
         return "(e.user_id = {$this->u} AND e.status = 'AKTIF' AND k.archived_at IS NULL AND t.status = 'active')";
+    }
+
+    /**
+     * id mata kuliah yang DIAMPU pengguna ini (superadmin: semua), dibaca dari view roster.
+     *
+     * LokaUjian tidak boleh men-join skemanya sendiri dengan roster (KONTRAK.md §18). Jadi untuk
+     * tabel milik LokaUjian — bank soal, gambar, ujian — hak akses berbentuk daftar id ini:
+     * setiap kueri pada tabel itu diikat ke daftarnya lewat diKelola(). Daftarnya dibaca dari
+     * roster sekali per permintaan dan tidak disimpan melewatinya.
+     *
+     * @return list<int>
+     */
+    public function idMatkulDiampu(): array
+    {
+        if ($this->idDiampu === null) {
+            $this->idDiampu = [];
+            if ($this->staf()) {
+                $hasil = RosterDb::conn()->query("SELECT c.id FROM roster_courses c WHERE {$this->ampuMatkul()} ORDER BY c.id");
+                foreach ($hasil->fetch_all(MYSQLI_NUM) as $b) {
+                    $this->idDiampu[] = (int) $b[0];
+                }
+            }
+        }
+
+        return $this->idDiampu;
+    }
+
+    /**
+     * Syarat SQL untuk tabel LokaUjian yang punya kolom course_id: hanya baris mata kuliah yang
+     * diampu pengguna ini. $kolom adalah nama kolom yang ditulis kode, bukan masukan pengguna.
+     */
+    public function diKelola(string $kolom = 'course_id'): string
+    {
+        $ids = $this->idMatkulDiampu();
+
+        return $ids === [] ? self::TIDAK : $kolom . ' IN (' . implode(',', $ids) . ')';
     }
 }

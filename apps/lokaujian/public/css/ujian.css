@@ -1,0 +1,25 @@
+/* LokaUjian: tampilan soal (bank, pratinjau, dan mulai tahap U3 halaman ujian mahasiswa).
+   Gaya bersama ada di /aset/lokandita.css; berkas ini hanya menambah yang khas soal. */
+.soal { border: 1px solid var(--garis); border-radius: .5rem; padding: .75rem 1rem 1rem; margin: 1rem 0; }
+.soal-kepala { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-bottom: .5rem; }
+.soal-nomor { font-weight: 700; }
+.soal-teks > :first-child, .opsi-isi > :first-child { margin-top: 0; }
+.soal-teks > :last-child, .opsi-isi > :last-child { margin-bottom: 0; }
+.soal-teks pre, .opsi-isi pre { direction: ltr; text-align: left; overflow-x: auto; }
+.soal-gambar { margin: .75rem 0; }
+.soal-gambar img, .opsi-isi img { max-width: 100%; height: auto; border: 1px solid var(--garis); border-radius: .25rem; background: #fff; }
+.opsi-isi img { max-width: min(100%, 20rem); display: block; margin-top: .25rem; }
+.soal-jawab { border: 0; margin: .75rem 0 0; padding: 0; }
+.opsi { display: flex; gap: .5rem; align-items: flex-start; font-weight: 400; margin: .5rem 0 0; }
+.opsi input { margin-top: .3rem; flex: none; }
+.opsi-huruf { font-weight: 700; flex: none; }
+.opsi-isi { flex: 1; min-width: 0; }
+.kelompok { border: 2px solid var(--garis); border-radius: .5rem; padding: .75rem 1rem; margin: 1rem 0; }
+.kelompok-bersama { padding-bottom: .75rem; border-bottom: 1px dashed var(--garis); }
+.pratinjau-pita { display: inline-block; padding: .1rem .6rem; border: 1px dashed var(--emas); border-radius: 999px; font-size: .8rem; font-weight: 700; }
+.kunci-staf { margin: .5rem 0 0; font-size: .9rem; }
+.baris-opsi { border: 1px solid var(--garis); border-radius: .5rem; padding: 0 .75rem .75rem; margin-top: .75rem; }
+.baris-opsi label.sebaris, label.sebaris { display: flex; gap: .5rem; align-items: center; font-weight: 400; }
+.gambar-kecil { max-width: 12rem; max-height: 8rem; height: auto; width: auto; border: 1px solid var(--garis); border-radius: .25rem; background: #fff; display: block; margin: .25rem 0; }
+.daftar-galat { margin: 0; padding-inline-start: 1.25rem; color: var(--bahaya); }
+.sel-centang { width: 2.5rem; }

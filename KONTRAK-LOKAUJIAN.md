@@ -2,7 +2,7 @@
 
 **This file is not the contract.** It lists what `KONTRAK.md` gains for LokaUjian (`SPEC-LOKAUJIAN.md`), written 2026-11-24 for the owner to read first. `KONTRAK.md` itself is changed only by the stage that builds each item, in the same commit as the code, so that contract and code never disagree. The stage is named with every item. When the last item has been merged, this file is deleted.
 
-Section numbers are those of `KONTRAK.md`. §20 and §21 are new sections; §18 (roster views) was merged in U0 and §19 (access and scope) was written in U1.
+Section numbers are those of `KONTRAK.md`. §21 is a new section; §18 (roster views) was merged in U0, §19 (access and scope) was written in U1, and §20 (question bank, pictures and the exam file format) in U2 — with one change the owner ordered on 2026-11-25: an option may carry a picture.
 
 The plan of a stage may change a name below when the code shows a better one; it then changes it here and in `KONTRAK.md` in the same commit. It may not change the shape of something two components share without the owner's approval.
 
@@ -35,10 +35,9 @@ The move into `packages/lokandita-auth` was done in U0 and is in `KONTRAK.md` §
 - Rotation (`POST /mata-kuliah/{id}/seb`) answers `409` while a session of that course is running.
 - `startURL` = `APP_URL/beranda` of LokaUjian.
 
-## §9 Docker networks and names — scheduler U3, pictures U2
+## §9 Docker networks and names — scheduler U3
 
 - From U3 the container `lokaujian-jadwal` (the same image `lokandita/lokaujian:<commit>`, runs the scheduler of §21, serves no HTTP, is on `data` only).
-- Named volume `lokandita_lokaujian_media` (Compose name `lokaujian_media`), mounted at `/srv/media` in `lokaujian` only — from U2.
 
 ## §10 Environment variables — after U0
 
@@ -49,13 +48,11 @@ The move into `packages/lokandita-auth` was done in U0 and is in `KONTRAK.md` §
 ## §11 Deploy and verification — after U0
 
 - From U3 `infra/deploy.sh lokaujian` also starts `lokaujian-jadwal` and fails unless the scheduler's heartbeat (§21) carries the deployed commit.
-- From U2 `infra/backup.sh` writes the picture volume as `media-lokaujian.tar.gz`; `infra/uji-restore.sh` restores it and checks every picture row against a file.
 
-New smoke checks (13, roster views, exists since U0; 14, the way in, since U1):
+New smoke checks (13, roster views, exists since U0; 14, the way in, since U1; 15, pictures, since U2):
 
 | # | Check | Stage |
 |---|---|---|
-| 15 | **Pictures.** `GET /media/soal/smoke.png` and `/media/soal/smoke.php` of `lokaujian` answer `403`; `GET /gambar/<32 zeros>` without a cookie redirects to login | U2 |
 | 16 | **Scheduler.** The heartbeat of §21 exists, is younger than 60 s and carries the current commit | U3 |
 | 17 | **SEB of LokaUjian.** As check 10, for `lokaujian`: `/seb` names the state of enforcement, `/seb/periksa` reports no header, `SEB_ENFORCEMENT` in the container equals the `.env`; `disabled` passes with the warning line | U4 |
 | 18 | **Routes exist.** Named staff and student routes of LokaUjian without a cookie each redirect to login with the right `next` | U3, extended in U5 |
@@ -79,74 +76,6 @@ Never in the export: question text, options, keys, pictures, points per question
 ## §16 App list — U6
 
 `apps/portal/app/Config/Aplikasi.php`: `lokaujian` becomes `status = aktif`, `alamat = LOKAUJIAN_URL`. Smoke check 12 keeps the six cards and their order.
-
-## §20 LokaUjian exam file format (new) — U2
-
-One JSON file per exam, UTF-8. Used by the web import and export and by `php spark ujian:impor` / `ujian:ekspor` (`SPEC-LOKAUJIAN.md` §6.3).
-
-```json
-{
-  "format": "lokaujian-ujian/1",
-  "course": "DDP101",
-  "title": "Kuis 1 — Percabangan",
-  "kind": "kuis",
-  "instructions": "Kerjakan semua soal.",
-  "settings": {
-    "mode": "per_mahasiswa",
-    "duration_minutes": 30,
-    "shuffle_questions": true,
-    "shuffle_options": true
-  },
-  "items": [
-    { "type": "benar_salah", "text": "…", "points": 1, "answer": true },
-    { "type": "pilihan_ganda", "text": "…", "points": 2, "image": "g1",
-      "options": [ { "text": "…" }, { "text": "…", "correct": true }, { "text": "…" } ] },
-    { "type": "isian", "text": "…", "points": 2 },
-    { "type": "uraian", "text": "…", "points": 10 },
-    { "type": "kelompok", "text": "…bacaan…", "image": "g2",
-      "questions": [
-        { "type": "pilihan_ganda", "text": "…", "points": 1,
-          "options": [ { "text": "…", "correct": true }, { "text": "…" } ] },
-        { "type": "isian", "text": "…", "points": 1 }
-      ] }
-  ],
-  "images": {
-    "g1": { "type": "png",  "alt": "Diagram alir", "sha256": "…", "data": "<base64>" },
-    "g2": { "type": "jpeg", "alt": "Denah",        "sha256": "…", "data": "<base64>" }
-  }
-}
-```
-
-| Field | Rule |
-|---|---|
-| `format` | Exactly `lokaujian-ujian/1` |
-| `course` | Exact course code; the importing user must be superadmin or its pengampu. On the web it must equal the course of the page |
-| `title` | 1–190 characters |
-| `kind` | `ujian` or `kuis`; default `ujian` |
-| `instructions` | Markdown, at most 5,000 characters; may be empty |
-| `settings.mode` | `per_mahasiswa` or `dikendalikan_dosen` |
-| `settings.duration_minutes` | Integer 5–600; required for `per_mahasiswa`, optional or `null` for `dikendalikan_dosen` |
-| `settings.shuffle_questions`, `settings.shuffle_options` | Boolean; default `false` |
-| `items` | 1–200 questions in all, counting those inside groups. Order in the file is the exam order |
-| `type` | `benar_salah`, `pilihan_ganda`, `isian`, `uraian`, or `kelompok` (top level only; a group cannot hold a group) |
-| `text` | Markdown, 1–10,000 characters for a question; for a group at most 20,000, and it may be empty when the group has an `image`. Raw HTML is shown as text |
-| `points` | Number 0.25–100 in steps of 0.25; default 1. Not allowed on a `kelompok` |
-| `answer` | `benar_salah` only, required: `true` or `false` |
-| `options` | `pilihan_ganda` only, required: 2–6 objects `{ "text", "correct"? }`, `text` 1–1,000 characters; **exactly one** has `"correct": true` |
-| `questions` | `kelompok` only: 1–20 questions of the four types |
-| `image` | Optional on a question and on a group: a key of `images` |
-| `images.<key>` | Key `[a-z0-9_-]{1,40}`; `type` `png` or `jpeg`; `alt` 1–300 characters; `data` Base64 of the file; `sha256` lower-case hex of the decoded bytes. At most 40 pictures. Every picture must be used by an item |
-
-Rules:
-
-- At most 24 MB. Unknown keys are refused at every level; a key that does not belong to the type (`options` on an `isian`, `answer` on a `pilihan_ganda`) is refused. Any mistake refuses the whole file and nothing is stored. Messages name the JSON path and line and say what to change (`items[3].options: exactly one option must have "correct": true, found 2`).
-- An import creates one new exam in `draf`, as the importing user. A question or group whose content (type, text, points, options with their order and key, answer, picture) equals one already in that course's bank is reused; otherwise it is added to the bank.
-- A picture whose `sha256` equals a stored picture of that course is reused as it is. Any other picture goes through the upload checks (type decided from the content, at most 5 MB and 30,000,000 pixels, decodable) and is written anew from its pixels; its `sha256` in later exports is that of the stored file.
-- The export writes the stored files, so exporting, importing and exporting again gives a byte-identical file. Key order and formatting of the export are fixed (two-space indentation, keys in the order of the table above).
-- The file never holds classes, sessions, schedules, students, answers or ids of the database.
-- The export contains the keys: staff only (superadmin, the pengampu), `Cache-Control: no-store`, `Content-Disposition: attachment; filename="lokaujian-<course code>-<exam id>.json"`.
-- `php spark ujian:impor [file] --oleh <nomor induk of an active superadmin or of the pengampu>` reads standard input without a file argument and exits 0 only when the file is accepted. `php spark ujian:ekspor <exam id> --oleh <nomor induk>` prints the file.
-- Audit in LokaUjian's `audit_log`: `ujian.diimpor` (`{ berkas, soal, soal_baru, gambar, gambar_baru }`), `ujian.impor.ditolak` (`{ berkas, alasan }`), `ujian.diekspor`; from the command line with `lewat: cli`.
 
 ## §21 LokaUjian scheduler (new) — U3
 

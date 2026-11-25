@@ -64,6 +64,23 @@ final class Roster
     }
 
     /**
+     * Mata kuliah yang DIAMPU pengguna ini (superadmin: semua) menurut kodenya — untuk impor
+     * berkas ujian, yang menyebut mata kuliah dengan kode (KONTRAK.md §20). Kodenya harus persis
+     * sama, huruf besar-kecil termasuk.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function matkulDiampuDariKode(string $kode): ?array
+    {
+        $b = $this->baris("
+            SELECT c.id, c.code, c.name, c.owner_id, 1 AS diampu
+            FROM roster_courses c
+            WHERE c.code = ? AND {$this->akses->ampuMatkul()}", [$kode])[0] ?? null;
+
+        return $b !== null && (string) $b['code'] === $kode ? $b : null;
+    }
+
+    /**
      * Kelas yang boleh dilihat pengguna ini pada satu tahun ajaran; bila $matkulId diisi,
      * hanya kelas mata kuliah itu.
      *

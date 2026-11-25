@@ -1021,7 +1021,7 @@ Access:
 
 ## 19. LokaUjian — access and scope (stage U1, `SPEC-LOKAUJIAN.md` §3, §4)
 
-LokaUjian's own; no other component calls these routes. They are recorded here so that the tests against real containers have something to hold on to. Since U1 LokaUjian has **no table**: everything below is read from the roster views (§18) and from `user_directory` (§3). Nothing here adds an environment variable.
+LokaUjian's own; no other component calls these routes. They are recorded here so that the tests against real containers have something to hold on to. Everything below is read from the roster views (§18) and from `user_directory` (§3); LokaUjian's own tables come with stage U2 (§20). Nothing here adds an environment variable.
 
 Authentication is §4 with app name `lokaujian` (filter `masuk`, account routes from `Routes::akun()`), so a user without `app_access` for `lokaujian` gets `403` on every route below, whatever their classes.
 
@@ -1044,10 +1044,172 @@ The rules live once, in `App\Policy\Akses`, as SQL conditions that `App\Librarie
 | `GET /` | public (§4) | short page with "Masuk"; with a `lokandita_sid` cookie it redirects to `/beranda` |
 | `GET /beranda` | any session; **not** behind filter `seb` (`SPEC-LOKAUJIAN.md` §9.1) | staff: the classes they see in the active academic year, with the number of `AKTIF` students and the pengajar. Mahasiswa: the list of their exams — empty until U3 — and the classes in which they are mahasiswa by the rule above |
 | `GET /mata-kuliah` | superadmin, dosen | the courses they see |
-| `GET /mata-kuliah/{id}` | same, in scope | the course and those of its classes in the active academic year that they see |
+| `GET /mata-kuliah/{id}` | same, in scope | the course and those of its classes in the active academic year that they see; for whoever manages the course (§20) also the way to its question bank and exams |
 | `GET /kelas/{id}` | same, in scope | course, academic year, pengampu, pengajar, and the `AKTIF` students (nomor induk, name) ordered by nomor induk |
 
 - Lists hold the active academic year only. `GET /kelas/{id}` also opens a class of an archived year that is in scope, marked as archived; an archived class is listed for its staff with a mark and is never a class of a mahasiswa.
 - Names and nomor induk come from `user_directory` at the moment of the request; an id without a row there is shown as "Akun Lokandita tidak ditemukan".
 - Every page is `noindex, nofollow`; pages behind a session carry `Cache-Control: no-store`.
 - `apps/lokaujian/tests/Policy/MatriksAksesTest.php` fails when a route registered in `Config/Routes.php` is missing from its matrix; `LingkupKelasTest.php` holds the cross-class cases.
+
+## 20. LokaUjian — question bank, pictures and exam file (stage U2, `SPEC-LOKAUJIAN.md` §5, §5.4, §6.3)
+
+LokaUjian's own; no other component reads these tables or calls these routes. Recorded here so that the tests against real containers have something to hold on to. Nothing here adds an environment variable.
+
+### Who manages a course
+
+**Superadmin, and the pengampu of the course** (`roster_courses.owner_id`). Nobody else reads or writes its bank, pictures or exams.
+
+LokaUjian never joins its schema with the roster (§18). `App\Policy\Akses::idMatkulDiampu()` reads the ids of the courses the user manages from the roster views, once per request and never kept beyond it; `Akses::diKelola()` turns them into the condition `course_id IN (…)`, and **every** query of `App\Libraries\Bank`, `Ujian` and `Media` carries that condition together with the course id of the route. No function fetches a question, group, picture or exam by its id alone.
+
+- Every route below except `/gambar/…` has the course id in its path: `/mata-kuliah/{m}/…`, behind `masuk:superadmin,dosen`. A course outside what the user sees → `404` (*Halaman tidak ditemukan*, as §19). A dosen who sees the course as pengajar but does not manage it → `403`. A mahasiswa → `403` from the filter.
+- A question, group or exam id that belongs to another course, in whichever course's path it is requested, → `404`, the same answer as for an id that does not exist.
+- In an archived academic year nothing changes here: the bank belongs to the course, not to a year.
+
+### Tables (`lokaujian` schema)
+
+```
+audit_log        (id BIGINT PK, actor_id, action, target_tipe, target_id, course_id, class_id, detail JSON, ip, user_agent, created_at)
+images           (id, course_id, kunci CHAR(32) UNIQUE, jenis 'png'|'jpeg', lebar, tinggi, byte, sha256 CHAR(64),
+                  uploaded_by, uploaded_at)                                                   UNIQUE(course_id, sha256)
+question_groups  (id, course_id, text, image_id NULL → images, image_alt NULL, content_hash CHAR(64), archived_at NULL,
+                  created_by, created_at, updated_by, updated_at)
+questions        (id, course_id, group_id NULL → question_groups, position NULL, type, text, points DECIMAL(5,2),
+                  answer TINYINT NULL, image_id NULL → images, image_alt NULL, content_hash CHAR(64), archived_at NULL,
+                  created_by, created_at, updated_by, updated_at)                              UNIQUE(group_id, position)
+question_options (id, question_id → questions, position, text VARCHAR(1000), correct, image_id NULL → images, image_alt NULL)
+                                                                                              UNIQUE(question_id, position)
+exams            (id, course_id, title, kind 'ujian'|'kuis', instructions, mode 'per_mahasiswa'|'dikendalikan_dosen',
+                  duration_minutes NULL, shuffle_questions, shuffle_options, status 'draf'|'terbit'|'arsip',
+                  created_by, created_at, updated_at)
+exam_items       (id, exam_id → exams, position, question_id NULL → questions, group_id NULL → question_groups)
+                                                                                              UNIQUE(exam_id, position)
+```
+
+- `course_id` is the roster's id and every `*_by` / `actor_id` is `users.id` of §3: no foreign key leaves the schema.
+- `questions.type` is `benar_salah`, `pilihan_ganda`, `isian` or `uraian` and never changes after creation. `answer` is set exactly for `benar_salah`. `points` is 0.25–100 in steps of 0.25. A question with `group_id` is a member of that group at `position` (1–20, no gaps); it is never listed, archived or put into an exam on its own.
+- A `pilihan_ganda` has 2–6 options and exactly one with `correct = 1`. **An option may carry a picture, and its text may then be empty** (the owner's decision of 2026-11-25, overruling `SPEC-LOKAUJIAN.md` §17 point 10). A question and a group carry at most one picture each; a group needs a text or a picture.
+- **The alternative text belongs to the use, not to the file**: `image_alt` sits next to `image_id` and is required whenever `image_id` is set (1–300 characters). `images` holds one row per stored file per course; the same file may be used with different alternative texts.
+- `content_hash` is the SHA-256 of the content in a fixed form — for a question: type, text, points, answer, picture (SHA-256 of the file and its alternative text), and the options with their order, key and pictures; for a group: text, picture, and the hashes of its questions in order. It is recomputed on every save and is how an import recognises content that is already in the bank.
+- `exam_items` holds exactly one of `question_id` (a question outside a group) or `group_id` per row. An exam item refers to the bank: a `draf` follows later edits in the bank. Freezing at publication is stage U3; in U2 every exam is a `draf`.
+- A question or group that any exam uses — a draft included — cannot be deleted, only archived (`archived_at`): hidden from the bank list, kept for its exams. One that no exam uses can be deleted for good; its picture file stays.
+- `audit_log` is append-only: `App\Libraries\Audit` only inserts, in the transaction of the change, and no route changes or deletes a row. The actor of a row written from a `spark` command is the person named by `--oleh`, and its `detail` carries `lewat: cli`.
+
+| `action` | When | `detail` |
+|---|---|---|
+| `ujian.dibuat` | a draft made from ticked bank items | `{ judul, butir, soal }` |
+| `ujian.diimpor` | a file accepted | `{ judul, butir, soal, berkas, soal_baru, gambar, gambar_baru }` |
+| `ujian.impor.ditolak` | a file refused (`target_tipe = berkas`) | `{ berkas, alasan, di, kesalahan }` — code and JSON path of the first mistake, and how many there were; never content of the file |
+| `ujian.diekspor` | a file handed out | `{ berkas, soal, byte }` |
+| `ujian.dihapus` | a draft deleted | `{ judul, soal }` |
+| `soal.dihapus`, `kelompok.dihapus` | a permanent delete from the bank | `{ tipe, kelompok }` / `{ soal }` |
+
+Creating, editing and archiving in the bank are not audited (`SPEC-LOKAUJIAN.md` §13 does not list them); the rows carry `created_by` / `updated_by`.
+
+### Routes
+
+All under `/mata-kuliah/{m}`, for whoever manages course `m`. Every `POST` carries the CSRF field `csrf`; forms with a file are `multipart/form-data`.
+
+| Route | Does |
+|---|---|
+| `GET /bank` | the bank: questions outside a group and groups, oldest first, with type, points, first words and the exams that use each. Query: `q` (words in a question's or group's text), `tipe` (one of the four types, or `kelompok`), `arsip=1` (the archived ones instead) |
+| `GET /bank/soal/baru?tipe=<type>[&kelompok=<id>]`, `POST /bank/soal` | form and creation of one question; with `kelompok` it becomes the last question of that group (at most 20, else `422`) |
+| `GET /bank/soal/{id}` | preview of a question as a student sees it, marked *Pratinjau*, then — outside that partial — its key and the actions. A group member redirects to its group |
+| `GET /bank/soal/{id}/sunting`, `POST /bank/soal/{id}` | form and save. The type cannot be changed |
+| `POST /bank/soal/{id}/arsip` | field `arsip` `1` or `0`; `404` for a group member |
+| `POST /bank/soal/{id}/hapus` | permanent delete; refused (redirect with `pesan=dipakai`, nothing changed) when an exam uses it or its group |
+| `POST /bank/soal/{id}/geser` | group members only: field `arah` `naik` or `turun`, one step |
+| `GET /bank/kelompok/baru`, `POST /bank/kelompok`, `GET /bank/kelompok/{id}`, `GET /bank/kelompok/{id}/sunting`, `POST /bank/kelompok/{id}`, `POST /bank/kelompok/{id}/arsip`, `POST /bank/kelompok/{id}/hapus` | the same for a group's shared part; the group page previews the whole group and lists its questions with keys. Deleting a group deletes its questions |
+| `GET /ujian` | the exams of the course with number of questions, total points and the split between automatically scored and lecturer-marked points; and the import form |
+| `POST /ujian` | fields `judul`, `jenis` (`ujian`/`kuis`), `butir[]` (`s<question id>` or `k<group id>`): a new `draf` holding those bank items in the order sent, with mode `dikendalikan_dosen`, no duration and no shuffling. Refused, with nothing stored, for no item, an item that is not a question outside a group or a group of this course, an empty group, or more than 200 questions |
+| `GET /ujian/{id}` | preview of the whole exam with the student's partial; no key on the page |
+| `GET /ujian/{id}/ekspor`, `POST /ujian/{id}/ekspor` | the page that says the file contains every key; the file (below) |
+| `POST /ujian/impor` | file field `berkas`: import (below). Accepted → redirect to the new exam; refused → `422` with every mistake |
+| `POST /ujian/{id}/hapus` | deletes a `draf`; its questions stay in the bank |
+
+Form fields of a question: `type`, `text`, `points` (a comma is accepted as decimal sign), `answer` (`benar`/`salah`), `gambar` (file), `alt`, `hapus_gambar`; for `pilihan_ganda` six rows `opsi_teks[0…5]`, `opsi_gambar_0…5` (files), `opsi_alt[…]`, `opsi_hapus_gambar[…]` and `benar` (the row that is correct). A row with neither text nor picture is not an option. A mistake answers `422` with the form, everything typed, and one sentence per mistake; nothing is stored. Forms and import go through the same rules (`App\Libraries\Aturan`).
+
+Preview uses the view partials `_soal` and `_kelompok`, which the student's exam page of stage U3 will use; they hold no key and no hint of correctness. A preview creates and records nothing. Text is Markdown (`league/commonmark`, raw HTML escaped, unsafe links removed) inside `dir="auto"`.
+
+### Pictures
+
+- **Volume** `lokandita_lokaujian_media` at `/srv/media` in `lokaujian` only (§9); files are `/srv/media/soal/<kunci>.png` or `.jpg`, `kunci` = 32 hex characters from `random_bytes(16)`. A file is never changed or deleted.
+- **Upload checks** (`App\Libraries\Gambar::periksa`, before the image is decoded): at most 5 MB (`terlalu_besar`); JPEG, PNG or WebP decided from the content, `finfo` and the image header agreeing — extension and browser MIME type are ignored (`bukan_gambar`); at most 30,000,000 pixels (`terlalu_banyak_piksel`). There is no minimum size.
+- **The upload is never stored.** `Gambar::tulis` decodes it (a truncated file is refused, `tidak_terbaca`) and writes one new file from the pixels: PNG for a PNG upload (transparency kept), JPEG quality 85 otherwise (transparency on white), EXIF orientation applied, longest side at most 2000 px. A result above 5 MB is refused (`hasil_terlalu_besar`). The new file carries no metadata and nothing that was appended to the upload.
+- A result whose SHA-256 equals a stored picture of the same course is not stored twice; the existing row is used.
+- **Pictures are not static files.** Apache's `/media/` (§16) answers only names of the form `<32 hex>-<digits>.(avif|webp|jpg)`; a question picture is `<32 hex>.png|jpg`, so `/media/soal/…` is `403` for every name, with or without a session.
+- **`GET /gambar/<kunci>`** (filter `masuk`, any role) is the only way out: the app reads the row with `Akses::diKelola()` in the query and answers the file with its `Content-Type`, `Cache-Control: private, no-store` and `X-Content-Type-Options: nosniff`. A `kunci` of another course, an unknown `kunci`, and — in U2 — every request of a pengajar or a mahasiswa get the same `404`. Students are served pictures from stage U3, only while they have an attempt in progress or a released review of an exam that contains the picture. A row whose file is missing is `404` with the log line `gambar.berkas_hilang`.
+- `infra/backup.sh` writes the volume as `media-lokaujian.tar.gz` (through `docker exec lokaujian tar`) after the dump; `infra/uji-restore.sh` unpacks it into a temporary directory, refuses any file not named `soal/<32 hex>.png|jpg`, checks every row of the restored `lokaujian.images` against its file (size and SHA-256), and compares the archive with the live volume (`docs/RESTORE.md`).
+- Test containers have no volume: their `/srv/media` is the image's own directory. A `spark` command run by a test writes pictures inside the test-runner container, not inside `lokaujian-tes`.
+
+### Exam file format
+
+One JSON file per exam, UTF-8 (a BOM is accepted). Used by `POST /ujian/impor`, `POST /ujian/{id}/ekspor` and by `php spark ujian:impor` / `ujian:ekspor`. `apps/lokaujian/contoh/ujian-contoh.json` is a file with every type of content.
+
+```json
+{
+  "format": "lokaujian-ujian/1",
+  "course": "DDP101",
+  "title": "Kuis 1 — Percabangan",
+  "kind": "kuis",
+  "instructions": "Kerjakan semua soal.",
+  "settings": {
+    "mode": "per_mahasiswa",
+    "duration_minutes": 30,
+    "shuffle_questions": true,
+    "shuffle_options": true
+  },
+  "items": [
+    { "type": "benar_salah", "text": "…", "points": 1, "answer": true },
+    { "type": "pilihan_ganda", "text": "…", "points": 2,
+      "options": [ { "text": "…" }, { "text": "…", "correct": true }, { "text": "", "image": "g2" } ],
+      "image": "g1" },
+    { "type": "isian", "text": "…", "points": 2 },
+    { "type": "uraian", "text": "…", "points": 10 },
+    { "type": "kelompok", "text": "…bacaan…",
+      "questions": [
+        { "type": "pilihan_ganda", "text": "…", "points": 1,
+          "options": [ { "text": "…", "correct": true }, { "text": "…" } ] },
+        { "type": "isian", "text": "…", "points": 1 }
+      ],
+      "image": "g3" }
+  ],
+  "images": {
+    "g1": { "type": "png",  "alt": "Diagram alir", "sha256": "…", "data": "<base64>" },
+    "g2": { "type": "png",  "alt": "Belah ketupat", "sha256": "…", "data": "<base64>" },
+    "g3": { "type": "jpeg", "alt": "Denah",        "sha256": "…", "data": "<base64>" }
+  }
+}
+```
+
+| Field | Rule |
+|---|---|
+| `format` | Exactly `lokaujian-ujian/1` |
+| `course` | Exact course code, case included; the importing user must be superadmin or its pengampu. On the web it must be the course of the page |
+| `title` | 1–190 characters, one line |
+| `kind` | `ujian` or `kuis`; default `ujian` |
+| `instructions` | Markdown, at most 5,000 characters; may be empty or absent |
+| `settings.mode` | `per_mahasiswa` or `dikendalikan_dosen` |
+| `settings.duration_minutes` | Integer 5–600; required for `per_mahasiswa`, optional or `null` for `dikendalikan_dosen` |
+| `settings.shuffle_questions`, `settings.shuffle_options` | Boolean; default `false` |
+| `items` | 1–200 questions in all, counting those inside groups. Order in the file is the exam order |
+| `type` | `benar_salah`, `pilihan_ganda`, `isian`, `uraian`, or `kelompok` (top level only; a group cannot hold a group) |
+| `text` | Markdown, 1–10,000 characters for a question; for a group at most 20,000, and it may be empty or absent when the group has an `image`. Raw HTML is shown as text |
+| `points` | Number 0.25–100 in steps of 0.25; default 1. Not allowed on a `kelompok` |
+| `answer` | `benar_salah` only, required: `true` or `false` |
+| `options` | `pilihan_ganda` only, required: 2–6 objects `{ "text"?, "correct"?, "image"? }`; `text` at most 1,000 characters, and it may be empty or absent only when the option has an `image`; **exactly one** has `"correct": true` |
+| `questions` | `kelompok` only: 1–20 questions of the four types |
+| `image` | Optional on a question, on a group and on an option: a key of `images` |
+| `images.<key>` | Key `[a-z0-9_-]{1,40}`; `type` `png` or `jpeg`, which must be what the content is; `alt` 1–300 characters — the alternative text of the uses that name this key; `data` Base64 of the file; `sha256` lower-case hex of the decoded bytes. At most 40 entries. Every entry must be used by an item. The same file may appear under two keys with different `alt` |
+
+Rules:
+
+- At most 24 MB. Types are checked strictly (a number in quotes is not a number). Unknown keys are refused at every level; a key that does not belong to the type (`options` on an `isian`, `answer` on a `pilihan_ganda`, `points` on a `kelompok`) is refused; a key written twice in one object is refused. **Any mistake refuses the whole file and nothing is stored** — no question, picture row, picture file or exam. All mistakes found are reported together (at most 50), each with its JSON path, its line in the file, and a sentence that says what to change (`items[2].options (baris 14): tepat satu opsi harus ditandai sebagai jawaban benar; sekarang 2`), in the language of the user.
+- Text is stored with `\n` line ends and without leading or trailing white space; forms store it the same way.
+- An import creates one new exam in `draf`, as the importing user. A question outside a group whose content hash equals one already in that course's bank — archived ones included, which stay archived — is reused; so is a group whose shared part and questions all equal a stored group. Anything else is added to the bank.
+- A picture whose `sha256` equals a stored picture of that course is reused as it is. Any other picture goes through the upload checks above and is written anew from its pixels; its `sha256` in later exports is that of the stored file.
+- The export writes the stored files and is a pure function of the exam's content: two-space indentation, one newline at the end, `/` and non-ASCII characters unescaped, keys in this order — top level as in the table; `settings`: `mode`, `duration_minutes` (always written, `null` when there is none), `shuffle_questions`, `shuffle_options`; an item: `type`, `text`, `points`, `answer`, `options`, `questions`, `image`; an option: `text` (always written), `correct` (only when `true`), `image`; a picture: `type`, `alt`, `sha256`, `data`. Pictures are named `g1`, `g2`, … in the order of first use (a group's picture before those of its questions, a question's before those of its options). **Exporting, importing that file into the same course and exporting again gives a byte-identical file.**
+- The file never holds classes, sessions, schedules, students, answers or ids of the database.
+- The export contains the keys: `Content-Type: application/json; charset=utf-8`, `Cache-Control: no-store`, `Content-Disposition: attachment; filename="lokaujian-<course code>-<exam id>.json"`.
+- `docker exec -i lokaujian php spark ujian:impor [file] --oleh <nomor induk> [--nama <file name>]` reads standard input without a file argument and exits 0 only when the file is accepted; a refusal prints every mistake with path and line. `php spark ujian:ekspor <exam id> --oleh <nomor induk>` prints the file to standard output and everything else to standard error. `--oleh` must be an active superadmin, or an active dosen with `lokaujian` access who is the pengampu of the course; an exam of a course that person does not manage is answered like one that does not exist.
+

@@ -1,0 +1,172 @@
+{
+  "format": "lokaujian-ujian/1",
+  "course": "DDP101",
+  "title": "Contoh — semua tipe soal",
+  "kind": "kuis",
+  "instructions": "Contoh ini memuat keempat tipe soal, soal bergambar, opsi bergambar, dan satu kelompok soal.\n\nKerjakan semua soal. Jawaban tersimpan otomatis.",
+  "settings": {
+    "mode": "per_mahasiswa",
+    "duration_minutes": 30,
+    "shuffle_questions": false,
+    "shuffle_options": true
+  },
+  "items": [
+    {
+      "type": "benar_salah",
+      "text": "Dalam bahasa C++, setiap pernyataan diakhiri dengan titik koma (`;`).",
+      "points": 1,
+      "answer": true
+    },
+    {
+      "type": "pilihan_ganda",
+      "text": "Berapakah nilai `x` setelah potongan kode berikut dijalankan?\n\n```cpp\nint x = 7;\nx = x % 3 + 2;\n```",
+      "points": 2,
+      "options": [
+        {
+          "text": "1"
+        },
+        {
+          "text": "3",
+          "correct": true
+        },
+        {
+          "text": "4"
+        },
+        {
+          "text": "9"
+        }
+      ]
+    },
+    {
+      "type": "pilihan_ganda",
+      "text": "Perhatikan diagram alir pada gambar. Apa yang dicetak bila masukannya **5**?",
+      "points": 2,
+      "options": [
+        {
+          "text": "Genap"
+        },
+        {
+          "text": "Ganjil",
+          "correct": true
+        },
+        {
+          "text": "5"
+        },
+        {
+          "text": "Tidak ada yang dicetak"
+        }
+      ],
+      "image": "g1"
+    },
+    {
+      "type": "pilihan_ganda",
+      "text": "Simbol manakah yang dipakai untuk **keputusan** (percabangan) pada diagram alir?",
+      "points": 2,
+      "options": [
+        {
+          "text": "",
+          "image": "g2"
+        },
+        {
+          "text": "",
+          "image": "g3"
+        },
+        {
+          "text": "",
+          "correct": true,
+          "image": "g4"
+        },
+        {
+          "text": "",
+          "image": "g5"
+        }
+      ]
+    },
+    {
+      "type": "isian",
+      "text": "Tuliskan operator C++ yang menghasilkan **sisa pembagian** dua bilangan bulat.",
+      "points": 0.5
+    },
+    {
+      "type": "uraian",
+      "text": "Jelaskan perbedaan perulangan `while` dan `do … while`.\n\nBerikan satu contoh keadaan ketika `do … while` lebih tepat dipakai.",
+      "points": 10
+    },
+    {
+      "type": "kelompok",
+      "text": "**Keterangan untuk tiga soal berikut.**\n\nSebuah toko memberi diskon menurut tabel pada gambar. Program kasir membaca total belanja, lalu menghitung jumlah yang harus dibayar.",
+      "questions": [
+        {
+          "type": "pilihan_ganda",
+          "text": "Berapa yang harus dibayar untuk belanja sebesar Rp250.000?",
+          "points": 2,
+          "options": [
+            {
+              "text": "Rp25.000"
+            },
+            {
+              "text": "Rp200.000"
+            },
+            {
+              "text": "Rp225.000",
+              "correct": true
+            },
+            {
+              "text": "Rp250.000"
+            }
+          ]
+        },
+        {
+          "type": "benar_salah",
+          "text": "Belanja sebesar Rp99.999 mendapat diskon 10%.",
+          "points": 1,
+          "answer": false
+        },
+        {
+          "type": "isian",
+          "text": "Berapa persen diskon untuk belanja tepat Rp500.000? Tulis angkanya saja.",
+          "points": 1
+        }
+      ],
+      "image": "g6"
+    }
+  ],
+  "images": {
+    "g1": {
+      "type": "png",
+      "alt": "Diagram alir: Mulai, baca n, keputusan \"n % 2 == 0?\"; cabang Ya mencetak \"Genap\", cabang Tidak mencetak \"Ganjil\"; lalu Selesai.",
+      "sha256": "4f049a063da7306cf20ad5f9d8662e9d067fcc2f7b3d53b83cbebf7ce718ce11",
+      "data": "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"
+    },
+    "g2": {
+      "type": "png",
+      "alt": "Simbol berbentuk oval",
+      "sha256": "17bf9ddb2205eace2409c4389981277f6ee921b761391eb1a32b2aa3768d39b2",
+      "data": "iVBORw0KGgoAAAANSUhEUgAAANwAAACCCAYAAAAt3qYGAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAC1klEQVR42u3dQUrDUBSG0Ta4ig7cgyCI+x9IodA9OOg26kAiQRRN2zTvv+98G7AkHO/FpL7t+Xw+byTdpcElkICTgJMEnAScJOAk4CTgJAEnAScJOAk4CThJwEnASQJOAk4ScBJwEnCSgJOAkwScBJwEnCTgJOAkAScBJ+mzB5egjXaPz4v/jNP7wYVeua3jqmpgghI4sGa0P74t/vlenl5BBK4+rntgWgMlhMCtCiwJ1hIQAQRuMWSVcd0CIXzAAQYgcC1Dg+z2+HqH1y24n5ABdl+APeLrDhxo4AEHGXyd4CsNboS2P7593VzQ2oU3vU9V4ZUFt3t8Bi0cXkV05cB9Xx9By181K8ErAw408IBbARtoteGlo4sGBxp4aQ3J2EZksPXR9H4nfccwfsKZbCZd6qSLAzd9tibw0tANsCl9xUxaLwfYBB1wsKkkugE2QQccbCqJbmgZG2i6FF6r6Jp9LGC66dJaflwwwCarpZVSKllz4Ew3VZ5yJpwEnAScdVLWShNOMuEkAScBJwEnCTgJuFs1vmx6zeHv0liLLzGbcBJwEnDWSlknTTjJhDPlZLqlTbjpgYrSf7G1/PL7Q6sf7PR+iD2wQeuja/Xfnzc94ayWqrJKRoCDTpWwRYCDTlWwxYCDThWwRYGDTunYNhsnoCoYWhq2uAn3/SJ7TtcntvGXbBq22Aln0plsidjiwYEHGnANoAOvHrQK2EqBAw804FaGN/2jCng50Mb7VglaeXDTaQdeFrRqU60bcL+tmeC1uTpWhtYVOPggAw480DqC1j24v/ABeHtgvSIDbiY8+K5DBhpwAAIGXCq+HhD+5yVxyIBbFWAixDnfvgAMuBiEa6C85qtMcAHXBcR7BxZwUMIEnKT5OcxDAk4CThJwEnCSgJOAk4CTBJwEnCTgJOAk4CQBJwEnCTgJOEnAScBJwEkCTgJOEnAScBJwkoCTgJMEnNR2Hw55E6uESK7jAAAAAElFTkSuQmCC"
+    },
+    "g3": {
+      "type": "png",
+      "alt": "Simbol berbentuk persegi panjang",
+      "sha256": "ca997e19632790a516d9e08a0c4e5478f47cf9b9ed10375b1d14b5f12d4dea54",
+      "data": "iVBORw0KGgoAAAANSUhEUgAAANwAAACCCAYAAAAt3qYGAAAACXBIWXMAAA7EAAAOxAGVKw4bAAABUklEQVR42u3XywmAMBBAQSNW4cEeBEHS/0EEwR482MZahL+gMxUsWR5LUkREBTyi9gQgOBAcIDgQHCA4EBwIDhAcCA4QHAgOBAcIDgQHCA4EBwgOBAeCAwQHggMEB4IDwQGCA8EBgoOiNaUM0naDbXCrfVtcOHDhXjavk81wibHP/nDwV4IDwYHgAMGB4ADBgeBAcIDgQHCA4EBwIDhAcCA4QHAgOEBwIDgQHCA4EBwgOBAcCA4QHAgOEBwIDhAcCA4EBwgOBAcIDgQHggMEB4IDBAeCAwQHggPBAYIDwQGCA8GB4ADBgeAAwYHgQHCA4EBwgOBAcIDgQHAgOEBwIDhAcCA4EBwgOPiQpsShxj7bDC4ccE6KiPAM4MKB4ADBgeAAwYHgQHCA4EBwgOBAcCA4QHAgOEBwIDhAcCA4EBwgOBAcIDgQHAgOEBwIDhAcFOsAl9QPooqtaxMAAAAASUVORK5CYII="
+    },
+    "g4": {
+      "type": "png",
+      "alt": "Simbol berbentuk belah ketupat",
+      "sha256": "96c34943c64ee2714fbc477d30cb824a486218abc8b97948c3400d479a1241bd",
+      "data": "iVBORw0KGgoAAAANSUhEUgAAANwAAACCCAYAAAAt3qYGAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAC10lEQVR42u3cMUpDURCG0Ze3DAv3EBBC9l+EgJA9KKRzBRbPwkYQRYQ7787M+dp0Fw7zJ6CHbdu2RVJIqyeQgJOAkwScBJwk4CTgJOAkAScBJwk4CTgJOEnA6cceHp88QsIO/jwnP7T7y7OHAU4joV1vl+V0PIMHnEZiu94u3z7/Cg864DQIGnjAadB8/GtmJnAKgAYecBo4H/8DDzrgQBsEDTzgNGg+mpnAaYKr5toBB9qO0MADznycCB14wLlqrh1wqgMNPODMRzMTONWHBh5w5qOZCZx6QAMPOPPRzATOVeuXawccaOABZz6amQLOVXPtgAMNPODMR5mZwIEGHnDmo8xM4EADDzjzEbqG8FqBc9VcO+BAA68RvNLgzEczEzhXTY2vXTlwoIEHnPkoM7MGONDAA858lJlZBxxo4GWFlwqc+ajsMzMNOFdNFa7d9OBAUyV404IzH1VxZk4JzlVT1Ws3FTjQVB3eFODMR3WZmbuCA03d4O0GznxUx5kZDg40dYYXBs58lJkZBM5Vk2v32eq5pYLf4UxKmZR+NBFsNX80AU+doe0OzsxU9fk4HTjw1AXaVODMTFWcj9ODA09VoU0NzsxUhfmYCpxrpypXLRU48FQBWjpwZqayzcf04Fw7Zbxq6cGBB5p/dW5mynysDw480IAzM2U+9gAHHmjAmZlqOB/bgXPtXDXgwFNDaC3BmZnmI3CunavWqLbgwAMNODPTfAQOPIEGnJlpPgIHHmigAWdmmo/AuXauGnACDzTgzEzzETjwml07Vw048EADzsysAc98BA480IBTnZlpPgIHHmjAqcbMNB+Bc+1cNeBUBx5owJmZAfDMR+DAC7p2rhpwCoAHGnAKmJnmI3AKgAcacAqameYjcAqABxpwCpiZ5iNwCoYHGnAa3Ovb+3I6nkEDTtJvrZ5AAk4CThJwEnCSgJOAk4CTBJwEnCTgJOAk4CRF9AG+4umgRg4dQgAAAABJRU5ErkJggg=="
+    },
+    "g5": {
+      "type": "png",
+      "alt": "Simbol berbentuk jajar genjang",
+      "sha256": "157767504fa36129d9fb5aa0fc7802b1f71eab9bccb97b6f311c999523ff2054",
+      "data": "iVBORw0KGgoAAAANSUhEUgAAANwAAACCCAYAAAAt3qYGAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB9UlEQVR42u3XMQrCQBRF0YlkFRbuQRDE/RciCO7Bwm2Mlb1FJsb3z9lBZnjczNR77w1Yxc4RgMGBwQEGBwYHGBwYHBgcYHBgcIDBgcGBwQEGBwYHGBwYHGBwYHBgcIDBgcEBBgcGBwYHGBwYHGBwsGlz4kftDyc3yxCv513hjA2F++HYbo+rm2Ux5+Nlkbp5w8HKYganbmy9bgoHCqduZNZN4UDh1I3MuikcKJy6kVk3hQOFUzcy66ZwoHDqRmbdFA4UTt3IrJvCgcKpG5l1UzhQOHUjs24KBwqnbmTWTeFA4dSNzLopHCicupFZN4UDg1M3MuumcGBw6kZm3RQOqg9O3Uitm8JB5cGpG8l1UzioOjh1I71umxmcsVFhbH4podrg1I0qdVM4qDQ4daNS3RQOqgxO3ahWN4WDCoNTNyrWTeEgfXDqRtW6KRwkD07dqFw3hYPUwakb1eumcJA4OHVD3RQO8ganbqibwkHe4NQNdVM4yBucuqFuCgd5g1M31E3hIG9w6oa6KRzkDU7dUDeFg7zBqRvqpnCQNzh1Q92+M484IGBQ4T51gxGS6tZaa1PvvbtW+KM3HGBwYHBgcIDBgcEBBgcGBxgcGBwYHGBwYHCAwYHBgcEBBgcGBxgcGBxgcGBwYHCAwYHBAQYHBgcGBwzzBsSF4g6ZtCceAAAAAElFTkSuQmCC"
+    },
+    "g6": {
+      "type": "png",
+      "alt": "Tabel diskon: belanja kurang dari Rp100.000 tanpa diskon; Rp100.000 sampai Rp499.999 diskon 10%; Rp500.000 atau lebih diskon 20%.",
+      "sha256": "da82b6e6995e0d8a8a1b13b89306783941b9d8160b9b7f38e9a0105bf9d8a765",
+      "data": "iVBORw0KGgoAAAANSUhEUgAAAeAAAAC+CAYAAADtJ9ymAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAI30lEQVR42u3dUW7jKAAG4LbKKfrQO4xUaTT3f6hGqjR36EOv4XnKrOUFAwYbB3+ftFI3qcFJgR+IJ36epml6AgAO9eItAAABDAACGAAQwAAggAEAAQwAAhgAEMAAIIABAAEMAAIYAAQwACCAAWAkt60Hvr69e/cA4Onp6fvr0woYAIZeAc/9/vPhnQSG9PPHL2MdybaxhRUwAHQggAFAAAOAAAYABDAACGAAQAADgAAGAAQwAAhgAEAAA4AABgABDHv7+eNX9ZeZ9ygboIXb0RWmBsVedxupvePJ/fhW59/rDiytX0dJPWtto/R8fv/5+BfC7mBD74lmSZuu7YNH9WEecAX8+8/Hv//WHjt6pXO2xjpy50kNEPP2cP+dLX/jmmNh77FPu8QWNMFBAth/gh0KYX3wOm5nPrll41zbrlxbVcUa+RHnnXM+tVtNax37vhWbU9fa77V6D1tur+W8LlvRPJLSsaOkX6f6dGh8LRk/GGgFPG8AodlibBs7Vc7e2z/3gT5WT+p1bX1/1urLrSvnM6mj3sP5f7HBw3Yeo66Mc/thqv2nwjdVhn52wQAONZqtDeDo7Zy1c+7xuh7xPcypu8XrglFCO7X42Dq+6mf7uo3+As/YWFqc05Gv6+j3cN7RbR3Df/0idtGpPiKAH2IlfYZQru0sR76u1nWVfCbb4vNb/ySD0UI41MZDfcT1D+f3cuZGNh/kcwfS1D9L2jt818557XPa2vMadUWc+ixdyDLS4qBmbMvtPzXjKxdZAYe2W2KfBcZ+L/Zc7GKD+c9bG2LqqsHYNtLaCnN5PiWvq3YQaFVX65l5ztWZBhXOGLo5fT42gd+yBR3qb7njK/t6nqZp2nLg69u7P9yAs/AjQ2vrKiB3J0TbpHVwak/E2sb31+c4K2D67DIcOcjsWY+BEjg7ASyEnS9AB76KEgAEMAAIYABAAAOAAAYABDAACGAAQAADgAAGAAQwAAhgALiMJndDAoAr23I3JCtgAOhAAANAB01uR7hl6Q3wCOYftxnriLUNK2AAeBACGAAEMAAIYABAAAOAAAYABDAACGAAQAADgAAGAAQwAAhgABDAe7rivYT3eM0tylwr4/Xtver5nLp71g89xoFQmw09rm0LYC46KXh9e3/6/vp8+v76jA4Ya8/n1F1Tfm390KO/hdps6PH7YwhgTjobremgax18+VxswIg9X1p3afm19UOv8NVmmbudsXGGwmH+2P3ntft0Lht3qPzc47cEXer4Vue3NYTNruE8E+l5f7b6FcDdwrdFaKcCvPT40nMMHZ96zSXnZwYN44VwzXiIAD4sfEMruGU4xcKvxwpwbTWbe346JYAAbha+R5Q/n1meydnPD+izIKn9eAkBnL2C3WPLpbbM1Oevvc8PGDd8bUdfR/eroHM+y6xdHW49/v5PA/Ze7Z9t9Vt7VfL88dBra33Vs4GKs9NmOdUKONQ47w0ytAItCana40PBWNJZUvXXnt+yI29ZpafKSG2F1W6V1ZZvq45HDuHYBZba9bU8T9M01a7qRmsoOVcpA9cw8lhH37bhizgAoIObt+D/QlvCZr4ACOCDQhgA9mILGgAEMAAIYABAAAOAAAYABDAACGAAQAADgAAGAAQwAPTR5Ksoz3Y/W4A9GOuwAgYAAQwAlGqyBe3OQcCoam+6zjXahhUwADwIAQwAAhgABDAAIIABQAADAAIYAAQwACCAAUAAAwACGAAEMABcxq33Cby+vUe/4Pz+Rddbn8+pu6b82vrPbu1vU1vO8kvMS5/P/dtuLb+2fmg55oUeb9U/uWgAr91JYt64YgP42vMlnWBL+bX1X2mwyQ3k3Pd7a+C3+nvDkWNe6GftcQwvPRvi2ixw/ty9weU+X1p3afm19T+K2g5ukIA2Yx5WwKca3EebCedugS7vTbq2NbV2H9Pc+mu294Uv1I95y36ubwlgGs+ES7ZAU9tUqf/P2WKtmYGnBohU2bWz/9ryrT44a3gLXwHMzrPjZXC2nm23KL/1aqB0R2Dv8mvrBxDAJw3b0i3g1gFwVPm5q2Ig3adiHzshgKlcoR21zbR3+a4ghv3C13b0OE75RRy1VyXPHw+t7Fpf9VzaEUpXm1tWp6VXhZ9hcCl9Pvb3bVW+CQRnGfOwAm4+6C5/joVcqCHWbsXUll9Tf2oLOnQF85bPQGNXQafKT/1tWv/9Y+G69vze5dfWD63GvOUFmLagx/E8TdO0xwDKeVeUgLGO/m3Dd0EDQAcCGAAEMC3YJgMQwACAAAYAAQwAAhgAEMAAIIABAAEMAAIYABDAACCAAYCwJrcj7H0/WYAjGOuwAgYAAQwAlGqyBe3uO8Coam+6zjXahhUwADwIAQwAAhgABDAAIIABQAADAAIYAAQwACCAAUAAAwACGAAEMABcxq1HpbEvsF5+0fn992JfgJ56Pvc8tpZfW3/O+fX68vea15Z73rHf6/m64ahxL9b2c8dC/UQAb5ZqOPPGFWpoqedLBv8t5dfWf3bfX59uPg47TqaXj8XGlNDPwncML4/QWJdhkHp+7/Jr6885v3t5859HYwCBY8YUrIBZdLhYGOWsrNeOz5lt73n+od8p/XghdTxcZbI5D2OrXwF82AB+ldluaUAeEbC19af+PzXDTx0Pjz75LmnPI3/cJYBPMBu8UsNaBsvRx599xm/Fy5Um3whgOs+CS4O09vjWOxjAvuE7vwDLJFUA07kjPvIKF/T5beFrO3ocL70aY2pwr7kqef54qK7WVz236Fw1v5M6vsdq1QoZyia0LccUrICzG1toRZXaaqndiqktv6b+5euPXZAUqyN1fG75OeGZU3/q77d8PlU+jLoKDvXxVH+fh7Et6LE8T9M01TYmDQG4QnAa62jZNnwXNAB0IIABQAADgAAGAAQwAAhgAEAAA4AABgAEMAAIYABAAAOAAAYAAQwACGAAGEqT+wG7+TpwBcY6rIAB4ME9T9M0eRsAwAoYAAQwACCAAUAAAwACGAAEMAAggAFAAAOAAAYABDAACGAAQAADwCj+AunNpwK5ijt+AAAAAElFTkSuQmCC"
+    }
+  }
+}

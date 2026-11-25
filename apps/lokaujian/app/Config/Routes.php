@@ -5,8 +5,8 @@ use Lokandita\Auth\Routes as RuteBersama;
 
 /** @var RouteCollection $routes */
 
-// LokaUjian tahap U1 (SPEC-LOKAUJIAN.md §15): jalan masuk dan lingkup. Belum ada soal, ujian
-// atau sesi; itu tahap U2 dan seterusnya.
+// LokaUjian (SPEC-LOKAUJIAN.md §15): jalan masuk dan lingkup (U1), bank soal dan draf ujian (U2).
+// Belum ada sesi dan pengerjaan; itu tahap U3 dan seterusnya.
 
 // KONTRAK.md §11: dipakai infra/deploy.sh untuk memastikan commit yang berjalan.
 $routes->get('healthz', '\Lokandita\Auth\Controllers\Healthz::index');
@@ -36,3 +36,41 @@ $routes->group('', ['filter' => 'masuk:superadmin,dosen'], static function (Rout
     $routes->get('mata-kuliah/(:num)', 'Matkul::lihat/$1');
     $routes->get('kelas/(:num)', 'Kelas::lihat/$1');
 });
+
+// Bank soal dan draf ujian satu mata kuliah (tahap U2, SPEC-LOKAUJIAN.md §5, §6.3; KONTRAK.md §20).
+// Hanya superadmin dan pengampu mata kuliah itu: mata kuliah di luar lingkup dijawab 404, pengajar
+// mata kuliah itu 403 (BaseController::matkulDikelola). Setiap rute memuat id mata kuliahnya dan
+// setiap kueri diikat ke id itu, jadi soal, kelompok atau ujian mata kuliah lain dijawab 404.
+$routes->group('mata-kuliah/(:num)', ['filter' => 'masuk:superadmin,dosen'], static function (RouteCollection $routes): void {
+    $routes->get('bank', 'Bank::daftar/$1');
+
+    $routes->get('bank/soal/baru', 'Soal::baru/$1');
+    $routes->post('bank/soal', 'Soal::buat/$1');
+    $routes->get('bank/soal/(:num)', 'Soal::lihat/$1/$2');
+    $routes->get('bank/soal/(:num)/sunting', 'Soal::sunting/$1/$2');
+    $routes->post('bank/soal/(:num)', 'Soal::simpan/$1/$2');
+    $routes->post('bank/soal/(:num)/arsip', 'Soal::arsip/$1/$2');
+    $routes->post('bank/soal/(:num)/hapus', 'Soal::hapus/$1/$2');
+    $routes->post('bank/soal/(:num)/geser', 'Soal::geser/$1/$2');
+
+    $routes->get('bank/kelompok/baru', 'Kelompok::baru/$1');
+    $routes->post('bank/kelompok', 'Kelompok::buat/$1');
+    $routes->get('bank/kelompok/(:num)', 'Kelompok::lihat/$1/$2');
+    $routes->get('bank/kelompok/(:num)/sunting', 'Kelompok::sunting/$1/$2');
+    $routes->post('bank/kelompok/(:num)', 'Kelompok::simpan/$1/$2');
+    $routes->post('bank/kelompok/(:num)/arsip', 'Kelompok::arsip/$1/$2');
+    $routes->post('bank/kelompok/(:num)/hapus', 'Kelompok::hapus/$1/$2');
+
+    $routes->get('ujian', 'Draf::daftar/$1');
+    $routes->post('ujian', 'Draf::buat/$1');
+    $routes->post('ujian/impor', 'Draf::impor/$1');
+    $routes->get('ujian/(:num)', 'Draf::lihat/$1/$2');
+    $routes->get('ujian/(:num)/ekspor', 'Draf::eksporHalaman/$1/$2');
+    $routes->post('ujian/(:num)/ekspor', 'Draf::ekspor/$1/$2');
+    $routes->post('ujian/(:num)/hapus', 'Draf::hapus/$1/$2');
+});
+
+// Gambar soal (SPEC-LOKAUJIAN.md §5.3): dijawab aplikasi sesudah hak akses diperiksa, tidak pernah
+// sebagai berkas statis. Semua peran lewat filter; siapa yang boleh melihat gambar mana diputuskan
+// di kueri (App\Libraries\Media) — tahap U2: hanya pengelola mata kuliahnya.
+$routes->get('gambar/([0-9a-f]{32})', 'Gambar::tampil/$1', ['filter' => 'masuk']);
