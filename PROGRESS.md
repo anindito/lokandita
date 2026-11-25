@@ -1,5 +1,7 @@
 # Progress
 
+**LokaUjian stage U3 — exam setup and delivery (`SPEC-LOKAUJIAN.md` §6, §7, §8, §9.2) — built and deployed on 2026-11-25 (`lokaujian` and its new scheduler `lokaujian-jadwal` run `7694ee3`); **not closed, no tag: the owner's gate is open.** `auth`, `lokakode`, `portal` and the judge worker were not redeployed and still run `abf9717`, so smoke is 72 pass, 4 fail (check 0 and the worker's commit only). **No logged-in request has reached the deployed U3 code and no person has seen any of its pages.** It runs with `SEB_ENFORCEMENT=disabled`; the host `lokaujian.lokandita.com` is in maintenance. See "LokaUjian U3" at the end of this file.**
+
 **LokaUjian stage U2 — question authoring (`SPEC-LOKAUJIAN.md` §5, §6.3) — finished 2026-11-25, tag `lokaujian-u2` on `abf9717`, closed on the owner's order with gate step 7 skipped: **importing a file and export → import → export giving the same file have not been seen on the deployed system and rest on `ImporEksporTest` only.** All five components run `abf9717`; smoke 65 pass, 0 fail. The host `lokaujian.lokandita.com` is in maintenance. See "LokaUjian U2" and what follows it at the end of this file. Next: U3 (exam setup and delivery), begun 2026-11-25 with a plan for the owner's approval.**
 
 **LokaUjian stage U1 — access (`SPEC-LOKAUJIAN.md` §3, §4) — finished 2026-11-25, tag `lokaujian-u1`, closed on the owner's order with half of the gate: the student part was done by the owner and is confirmed by the log; **the pengajar part (own classes only, changed class number → *Halaman tidak ditemukan*) was skipped by the owner and is proven by tests only.** The host `lokaujian.lokandita.com` is in maintenance again. See "LokaUjian U1" and "Gate result for LokaUjian U1" at the end of this file. Next: U2 (question authoring), not started; it begins in a new session with a plan.**
@@ -1772,3 +1774,92 @@ What the U3 session read for itself before writing this entry (19:44 WIB, read-o
 Not read again: `infra/tes-infra.sh`, `infra/backup.sh` and `infra/uji-restore.sh` at `abf9717`.
 
 This entry is committed after that deploy, so `infra/smoke.sh` check 0 reports a different commit for every component until the next deploy, as at the end of the earlier stages.
+
+## LokaUjian U3 — exam setup and delivery (2026-11-25)
+
+Plan presented and answered by the owner with "approve all". Read as: `SPEC-LOKAUJIAN.md` §17 points 3, 4, 5, 12 and 14 confirmed; and — the agent's reading of two questions the answer did not address in words — maximum points stay visible to students, and the gate uses a separate test class, not TS-6. Choices are in `DECISIONS.md`. Two commits: `e22f6f9` (the stage: code, `KONTRAK.md` §21 and §22, infrastructure) and `7694ee3` (a defect in the deploy check, found on the second deploy; below). **Built and deployed; not closed — the owner's gate is open, no tag.**
+
+Built:
+
+- **Exams** (`KONTRAK.md` §22): the draft page gained settings (title, kind, instructions, mode, duration, the two shuffles) and the order of its items (up, down, remove, add from the bank). **Publishing freezes the content** into `exam_groups`, `exam_questions`, `exam_options`; it is refused with a list of exactly what is missing. Withdraw to draft (no attempt yet), archive, delete (no attempt). The export of a published exam writes the frozen copy.
+- **Sessions:** a published exam is given to a class, one session per exam per class. `per_mahasiswa`: schedule, open and close by hand. `dikendalikan_dosen`: Mulai, set or change the end (minutes from now, or a clock time), Akhiri announced 30 seconds ahead, automatic end 8 hours after the start. A plain session page: state, server time, scheduler alive or not, three counts. A pengajar runs the sessions of their own classes and can preview the exam; `Akses` now hands out class ids (carried from U2).
+- **The time rule, once:** `App\Libraries\Tenggat`, SQL over MySQL's clock. The deadline is not stored; an attempt past its deadline is ended whatever its row says. Saves are accepted up to 10 seconds after the deadline.
+- **Scheduler** (`KONTRAK.md` §21): container `lokaujian-jadwal`, `php spark ujian:jadwal`, a pass every 10 seconds, heartbeat in Redis. It only marks ended attempts as submitted.
+- **Student side:** the home list; the page before the start; the waiting page that turns into the exam when the lecturer starts; the exam page — one question at a time, question map, ragu-ragu, Hapus pilihan, character counts, countdown from the server's seconds, three save states, answers held and retried without a connection, resume, takeover by the newest page, review panel, Kumpulkan, receipt. Pictures reach a student only while their attempt runs.
+- **Copy and paste:** paste blocked on every path of §9.2, copy and cut blocked, text selection and printing off; `paste_allowed` exempts. `paste_blocked` and `page_taken_over` are recorded in the new `integrity_events`.
+- **SEB in this stage:** `SEB_ENFORCEMENT` joined LokaUjian's variables. With `disabled` every student page carries the red banner; with `enabled` students are refused (enforcement itself is U4).
+- Compose, `deploy.sh`, `lib.sh`, `tes.sh` (second container with `enabled`, headless Chromium, one scheduler pass), `tes-infra.sh` section A4, smoke checks 16 and 18. Texts in `id`, `en`, `ar` (two new language files).
+- No file of `auth`, `lokakode`, `portal`, the shared package or the judge changed (`git diff abf9717 --stat` lists only `apps/lokaujian`, `infra` and the root documents).
+
+Verified by the agent (commands and output shown in the session):
+
+- `infra/tes.sh lokaujian` at the final code → `OK (101 tests, 8765 assertions)`, against real MySQL, Redis, `auth-tes`, `lokaujian-tes`, `lokaujian-seb-tes` and a real headless Chromium. Among them:
+  - `MatriksAksesTest`: all 53 routes × seven actors (a second student was added). The 25 new routes: pengajar B and the pengampu of another course get 404 on the session of class XA; a pengajar gets 404 on schedule and delete; staff get 403 on student routes; **student B gets 404 on the session of class XA**; every refused write is sent with a valid CSRF token and leaves the checksum of all fourteen tables unchanged.
+  - **The gate cases, on test containers** (`PengerjaanTest`, `HalamanUjianTest`): a student completes an exam in each timing mode; the browser is closed mid-exam, five minutes pass, and the reopened page has the same answers, the same order and 15 of 20 minutes; a save 7 seconds after the deadline is accepted and one 12 seconds after is refused with `409 waktu_habis`, nothing changed; Ctrl+V, Shift+Insert, the paste event, drop, `beforeinput`, middle click and the context menu are each refused in an `isian` box, an `uraian` box and a box inside a group, by real key and mouse events.
+  - Cross-class (`PengerjaanTest`, `SesiTest`): six kinds of outsider — a student of another class, of another course, a `LULUS` one, a withdrawn one, one of an archived class, one of an archived year — get an answer identical to "does not exist" on every student route, cannot save with student A's page token, and change nothing. A session of class XA answers pengajar B exactly like a session that does not exist.
+  - Freezing (`TerbitTest`): after publishing, an edit in the bank changes neither the preview nor the frozen rows, and the export is byte-identical to the one taken before the edit.
+  - One attempt: a second *Mulai* returns the same attempt, and a direct second `INSERT` is refused by MySQL (1062).
+  - Counter: an older save never overwrites a newer one. Takeover: the old page gets `409 diambil_alih`, one event is recorded however often it retries, and in the browser the old page stops with the sentence.
+  - Without a connection (network switched off through the DevTools Protocol): the header says *Belum tersimpan — mencoba lagi*, the banner shows, nothing reaches the database, the typed text stays; back online both answers arrive and the header says *Tersimpan*.
+  - Scheduler: marks nothing inside the 10-second grace; then `waktu_habis` with `submitted_at` equal to the deadline; `diakhiri_dosen` for a session the lecturer ended; a second pass changes nothing. As a real process: heartbeat with commit and pid; a second scheduler exits with its log line; a missing variable exits 78.
+  - With `SEB_ENFORCEMENT=enabled` (second container): a student gets 403 on every exam route and on the JSON endpoints, the home list still opens, staff are unaffected.
+  - Layout: the exam page in Indonesian, Arabic and dark mode at 1280 and 390 pixels — direction, nothing overflowing, countdown left-to-right, no CSP violation and no script error. The agent looked at the six screenshots.
+- `infra/tes.sh auth`, run because `infra/tes.sh` itself changed → `OK (111 tests, 1706 assertions)`, the same numbers as at U1.
+- `infra/cek-env.sh` → LULUS (13 keys for `lokaujian`).
+- `infra/deploy.sh lokaujian` at `7694ee3` → migration done; `/healthz` reports the commit; the scheduler's heartbeat carries the commit and the host name of the new container.
+- `infra/smoke.sh` → **72 pass, 4 fail**: check 0 for `auth`, `lokakode`, `portal` and the worker's commit in check 6 — not redeployed, by the owner's instruction. Checks 16 (3 lines) and 18 (8 lines) pass; check 18 prints the warning that students are not required to use SEB.
+- `infra/tes-infra.sh` → 83 pass, **5 fail**, all five because `auth`, `lokakode` and `portal` do not run `HEAD`. Section A4 (9 lines) passes.
+- `infra/backup.sh` → done, 1 question picture. `infra/uji-restore.sh` → LULUS, 66 schemas/tables (the seven new ones among them).
+- Production schema `lokaujian`: the seven new tables exist and are empty; the one exam is still a `draf`. From the internet `/beranda`, `/sesi/1`, `/ujian-saya/1/kerjakan` and `/js/ujian.js` → 503 (maintenance); from inside, `/js/ujian.js` → 200.
+
+Not verified, or weaker than it looks:
+
+- **No logged-in request has reached the deployed U3 code.** The agent does not create sessions for production accounts. Publishing, sessions, the exam page and every save are proven only between test containers. The owner's gate is the first real use.
+- **No person has seen any page of U3.** The agent saw screenshots of the student's exam page and its review panel, rendered by the test browser. The lecturer's pages — the draft's edit page, the exam page with its sessions, the session page — and the student's home list, start page, waiting page and receipt have been seen by nobody; tests read their HTML only.
+- **No real Safe Exam Browser.** This stage has none by design; the gate is done in an ordinary browser with the red banner. Whether the exam page behaves inside SEB 3.10.x (key handling, the paste block next to SEB's own) is U4.
+- **The paste block was proven in Chromium on Linux only.** Not in Firefox, not in Safari, not on Windows.
+- **No load.** One browser at a time; the largest test world has three students. 110 concurrent students is U6. Each exam page asks the server every 10 seconds and each request passes the shared session check.
+- **A student who closes the browser while offline loses what was typed since the last *Tersimpan*** — unsent answers live in the page only (`DECISIONS.md`). The page asks before closing.
+- The watermark's clock is the browser's (display only; no decision uses it).
+- The lecturer's session page does not refresh itself, shows three counts and no student. Extra time and reopening have no screen yet: if a student's laptop dies during the gate there is nothing to press (U5).
+- **No score exists.** Ended attempts are marked, not scored (U5).
+- A session that opens or closes by its schedule leaves no audit row.
+- The suites of `lokakode` and `portal` were not run: no file of theirs or of the shared package changed, but `infra/tes.sh`, which runs them, did.
+- The Arabic texts (195 new keys) were written by the agent and read by no Arabic speaker.
+- `PROGRESS.md` is committed after the deploy, so `infra/smoke.sh` check 0 reports a different commit for `lokaujian` too until the closing deploy.
+
+Mistakes of this session:
+
+- **The deploy check accepted a dead scheduler's heartbeat.** As first written, `infra/deploy.sh lokaujian` only compared the commit in the heartbeat. A heartbeat outlives its writer by up to 60 seconds, so the second deploy of `e22f6f9` reported "LULUS" about 25 seconds before the new scheduler had taken over (`--periksa` in the new container answered "no heartbeat" at that moment). The first deploy was not affected (there was no older heartbeat). Corrected in `7694ee3`: deploy, smoke check 16 and `tes-infra.sh` now require the heartbeat to come from the running container; the third deploy waited 47 seconds and showed the new container's name.
+- A view variable named `kelas` reached the picture partial and the page of a draft with a picture answered 500. Found by two tests of the first run, before any deploy; corrected (`DECISIONS.md`).
+- An answer was written into the `value` attribute with attribute escaping, which turns spaces into `&#x20;`; correct, but the test that reads the page failed. Changed to ordinary escaping.
+- Two expectations in the new tests were wrong on the first run (the exact text of `Cache-Control`; the word "correct" inside `autocorrect`). No application code changed because of them.
+- The plan named three or four commits; the stage is one, plus the correction (`DECISIONS.md`).
+- `KONTRAK-LOKAUJIAN.md` said the scheduler deletes its heartbeat on a clean stop and passes "at least every 20 seconds". It never deletes it (the image has no `pcntl`) and passes every 10 seconds; `KONTRAK.md` §21 says what the code does.
+
+Changed on the server outside Git (no value shown anywhere): `apps/lokaujian/.env` gained `SEB_ENFORCEMENT=disabled` (not a secret). The container `lokaujian-jadwal` is new. Production schema `lokaujian`: migration `2026-11-25-000002` ran (seven tables, two columns on `exams`). All are in the backup of 2026-11-25 13:46 UTC.
+
+Owner's gate for U3 (`SPEC-LOKAUJIAN.md` §15). It is done in an ordinary browser; every student page shows the red banner "MODE UJI".
+
+1. **Before opening the host:** in LokaKode, a class whose only `AKTIF` student is `Dummy` (the test class the plan asked for). While the host is open and SEB is off, any student of a class that has a session could start that exam; with a separate class only `Dummy` can.
+2. Tell the agent to open the host (`infra/pemeliharaan.sh lokaujian off`).
+3. As superadmin or pengampu: *Mata kuliah* → the course → *Ujian dan kuis* → the draft → **Sunting**: mode *Per mahasiswa*, durasi `5`, **Simpan setelan**; back to the exam → **Terbitkan** → **Berikan ke kelas**: the test class, opening a few minutes ago, closing in an hour.
+4. As `Dummy`: the home lists the exam → open it → **Mulai**. Answer a choice, type in a short and a long answer; the header must say *Tersimpan* with a time. Press **Ctrl+V** in each text box: refused, with a message.
+5. **Close the browser.** Open it again, log in, **Lanjutkan**: the answers are there and the countdown has gone on.
+6. Let the 5 minutes run out while typing: the page stops with *Waktu habis*; the receipt says how many were answered. (The agent then reads from the log whether a save arrived after the deadline and was refused.)
+7. Second exam, lecturer-controlled: in the bank tick a few questions → **Buat draf ujian** → **Terbitkan** (the mode stays *Dikendalikan dosen*) → **Berikan ke kelas** → open the session (the class name in the table).
+8. As `Dummy`, open that exam: *Menunggu dosen memulai ujian*. As the lecturer press **Mulai** (10 minutes): Dummy's page becomes the exam by itself. Answer, **Selesai** → check the review → **Kumpulkan**.
+9. Optional: a third exam, started and then ended with **Akhiri** while Dummy is typing: Dummy sees the notice and the page stops within about 40 seconds.
+10. Optional, carried from U1: as a pengajar of the test class, the session opens and **Mulai** works; the bank is refused.
+11. Tell the agent to close the host. The agent then runs `infra/smoke.sh`, `infra/backup.sh` and `infra/uji-restore.sh` and reports what the server recorded.
+
+After the gate: tag `lokaujian-u3` on the commit that records it. Redeploying `auth`, `lokakode`, `portal` and the judge worker so that check 0 passes needs the owner's word.
+
+Carried into U4:
+
+- The alias `seb` is a stand-in; U4 replaces it with the shared `WajibSeb`, adds `SEB_ENCRYPTION_KEY`, the configuration tables and panel, `lokaujian`'s SEB routes, smoke check 17, and the remaining events of §9.3.
+- The pengajar half of the U1 gate and the import half of the U2 gate are still unseen on the deployed system unless steps 10 above and a real import happen.
+- No page of the lecturer's side has been seen in a browser by a person or a layout test; Arabic is unread by a speaker.
+- No extra time, no reopening, no live view per student, no score, no CSV (U5). No load test (U6).
+- The Portal card stays "segera" until U6; 238 accounts have `lokaujian` access and get in whenever the host is open — **from U3 on that matters**: with SEB off they can start any exam given to their class.
+
