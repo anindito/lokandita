@@ -1,5 +1,7 @@
 # Progress
 
+**LokaUjian stage U2 — question authoring (`SPEC-LOKAUJIAN.md` §5, §6.3) — finished 2026-11-25, tag `lokaujian-u2` on `abf9717`, closed on the owner's order with gate step 7 skipped: **importing a file and export → import → export giving the same file have not been seen on the deployed system and rest on `ImporEksporTest` only.** All five components run `abf9717`; smoke 65 pass, 0 fail. The host `lokaujian.lokandita.com` is in maintenance. See "LokaUjian U2" and what follows it at the end of this file. Next: U3 (exam setup and delivery), begun 2026-11-25 with a plan for the owner's approval.**
+
 **LokaUjian stage U1 — access (`SPEC-LOKAUJIAN.md` §3, §4) — finished 2026-11-25, tag `lokaujian-u1`, closed on the owner's order with half of the gate: the student part was done by the owner and is confirmed by the log; **the pengajar part (own classes only, changed class number → *Halaman tidak ditemukan*) was skipped by the owner and is proven by tests only.** The host `lokaujian.lokandita.com` is in maintenance again. See "LokaUjian U1" and "Gate result for LokaUjian U1" at the end of this file. Next: U2 (question authoring), not started; it begins in a new session with a plan.**
 
 **LokaUjian stage U0 — contract and groundwork (`SPEC-LOKAUJIAN.md` §15) — finished 2026-11-25, tag `lokaujian-u0`, on the owner's report that the gate passed: real SEB 3.10.2 is accepted by LokaKode after the move, an ordinary browser is refused, and `lokaujian.lokandita.com` shows the maintenance page. See "LokaUjian U0" and "Gate result for LokaUjian U0" at the end of this file. LokaUjian stays in maintenance. Next: U1 (access), not started; it begins in a new session with a plan.**
@@ -1755,3 +1757,18 @@ The owner ordered "Close with step 7 skipped". U2 is closed on these terms:
 - Also unseen: question pictures and option pictures (only a group picture was uploaded), the sample file, the `spark` commands with `--oleh`, and the pengajar's view (carried from U1).
 
 `lokaujian` is deployed at the commit that holds this entry. The tag `lokaujian-u2` goes on that commit once `infra/smoke.sh` passes, which needs `auth`, `lokakode`, `portal` and the judge worker redeployed — the owner's word, not yet given.
+
+### Closing deploy of LokaUjian U2 — 2026-11-25
+
+Recorded on the owner's word at the start of the U3 session: all five components were redeployed at `abf9717`, `infra/smoke.sh` passed with 65 pass and 0 fail, and the tag `lokaujian-u2` was placed. The output of that deploy and that smoke run is in the session that made them, not in this one.
+
+What the U3 session read for itself before writing this entry (19:44 WIB, read-only):
+
+- `GET /healthz` inside `auth`, `lokakode`, `portal` and `lokaujian` → each answers commit `abf97173ef2ce6eb3510591f4b879ca34ae023c0`.
+- `git rev-parse lokaujian-u2^{commit}` → the same commit; `git ls-remote --tags origin` lists `lokaujian-u2`; `main` equals `origin/main`.
+- `infra/smoke.sh`, run again → `smoke: 65 lulus, 0 gagal, 0 belum aktif`, `smoke: LULUS`. Its check 6 passed, so the judge worker's heartbeat carries that commit as well.
+- `infra/pemeliharaan.sh status` → `lokaujian.lokandita.com` in maintenance (503); the other three hosts open.
+
+Not read again: `infra/tes-infra.sh`, `infra/backup.sh` and `infra/uji-restore.sh` at `abf9717`.
+
+This entry is committed after that deploy, so `infra/smoke.sh` check 0 reports a different commit for every component until the next deploy, as at the end of the earlier stages.
