@@ -72,6 +72,7 @@ sama "lokaujian-jadwal memakai image yang sama dengan lokaujian" "$(docker inspe
 sama "lokaujian-jadwal tanpa volume gambar" "$(volume lokaujian-jadwal)" ""
 if [ "$(docker exec lokaujian-jadwal id -u)" != "0" ]; then ok "lokaujian-jadwal berjalan bukan sebagai root"; else tidak "lokaujian-jadwal berjalan sebagai root"; fi
 sama "denyut penjadwal membawa commit HEAD" "$(denyut_jadwal | jq -r '.commit' 2>/dev/null || true)" "$head"
+sama "denyut penjadwal ditulis kontainer yang berjalan" "$(denyut_jadwal | jq -r '.nama' 2>/dev/null | cut -d: -f1)" "$(docker inspect -f '{{.Config.Hostname}}' lokaujian-jadwal)"
 sama "penjadwal tidak melayani HTTP" "$(docker exec lokaujian-jadwal sh -c 'curl -s -o /dev/null --max-time 2 -w "%{http_code}" http://127.0.0.1:8080/healthz || true')" "000"
 
 echo "B. /healthz dan commit (§11)"

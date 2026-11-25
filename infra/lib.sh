@@ -62,6 +62,17 @@ denyut_jadwal() {
 	docker exec redis redis-cli -n 3 get lokaujian:jadwal 2> /dev/null || true
 }
 
+# Benar bila denyut penjadwal membawa commit <commit> DAN ditulis oleh kontainer lokaujian-jadwal
+# yang sekarang berjalan. Denyut bertahan 60 detik sesudah penulisnya mati, jadi commit saja
+# tidak membuktikan apa-apa: sisa denyut kontainer lama membawa commit yang sama pada deploy ulang.
+denyut_jadwal_sah() { # <denyut JSON> <commit>
+	local host
+	host="$(docker inspect -f '{{.Config.Hostname}}' lokaujian-jadwal 2> /dev/null || true)"
+	[ -n "$host" ] && [ -n "$1" ] \
+		&& [ "$(jq -r '.commit' <<< "$1" 2> /dev/null)" = "$2" ] \
+		&& [ "$(jq -r '.nama' <<< "$1" 2> /dev/null | cut -d: -f1)" = "$host" ]
+}
+
 # Benar bila layanan pengguna tetap hidup tanpa ada yang login.
 linger_aktif() {
 	[ "$(loginctl show-user "$(id -un)" -p Linger --value 2> /dev/null)" = "yes" ]

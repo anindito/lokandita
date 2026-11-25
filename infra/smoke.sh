@@ -344,12 +344,12 @@ vol="$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/srv/media"}}{{
 if [ "$vol" = "lokandita_lokaujian_media" ]; then ok "lokaujian: /srv/media adalah volume $vol"; else tidak "lokaujian: /srv/media bukan volume lokandita_lokaujian_media ('$vol')"; fi
 
 echo "16. penjadwal LokaUjian (tahap U3, KONTRAK.md §21)"
-# Denyutnya di Redis ada, lebih muda dari 60 detik, dan membawa commit HEAD.
+# Denyutnya di Redis ada, lebih muda dari 60 detik, membawa commit HEAD, dan ditulis kontainer yang berjalan.
 denyut="$(denyut_jadwal)"
-if [ -n "$denyut" ] && [ "$(jq -r '.commit' <<< "$denyut" 2> /dev/null)" = "$head" ]; then
-	ok "denyut penjadwal -> $denyut"
+if denyut_jadwal_sah "$denyut" "$head"; then
+	ok "denyut penjadwal, dari kontainer yang berjalan -> $denyut"
 else
-	tidak "penjadwal seharusnya commit $head, denyut di Redis: ${denyut:-<tidak ada>} (infra/deploy.sh lokaujian)"
+	tidak "penjadwal seharusnya commit $head dan berdenyut dari kontainer lokaujian-jadwal yang berjalan; denyut di Redis: ${denyut:-<tidak ada>} (infra/deploy.sh lokaujian)"
 fi
 umur="$(jq -r '(now - (.waktu | fromdateiso8601)) | floor' <<< "$denyut" 2> /dev/null || true)"
 if [[ "$umur" =~ ^-?[0-9]+$ ]] && [ "$umur" -ge -5 ] && [ "$umur" -lt 60 ]; then ok "denyut penjadwal berumur $umur detik (batas 60)"; else tidak "denyut penjadwal tidak ada atau terlalu tua ('${umur:-tidak ada}' detik)"; fi

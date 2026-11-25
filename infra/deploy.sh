@@ -172,19 +172,20 @@ if ! verifikasi_commit "$sasaran" "$commit"; then
 	gagal "deploy $sasaran: kontainer tidak menjalankan commit $commit"
 fi
 # Penjadwal LokaUjian (KONTRAK.md §21) berjalan dari image yang sama dan diganti bersama
-# aplikasinya. Deploy GAGAL kecuali denyutnya di Redis membawa commit ini. Penjadwal baru
-# mengamati denyut lama sampai 25 detik sebelum mengambil alih, jadi ditunggu sampai 90 detik.
+# aplikasinya. Deploy GAGAL kecuali denyut di Redis membawa commit ini DAN ditulis kontainer yang
+# baru (lib.sh: denyut_jadwal_sah). Penjadwal baru mengamati denyut lama sampai 25 detik sebelum
+# mengambil alih, jadi ditunggu sampai 90 detik.
 if [ "$sasaran" = "lokaujian" ]; then
 	compose up -d --no-build --force-recreate --no-deps lokaujian-jadwal
 	denyut=""
 	for ((i = 1; i <= 45; i++)); do
 		denyut="$(denyut_jadwal)"
-		if [ -n "$denyut" ] && [ "$(jq -r '.commit' <<< "$denyut" 2> /dev/null)" = "$commit" ]; then break; fi
+		if denyut_jadwal_sah "$denyut" "$commit"; then break; fi
 		sleep 2
 	done
-	if [ "$(jq -r '.commit' <<< "$denyut" 2> /dev/null)" != "$commit" ]; then
+	if ! denyut_jadwal_sah "$denyut" "$commit"; then
 		docker logs --tail 30 lokaujian-jadwal >&2 || true
-		gagal "deploy lokaujian: penjadwal tidak berdenyut dengan commit $commit (denyut terakhir: ${denyut:-tidak ada})"
+		gagal "deploy lokaujian: kontainer penjadwal yang baru tidak berdenyut dengan commit $commit (denyut terakhir: ${denyut:-tidak ada})"
 	fi
 	echo "verifikasi lokaujian-jadwal: denyut -> $denyut"
 	echo "verifikasi lokaujian-jadwal: LULUS, penjadwal menjalankan commit $commit"
