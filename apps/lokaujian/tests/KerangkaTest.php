@@ -8,9 +8,9 @@ use Lokandita\Auth\Testing\Http;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Tahap U0: kerangka LokaUjian lewat HTTP sungguhan ke lokaujian-tes. Aplikasinya belum punya
- * halaman; yang dibuktikan di sini adalah bahwa ia menjawab sebagai dirinya dan tidak
- * membuka apa pun selain yang disebut KONTRAK.md §4.
+ * Kerangka LokaUjian lewat HTTP sungguhan ke lokaujian-tes: ia menjawab sebagai dirinya dan
+ * tidak membuka apa pun selain yang disebut KONTRAK.md §4. Jalan masuknya (login, menu akun,
+ * halaman depan) diuji ClientAppTest dari paket bersama; lingkupnya di tests/Policy/.
  */
 final class KerangkaTest extends TestCase
 {
@@ -49,17 +49,31 @@ final class KerangkaTest extends TestCase
     }
 
     /**
-     * Belum ada halaman: tidak ada beranda, tidak ada rute akun, tidak ada rute SEB, tidak ada
-     * API internal. Semuanya 404.
+     * Yang belum dibangun tetap 404: ekspor data sendiri (U5), SEB (U4), dan API internal, yang
+     * hanya milik LokaAuth. Rute akun menolak POST tanpa token CSRF.
      */
-    public function testBelumAdaHalamanLain(): void
+    public function testYangBelumDibangunTetapTidakAda(): void
     {
-        foreach (['/', '/beranda', '/data-saya', '/seb', '/seb/periksa', '/mata-kuliah/1/seb', '/internal/session/touch'] as $jalur) {
+        foreach (['/data-saya', '/seb', '/seb/periksa', '/mata-kuliah/1/seb', '/internal/session/touch'] as $jalur) {
             $r = $this->tamu()->get($jalur);
             $this->assertSame(404, $r->status, $jalur);
         }
-        foreach (['/keluar', '/sesi/perpanjang', '/preferensi', '/api/seb/denyut'] as $jalur) {
-            $this->assertContains($this->tamu()->post($jalur, [])->status, [403, 404], $jalur);
+        $this->assertContains($this->tamu()->post('/api/seb/denyut', [])->status, [403, 404]);
+        foreach (['/keluar', '/sesi/perpanjang', '/preferensi'] as $jalur) {
+            $this->assertSame(403, $this->tamu()->post($jalur, [])->status, $jalur);
         }
+    }
+
+    /**
+     * Seluruh LokaUjian tidak untuk diindeks, juga halaman depannya yang tanpa sesi.
+     */
+    public function testHalamanDepanPublikTetapiTidakDiindeks(): void
+    {
+        $r = $this->tamu()->get('/');
+        $this->assertSame(200, $r->status);
+        $this->assertStringContainsString('<meta name="robots" content="noindex, nofollow">', $r->body);
+        $this->assertStringNotContainsString('og:', $r->body);
+        $this->assertStringContainsString('href="/beranda"', $r->body);
+        $this->assertStringContainsString('Safe Exam Browser', $r->body);
     }
 }

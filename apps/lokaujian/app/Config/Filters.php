@@ -7,6 +7,7 @@ use CodeIgniter\Filters\CSRF;
 use CodeIgniter\Filters\ForceHTTPS;
 use CodeIgniter\Filters\PageCache;
 use CodeIgniter\Filters\PerformanceMetrics;
+use Lokandita\Auth\Filters\RequireLogin;
 use Lokandita\Auth\Filters\SecurityHeaders;
 
 class Filters extends BaseFilters
@@ -20,6 +21,8 @@ class Filters extends BaseFilters
         'pagecache'   => PageCache::class,
         'performance' => PerformanceMetrics::class,
         'keamanan'    => SecurityHeaders::class,
+        // KONTRAK.md §4: lima langkah mengenali pengguna, dari paket bersama.
+        'masuk'       => RequireLogin::class,
     ];
 
     /**

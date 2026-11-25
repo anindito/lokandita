@@ -12,15 +12,14 @@ The plan of a stage may change a name below when the code shows a better one; it
 
 `app_access.app` already has `lokaujian`. LokaUjian reads `session_identity`, `app_access` and `user_directory` through `identity_reader`, as LokaKode does. `paste_allowed` comes from `session_identity`.
 
-## §4 Client authentication and public routes — U1, U4, U6
+## §4 Client authentication and public routes — U4, U6
 
-LokaUjian uses `Lokandita\Auth\Filters\RequireLogin` (filter `masuk`) with app name `lokaujian`, and registers `Routes::akun()` (U1; `Routes::publik()` is registered since U0).
+Filter `masuk`, `Routes::akun()` and the landing `/` were merged into `KONTRAK.md` §4 in U1.
 
 Public routes table gains:
 
 | App | Routes | Stage |
 |---|---|---|
-| LokaUjian | `/` — with a `lokandita_sid` cookie present it redirects to `/beranda`; without one it shows a short page with a "Masuk" link to `/beranda`. Every page of LokaUjian is `noindex, nofollow` | U1 |
 | LokaUjian | `/seb`, `/seb/periksa`, `/seb/keluar`, `/seb/unduh/<course code>.seb` (§8) | U4 |
 
 `GET /beranda` in the Portal: `lokaujian` becomes an app that is built (address from `LOKAUJIAN_URL`) — **U6**, when the owner opens the host. Until then it stays "segera".
@@ -64,7 +63,6 @@ New smoke checks (13, roster views, exists since U0):
 
 ## §12 Tests — after U0
 
-- From U1 the shared client test (`packages/lokandita-auth/tests`) runs in LokaUjian's suite.
 - From U3 the headless Chromium of §12 is started for `lokaujian` too (`lokaujian.lokandita.com` mapped to a test edge, every other name unresolvable). `tests/Peramban/` covers autosave, countdown, resume, working without a connection (network switched off through the DevTools Protocol), and the paste block; they fail, not skip, when the browser is missing.
 - From U4 `infra/tes.sh lokaujian` serves `lokaujian-tes` (`SEB_ENFORCEMENT=disabled`) and `lokaujian-seb-tes` (`enabled`); SEB tests compute the headers by the formula of §8. No test can show that a real SEB client is accepted; that is the owner's gate in U4.
 - From U3 `infra/tes.sh lokaujian` also runs the scheduler once against the test schema.

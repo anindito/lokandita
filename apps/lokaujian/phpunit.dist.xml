@@ -16,8 +16,8 @@
     <testsuites>
         <testsuite name="App">
             <directory>./tests</directory>
-            <!-- Tes kontrak paket bersama (./vendor/lokandita/auth/tests) ditambahkan di tahap U1,
-                 saat LokaUjian punya /beranda dan login; di U0 belum ada yang bisa diujinya. -->
+            <!-- Tes kontrak paket bersama dijalankan di setiap aplikasi klien (sejak tahap U1). -->
+            <directory>./vendor/lokandita/auth/tests</directory>
         </testsuite>
     </testsuites>
 

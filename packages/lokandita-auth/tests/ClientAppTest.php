@@ -41,7 +41,8 @@ final class ClientAppTest extends TestCase
      */
     private function masuk(array $over = []): array
     {
-        $user = Fixtures::user($this->db, $over + ['global_role' => 'dosen']);
+        // Akses bawaan data uji adalah portal dan lokakode; aplikasi yang diuji ikut ditambahkan.
+        $user = Fixtures::user($this->db, $over + ['global_role' => 'dosen', 'apps' => array_values(array_unique(['portal', 'lokakode', $this->app]))]);
         $auth = Fixtures::login(new Http((string) getenv('AUTH_TES_URL')), $user);
         $this->assertArrayHasKey('lokandita_sid', $auth->cookies, 'login di LokaAuth gagal');
 
@@ -310,8 +311,14 @@ final class ClientAppTest extends TestCase
         $tamu = new Http((string) getenv('APP_TES_URL'));
         $r    = $tamu->get('/');
         $this->assertSame(200, $r->status);
-        $this->assertStringContainsString('<meta name="robots" content="index, follow">', $r->body);
-        $this->assertStringContainsString('<link rel="canonical" href="' . $this->appUrl . '/">', $r->body);
+        if ($this->app === 'lokaujian') {
+            // LokaUjian tidak punya halaman untuk dicari: halaman depannya publik tetapi noindex.
+            $this->assertStringContainsString('<meta name="robots" content="noindex, nofollow">', $r->body);
+            $this->assertStringNotContainsString('rel="canonical"', $r->body);
+        } else {
+            $this->assertStringContainsString('<meta name="robots" content="index, follow">', $r->body);
+            $this->assertStringContainsString('<link rel="canonical" href="' . $this->appUrl . '/">', $r->body);
+        }
         $this->assertStringContainsString('href="/beranda"', $r->body, 'tombol Masuk');
         $this->assertArrayNotHasKey('lokandita_sid', $tamu->cookies);
         $this->assertMatchesRegularExpression("/script-src 'self' 'nonce-/", (string) $r->header('Content-Security-Policy'));

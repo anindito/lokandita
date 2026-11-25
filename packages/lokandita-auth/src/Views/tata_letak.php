@@ -6,7 +6,8 @@
  * of ['jenis' => 'galat'|'sukses', 'teks' => string], opsional), $kelasBadan
  * (string, opsional: kelas CSS pada <body>, misalnya untuk halaman selebar layar).
  * Halaman publik (Lokandita\Auth\Publik::data): $publik (true = boleh diindeks, tombol Masuk
- * dan pilihan bahasa di kepala), $deskripsi (string), $navPublik (list of ['href', 'teks']),
+ * dan pilihan bahasa di kepala), $indeks (false = halaman publik yang tetap noindex),
+ * $deskripsi (string), $navPublik (list of ['href', 'teks']),
  * $kreditFoto (string, opsional: sumber foto yang tampil di halaman itu; ditulis di kaki).
  * Tanpa $publik halaman bertanda noindex — itu bawaannya, supaya halaman bersesi tidak
  * pernah terindeks karena lupa.
@@ -14,6 +15,7 @@
  * Bagian: 'isi'; 'kepala' (opsional: tag tambahan di <head>, misalnya skrip halaman itu).
  */
 $publik    = ($publik ?? false) === true;
+$indeks    = $publik && ($indeks ?? true) === true;
 $portal    = rtrim((string) getenv('PORTAL_URL'), '/');
 $jalur     = '/' . ltrim(service('request')->getUri()->getPath(), '/');
 $kanonik   = rtrim((string) getenv('APP_URL'), '/') . ($jalur === '/' ? '/' : $jalur);
@@ -31,7 +33,7 @@ $logo      = is_array($logo) && isset($logo['lebar'], $logo['tinggi']) ? $logo :
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-<?php if ($publik): ?>
+<?php if ($indeks): ?>
     <meta name="robots" content="index, follow">
     <meta name="description" content="<?= esc($deskripsi ?? '') ?>">
     <link rel="canonical" href="<?= esc($kanonik) ?>">

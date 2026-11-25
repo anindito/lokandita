@@ -28,13 +28,15 @@ final class Publik
 
     /**
      * Data tata letak untuk halaman publik: boleh diindeks, tombol Masuk, pilihan bahasa.
+     * Dengan $indeks = false halaman itu tetap publik (tombol Masuk, pilihan bahasa) tetapi
+     * bertanda noindex — untuk aplikasi yang tidak punya halaman untuk dicari (LokaUjian).
      *
      * @param list<array{href: string, teks: string}> $nav
      *
      * @return array<string, mixed>
      */
-    public static function data(string $judul, string $deskripsi, array $nav = []): array
+    public static function data(string $judul, string $deskripsi, array $nav = [], bool $indeks = true): array
     {
-        return ['judul' => $judul, 'deskripsi' => $deskripsi, 'publik' => true, 'navPublik' => $nav];
+        return ['judul' => $judul, 'deskripsi' => $deskripsi, 'publik' => true, 'navPublik' => $nav, 'indeks' => $indeks];
     }
 }
