@@ -1,6 +1,6 @@
 # Progress
 
-**LokaUjian stage U1 — access (`SPEC-LOKAUJIAN.md` §3, §4) — built 2026-11-25, **not closed and not tagged**. Gate: the student part is done (owner's report, confirmed by the log); the pengajar part (own classes only, changed class number → *Halaman tidak ditemukan*) was skipped by the owner and is proven by tests only. `lokaujian` runs `69239ee`; `auth`, `lokakode`, `portal` and the judge worker still run `0059b3f`, so `infra/smoke.sh` fails on check 0 only. The host is in maintenance again. See "LokaUjian U1" at the end of this file.**
+**LokaUjian stage U1 — access (`SPEC-LOKAUJIAN.md` §3, §4) — finished 2026-11-25, tag `lokaujian-u1`, closed on the owner's order with half of the gate: the student part was done by the owner and is confirmed by the log; **the pengajar part (own classes only, changed class number → *Halaman tidak ditemukan*) was skipped by the owner and is proven by tests only.** The host `lokaujian.lokandita.com` is in maintenance again. See "LokaUjian U1" and "Gate result for LokaUjian U1" at the end of this file. Next: U2 (question authoring), not started; it begins in a new session with a plan.**
 
 **LokaUjian stage U0 — contract and groundwork (`SPEC-LOKAUJIAN.md` §15) — finished 2026-11-25, tag `lokaujian-u0`, on the owner's report that the gate passed: real SEB 3.10.2 is accepted by LokaKode after the move, an ordinary browser is refused, and `lokaujian.lokandita.com` shows the maintenance page. See "LokaUjian U0" and "Gate result for LokaUjian U0" at the end of this file. LokaUjian stays in maintenance. Next: U1 (access), not started; it begins in a new session with a plan.**
 
@@ -1638,8 +1638,16 @@ After the gate: tag `lokaujian-u1` on the commit that records it.
 
 ### Gate result for LokaUjian U1 (2026-11-25)
 
-- The agent opened the host on the owner's order ("do no 1") at about 12:19 WIB and closed it again on his order at about 12:27 WIB; it answers 503 from the internet.
+- The agent opened the host on the owner's order ("do no 1") shortly before 12:20 WIB and closed it again on his order a few minutes later (the exact minutes were not noted; an earlier version of this line gave times that were guessed); it answers 503 from the internet.
 - **Step 3 (student): done.** The owner reported "no 3 done". The container log has one `GET /beranda` → 200 at 12:20:38 WIB followed by `POST /keluar` → 303, and LokaAuth's audit log has one `logout` with `app = lokaujian` by an account of role mahasiswa at 12:20:47 WIB. This is the first logged-in request to the deployed LokaUjian, and the first logout from it. What the page showed is the owner's observation.
 - **Step 2 (pengajar sees only own classes; a changed class number gives *Halaman tidak ditemukan*): skipped by the owner** ("just skip no 2"). No dosen has opened the deployed LokaUjian; the log has no request to `/kelas/…` or `/mata-kuliah` with a session and no `access.denied`. That half of the gate of `SPEC-LOKAUJIAN.md` §15 rests on `LingkupKelasTest` and `MatriksAksesTest` only.
 - **Step 4:** `infra/smoke.sh` with the host open → **54 pass, 5 fail**. All five are check 0: `auth`, `lokakode`, `portal` and the judge worker run `0059b3f`, `lokaujian` runs `69239ee`, and `HEAD` was the commit that holds only `PROGRESS.md`. Check 1 for the open host and check 14 pass.
-- Not done: the redeploy of the other four components (it needs the owner's word), and with it a passing smoke run. No tag `lokaujian-u1` until the owner says the stage is closed.
+- **Closing (owner: "lakukan keduanya"):** the owner ordered both the redeploy of every component and closing the stage with step 2 skipped. Right before the deploy LokaKode had 0 submissions and 0 active student sessions in the last 10 minutes and no unfinished judge job. The deploy of all five components and `infra/smoke.sh` are run at the commit that holds this line; their output is in the session, and the tag `lokaujian-u1` is put on this commit only when that smoke run passes.
+
+Carried into U2:
+
+- The pengajar half of the U1 gate has not been seen on the deployed system by anyone. The first dosen who opens LokaUjian is the real check; do it when the host is next opened.
+- No page of LokaUjian has been checked in Arabic or in dark mode by a person or a browser test.
+- `Akses` does not yet hand out id lists for LokaUjian's own tables; U2 writes that with the question bank, together with the audit table.
+- The Portal card stays "segera" until U6 (the owner asked about it on 2026-11-25 and was told why).
+- 238 accounts have `lokaujian` access and get in whenever the host is open.
