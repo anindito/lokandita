@@ -1745,3 +1745,13 @@ After closing:
 Left in production by the gate: six questions, one group, one picture and one draft exam in one course's bank. Nothing of it reaches students.
 
 **Not closed, no tag.** Open for the owner: close U2 with step 7 skipped, or do step 7 first.
+
+### LokaUjian U2 closed by the owner with step 7 skipped (2026-11-25)
+
+The owner ordered "Close with step 7 skipped". U2 is closed on these terms:
+
+- Seen on the deployed system by the owner: writing the four types and a group with a picture, the previews, a draft exam, one export (steps 2–6).
+- **Not seen on the deployed system by anyone:** importing a file, and export → import → export giving the same file. That half of the gate of `SPEC-LOKAUJIAN.md` §15 rests on `ImporEksporTest` only. The first real import is the real check; compare the two files with `sha256sum` when it happens.
+- Also unseen: question pictures and option pictures (only a group picture was uploaded), the sample file, the `spark` commands with `--oleh`, and the pengajar's view (carried from U1).
+
+`lokaujian` is deployed at the commit that holds this entry. The tag `lokaujian-u2` goes on that commit once `infra/smoke.sh` passes, which needs `auth`, `lokakode`, `portal` and the judge worker redeployed — the owner's word, not yet given.
