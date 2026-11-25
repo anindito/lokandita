@@ -322,6 +322,27 @@ for jalur in /beranda /mata-kuliah /mata-kuliah/1 /kelas/1; do
 	if [ "$j" = "$harap" ]; then ok "lokaujian GET $jalur tanpa cookie -> $j"; else tidak "lokaujian GET $jalur tanpa cookie -> '$j' (seharusnya '$harap')"; fi
 done
 
+echo "15. gambar soal LokaUjian (tahap U2, KONTRAK.md §20)"
+# Gambar soal bukan berkas statis: di bawah /media/ Apache menjawab 403 apa pun namanya, dan
+# satu-satunya jalan keluarnya, /gambar/<kunci>, meminta masuk lebih dulu. Ditanyakan seperti cek 8.
+for jalur in /media/soal/smoke.png /media/soal/smoke.php; do
+	j="$(tanya portal lokaujian "$jalur")"
+	if [ "$j" = "403 " ]; then ok "lokaujian GET $jalur -> 403 (bukan berkas statis)"; else tidak "lokaujian GET $jalur -> '$j' (seharusnya 403)"; fi
+done
+jalur="/gambar/00000000000000000000000000000000"
+j="$(tanya portal lokaujian "$jalur")"
+harap="302 $login_url?next=$(jq -rn --arg u "$url$jalur" '$u|@uri')"
+if [ "$j" = "$harap" ]; then ok "lokaujian GET $jalur tanpa cookie -> $j"; else tidak "lokaujian GET $jalur tanpa cookie -> '$j' (seharusnya '$harap')"; fi
+# Rute bank soal dan draf ujian ada di kode yang berjalan, dan tidak terbuka tanpa masuk.
+for jalur in /mata-kuliah/1/bank /mata-kuliah/1/ujian; do
+	j="$(tanya portal lokaujian "$jalur")"
+	harap="302 $login_url?next=$(jq -rn --arg u "$url$jalur" '$u|@uri')"
+	if [ "$j" = "$harap" ]; then ok "lokaujian GET $jalur tanpa cookie -> $j"; else tidak "lokaujian GET $jalur tanpa cookie -> '$j' (seharusnya '$harap')"; fi
+done
+# Volume gambar terpasang: tanpa volume, gambar hilang pada deploy berikutnya.
+vol="$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/srv/media"}}{{.Name}}{{end}}{{end}}' lokaujian 2> /dev/null || true)"
+if [ "$vol" = "lokandita_lokaujian_media" ]; then ok "lokaujian: /srv/media adalah volume $vol"; else tidak "lokaujian: /srv/media bukan volume lokandita_lokaujian_media ('$vol')"; fi
+
 echo
 echo "smoke: $lulus lulus, $gagal_n gagal, $tunda belum aktif"
 if [ "$gagal_n" -gt 0 ]; then

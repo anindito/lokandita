@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Backup harian (SPEC.md §16): semua skema aplikasi + semua .env + foto unggahan Portal.
-# Hasil: $BACKUP_DIR/lokandita-YYYYmmdd-HHMMSS/{db.sql.gz,env.tar.gz,media.tar.gz,SHA256SUMS}
+# Backup harian (SPEC.md §16): semua skema aplikasi + semua .env + foto unggahan Portal
+# + gambar soal LokaUjian.
+# Hasil: $BACKUP_DIR/lokandita-YYYYmmdd-HHMMSS/{db.sql.gz,env.tar.gz,media.tar.gz,media-lokaujian.tar.gz,SHA256SUMS}
 # Backup yang lebih tua dari BACKUP_RETENTION_DAYS hari dihapus.
 #
 # Isi backup: data pribadi dan rahasia (termasuk INSTANCE_SECRET dan
@@ -42,10 +43,18 @@ docker exec portal tar -C /srv/media -czf - . > "$tujuan/media.tar.gz" \
 	|| gagal "volume foto Portal tidak dapat dibaca; backup di $tujuan tidak lengkap"
 jumlah_media="$(tar -tzf "$tujuan/media.tar.gz" | grep -c -v '/$' || true)"
 
-(cd "$tujuan" && sha256sum db.sql.gz env.tar.gz media.tar.gz > SHA256SUMS)
+# Gambar soal LokaUjian (KONTRAK.md §20): isi volume lokandita_lokaujian_media, dibaca dari
+# kontainer lokaujian yang sedang berjalan. Seperti foto Portal: dump diambil lebih dulu dan
+# gambar tidak pernah dihapus, jadi setiap gambar yang disebut dump itu ada di arsip ini.
+docker exec lokaujian tar -C /srv/media -czf - . > "$tujuan/media-lokaujian.tar.gz" \
+	|| gagal "volume gambar LokaUjian tidak dapat dibaca; backup di $tujuan tidak lengkap"
+jumlah_gambar="$(tar -tzf "$tujuan/media-lokaujian.tar.gz" | grep -c -v '/$' || true)"
+
+(cd "$tujuan" && sha256sum db.sql.gz env.tar.gz media.tar.gz media-lokaujian.tar.gz > SHA256SUMS)
 echo "  db.sql.gz    $(stat -c %s "$tujuan/db.sql.gz") byte"
 echo "  env.tar.gz   $(stat -c %s "$tujuan/env.tar.gz") byte, ${#berkas_env[@]} berkas .env"
 echo "  media.tar.gz $(stat -c %s "$tujuan/media.tar.gz") byte, $jumlah_media berkas foto"
+echo "  media-lokaujian.tar.gz $(stat -c %s "$tujuan/media-lokaujian.tar.gz") byte, $jumlah_gambar berkas gambar soal"
 
 # Retensi.
 find "${dir:?}" -maxdepth 1 -type d -name 'lokandita-????????-??????' -mtime "+$hari" -print -exec rm -rf {} + \

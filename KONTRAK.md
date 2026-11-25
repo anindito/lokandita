@@ -526,7 +526,7 @@ LokaKode's implementation is `App\Libraries\SumberSeb`, which reads LokaKode's o
 - Every app container serves HTTP on port **8080**. No app publishes a port to the host.
 - Caddy reaches apps by container name on `edge`. Apps reach LokaAuth **only** by `auth-internal` on `internal`.
 - MySQL `3306` and Redis `6379` are published on `127.0.0.1` only, for the worker and for CLI use.
-- Named volumes (Compose project `lokandita`): `lokandita_mysql_data`, `lokandita_redis_data`, `lokandita_caddy_data`, `lokandita_caddy_config`, and `lokandita_portal_media` (the Portal's uploaded hero photos, §16).
+- Named volumes (Compose project `lokandita`): `lokandita_mysql_data`, `lokandita_redis_data`, `lokandita_caddy_data`, `lokandita_caddy_config`, `lokandita_portal_media` (the Portal's uploaded hero photos, §16), and `lokandita_lokaujian_media` (Compose name `lokaujian_media`; LokaUjian's question pictures, §20, mounted at `/srv/media` in `lokaujian` only).
 - LokaAuth must not decide trust from the caller's IP or subnet.
 - The `internal` network is created with `internal: true`: it has no route out of the host.
 - Compose project name is `lokandita`; the file is `infra/compose.yml`. App images are `lokandita/<app>:<commit>`, and the one in use also carries the tag `aktif`.
@@ -636,11 +636,12 @@ Values are written without quotes.
   12. brand (§16 "Brand files"), asked as in check 8: `auth`, `portal`, `lokakode` and `lokaujian` each answer `200` for `/favicon.ico`, `/merek/icon-{16,32,180,192,512}.png`, `/merek/logo-{terang,gelap}.webp` and a `/merek/site.webmanifest` that is JSON with a name and two icons; `GET /` of `portal` carries the six app cards in the order of §16; no public page of `portal` and not the landing of `lokakode` contains "LokaAuth" — it fails when a text override (§15) brings the name back.
   13. roster views (§18), through `ROSTER_READER_DSN` from inside `lokaujian`: the user is `roster_reader`; `SELECT COUNT(*)` works on each of the five views; `SELECT` on `enrollments` and on `submissions` and `INSERT` into `roster_classes` are each refused with error 1142; the count of each view equals the count of its table, asked through `lokakode`. Only counts are printed.
   14. the way into LokaUjian (stage U1, §19), asked as in check 8 from inside `portal`: `GET /` of `lokaujian` without a cookie answers `200` with `noindex, nofollow` and a link to `/beranda`; `GET /beranda`, `/mata-kuliah`, `/mata-kuliah/1` and `/kelas/1` without a cookie each redirect to `AUTH_LOGIN_URL` with `next` equal to that address.
+  15. question pictures of LokaUjian (stage U2, §20), asked as in check 8 from inside `portal`: `GET /media/soal/smoke.png` and `/media/soal/smoke.php` of `lokaujian` answer `403`; `GET /gambar/<32 zeros>`, `/mata-kuliah/1/bank` and `/mata-kuliah/1/ujian` without a cookie each redirect to `AUTH_LOGIN_URL` with `next` equal to that address; `/srv/media` of the running `lokaujian` container is the volume `lokandita_lokaujian_media`.
 - `smoke.sh` additionally checks (as check 0) that every app container reports the current `HEAD` at `/healthz`.
 - In check 1 a host in maintenance must answer `503`, an open host `2xx`/`3xx`, and `www` a `301` to the apex; the certificate must validate.
 - Checks 3–5 become active in stage 5, check 6 in stage 7 and check 7 in stage 8, by a switch at the top of `smoke.sh`. Until then each prints `BELUM AKTIF`, is counted separately, and is not reported as passed.
 - `infra/tes-infra.sh` tests §9, §10 and the deploy verification against the running containers.
-- `infra/backup.sh` dumps the schemas `identity`, `lokakode`, `portal` and `lokaujian` and every `.env`; `infra/uji-restore.sh` compares the tables and views of the four schemas with the live database (`docs/RESTORE.md`).
+- `infra/backup.sh` dumps the schemas `identity`, `lokakode`, `portal` and `lokaujian` and every `.env`; `infra/uji-restore.sh` compares the tables and views of the four schemas with the live database (`docs/RESTORE.md`). The two picture volumes are written next to the dump: `media.tar.gz` (§16) and `media-lokaujian.tar.gz` (§20).
 - A stage is not finished until `smoke.sh` passes after deploy.
 
 ## 12. Tests

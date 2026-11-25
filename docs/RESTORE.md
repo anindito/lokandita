@@ -6,9 +6,10 @@
 
 ```
 /srv/lokandita-data/backups/lokandita-YYYYmmdd-HHMMSS/     (time in UTC)
-├── db.sql.gz      mysqldump of identity, lokakode, portal (one consistent snapshot)
+├── db.sql.gz      mysqldump of identity, lokakode, portal, lokaujian (one consistent snapshot)
 ├── env.tar.gz     every component's .env, including INSTANCE_SECRET and SEB_ENCRYPTION_KEY
 ├── media.tar.gz   the Portal's uploaded hero photos (Docker volume lokandita_portal_media, KONTRAK.md §16)
+├── media-lokaujian.tar.gz   LokaUjian's question pictures (Docker volume lokandita_lokaujian_media, KONTRAK.md §20)
 └── SHA256SUMS
 ```
 
@@ -25,7 +26,7 @@ infra/uji-restore.sh                 # newest backup
 infra/uji-restore.sh <backup folder>
 ```
 
-It verifies the checksums, loads the dump into a temporary MySQL container that has no network, compares the list of schemas, tables and views (`identity`, `lokakode`, `portal`, `lokaujian`) with the live database, and removes the container. It then unpacks `media.tar.gz` into a temporary directory and checks that it holds only server-generated photo files, that every photo named in the restored `portal.foto` table is complete there (12 files each), that the published photo is among them, and that every file equals the one in the live volume. It never writes to the live database or the live volume. Run it after each stage that adds tables. A backup made before the photos were included has no `media.tar.gz` and is refused; make a new backup first.
+It verifies the checksums, loads the dump into a temporary MySQL container that has no network, compares the list of schemas, tables and views (`identity`, `lokakode`, `portal`, `lokaujian`) with the live database, and removes the container. It then unpacks `media.tar.gz` into a temporary directory and checks that it holds only server-generated photo files, that every photo named in the restored `portal.foto` table is complete there (12 files each), that the published photo is among them, and that every file equals the one in the live volume. It does the same for `media-lokaujian.tar.gz`: only files named `soal/<32 hex>.png|jpg` may be in it, every row of the restored `lokaujian.images` table must have its file there with the size and SHA-256 recorded in that row, and every file must equal the one in the live volume. It never writes to the live database or the live volumes. Run it after each stage that adds tables. A backup made before the photos or the question pictures were included lacks `media.tar.gz` or `media-lokaujian.tar.gz` and is refused; make a new backup first.
 
 ## Real restore
 
@@ -46,4 +47,9 @@ This overwrites live data. Do it only on purpose.
    docker exec -i -u www-data portal tar -C /srv/media -xzf - < <backup folder>/media.tar.gz
    ```
    Then open `https://lokandita.com/` and `/admin/teks/foto`. If a published photo's files are missing the landing page shows the default photo and the Portal log has a line `foto.berkas_hilang`.
-9. Open the hosts again with `infra/pemeliharaan.sh <app> off`.
+9. Restore LokaUjian's question pictures into the volume of the running `lokaujian` container, in the same way:
+   ```
+   docker exec -i -u www-data lokaujian tar -C /srv/media -xzf - < <backup folder>/media-lokaujian.tar.gz
+   ```
+   Then open a question with a picture in a course's *Bank soal*. A picture whose file is missing is answered `404` and the LokaUjian log has a line `gambar.berkas_hilang`; exporting an exam that uses it fails with the same words.
+10. Open the hosts again with `infra/pemeliharaan.sh <app> off`.

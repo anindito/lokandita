@@ -2,7 +2,8 @@
 # Uji restore (SPEC.md §16): memulihkan backup ke kontainer MySQL sementara
 # yang terpisah, lalu membandingkan daftar tabel dengan database yang hidup; dan
 # membongkar arsip foto Portal (KONTRAK.md §16) ke direktori sementara, lalu memeriksa
-# bahwa setiap foto yang disebut basis data hasil restore ada di dalamnya, utuh.
+# bahwa setiap foto yang disebut basis data hasil restore ada di dalamnya, utuh; hal yang sama
+# untuk gambar soal LokaUjian (KONTRAK.md §20).
 # Tidak pernah menulis ke database atau volume yang hidup. Lihat docs/RESTORE.md.
 #
 #   infra/uji-restore.sh            backup terbaru
@@ -18,6 +19,8 @@ echo "menguji: $sumber"
 tar -tzf "$sumber/env.tar.gz" | sed 's/^/  env.tar.gz berisi: /'
 
 [ -f "$sumber/media.tar.gz" ] || gagal "backup ini tidak memuat media.tar.gz (dibuat sebelum foto Portal ikut dibackup); buat backup baru dengan infra/backup.sh"
+
+[ -f "$sumber/media-lokaujian.tar.gz" ] || gagal "backup ini tidak memuat media-lokaujian.tar.gz (dibuat sebelum gambar soal LokaUjian ikut dibackup); buat backup baru dengan infra/backup.sh"
 
 NAMA=lokandita-uji-restore
 IMAGE="$(docker inspect -f '{{.Config.Image}}' mysql)"
@@ -105,4 +108,40 @@ beda="$(comm -13 <(echo "$hidup_media") <(echo "$pulih_media"))"
 baru="$(comm -23 <(echo "$hidup_media") <(echo "$pulih_media") | grep -c . || true)"
 echo "  isi arsip sama dengan volume yang hidup ($baru berkas di volume lebih baru daripada backup)"
 
-echo "uji-restore: LULUS — $(wc -l <<< "$pulih") skema/tabel pulih dan sama dengan yang hidup; $jumlah berkas foto pulih"
+# --- Gambar soal LokaUjian ---------------------------------------------------
+# 1. Arsip dibongkar ke direktori sementara tersendiri di host (bukan ke volume yang hidup).
+bongkar_ujian="$bongkar/lokaujian"
+mkdir "$bongkar_ujian"
+tar -C "$bongkar_ujian" -xzf "$sumber/media-lokaujian.tar.gz" || gagal "media-lokaujian.tar.gz tidak dapat dibongkar"
+jumlah_gambar="$(find "$bongkar_ujian" -type f | wc -l)"
+echo "gambar soal hasil restore: $jumlah_gambar berkas"
+
+# 2. Hanya berkas buatan server yang boleh ada di dalamnya: soal/<32 heks>.png|jpg.
+asing="$(find "$bongkar_ujian" -type f ! -regex '.*/soal/[0-9a-f]\{32\}\.\(png\|jpg\)' | sed "s#^$bongkar_ujian/##")"
+[ -z "$asing" ] || gagal "arsip gambar soal memuat berkas yang bukan buatan server: $asing"
+
+# 3. Setiap baris lokaujian.images di basis data HASIL RESTORE harus punya berkasnya di arsip,
+#    dengan ukuran dan SHA-256 yang tercatat di baris itu. Hanya jumlah yang dicetak.
+baris="$(docker exec -i "$NAMA" sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N' <<< "SELECT kunci, IF(jenis = 'png', 'png', 'jpg'), byte, sha256 FROM lokaujian.images ORDER BY id;")" \
+	|| gagal "tabel lokaujian.images tidak terbaca di hasil restore"
+gambar=0
+while read -r kunci akhiran byte sha; do
+	[ -n "$kunci" ] || continue
+	f="$bongkar_ujian/soal/$kunci.$akhiran"
+	[ -s "$f" ] || gagal "gambar soal $kunci: berkas $kunci.$akhiran tidak ada di arsip atau kosong"
+	[ "$(stat -c %s "$f")" = "$byte" ] || gagal "gambar soal $kunci: ukuran berkas di arsip berbeda dari yang tercatat"
+	[ "$(sha256sum "$f" | cut -d ' ' -f 1)" = "$sha" ] || gagal "gambar soal $kunci: isi berkas di arsip berbeda dari yang tercatat"
+	gambar=$((gambar + 1))
+done <<< "$baris"
+echo "  $gambar gambar di lokaujian.images, semuanya ada di arsip dengan isi yang tercatat"
+
+# 4. Isi arsip sama, berkas demi berkas, dengan volume yang hidup — kecuali gambar yang
+#    diunggah sesudah backup dibuat, yang hanya boleh ADA di volume, tidak boleh berbeda.
+hidup_ujian="$(docker exec lokaujian sh -c 'cd /srv/media && find . -type f -exec sha256sum {} + | sort -k 2')"
+pulih_ujian="$(cd "$bongkar_ujian" && find . -type f -exec sha256sum {} + | sort -k 2)"
+beda="$(comm -13 <(echo "$hidup_ujian") <(echo "$pulih_ujian"))"
+[ -z "$beda" ] || gagal "berkas di arsip gambar soal tidak ada di volume yang hidup atau isinya berbeda: $beda"
+baru="$(comm -23 <(echo "$hidup_ujian") <(echo "$pulih_ujian") | grep -c . || true)"
+echo "  isi arsip sama dengan volume yang hidup ($baru berkas di volume lebih baru daripada backup)"
+
+echo "uji-restore: LULUS — $(wc -l <<< "$pulih") skema/tabel pulih dan sama dengan yang hidup; $jumlah berkas foto dan $jumlah_gambar berkas gambar soal pulih"

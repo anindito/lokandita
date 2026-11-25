@@ -114,6 +114,11 @@ services:
     container_name: lokaujian
     env_file: ../apps/lokaujian/.env
     networks: [edge, internal, data]
+    volumes:
+      # Gambar soal yang sudah diolah (KONTRAK.md §20): bertahan melewati deploy, ikut
+      # infra/backup.sh. BUKAN berkas statis: Apache menjawab 403 untuk nama berkasnya di bawah
+      # /media/; gambar hanya keluar lewat GET /gambar/<kunci> sesudah hak akses diperiksa.
+      - lokaujian_media:/srv/media
     <<: *app
 
   portal:
@@ -142,3 +147,4 @@ volumes:
   mysql_data:
   redis_data:
   portal_media:
+  lokaujian_media:

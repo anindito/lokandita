@@ -55,6 +55,15 @@ sama "portal: www-data bisa menulis ke /srv/media/hero" "$(docker exec portal sh
 sama "portal: /media/ tidak menjalankan dan tidak menyajikan PHP" "$(docker exec portal sh -c 'f=/srv/media/hero/uji-infra.php; echo "<?php echo 1+1;" > "$f"; curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/media/hero/uji-infra.php; rm -f "$f"')" "403"
 sama "portal: /media/ tanpa daftar isi" "$(docker exec portal curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/media/hero/)" "403"
 
+echo "A3. volume gambar soal LokaUjian (§20)"
+sama "lokaujian: /srv/media adalah volume" "$(volume lokaujian)" "lokandita_lokaujian_media"
+sama "lokaujian: www-data bisa menulis ke /srv/media" "$(docker exec lokaujian sh -c 'test -w /srv/media && echo ya || echo tidak')" "ya"
+# Gambar soal BUKAN berkas statis: berkas bernama seperti gambar soal yang ditaruh di volume tidak
+# disajikan Apache, begitu pula berkas PHP; berkas ujinya langsung dihapus lagi.
+sama "lokaujian: /media/ tidak menyajikan gambar soal" "$(docker exec lokaujian sh -c 'mkdir -p /srv/media/soal; f=/srv/media/soal/00000000000000000000000000000000.png; echo uji > "$f"; curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/media/soal/00000000000000000000000000000000.png; rm -f "$f"')" "403"
+sama "lokaujian: /media/ tidak menjalankan dan tidak menyajikan PHP" "$(docker exec lokaujian sh -c 'mkdir -p /srv/media/soal; f=/srv/media/soal/uji-infra.php; echo "<?php echo 1+1;" > "$f"; curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/media/soal/uji-infra.php; rm -f "$f"')" "403"
+sama "lokaujian: /media/ tanpa daftar isi" "$(docker exec lokaujian curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/media/soal/)" "403"
+
 echo "B. /healthz dan commit (§11)"
 for a in "${APLIKASI[@]}"; do
 	sama "$a /healthz" "$(docker exec "$a" curl -fsS --max-time 3 http://127.0.0.1:8080/healthz 2>&1 || true)" "{\"app\":\"$a\",\"commit\":\"$head\"}"
