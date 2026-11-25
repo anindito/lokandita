@@ -1582,3 +1582,13 @@ Owner's gate for U0:
 3. `https://lokaujian.lokandita.com` in a browser: valid certificate, maintenance page.
 
 After the gate: tag `lokaujian-u0` on the commit that records it, then `infra/deploy.sh` for all five components and `infra/smoke.sh`.
+
+### Gate result for LokaUjian U0 — checks 1 and 2 (2026-11-25)
+
+The owner reported "no 1 and no 2 is done". What the server recorded for the test account he had made for it (student `Dummy`, enrolled in TS-PY class TS-6 on his order; TS-PY meetings 1–4 published by him at 08:40–08:42 WIB):
+
+- **Check 1, real SEB after the move:** login from a client that names itself `SEB/3.10.2` at 08:49 WIB; 36 requests from that client answered 200 and none 403, among them a practice problem page; 5 heartbeats (`POST /api/seb/denyut`) answered 200 between 08:50:05 and 08:52:14 WIB. This is the first request with real SEB headers since the move, and it is accepted with the TS-PY configuration and the Browser Exam Key registered before the move.
+- **Check 2, refusal outside SEB:** the same account from an ordinary browser at 08:53 WIB → 403, integrity event `seb_rejected` with reason `tanpa_header`. One `GET /mata-kuliah/{id}/seb` answered 200 in the same period (the staff panel, opened from an ordinary browser).
+- **Check 3 (maintenance page of `lokaujian.lokandita.com` seen in a browser): not reported yet.** By curl it answers 503 with a valid certificate. No tag until the owner has said so.
+
+Left in production by the gate: the account `Dummy` is an `AKTIF` member of TS-6 (29 students now) and appears in that class's lists, leaderboard and exports; two `seb_rejected` events (one from the agent's own check with curl on 2026-11-24, one from the owner's Chrome check). The owner decides when it is set to `MENGUNDURKAN_DIRI`.
