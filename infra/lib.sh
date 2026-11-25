@@ -57,6 +57,11 @@ denyut_judge() {
 	docker exec redis redis-cli -n 0 get lokandita:judge:worker 2> /dev/null || true
 }
 
+# Denyut penjadwal LokaUjian dari Redis DB 3 (JSON, KONTRAK.md §21), atau kosong bila tidak berjalan.
+denyut_jadwal() {
+	docker exec redis redis-cli -n 3 get lokaujian:jadwal 2> /dev/null || true
+}
+
 # Benar bila layanan pengguna tetap hidup tanpa ada yang login.
 linger_aktif() {
 	[ "$(loginctl show-user "$(id -un)" -p Linger --value 2> /dev/null)" = "yes" ]

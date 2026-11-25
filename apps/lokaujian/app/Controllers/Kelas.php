@@ -33,6 +33,8 @@ final class Kelas extends BaseController
             'pengajar'  => $pengajar,
             'mahasiswa' => $mahasiswa,
             'orang'     => $orang,
+            // Sesi kelas ini (tahap U3): siapa pun yang melihat kelasnya boleh menjalankannya.
+            'sesi'      => (new \App\Libraries\Sesi($this->akses()))->untukKelas((int) $kelas['id']),
         ]);
     }
 }

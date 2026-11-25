@@ -26,7 +26,10 @@ abstract class UjianCase extends TestCase
     protected \mysqli $db;     // lokaujian_test — skema aplikasi yang diuji
 
     /** Tabel LokaUjian, anak lebih dulu (urutan penghapusan mengikuti kunci asing). */
-    protected const TABEL = ['exam_items', 'exams', 'question_options', 'questions', 'question_groups', 'images', 'audit_log'];
+    protected const TABEL = [
+        'answers', 'integrity_events', 'attempts', 'sessions', 'exam_options', 'exam_questions', 'exam_groups',
+        'exam_items', 'exams', 'question_options', 'questions', 'question_groups', 'images', 'audit_log',
+    ];
 
     protected function setUp(): void
     {
@@ -205,6 +208,108 @@ abstract class UjianCase extends TestCase
         $this->assertMatchesRegularExpression('#/ujian/\d+\?pesan=dibuat$#', (string) $r->header('Location'), 'draf tidak dibuat');
 
         return (int) $this->db->query('SELECT MAX(id) AS id FROM exams')->fetch_assoc()['id'];
+    }
+
+    // ------------------------------------------------------------------ tahap U3: terbit, sesi, pengerjaan
+
+    /**
+     * Ujian TERBIT mata kuliah itu, dibuat lewat form sungguhan: benar/salah (kunci Benar),
+     * pilihan ganda (opsi kedua benar), isian, uraian, dan satu kelompok dengan dua isian.
+     * Enam soal. Mengembalikan id ujian.
+     *
+     * @param array<string, string> $setelan isian form setelan yang diganti (mode, durasi, acak_soal, acak_opsi)
+     */
+    protected function ujianTerbit(Http $http, int $matkul, string $judul = 'Ujian uji', array $setelan = []): int
+    {
+        $bs = $this->buatSoal($http, $matkul, 'benar_salah', ['text' => 'BS: bumi itu bulat']);
+        $pg = $this->buatSoal($http, $matkul, 'pilihan_ganda', ['text' => 'PG: dua tambah dua']);
+        $is = $this->buatSoal($http, $matkul, 'isian', ['text' => 'ISIAN: ibu kota Indonesia']);
+        $ur = $this->buatSoal($http, $matkul, 'uraian', ['text' => 'URAIAN: jelaskan rekursi']);
+        $k  = $this->buatKelompok($http, $matkul, 'BACAAN: teks bersama kelompok');
+        $this->buatSoal($http, $matkul, 'isian', ['text' => 'KEL-1: soal pertama kelompok'], [], $k);
+        $this->buatSoal($http, $matkul, 'isian', ['text' => 'KEL-2: soal kedua kelompok'], [], $k);
+        $id = $this->buatDraf($http, $matkul, $judul, ["s{$bs}", "s{$pg}", "s{$is}", "s{$ur}", "k{$k}"]);
+        $r  = $this->kirim($http, "/mata-kuliah/{$matkul}/ujian/{$id}", $setelan + ['judul' => $judul, 'jenis' => 'ujian', 'petunjuk' => 'Kerjakan dengan jujur.', 'mode' => 'dikendalikan_dosen', 'durasi' => '']);
+        $this->assertContains($r->status, [302, 303], 'setelan ujian: ' . substr(strip_tags($r->body), 0, 500));
+        $r = $this->kirim($http, "/mata-kuliah/{$matkul}/ujian/{$id}/terbit");
+        $this->assertContains($r->status, [302, 303], 'menerbitkan: ' . substr(strip_tags($r->body), 0, 500));
+        $this->assertSame('terbit', $this->db->query("SELECT status FROM exams WHERE id = {$id}")->fetch_assoc()['status']);
+
+        return $id;
+    }
+
+    /**
+     * Memberikan ujian terbit ke satu kelas; mengembalikan id sesi. Untuk per_mahasiswa jadwalnya
+     * bawaan: dibuka sejam lalu, ditutup sejam lagi (waktu WIB, seperti di form).
+     */
+    protected function beri(Http $http, int $matkul, int $ujian, int $kelas, ?string $buka = null, ?string $tutup = null): int
+    {
+        $wib = static fn (string $geser): string => (new \DateTimeImmutable($geser, new \DateTimeZone('Asia/Jakarta')))->format('Y-m-d\TH:i');
+        $r   = $this->kirim($http, "/mata-kuliah/{$matkul}/ujian/{$ujian}/sesi", ['kelas' => (string) $kelas, 'buka' => $buka ?? $wib('-1 hour'), 'tutup' => $tutup ?? $wib('+1 hour')]);
+        $this->assertStringEndsWith('?pesan=sesi_dibuat', (string) $r->header('Location'), 'memberikan ujian ke kelas');
+
+        return (int) $this->db->query("SELECT id FROM sessions WHERE exam_id = {$ujian} AND class_id = {$kelas}")->fetch_assoc()['id'];
+    }
+
+    /**
+     * Mahasiswa menekan Mulai; mengembalikan baris pengerjaannya.
+     *
+     * @return array<string, mixed>
+     */
+    protected function mulaiKerja(Http $mhs, int $sesi, string $userId): array
+    {
+        $r = $this->kirim($mhs, "/ujian-saya/{$sesi}/mulai");
+        $this->assertStringEndsWith("/ujian-saya/{$sesi}/kerjakan", (string) $r->header('Location'), 'mulai mengerjakan');
+
+        return $this->pengerjaan($sesi, $userId);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function pengerjaan(int $sesi, string $userId): array
+    {
+        $b = $this->db->query("SELECT * FROM attempts WHERE session_id = {$sesi} AND user_id = '" . $this->db->real_escape_string($userId) . "'")->fetch_assoc();
+        $this->assertIsArray($b, 'pengerjaan tidak ada');
+
+        return $b;
+    }
+
+    /**
+     * Membuka halaman ujian (mengambil alih pengerjaan) dan mengembalikan token halamannya.
+     */
+    protected function bukaHalamanUjian(Http $mhs, int $sesi): string
+    {
+        $r = $mhs->get("/ujian-saya/{$sesi}/kerjakan");
+        $this->assertSame(200, $r->status, 'halaman ujian');
+        $this->assertSame(1, preg_match('/data-halaman="([0-9a-f]{32})"/', $r->body, $m));
+
+        return $m[1];
+    }
+
+    /**
+     * Kirim simpan-jawaban JSON seperti yang dilakukan halaman ujian.
+     */
+    protected function simpan(Http $mhs, int $sesi, string $token, int $soal, mixed $nilai, int $n, bool $ragu = false): Http
+    {
+        $csrf = $this->csrf($mhs);
+
+        return $mhs->postJson("/api/sesi/{$sesi}/jawaban", ['halaman' => $token, 'soal' => $soal, 'nilai' => $nilai, 'ragu' => $ragu, 'n' => $n], ['X-CSRF-TOKEN' => $csrf]);
+    }
+
+    /**
+     * id soal beku ujian itu menurut awal teksnya ("BS", "PG", "ISIAN", "URAIAN", "KEL-1", "KEL-2").
+     *
+     * @return array<string, int>
+     */
+    protected function soalBeku(int $ujian): array
+    {
+        $peta = [];
+        foreach ($this->db->query("SELECT id, text FROM exam_questions WHERE exam_id = {$ujian} ORDER BY position")->fetch_all(MYSQLI_ASSOC) as $b) {
+            $peta[(string) strtok((string) $b['text'], ':')] = (int) $b['id'];
+        }
+
+        return $peta;
     }
 
     /**

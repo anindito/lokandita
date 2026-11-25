@@ -20,6 +20,13 @@
     </dl>
 </div>
 
+<h2><?= lang('Sesi.judulKelas') ?></h2>
+<?php if ($sesi === []): ?>
+    <div class="kartu"><p><?= lang('Sesi.kosongKelas') ?></p></div>
+<?php else: ?>
+    <?= view('_sesi_tabel', ['sesi' => $sesi]) ?>
+<?php endif ?>
+
 <h2><?= lang('Ujian.kelas.mahasiswa') ?> (<span data-jumlah-mahasiswa><?= count($mahasiswa) ?></span>)</h2>
 <?php if ($mahasiswa === []): ?>
     <div class="kartu"><p><?= lang('Ujian.kelas.tanpaMahasiswa') ?></p></div>

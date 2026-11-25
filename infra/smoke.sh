@@ -343,6 +343,45 @@ done
 vol="$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/srv/media"}}{{.Name}}{{end}}{{end}}' lokaujian 2> /dev/null || true)"
 if [ "$vol" = "lokandita_lokaujian_media" ]; then ok "lokaujian: /srv/media adalah volume $vol"; else tidak "lokaujian: /srv/media bukan volume lokandita_lokaujian_media ('$vol')"; fi
 
+echo "16. penjadwal LokaUjian (tahap U3, KONTRAK.md §21)"
+# Denyutnya di Redis ada, lebih muda dari 60 detik, dan membawa commit HEAD.
+denyut="$(denyut_jadwal)"
+if [ -n "$denyut" ] && [ "$(jq -r '.commit' <<< "$denyut" 2> /dev/null)" = "$head" ]; then
+	ok "denyut penjadwal -> $denyut"
+else
+	tidak "penjadwal seharusnya commit $head, denyut di Redis: ${denyut:-<tidak ada>} (infra/deploy.sh lokaujian)"
+fi
+umur="$(jq -r '(now - (.waktu | fromdateiso8601)) | floor' <<< "$denyut" 2> /dev/null || true)"
+if [[ "$umur" =~ ^-?[0-9]+$ ]] && [ "$umur" -ge -5 ] && [ "$umur" -lt 60 ]; then ok "denyut penjadwal berumur $umur detik (batas 60)"; else tidak "denyut penjadwal tidak ada atau terlalu tua ('${umur:-tidak ada}' detik)"; fi
+s="$(docker inspect -f '{{.State.Status}}' lokaujian-jadwal 2> /dev/null || true)"
+if [ "$s" = "running" ]; then ok "kontainer lokaujian-jadwal: running"; else tidak "kontainer lokaujian-jadwal: '${s:-tidak ada}' (seharusnya running)"; fi
+
+echo "18. rute LokaUjian ada di kode yang berjalan (tahap U3, KONTRAK.md §22)"
+# Ditanyakan seperti cek 8. Tanpa cookie setiap rute staf dan mahasiswa mengarah ke LokaAuth
+# dengan next ke alamat itu sendiri: rutenya terdaftar, dan tidak ada yang terbuka tanpa masuk.
+for jalur in /mata-kuliah/1/ujian/1/sunting /sesi/1 /sesi/1/pratinjau /ujian-saya/1 /ujian-saya/1/kerjakan /api/sesi/1/keadaan; do
+	j="$(tanya portal lokaujian "$jalur")"
+	harap="302 $login_url?next=$(jq -rn --arg u "$url$jalur" '$u|@uri')"
+	if [ "$j" = "$harap" ]; then ok "lokaujian GET $jalur tanpa cookie -> $j"; else tidak "lokaujian GET $jalur tanpa cookie -> '$j' (seharusnya '$harap')"; fi
+done
+# Tabel tahap U3 ada di skema yang sungguhan (migrasi sudah berjalan).
+ada="$(printf "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='lokaujian' AND table_name IN ('exam_questions','exam_groups','exam_options','sessions','attempts','answers','integrity_events');\n" \
+	| docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N' 2> /dev/null || true)"
+if [ "$ada" = "7" ]; then ok "skema lokaujian memuat ketujuh tabel tahap U3"; else tidak "skema lokaujian: $ada dari 7 tabel tahap U3 (infra/deploy.sh lokaujian menjalankan migrasinya)"; fi
+# Tahap U3 berjalan dengan penegakan SEB dinonaktifkan (SPEC-LOKAUJIAN.md §15); penegakan dan
+# cek 17 menyusul di tahap U4. Nilai di kontainer harus sama dengan .env, dan `disabled` DIPERINGATKAN.
+seb_env="$(nilai_env "$AKAR/apps/lokaujian/.env" SEB_ENFORCEMENT)"
+seb_jalan="$(docker exec lokaujian printenv SEB_ENFORCEMENT 2> /dev/null || true)"
+if [ -n "$seb_jalan" ] && [ "$seb_jalan" = "$seb_env" ]; then
+	if [ "$seb_jalan" = "disabled" ]; then
+		ok "lokaujian: SEB_ENFORCEMENT=disabled di .env dan di kontainer — PERINGATAN: MODE UJI, mahasiswa TIDAK diwajibkan memakai SEB"
+	else
+		ok "lokaujian: SEB_ENFORCEMENT=$seb_jalan di .env dan di kontainer — tahap U3: mahasiswa DITOLAK di semua rute ujian sampai tahap U4"
+	fi
+else
+	tidak "lokaujian: SEB_ENFORCEMENT di kontainer ('$seb_jalan') berbeda dari apps/lokaujian/.env ('$seb_env'): deploy ulang lokaujian"
+fi
+
 echo
 echo "smoke: $lulus lulus, $gagal_n gagal, $tunda belum aktif"
 if [ "$gagal_n" -gt 0 ]; then

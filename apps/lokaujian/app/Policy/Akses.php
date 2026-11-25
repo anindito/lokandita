@@ -33,6 +33,12 @@ final class Akses
     /** @var list<int>|null id mata kuliah yang diampu; dibaca sekali per permintaan */
     private ?array $idDiampu = null;
 
+    /** @var list<int>|null id kelas yang boleh dilihat staf ini; dibaca sekali per permintaan */
+    private ?array $idKelasStaf = null;
+
+    /** @var list<int>|null id kelas tempat pengguna ini mahasiswa; dibaca sekali per permintaan */
+    private ?array $idKelasSaya = null;
+
     public function __construct(private readonly Identity $identitas)
     {
         $this->u = "'" . RosterDb::conn()->real_escape_string($identitas->userId) . "'";
@@ -161,5 +167,85 @@ final class Akses
         $ids = $this->idMatkulDiampu();
 
         return $ids === [] ? self::TIDAK : $kolom . ' IN (' . implode(',', $ids) . ')';
+    }
+
+    /**
+     * id kelas yang boleh DILIHAT staf ini (superadmin: semua; pengampu: semua kelas mata
+     * kuliahnya; pengajar: kelasnya), dibaca dari view roster sekali per permintaan. Dipakai untuk
+     * mengikat kueri sesi (tahap U3): siapa yang melihat kelasnya boleh menjalankan sesinya
+     * (SPEC-LOKAUJIAN.md §3).
+     *
+     * @return list<int>
+     */
+    public function idKelasDilihat(): array
+    {
+        if ($this->idKelasStaf === null) {
+            $this->idKelasStaf = [];
+            if ($this->staf()) {
+                $hasil = RosterDb::conn()->query(
+                    "SELECT k.id FROM roster_classes k JOIN roster_courses c ON c.id = k.course_id WHERE {$this->lihatKelas()} ORDER BY k.id",
+                );
+                foreach ($hasil->fetch_all(MYSQLI_NUM) as $b) {
+                    $this->idKelasStaf[] = (int) $b[0];
+                }
+            }
+        }
+
+        return $this->idKelasStaf;
+    }
+
+    /**
+     * Syarat SQL untuk tabel LokaUjian yang punya kolom class_id: hanya baris kelas yang boleh
+     * dilihat staf ini.
+     */
+    public function diJalankan(string $kolom = 'class_id'): string
+    {
+        $ids = $this->idKelasDilihat();
+
+        return $ids === [] ? self::TIDAK : $kolom . ' IN (' . implode(',', $ids) . ')';
+    }
+
+    /**
+     * id kelas tempat pengguna ini MAHASISWA menurut kelasMahasiswa(), dibaca sekali per
+     * permintaan.
+     *
+     * @return list<int>
+     */
+    public function idKelasMahasiswa(): array
+    {
+        if ($this->idKelasSaya === null) {
+            $this->idKelasSaya = [];
+            if ($this->mahasiswa()) {
+                $hasil = RosterDb::conn()->query("
+                    SELECT k.id FROM roster_enrollments e
+                    JOIN roster_classes k ON k.id = e.class_id
+                    JOIN roster_academic_years t ON t.id = k.academic_year_id
+                    WHERE {$this->kelasMahasiswa()} ORDER BY k.id");
+                foreach ($hasil->fetch_all(MYSQLI_NUM) as $b) {
+                    $this->idKelasSaya[] = (int) $b[0];
+                }
+            }
+        }
+
+        return $this->idKelasSaya;
+    }
+
+    /**
+     * Syarat SQL: baris kelas tempat pengguna ini mahasiswa.
+     */
+    public function diKelasSaya(string $kolom = 'class_id'): string
+    {
+        $ids = $this->idKelasMahasiswa();
+
+        return $ids === [] ? self::TIDAK : $kolom . ' IN (' . implode(',', $ids) . ')';
+    }
+
+    /**
+     * id pengguna ini, sudah di-escape dan berkutip, untuk kueri pada tabel LokaUjian sendiri
+     * (kolom user_id). Hanya huruf heksadesimal dan tanda hubung yang lolos.
+     */
+    public function idSql(): string
+    {
+        return "'" . preg_replace('/[^0-9A-Za-z-]/', '', $this->identitas->userId) . "'";
     }
 }

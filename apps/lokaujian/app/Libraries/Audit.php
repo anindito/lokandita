@@ -32,6 +32,7 @@ final class Audit
         int|string|null $targetId = null,
         array $detail = [],
         ?int $matkulId = null,
+        ?int $kelasId = null,
     ): void {
         $pelakuId = Current::identity()?->userId;
         if ($pelakuId === null) {
@@ -52,7 +53,7 @@ final class Audit
             'target_tipe' => $targetTipe,
             'target_id'   => $targetId === null ? null : (string) $targetId,
             'course_id'   => $matkulId,
-            'class_id'    => null,
+            'class_id'    => $kelasId,
             'detail'      => json_encode($detail, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
             'ip'          => $ip,
             'user_agent'  => $agent,

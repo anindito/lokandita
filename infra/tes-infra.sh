@@ -64,6 +64,16 @@ sama "lokaujian: /media/ tidak menyajikan gambar soal" "$(docker exec lokaujian 
 sama "lokaujian: /media/ tidak menjalankan dan tidak menyajikan PHP" "$(docker exec lokaujian sh -c 'mkdir -p /srv/media/soal; f=/srv/media/soal/uji-infra.php; echo "<?php echo 1+1;" > "$f"; curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/media/soal/uji-infra.php; rm -f "$f"')" "403"
 sama "lokaujian: /media/ tanpa daftar isi" "$(docker exec lokaujian curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/media/soal/)" "403"
 
+echo "A4. penjadwal LokaUjian (§9, §21)"
+sama "lokaujian-jadwal berjalan" "$(docker inspect -f '{{.State.Running}}' lokaujian-jadwal 2>/dev/null || echo tidak-ada)" "true"
+sama "jaringan lokaujian-jadwal" "$(jaringan lokaujian-jadwal)" "data"
+sama "lokaujian-jadwal tidak membuka port ke host" "$(docker port lokaujian-jadwal | wc -l)" "0"
+sama "lokaujian-jadwal memakai image yang sama dengan lokaujian" "$(docker inspect -f '{{.Image}}' lokaujian-jadwal)" "$(docker inspect -f '{{.Image}}' lokaujian)"
+sama "lokaujian-jadwal tanpa volume gambar" "$(volume lokaujian-jadwal)" ""
+if [ "$(docker exec lokaujian-jadwal id -u)" != "0" ]; then ok "lokaujian-jadwal berjalan bukan sebagai root"; else tidak "lokaujian-jadwal berjalan sebagai root"; fi
+sama "denyut penjadwal membawa commit HEAD" "$(denyut_jadwal | jq -r '.commit' 2>/dev/null || true)" "$head"
+sama "penjadwal tidak melayani HTTP" "$(docker exec lokaujian-jadwal sh -c 'curl -s -o /dev/null --max-time 2 -w "%{http_code}" http://127.0.0.1:8080/healthz || true')" "000"
+
 echo "B. /healthz dan commit (§11)"
 for a in "${APLIKASI[@]}"; do
 	sama "$a /healthz" "$(docker exec "$a" curl -fsS --max-time 3 http://127.0.0.1:8080/healthz 2>&1 || true)" "{\"app\":\"$a\",\"commit\":\"$head\"}"

@@ -5,8 +5,8 @@ use Lokandita\Auth\Routes as RuteBersama;
 
 /** @var RouteCollection $routes */
 
-// LokaUjian (SPEC-LOKAUJIAN.md §15): jalan masuk dan lingkup (U1), bank soal dan draf ujian (U2).
-// Belum ada sesi dan pengerjaan; itu tahap U3 dan seterusnya.
+// LokaUjian (SPEC-LOKAUJIAN.md §15): jalan masuk dan lingkup (U1), bank soal dan draf ujian (U2),
+// penerbitan, sesi dan pengerjaan (U3). Penegakan SEB, tampilan langsung dan ekspor: U4 dan U5.
 
 // KONTRAK.md §11: dipakai infra/deploy.sh untuk memastikan commit yang berjalan.
 $routes->get('healthz', '\Lokandita\Auth\Controllers\Healthz::index');
@@ -68,9 +68,52 @@ $routes->group('mata-kuliah/(:num)', ['filter' => 'masuk:superadmin,dosen'], sta
     $routes->get('ujian/(:num)/ekspor', 'Draf::eksporHalaman/$1/$2');
     $routes->post('ujian/(:num)/ekspor', 'Draf::ekspor/$1/$2');
     $routes->post('ujian/(:num)/hapus', 'Draf::hapus/$1/$2');
+
+    // Tahap U3 (SPEC-LOKAUJIAN.md §6; KONTRAK.md §22): menyusun dan mengatur draf, menerbitkan
+    // (isi dibekukan), menarik, mengarsipkan, dan memberikan ujian terbit kepada satu kelas.
+    $routes->get('ujian/(:num)/sunting', 'Draf::sunting/$1/$2');
+    $routes->post('ujian/(:num)', 'Draf::simpan/$1/$2');
+    $routes->post('ujian/(:num)/butir', 'Draf::tambahButir/$1/$2');
+    $routes->post('ujian/(:num)/butir/(:num)/geser', 'Draf::geserButir/$1/$2/$3');
+    $routes->post('ujian/(:num)/butir/(:num)/hapus', 'Draf::hapusButir/$1/$2/$3');
+    $routes->post('ujian/(:num)/terbit', 'Draf::terbit/$1/$2');
+    $routes->post('ujian/(:num)/tarik', 'Draf::tarik/$1/$2');
+    $routes->post('ujian/(:num)/arsip', 'Draf::arsip/$1/$2');
+    $routes->post('ujian/(:num)/sesi', 'SesiStaf::buat/$1/$2');
+});
+
+// Sesi (tahap U3, SPEC-LOKAUJIAN.md §7; KONTRAK.md §22): siapa pun yang MELIHAT kelasnya boleh
+// menjalankannya — superadmin, pengampu mata kuliahnya, pengajar kelas itu. Lingkupnya diperiksa di
+// kueri (App\Libraries\Sesi + Akses::diJalankan); sesi kelas lain dijawab 404. Jadwal dan hapus
+// hanya bagi yang mengelola mata kuliahnya (404 bagi pengajar: baginya tindakan itu tidak ada).
+$routes->group('sesi/(:num)', ['filter' => 'masuk:superadmin,dosen'], static function (RouteCollection $routes): void {
+    $routes->get('', 'SesiStaf::lihat/$1');
+    $routes->get('pratinjau', 'SesiStaf::pratinjau/$1');
+    $routes->post('jadwal', 'SesiStaf::jadwal/$1');
+    $routes->post('buka', 'SesiStaf::buka/$1');
+    $routes->post('tutup', 'SesiStaf::tutup/$1');
+    $routes->post('mulai', 'SesiStaf::mulai/$1');
+    $routes->post('akhir', 'SesiStaf::akhir/$1');
+    $routes->post('akhiri', 'SesiStaf::akhiri/$1');
+    $routes->post('hapus', 'SesiStaf::hapus/$1');
+});
+
+// Mahasiswa (tahap U3, SPEC-LOKAUJIAN.md §8, §9.1): mulai, menunggu, halaman ujian, simpan,
+// kumpulkan. Filter `seb` selalu SESUDAH `masuk`. Di tahap U3 ia hanya memasang pita MODE UJI
+// (SEB_ENFORCEMENT=disabled) atau menolak (enabled) — App\Filters\SebSementara; penegakan
+// sungguhan tahap U4. Alamatnya memuat id SESI saja: pengerjaan dicari dari pengguna yang masuk.
+$routes->group('', ['filter' => ['masuk:mahasiswa', 'seb']], static function (RouteCollection $routes): void {
+    $routes->get('ujian-saya/(:num)', 'Kerja::lihat/$1');
+    $routes->post('ujian-saya/(:num)/mulai', 'Kerja::mulai/$1');
+    $routes->get('ujian-saya/(:num)/kerjakan', 'Kerja::kerjakan/$1');
+    $routes->post('ujian-saya/(:num)/kumpulkan', 'Kerja::kumpulkan/$1');
+    $routes->get('api/sesi/(:num)/keadaan', 'Kerja::keadaan/$1');
+    $routes->post('api/sesi/(:num)/jawaban', 'Kerja::jawaban/$1');
+    $routes->post('api/sesi/(:num)/peristiwa', 'Kerja::peristiwa/$1');
 });
 
 // Gambar soal (SPEC-LOKAUJIAN.md §5.3): dijawab aplikasi sesudah hak akses diperiksa, tidak pernah
 // sebagai berkas statis. Semua peran lewat filter; siapa yang boleh melihat gambar mana diputuskan
-// di kueri (App\Libraries\Media) — tahap U2: hanya pengelola mata kuliahnya.
+// di kueri (App\Libraries\Media): pengelola mata kuliahnya; staf yang menjalankan sesi ujian terbit
+// yang memuatnya; mahasiswa hanya selama pengerjaannya atas ujian itu berjalan.
 $routes->get('gambar/([0-9a-f]{32})', 'Gambar::tampil/$1', ['filter' => 'masuk']);

@@ -520,10 +520,11 @@ LokaKode's implementation is `App\Libraries\SumberSeb`, which reads LokaKode's o
 |---|---|---|
 | `edge` | caddy, auth, lokakode, portal, lokaujian | Public HTTP from Caddy to apps |
 | `internal` | auth (alias `auth-internal`), lokakode, portal, lokaujian | App-to-LokaAuth calls |
-| `data` | auth, lokakode, portal, lokaujian, mysql, redis | Database and cache |
+| `data` | auth, lokakode, portal, lokaujian, lokaujian-jadwal, mysql, redis | Database and cache |
 
-- Container names: `caddy`, `mysql`, `redis`, `auth`, `lokakode`, `portal`, `lokaujian`.
+- Container names: `caddy`, `mysql`, `redis`, `auth`, `lokakode`, `portal`, `lokaujian`, `lokaujian-jadwal`.
 - Every app container serves HTTP on port **8080**. No app publishes a port to the host.
+- `lokaujian-jadwal` (since stage U3) is the scheduler of §21: the image `lokandita/lokaujian:aktif`, the same `.env` as `lokaujian`, on `data` only, no HTTP, no volume.
 - Caddy reaches apps by container name on `edge`. Apps reach LokaAuth **only** by `auth-internal` on `internal`.
 - MySQL `3306` and Redis `6379` are published on `127.0.0.1` only, for the worker and for CLI use.
 - Named volumes (Compose project `lokandita`): `lokandita_mysql_data`, `lokandita_redis_data`, `lokandita_caddy_data`, `lokandita_caddy_config`, `lokandita_portal_media` (the Portal's uploaded hero photos, §16), and `lokandita_lokaujian_media` (Compose name `lokaujian_media`; LokaUjian's question pictures, §20, mounted at `/srv/media` in `lokaujian` only).
@@ -563,10 +564,11 @@ Each app validates its required variables at start and exits naming the missing 
 | `SERVICE_TOKEN_PORTAL`, `SERVICE_TOKEN_LOKAKODE`, `SERVICE_TOKEN_LOKAUJIAN` | ✔ | | | | |
 | `MFA_ENCRYPTION_KEY` | ✔ | | | | |
 | `INSTANCE_SECRET` | | ✔ | | | |
-| `SEB_ENCRYPTION_KEY`, `SEB_ENFORCEMENT` | | ✔ | | from U3/U4 | |
+| `SEB_ENCRYPTION_KEY` | | ✔ | | from U4 | |
+| `SEB_ENFORCEMENT` | | ✔ | | ✔ (since U3) | |
 | `JUDGE_CONCURRENCY` | | | | | ✔ |
 
-LokaUjian gets its own `SEB_ENCRYPTION_KEY` and `SEB_ENFORCEMENT` in the stage whose code first reads them; until then they are in no file.
+LokaUjian has `SEB_ENFORCEMENT` since stage U3 (§22 "Safe Exam Browser in stage U3") and gets its own `SEB_ENCRYPTION_KEY` in U4, the stage whose code first reads it; until then that key is in no file. `lokaujian-jadwal` uses `apps/lokaujian/.env`, the same file as `lokaujian`; its entrypoint runs the same check of required variables and exits with code 78 when one is missing.
 
 `infra/.env` (Caddy, MySQL, Redis, backup):
 
@@ -617,6 +619,7 @@ Values are written without quotes.
 ## 11. Deploy and verification
 
 - `infra/deploy.sh <auth|lokakode|portal|lokaujian>` builds the image tagged with the current Git commit, runs the app's migrations from that image (and for `auth` the reader grants of §3), starts it, and fails unless the running container reports that commit at `GET /healthz` (`{ "app": "...", "commit": "..." }`).
+- `infra/deploy.sh lokaujian` also recreates `lokaujian-jadwal` from the new image and fails unless the scheduler's heartbeat (§21) carries the deployed commit; it waits up to 90 seconds, because a new scheduler watches an old heartbeat for up to 25 seconds before taking over.
 - `infra/deploy.sh infra` starts MySQL, Redis and Caddy, runs `infra/mysql-init.sh`, and reloads the Caddyfile.
 - `infra/deploy.sh lokakode` runs `infra/mysql-hak-judge.sh` and `infra/mysql-hak-roster.sh` after LokaKode's migrations, because `judge_jobs` and the roster views (§18) live in LokaKode's schema. `roster_reader` must exist first (`infra/deploy.sh infra`).
 - `deploy.sh` refuses to run when the working tree has uncommitted or untracked changes, runs `infra/cek-env.sh` first, and warns when the commit is not on `origin`.
@@ -637,6 +640,8 @@ Values are written without quotes.
   13. roster views (§18), through `ROSTER_READER_DSN` from inside `lokaujian`: the user is `roster_reader`; `SELECT COUNT(*)` works on each of the five views; `SELECT` on `enrollments` and on `submissions` and `INSERT` into `roster_classes` are each refused with error 1142; the count of each view equals the count of its table, asked through `lokakode`. Only counts are printed.
   14. the way into LokaUjian (stage U1, §19), asked as in check 8 from inside `portal`: `GET /` of `lokaujian` without a cookie answers `200` with `noindex, nofollow` and a link to `/beranda`; `GET /beranda`, `/mata-kuliah`, `/mata-kuliah/1` and `/kelas/1` without a cookie each redirect to `AUTH_LOGIN_URL` with `next` equal to that address.
   15. question pictures of LokaUjian (stage U2, §20), asked as in check 8 from inside `portal`: `GET /media/soal/smoke.png` and `/media/soal/smoke.php` of `lokaujian` answer `403`; `GET /gambar/<32 zeros>`, `/mata-kuliah/1/bank` and `/mata-kuliah/1/ujian` without a cookie each redirect to `AUTH_LOGIN_URL` with `next` equal to that address; `/srv/media` of the running `lokaujian` container is the volume `lokandita_lokaujian_media`.
+  16. the scheduler of LokaUjian (stage U3, §21): the heartbeat `lokaujian:jadwal` exists, carries the current `HEAD`, and its `waktu` is younger than 60 seconds; the container `lokaujian-jadwal` is running.
+  18. routes of LokaUjian (stage U3, §22), asked as in check 8 from inside `portal`: `GET /mata-kuliah/1/ujian/1/sunting`, `/sesi/1`, `/sesi/1/pratinjau`, `/ujian-saya/1`, `/ujian-saya/1/kerjakan` and `/api/sesi/1/keadaan` without a cookie each redirect to `AUTH_LOGIN_URL` with `next` equal to that address; the `lokaujian` schema has the seven tables of §22; `SEB_ENFORCEMENT` in the running `lokaujian` container equals the value in `apps/lokaujian/.env`, and `disabled` passes with a warning line that says students are not required to use SEB. (Check 17, SEB of LokaUjian, comes with stage U4.)
 - `smoke.sh` additionally checks (as check 0) that every app container reports the current `HEAD` at `/healthz`.
 - In check 1 a host in maintenance must answer `503`, an open host `2xx`/`3xx`, and `www` a `301` to the apex; the certificate must validate.
 - Checks 3–5 become active in stage 5, check 6 in stage 7 and check 7 in stage 8, by a switch at the top of `smoke.sh`. Until then each prints `BELUM AKTIF`, is counted separately, and is not reported as passed.
@@ -655,6 +660,7 @@ Values are written without quotes.
 - For `portal`, `infra/tes.sh` also serves `lokakode-tes` on `lokakode_test` (the stage 11 gate needs three real apps; `LOKAKODE_TES_URL`) and starts the same browser with three host names mapped — `lokandita.com` → `portal-tes`, `lokakode.lokandita.com` → `lokakode-tes`, `auth.lokandita.com` → `auth-tes` — and every other name unresolvable. `apps/portal/tests/Peramban/ArabPublikTest.php` measures there that every public page of the three apps in Arabic is the mirror of its Indonesian version. `PembukaTest.php` measures the two landing pages in Indonesian and Arabic, light and dark, at 1280 and 390 pixels: the hero image loads as AVIF or WebP from the same origin, text never lies over it, no layout shift, WCAG AA contrast, and one size and stroke width for every icon.
 - With `TANGKAPAN=<host directory>` set, `infra/tes.sh` mounts that directory into the test container (`TANGKAPAN_DIR`) and the browser tests that take screenshots write them there; without it nothing is written.
 - For `lokaujian`, `infra/tes.sh` also builds LokaKode's image, recreates `lokakode_test` through the LokaKode migrations (so the views of §18 exist) and runs `infra/mysql-hak-roster.sh lokakode_test`; LokaKode itself is not served. `ROSTER_READER_DSN` of the app under test points at `lokakode_test`. Roster rows are written by the test code through `TES_ROSTER_TULIS_DSN` (user `lokakode_app`), which the app under test does not use. `apps/lokaujian/tests/RosterTest.php` proves that `roster_reader` reads the five views and nothing else, cannot write, and that `lokaujian_app` cannot touch the roster schema. Since stage U1 the shared client test (`packages/lokandita-auth/tests`) runs in LokaUjian's suite as it does in LokaKode's and the Portal's; its users get access to the app under test in addition to `portal` and `lokakode`.
+- Since stage U3, for `lokaujian`, `infra/tes.sh` also serves the same image a second time as `lokaujian-seb-tes` with `SEB_ENFORCEMENT=enabled` (`APP_SEB_TES_URL`; `lokaujian-tes` has `disabled`), starts the headless Chromium of the paragraph above with `lokaujian.lokandita.com` mapped to `lokaujian-tes` and every other name unresolvable, and runs `php spark ujian:jadwal --sekali` once against the test schema before PHPUnit. `apps/lokaujian/tests/Peramban/HalamanUjianTest.php` covers autosave, the countdown, resume after the browser is closed, working without a connection (network switched off through the DevTools Protocol), every paste path, copy and cut, takeover by a second page, the stop at the deadline, review and submit, and the waiting page; these tests fail, not skip, when the browser is missing. Tests that depend on time move the stored timestamps of the test schema (when an attempt started, when a session ends); the application under test keeps reading MySQL's clock. `tests/Jadwal/JadwalTest.php` runs the scheduler as a real process against Redis DB `15`.
 - `infra/tes.sh judge` is the only way to run the worker's tests (pytest, on the host, in `judge/.venv`). It recreates `lokakode_test` through the LokaKode migrations, gives `judge_worker` its grant there, and runs the tests against real MySQL, Redis DB `15` and real Docker. The tests refuse any schema not ending in `_test` and any Redis DB other than `15`, fail when Docker is unavailable, and fail when a test is skipped.
 
 ## 13. Production data (`SPEC.md` §17)
@@ -1092,7 +1098,7 @@ exam_items       (id, exam_id → exams, position, question_id NULL → question
 - A `pilihan_ganda` has 2–6 options and exactly one with `correct = 1`. **An option may carry a picture, and its text may then be empty** (the owner's decision of 2026-11-25, overruling `SPEC-LOKAUJIAN.md` §17 point 10). A question and a group carry at most one picture each; a group needs a text or a picture.
 - **The alternative text belongs to the use, not to the file**: `image_alt` sits next to `image_id` and is required whenever `image_id` is set (1–300 characters). `images` holds one row per stored file per course; the same file may be used with different alternative texts.
 - `content_hash` is the SHA-256 of the content in a fixed form — for a question: type, text, points, answer, picture (SHA-256 of the file and its alternative text), and the options with their order, key and pictures; for a group: text, picture, and the hashes of its questions in order. It is recomputed on every save and is how an import recognises content that is already in the bank.
-- `exam_items` holds exactly one of `question_id` (a question outside a group) or `group_id` per row. An exam item refers to the bank: a `draf` follows later edits in the bank. Freezing at publication is stage U3; in U2 every exam is a `draf`.
+- `exam_items` holds exactly one of `question_id` (a question outside a group) or `group_id` per row. An exam item refers to the bank: a `draf` follows later edits in the bank. Publishing copies the content into the frozen tables of §22; the `exam_items` rows stay, so a question that a published exam was made from still counts as used.
 - A question or group that any exam uses — a draft included — cannot be deleted, only archived (`archived_at`): hidden from the bank list, kept for its exams. One that no exam uses can be deleted for good; its picture file stays.
 - `audit_log` is append-only: `App\Libraries\Audit` only inserts, in the transaction of the change, and no route changes or deletes a row. The actor of a row written from a `spark` command is the person named by `--oleh`, and its `detail` carries `lewat: cli`.
 
@@ -1121,12 +1127,12 @@ All under `/mata-kuliah/{m}`, for whoever manages course `m`. Every `POST` carri
 | `POST /bank/soal/{id}/hapus` | permanent delete; refused (redirect with `pesan=dipakai`, nothing changed) when an exam uses it or its group |
 | `POST /bank/soal/{id}/geser` | group members only: field `arah` `naik` or `turun`, one step |
 | `GET /bank/kelompok/baru`, `POST /bank/kelompok`, `GET /bank/kelompok/{id}`, `GET /bank/kelompok/{id}/sunting`, `POST /bank/kelompok/{id}`, `POST /bank/kelompok/{id}/arsip`, `POST /bank/kelompok/{id}/hapus` | the same for a group's shared part; the group page previews the whole group and lists its questions with keys. Deleting a group deletes its questions |
-| `GET /ujian` | the exams of the course with number of questions, total points and the split between automatically scored and lecturer-marked points; and the import form |
+| `GET /ujian` | the exams of the course that are not archived (`?arsip=1`: the archived ones instead) with number of questions, total points and the split between automatically scored and lecturer-marked points; and the import form |
 | `POST /ujian` | fields `judul`, `jenis` (`ujian`/`kuis`), `butir[]` (`s<question id>` or `k<group id>`): a new `draf` holding those bank items in the order sent, with mode `dikendalikan_dosen`, no duration and no shuffling. Refused, with nothing stored, for no item, an item that is not a question outside a group or a group of this course, an empty group, or more than 200 questions |
-| `GET /ujian/{id}` | preview of the whole exam with the student's partial; no key on the page |
+| `GET /ujian/{id}` | preview of the whole exam with the student's partial; no key on the page. Since U3 also its state, its sessions and the actions of §22 |
 | `GET /ujian/{id}/ekspor`, `POST /ujian/{id}/ekspor` | the page that says the file contains every key; the file (below) |
 | `POST /ujian/impor` | file field `berkas`: import (below). Accepted → redirect to the new exam; refused → `422` with every mistake |
-| `POST /ujian/{id}/hapus` | deletes a `draf`; its questions stay in the bank |
+| `POST /ujian/{id}/hapus` | deletes an exam of any status that has **no attempt**, with its sessions; its questions stay in the bank. With an attempt: redirect with `pesan=ada_pengerjaan`, nothing changed |
 
 Form fields of a question: `type`, `text`, `points` (a comma is accepted as decimal sign), `answer` (`benar`/`salah`), `gambar` (file), `alt`, `hapus_gambar`; for `pilihan_ganda` six rows `opsi_teks[0…5]`, `opsi_gambar_0…5` (files), `opsi_alt[…]`, `opsi_hapus_gambar[…]` and `benar` (the row that is correct). A row with neither text nor picture is not an option. A mistake answers `422` with the form, everything typed, and one sentence per mistake; nothing is stored. Forms and import go through the same rules (`App\Libraries\Aturan`).
 
@@ -1139,7 +1145,7 @@ Preview uses the view partials `_soal` and `_kelompok`, which the student's exam
 - **The upload is never stored.** `Gambar::tulis` decodes it (a truncated file is refused, `tidak_terbaca`) and writes one new file from the pixels: PNG for a PNG upload (transparency kept), JPEG quality 85 otherwise (transparency on white), EXIF orientation applied, longest side at most 2000 px. A result above 5 MB is refused (`hasil_terlalu_besar`). The new file carries no metadata and nothing that was appended to the upload.
 - A result whose SHA-256 equals a stored picture of the same course is not stored twice; the existing row is used.
 - **Pictures are not static files.** Apache's `/media/` (§16) answers only names of the form `<32 hex>-<digits>.(avif|webp|jpg)`; a question picture is `<32 hex>.png|jpg`, so `/media/soal/…` is `403` for every name, with or without a session.
-- **`GET /gambar/<kunci>`** (filter `masuk`, any role) is the only way out: the app reads the row with `Akses::diKelola()` in the query and answers the file with its `Content-Type`, `Cache-Control: private, no-store` and `X-Content-Type-Options: nosniff`. A `kunci` of another course, an unknown `kunci`, and — in U2 — every request of a pengajar or a mahasiswa get the same `404`. Students are served pictures from stage U3, only while they have an attempt in progress or a released review of an exam that contains the picture. A row whose file is missing is `404` with the log line `gambar.berkas_hilang`.
+- **`GET /gambar/<kunci>`** (filter `masuk`, any role) is the only way out: the app reads the row with `Akses::diKelola()` in the query and answers the file with its `Content-Type`, `Cache-Control: private, no-store` and `X-Content-Type-Options: nosniff`. Besides whoever manages the course, since stage U3 the picture is answered to a staff member who may run a session (§22) of a published or archived exam whose frozen copy contains it, and to a mahasiswa **only while that student has an attempt in progress** on such an exam (the released review joins in U5). A `kunci` of another course, an unknown `kunci` and every other request get the same `404`. A row whose file is missing is `404` with the log line `gambar.berkas_hilang`.
 - `infra/backup.sh` writes the volume as `media-lokaujian.tar.gz` (through `docker exec lokaujian tar`) after the dump; `infra/uji-restore.sh` unpacks it into a temporary directory, refuses any file not named `soal/<32 hex>.png|jpg`, checks every row of the restored `lokaujian.images` against its file (size and SHA-256), and compares the archive with the live volume (`docs/RESTORE.md`).
 - Test containers have no volume: their `/srv/media` is the image's own directory. A `spark` command run by a test writes pictures inside the test-runner container, not inside `lokaujian-tes`.
 
@@ -1209,8 +1215,157 @@ Rules:
 - Text is stored with `\n` line ends and without leading or trailing white space; forms store it the same way.
 - An import creates one new exam in `draf`, as the importing user. A question outside a group whose content hash equals one already in that course's bank — archived ones included, which stay archived — is reused; so is a group whose shared part and questions all equal a stored group. Anything else is added to the bank.
 - A picture whose `sha256` equals a stored picture of that course is reused as it is. Any other picture goes through the upload checks above and is written anew from its pixels; its `sha256` in later exports is that of the stored file.
+- The export of a `terbit` or `arsip` exam writes its frozen copy (§22), not the bank.
 - The export writes the stored files and is a pure function of the exam's content: two-space indentation, one newline at the end, `/` and non-ASCII characters unescaped, keys in this order — top level as in the table; `settings`: `mode`, `duration_minutes` (always written, `null` when there is none), `shuffle_questions`, `shuffle_options`; an item: `type`, `text`, `points`, `answer`, `options`, `questions`, `image`; an option: `text` (always written), `correct` (only when `true`), `image`; a picture: `type`, `alt`, `sha256`, `data`. Pictures are named `g1`, `g2`, … in the order of first use (a group's picture before those of its questions, a question's before those of its options). **Exporting, importing that file into the same course and exporting again gives a byte-identical file.**
 - The file never holds classes, sessions, schedules, students, answers or ids of the database.
 - The export contains the keys: `Content-Type: application/json; charset=utf-8`, `Cache-Control: no-store`, `Content-Disposition: attachment; filename="lokaujian-<course code>-<exam id>.json"`.
 - `docker exec -i lokaujian php spark ujian:impor [file] --oleh <nomor induk> [--nama <file name>]` reads standard input without a file argument and exits 0 only when the file is accepted; a refusal prints every mistake with path and line. `php spark ujian:ekspor <exam id> --oleh <nomor induk>` prints the file to standard output and everything else to standard error. `--oleh` must be an active superadmin, or an active dosen with `lokaujian` access who is the pengampu of the course; an exam of a course that person does not manage is answered like one that does not exist.
+
+## 21. LokaUjian scheduler (stage U3, `SPEC-LOKAUJIAN.md` §7.5)
+
+`lokaujian-jadwal` (§9) runs `php spark ujian:jadwal` from the app image: one loop, one pass every 10 seconds, each pass idempotent. It has no state of its own; MySQL is the source of truth, and **nothing a student may or may not do depends on it having run**: whether an attempt may be answered is derived from the time on every read and every write (§22 "The time rule").
+
+- **What a pass does:** one statement that marks every attempt whose deadline passed more than 10 seconds ago (the grace of §22) as submitted — `submitted_at` = the deadline itself, `submit_how` = `diakhiri_dosen` when the session was ended by the lecturer and the attempt has no extra time, else `waktu_habis`. The state of a session (open, closed, running, finished) is not stored anywhere and is derived from its times, so a pass has nothing to do for it. Scoring joins in stage U5.
+- The lecturer's session page runs the same pass before it reads, so its numbers are right while the scheduler is down.
+- **Heartbeat:** Redis key `lokaujian:jadwal` (DB `3`), JSON `{ commit, pid, nama, mulai, waktu, lintasan }` — `nama` = `<host name>:<pid>`, `mulai` and `waktu` in UTC as `YYYY-MM-DDTHH:MM:SSZ`, `lintasan` = passes since the start — written after every pass with a lifetime of 60 s. A missing key means no scheduler is running. `infra/deploy.sh lokaujian`, `infra/smoke.sh` (check 16), `infra/tes-infra.sh` and the lecturer's session page read it.
+- **Exactly one scheduler per schema.** A scheduler that finds the heartbeat of another process watches it for up to 25 seconds: when it advances, the newcomer exits with one log line; when it stands still (the container that wrote it is gone), the newcomer takes over. The process handles no signal: stopped, it dies at once, and its key expires by itself. (The draft said "deleted on a clean stop"; the image has no `pcntl`, and a key that only ever expires needs none.)
+- It connects as `lokaujian_app` through `DB_DSN`; it makes no HTTP call and no call to LokaAuth.
+- `php spark ujian:jadwal --sekali` runs one pass and exits (tests; no heartbeat). `--periksa` runs nothing and exits 0 when the heartbeat of this container exists (the container's health check).
+- Exit code 78 means a missing environment variable, as for the judge worker.
+
+## 22. LokaUjian — publishing, sessions and attempts (stage U3, `SPEC-LOKAUJIAN.md` §6, §7, §8, §9.2)
+
+LokaUjian's own; no other component reads these tables or calls these routes. Recorded here so that the tests against real containers have something to hold on to.
+
+### Who may do what
+
+- **Manage** (edit a draft, publish, withdraw, archive, delete, give an exam to a class, change a schedule, delete a session): whoever manages the course (§20).
+- **Run a session** (see its page, open, close, start, set the end, end, preview the exam): whoever **sees the class** (§19) — superadmin, the pengampu of its course, a pengajar of that class. `App\Policy\Akses::idKelasDilihat()` reads those class ids from the roster once per request and `Akses::diJalankan()` turns them into `class_id IN (…)`; every query of `App\Libraries\Sesi` carries it. A session outside that scope is `404`, the same answer as for an id that does not exist. Schedule and delete answer `404` to a pengajar.
+- **Mahasiswa:** a student finds a session only when its class is one of theirs by the rule of §19 (`Akses::diKelasSaya()`), or when their own attempt already belongs to it — a student who leaves the class after starting keeps the attempt. **No address carries an attempt id**: student routes carry the session id, and the attempt is looked up from (exam of that session, logged-in user). A session of another class is `404`, identical to one that does not exist. Staff on a student route get `403` from the filter.
+
+### Tables (`lokaujian` schema, migration `2026-11-25-000002`)
+
+```
+exams            + published_at NULL, published_by NULL
+exam_groups      (id, exam_id → exams, text, image_id NULL → images, image_alt NULL, source_group_id NULL)
+exam_questions   (id, exam_id → exams, position, exam_group_id NULL → exam_groups, type, text, points, answer NULL,
+                  image_id NULL → images, image_alt NULL, source_question_id NULL)            UNIQUE(exam_id, position)
+exam_options     (id, exam_question_id → exam_questions, position, text, correct, image_id NULL → images, image_alt NULL)
+                                                                                              UNIQUE(exam_question_id, position)
+sessions         (id, exam_id → exams, course_id, class_id, open_at NULL, close_at NULL, started_at NULL, end_at NULL,
+                  ended_by NULL, created_by, created_at, updated_at)                           UNIQUE(exam_id, class_id)
+attempts         (id, session_id → sessions, exam_id → exams, class_id, user_id, started_at, extra_minutes DEFAULT 0,
+                  submitted_at NULL, submit_how 'mahasiswa'|'waktu_habis'|'diakhiri_dosen' NULL, urutan JSON,
+                  page_token CHAR(32), last_saved_at NULL)                                     UNIQUE(exam_id, user_id)
+answers          (id, attempt_id → attempts, exam_question_id → exam_questions, option_id NULL → exam_options,
+                  benar NULL, text NULL, ragu, counter, saved_at)                              UNIQUE(attempt_id, exam_question_id)
+integrity_events (id, user_id, attempt_id NULL, session_id NULL, kind, detail JSON, ip, user_agent, created_at)
+```
+
+- **The frozen copy.** `exam_groups`, `exam_questions` and `exam_options` are written by publishing and by nothing else: every question, option, key, points value and picture reference of the exam, with `position` 1…n in exam order (the questions of a group are consecutive). Later edits in the bank never reach them. Withdrawing an exam to `draf` deletes them. Ids in every student page and request are ids of the frozen copy, never of the bank.
+- `sessions` holds times, not a state. The state is derived: for `per_mahasiswa` the session is **open for starting** while `open_at <= now` and (`close_at` is null or `now < close_at`); for `dikendalikan_dosen` it **runs** from `started_at` until its end, which is `end_at`, and never later than 8 hours after `started_at`. `ended_by` is set by "Akhiri".
+- **One attempt per student per exam** is enforced by `UNIQUE(exam_id, user_id)`. `urutan` is `{ "soal": [frozen question ids in this student's order], "opsi": { "<question id>": [option ids in this student's order] } }`, fixed when the attempt is created and never rewritten. With question shuffling the units of the shuffle are groups and questions outside a group; inside a group the order never changes. *Benar* / *Salah* are not shuffled.
+- `extra_minutes` is part of the deadline; granting it is stage U5.
+- An answer row with `option_id`, `benar` and `text` all empty is "not answered" (a cleared choice keeps its row and its counter).
+- All times are UTC. No attempt, answer or integrity event is ever deleted; a session or an exam can be deleted only while it has no attempt.
+
+### The time rule
+
+Written once, in `App\Libraries\Tenggat`, as SQL over MySQL's clock (`UTC_TIMESTAMP()`); the browser's clock and the container's clock decide nothing. The deadline is not stored:
+
+```
+deadline = per_mahasiswa:       attempts.started_at + exams.duration_minutes + extra_minutes
+           dikendalikan_dosen:  end of the session (above)                   + extra_minutes
+```
+
+- **A student may answer exactly when the attempt is not submitted and the server's time is before its deadline.** An attempt whose deadline has passed is ended whatever its stored status says.
+- A save is accepted up to **10 seconds** after the deadline; the grace is not shown and not configurable. Anything later is refused.
+- A student who starts just before a `per_mahasiswa` session closes gets the full duration. A student who joins a running `dikendalikan_dosen` session gets the time that is left.
+
+### Exam routes (in addition to §20), for whoever manages course `m`
+
+All under `/mata-kuliah/{m}/ujian/{id}`; a draft route on an exam that is not a `draf` answers `404`.
+
+| Route | Does |
+|---|---|
+| `GET /sunting` | form of a `draf`: settings, the order of its items, and the bank items not yet in it |
+| `POST ` (the exam itself) | fields `judul`, `jenis`, `petunjuk`, `mode`, `durasi`, `acak_soal`, `acak_opsi`; checked by the rules of the exam file (§20). A mistake → `422` with the form |
+| `POST /butir` | `butir[]` as in `POST /ujian`: appends bank items |
+| `POST /butir/{position}/geser`, `POST /butir/{position}/hapus` | field `arah` `naik` or `turun`: one step; or removes the item (the last one cannot be removed) |
+| `POST /terbit` | publishes: writes the frozen copy, `status = terbit`. Refused with `422` and a list of **exactly what is missing** — no question; a `pilihan_ganda` without exactly one correct option; a `benar_salah` without a key; `per_mahasiswa` without a duration — and nothing stored |
+| `POST /tarik` | back to `draf`, only while the exam has no attempt (`pesan=ada_pengerjaan` otherwise). Its sessions stay and are shown to students again when it is published again |
+| `POST /arsip` | field `arsip` `1` or `0`: `terbit` ↔ `arsip`. Archiving is refused while an attempt is running (`pesan=sedang_berjalan`). An archived exam is in no student's list and its sessions take no action |
+| `POST /sesi` | fields `kelas`, and for `per_mahasiswa` `buka`, `tutup` (`YYYY-MM-DDTHH:MM`, Asia/Jakarta): gives a `terbit` exam to a class of this course that is not archived and belongs to the active academic year. At most one session per exam per class |
+
+### Session routes, for whoever may run the session
+
+| Route | Does |
+|---|---|
+| `GET /sesi/{id}` | state, the server's time, the times of the session, whether the scheduler is alive, and three counts: started, working, finished. No answer and no score. The page does not refresh itself (the live view per student is stage U5) |
+| `GET /sesi/{id}/pratinjau` | the published exam with the student's partial, no key |
+| `POST /sesi/{id}/buka`, `/tutup` | `per_mahasiswa`: open from now (a closing time still ahead is kept, one that has passed is cleared), or close now. Closing stops nobody who is working |
+| `POST /sesi/{id}/mulai` | `dikendalikan_dosen`: the clock starts for the whole class. Optional `menit` (1–480) or `jam` (`HH:MM`, Asia/Jakarta) sets the end with it |
+| `POST /sesi/{id}/akhir` | sets or changes the end of a running session: `menit` from now, or `jam` |
+| `POST /sesi/{id}/akhiri` | ends the session **30 seconds from now** for everyone; the end cannot be changed afterwards |
+| `POST /sesi/{id}/jadwal`, `/hapus` | managers only: new `buka` / `tutup`; delete a session that has no attempt |
+
+A refused action redirects to the session page with `pesan=g_<reason>` and changes nothing.
+
+### Student routes
+
+All behind `masuk:mahasiswa` and `seb` (below); `{s}` is a session id.
+
+| Route | Does |
+|---|---|
+| `GET /beranda` (§19, not behind `seb`) | the student's exams: in progress, not taken yet, finished. Title, kind, mode, duration and schedule — nothing of the content |
+| `GET /ujian-saya/{s}` | before the start: number of questions, time, instructions, rules, and *Mulai* — or the waiting page, which asks `…/keadaan` every 5 seconds and turns into the exam by itself when the lecturer starts. While running: *Lanjutkan*. Afterwards: the receipt — received, when, how, how many answered; no score |
+| `POST /ujian-saya/{s}/mulai` | creates the attempt, or returns the existing one; redirects to `/kerjakan`. Not accepted yet → back with `pesan=belum` |
+| `GET /ujian-saya/{s}/kerjakan` | the exam page, loaded once with the whole exam and no key. **Opening it takes the attempt over**: a new `page_token` is written. An attempt that has ended redirects to the receipt |
+| `POST /ujian-saya/{s}/kumpulkan` | submits (`submit_how = mahasiswa`); an attempt that has already ended is left as it is |
+| `GET /api/sesi/{s}/keadaan[?halaman=<token>]` | JSON `{ menerima, sesi_selesai, pengerjaan: null \| { berjalan, sisa, tanpa_akhir, berlalu, diakhiri, tambahan, dikumpulkan, diambil_alih } }` — `sisa` = seconds to the deadline; `tanpa_akhir` = lecturer-controlled without an end time (the page then shows `berlalu`, the seconds since the start) |
+| `POST /api/sesi/{s}/jawaban` | one save (below) |
+| `POST /api/sesi/{s}/peristiwa` | JSON `{ "jenis": "paste_blocked", "jalur": … }`, `jalur` one of `paste`, `keyboard`, `shift_insert`, `drop`, `middle_click`, `context_menu`, `copy`, `cut` |
+
+**Autosave request.** `POST /api/sesi/{s}/jawaban`, `Content-Type: application/json`, header `X-CSRF-TOKEN`:
+
+```json
+{ "halaman": "<page_token>", "soal": 123, "nilai": …, "ragu": false, "n": 7 }
+```
+
+`nilai` is `"benar"`, `"salah"` or `null` for `benar_salah`; an option id or `null` for `pilihan_ganda`; a string for `isian` (at most 200 characters) and `uraian` (at most 20,000). `n` is the save counter of that question, counted by the page from the stored value upwards.
+
+| Answer | Meaning |
+|---|---|
+| `200 { ok, n, disimpan, sisa }` | committed to MySQL. `n` = the counter now stored, `disimpan` = `HH:MM:SS` Asia/Jakarta, `sisa` = seconds left. **A save with a counter not above the stored one changes nothing** and is answered the same way |
+| `409 { error }` | never to be accepted, the page stops: `waktu_habis`, `dikumpulkan`, or `diambil_alih` (the page's token is no longer the attempt's) |
+| `422 { error }` | this request is wrong (`bentuk`, `soal`, `nilai`); nothing stored |
+| `404` | no attempt of this user in that session |
+| `429` | more than 240 saves in a minute for one student and session; the page retries. The counter lives in Redis (`lokaujian:laju:simpan:…`); with Redis empty or unreachable every save is accepted |
+| `403 { error: "seb_wajib" }` | from filter `seb` |
+
+The order of the checks is: the attempt is this user's; the page still holds it; the time rule; the question belongs to this exam and the value is valid; write. The page shows *Tersimpan* only for a `200`. On a network error, a `5xx` or a `429` it keeps the answer and sends it again until it is accepted; unsent answers live in the page's memory only, never in `localStorage`.
+
+### Integrity events of stage U3
+
+`paste_blocked` (`detail = { jalur }`) for a blocked paste, copy or cut, and `page_taken_over` (`detail = { halaman }`, once per page that was taken over). A user with `paste_allowed` (§3) may paste and nothing is recorded for them. The other events, and showing them, are stages U4 and U5.
+
+### Safe Exam Browser in stage U3
+
+LokaUjian has no SEB configuration yet (tables and panel are stage U4), so there is nothing to verify against. Filter `seb` is `App\Filters\SebSementara` for this stage:
+
+- `SEB_ENFORCEMENT=disabled`: student pages open, each with the red banner "MODE UJI: penegakan SEB dinonaktifkan".
+- `SEB_ENFORCEMENT=enabled`, or the variable missing: a mahasiswa is **refused** on every route behind `seb` (`403`; JSON `seb_wajib` under `/api/`). There is no state in which enforcement is "on" and nothing is checked.
+
+Staff pass in both cases. In U4 the alias `seb` becomes `Lokandita\Auth\Filters\WajibSeb` of §8.
+
+### Audit
+
+`App\Libraries\Audit` writes, in the transaction of the change, with `course_id` and for sessions `class_id`:
+
+| `action` | When |
+|---|---|
+| `ujian.diterbitkan`, `ujian.ditarik`, `ujian.diarsipkan`, `ujian.dipulihkan`, `ujian.dihapus` | the exam's status changes |
+| `sesi.dibuat`, `sesi.dijadwalkan`, `sesi.dibuka`, `sesi.ditutup`, `sesi.dimulai`, `sesi.akhir_ditetapkan`, `sesi.diakhiri`, `sesi.dihapus` | a person acts on a session |
+
+A session that opens or closes by its schedule, and an attempt that the scheduler marks, write no audit row: nobody acted. Saving settings and reordering a draft are not audited.
 

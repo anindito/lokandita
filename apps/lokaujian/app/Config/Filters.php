@@ -23,6 +23,8 @@ class Filters extends BaseFilters
         'keamanan'    => SecurityHeaders::class,
         // KONTRAK.md §4: lima langkah mengenali pengguna, dari paket bersama.
         'masuk'       => RequireLogin::class,
+        // Tahap U3: pita MODE UJI atau penolakan; diganti WajibSeb paket bersama di tahap U4.
+        'seb'         => \App\Filters\SebSementara::class,
     ];
 
     /**

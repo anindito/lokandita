@@ -17,6 +17,7 @@ $angka = static fn (float $n): string => Soal::poinTampil(number_format($n, 2, '
 <h1><?= lang('Bank.ujian.judul') ?>: <span class="ltr"><?= esc($matkul['code']) ?></span></h1>
 <p class="redup"><?= lang('Bank.ujian.penjelasan') ?> <a href="<?= $dasar ?>/bank"><?= lang('Bank.ujian.keBank') ?></a></p>
 
+<p><a href="<?= $dasar ?>/ujian<?= $arsip ? '' : '?arsip=1' ?>" data-arsip-taut><?= lang($arsip ? 'Sesi.ujian.lihatAktif' : 'Sesi.ujian.lihatArsip') ?></a></p>
 <?php if ($galatImpor !== []): ?>
     <div class="kartu" role="alert" data-galat-impor>
         <p><strong><?= lang('Bank.impor.ditolak', [esc($berkas)]) ?></strong></p>

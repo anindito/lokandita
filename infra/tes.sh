@@ -37,11 +37,11 @@ bersih() {
 		kill "$pid_worker" 2> /dev/null || true
 		wait "$pid_worker" 2> /dev/null || true
 	fi
-	docker rm -f auth-tes "$app-tes" lokakode-tes lokakode-seb-tes tes-jalan caddy-tes peramban-tes > /dev/null 2>&1 || true
+	docker rm -f auth-tes "$app-tes" lokakode-tes lokakode-seb-tes lokaujian-seb-tes tes-jalan caddy-tes peramban-tes > /dev/null 2>&1 || true
 	rm -rf "${tmp:?}"
 }
 trap bersih EXIT
-bersih_awal() { docker rm -f auth-tes "$app-tes" lokakode-tes lokakode-seb-tes tes-jalan caddy-tes peramban-tes > /dev/null 2>&1 || true; }
+bersih_awal() { docker rm -f auth-tes "$app-tes" lokakode-tes lokakode-seb-tes lokaujian-seb-tes tes-jalan caddy-tes peramban-tes > /dev/null 2>&1 || true; }
 bersih_awal
 
 bangun() { # <app>
@@ -89,6 +89,16 @@ env_tes() {
 		grep -q '^SEB_ENFORCEMENT=disabled$' "$tmp/$1.env" || gagal "env tes lokakode: SEB_ENFORCEMENT tidak ada"
 		grep -q '^SEB_ENFORCEMENT=enabled$' "$tmp/$1-seb.env" || gagal "env tes lokakode-seb: SEB_ENFORCEMENT tidak ada"
 	fi
+	# LokaUjian tahap U3: klien tes bukan SEB, dan penegakan sungguhan baru ada di tahap U4.
+	# Kontainer kedua dengan `enabled` (lokaujian-seb-tes) membuktikan bahwa di tahap ini
+	# `enabled` berarti mahasiswa DITOLAK, bukan dibiarkan lewat tanpa pemeriksaan.
+	if [ "$1" = "lokaujian" ]; then
+		sed -i -E 's#^SEB_ENFORCEMENT=.*#SEB_ENFORCEMENT=disabled#' "$tmp/$1.env"
+		sed -E 's#^SEB_ENFORCEMENT=.*#SEB_ENFORCEMENT=enabled#' "$tmp/$1.env" > "$tmp/$1-seb.env"
+		chmod 600 "$tmp/$1-seb.env"
+		grep -q '^SEB_ENFORCEMENT=disabled$' "$tmp/$1.env" || gagal "env tes lokaujian: SEB_ENFORCEMENT tidak ada"
+		grep -q '^SEB_ENFORCEMENT=enabled$' "$tmp/$1-seb.env" || gagal "env tes lokaujian-seb: SEB_ENFORCEMENT tidak ada"
+	fi
 }
 
 buat_ulang_skema() { # <skema_test>
@@ -107,7 +117,7 @@ jalan() {
 	docker create --name tes-jalan --network data --env-file "$tmp/$a.env" \
 		-e AUTH_TES_URL=http://auth-tes:8080 -e AUTH_TES_SKEMA="$skema_auth" -e APP_TES_URL="http://$app-tes:8080" \
 		-e LOKAKODE_TES_URL=http://lokakode-tes:8080 \
-		-e APP_SEB_TES_URL=http://lokakode-seb-tes:8080 \
+		-e APP_SEB_TES_URL="http://$( [ "$app" = "lokaujian" ] && echo lokaujian || echo lokakode )-seb-tes:8080" \
 		-e PERAMBAN_TES_URL="$url_peramban" \
 		${TANGKAPAN:+-v "$TANGKAPAN:/tangkapan" -e TANGKAPAN_DIR=/tangkapan} \
 		--entrypoint "$1" "lokandita/$a:tes" "${@:2}" > /dev/null
@@ -304,6 +314,16 @@ if [ "$app" != "auth" ]; then
 		"$AKAR/infra/mysql-hak-roster.sh" lokakode_test
 	fi
 	layani "$app" "$app-tes"
+	if [ "$app" = "lokaujian" ]; then
+		layani lokaujian lokaujian-seb-tes "" lokaujian-seb
+		# Halaman ujian (simpan otomatis, hitung mundur, lanjut, tanpa sambungan, blokir tempel)
+		# hanya bisa dibuktikan di peramban (KONTRAK.md §12).
+		peramban_tes lokaujian.lokandita.com=lokaujian-tes
+		# Penjadwal (KONTRAK.md §21) dijalankan sekali pada skema tes; tes-tesnya sendiri
+		# menjalankannya lagi sesudah menggeser waktu.
+		echo "== penjadwal sekali jalan pada skema tes"
+		jalan lokaujian php spark ujian:jadwal --sekali --no-header || gagal "ujian:jadwal --sekali gagal pada skema tes"
+	fi
 	if [ "$app" = "lokakode" ]; then
 		layani lokakode lokakode-seb-tes "" lokakode-seb
 		worker_tes

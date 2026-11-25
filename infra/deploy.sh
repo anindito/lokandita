@@ -4,7 +4,9 @@
 #   infra/deploy.sh infra                    MySQL, Redis, Caddy, skema dan pengguna
 #   infra/deploy.sh <auth|lokakode|portal|lokaujian>
 #                                            build image dari commit sekarang, jalankan,
-#                                            lalu GAGAL kecuali /healthz melaporkan commit itu
+#                                            lalu GAGAL kecuali /healthz melaporkan commit itu;
+#                                            lokaujian: juga penjadwalnya (lokaujian-jadwal),
+#                                            GAGAL kecuali denyutnya melaporkan commit itu
 #   infra/deploy.sh judge                    venv, image judge, layanan systemd pengguna;
 #                                            GAGAL kecuali denyut worker melaporkan commit itu
 #   infra/deploy.sh --verifikasi <app> <commit>   hanya pemeriksaan /healthz
@@ -168,6 +170,24 @@ compose up -d --no-build --force-recreate --no-deps "$sasaran"
 if ! verifikasi_commit "$sasaran" "$commit"; then
 	docker logs --tail 30 "$sasaran" >&2 || true
 	gagal "deploy $sasaran: kontainer tidak menjalankan commit $commit"
+fi
+# Penjadwal LokaUjian (KONTRAK.md §21) berjalan dari image yang sama dan diganti bersama
+# aplikasinya. Deploy GAGAL kecuali denyutnya di Redis membawa commit ini. Penjadwal baru
+# mengamati denyut lama sampai 25 detik sebelum mengambil alih, jadi ditunggu sampai 90 detik.
+if [ "$sasaran" = "lokaujian" ]; then
+	compose up -d --no-build --force-recreate --no-deps lokaujian-jadwal
+	denyut=""
+	for ((i = 1; i <= 45; i++)); do
+		denyut="$(denyut_jadwal)"
+		if [ -n "$denyut" ] && [ "$(jq -r '.commit' <<< "$denyut" 2> /dev/null)" = "$commit" ]; then break; fi
+		sleep 2
+	done
+	if [ "$(jq -r '.commit' <<< "$denyut" 2> /dev/null)" != "$commit" ]; then
+		docker logs --tail 30 lokaujian-jadwal >&2 || true
+		gagal "deploy lokaujian: penjadwal tidak berdenyut dengan commit $commit (denyut terakhir: ${denyut:-tidak ada})"
+	fi
+	echo "verifikasi lokaujian-jadwal: denyut -> $denyut"
+	echo "verifikasi lokaujian-jadwal: LULUS, penjadwal menjalankan commit $commit"
 fi
 # Image lama aplikasi ini tidak dipakai lagi; kembali ke versi lama = checkout lalu deploy.
 docker images --format '{{.Repository}}:{{.Tag}}' "lokandita/$sasaran" \

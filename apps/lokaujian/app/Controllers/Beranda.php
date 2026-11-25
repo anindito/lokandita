@@ -9,7 +9,7 @@ use Lokandita\Auth\UserDirectory;
 
 /**
  * Beranda: kelas yang boleh dilihat staf pada tahun ajaran aktif; untuk mahasiswa daftar
- * ujiannya (belum ada sampai tahap U3) dan kelas-kelasnya.
+ * ujiannya dan kelas-kelasnya.
  */
 final class Beranda extends BaseController
 {
@@ -21,6 +21,7 @@ final class Beranda extends BaseController
             return $this->halaman('beranda_mahasiswa', [
                 'judul' => lang('Lokandita.beranda'),
                 'kelas' => $roster->kelasSaya(),
+                'ujian' => (new \App\Libraries\Pengerjaan($this->akses()))->daftar(),
             ]);
         }
 

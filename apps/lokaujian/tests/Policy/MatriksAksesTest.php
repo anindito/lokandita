@@ -21,7 +21,7 @@ use Tests\Support\UjianCase;
  */
 final class MatriksAksesTest extends UjianCase
 {
-    private const PELAKU = ['superadmin', 'pengampuX', 'pengampuY', 'pengajarA', 'pengajarB', 'mhsA'];
+    private const PELAKU = ['superadmin', 'pengampuX', 'pengampuY', 'pengajarA', 'pengajarB', 'mhsA', 'mhsB'];
 
     // Rute paket bersama: diuji oleh ClientAppTest di paket (KONTRAK.md §4).
     private const PAKET = ['GET healthz', 'POST keluar', 'POST sesi/perpanjang', 'POST preferensi'];
@@ -46,8 +46,19 @@ final class MatriksAksesTest extends UjianCase
     private function matriks(array $d): array
     {
         $semua  = array_fill_keys(self::PELAKU, 'ok');
-        $staf   = ['mhsA' => 403] + $semua;
-        $kelola = ['pengampuY' => 404, 'pengajarA' => 403, 'pengajarB' => 403, 'mhsA' => 403] + $semua;
+        $staf   = ['mhsA' => 403, 'mhsB' => 403] + $semua;
+        $kelola = ['pengampuY' => 404, 'pengajarA' => 403, 'pengajarB' => 403] + $staf;
+        // Tahap U3. Menjalankan sesi kelas XA: superadmin, pengampu X, pengajar A. Mengatur sesi
+        // (jadwal, hapus): hanya yang mengelola mata kuliahnya — bagi pengajar A tindakan itu tidak
+        // ada (404). Rute mahasiswa: staf ditolak filter (403); mahasiswa B, yang bukan anggota
+        // kelas XA, mendapat 404 — sama dengan sesi yang tidak ada.
+        $jalankan = ['pengampuY' => 404, 'pengajarB' => 404] + $staf;
+        $atur     = ['pengajarA' => 404] + $jalankan;
+        $mhs      = ['superadmin' => 403, 'pengampuX' => 403, 'pengampuY' => 403, 'pengajarA' => 403, 'pengajarB' => 403, 'mhsA' => 'ok', 'mhsB' => 404];
+        $t        = $d['ujianT'] ?? 0;
+        $ss       = '/sesi/' . ($d['sesiXA'] ?? 0);
+        $us       = '/ujian-saya/' . ($d['sesiXA'] ?? 0);
+        $api      = '/api/sesi/' . ($d['sesiXA'] ?? 0);
         $x      = '/mata-kuliah/' . $d['matkulX'];
         $s      = $d['soalX'] ?? 0;
         $k      = $d['kelompokX'] ?? 0;
@@ -85,7 +96,37 @@ final class MatriksAksesTest extends UjianCase
             'POST mata-kuliah/{n}/ujian/{n}/ekspor'          => [$x . '/ujian/' . $u . '/ekspor', $kelola],
             'POST mata-kuliah/{n}/ujian/{n}/hapus'           => [$x . '/ujian/' . $u . '/hapus', $kelola],
 
-            'GET gambar/([0-9a-f]{32})' => ['/gambar/' . ($d['gambarX'] ?? str_repeat('0', 32)), ['pengampuY' => 404, 'pengajarA' => 404, 'pengajarB' => 404, 'mhsA' => 404] + $semua],
+            'GET mata-kuliah/{n}/ujian/{n}/sunting'           => [$x . '/ujian/' . $u . '/sunting', $kelola],
+            'POST mata-kuliah/{n}/ujian/{n}'                  => [$x . '/ujian/' . $u, $kelola],
+            'POST mata-kuliah/{n}/ujian/{n}/butir'            => [$x . '/ujian/' . $u . '/butir', $kelola],
+            'POST mata-kuliah/{n}/ujian/{n}/butir/{n}/geser'  => [$x . '/ujian/' . $u . '/butir/1/geser', $kelola],
+            'POST mata-kuliah/{n}/ujian/{n}/butir/{n}/hapus'  => [$x . '/ujian/' . $u . '/butir/1/hapus', $kelola],
+            'POST mata-kuliah/{n}/ujian/{n}/terbit'           => [$x . '/ujian/' . $u . '/terbit', $kelola],
+            'POST mata-kuliah/{n}/ujian/{n}/tarik'            => [$x . '/ujian/' . $t . '/tarik', $kelola],
+            'POST mata-kuliah/{n}/ujian/{n}/arsip'            => [$x . '/ujian/' . $t . '/arsip', $kelola],
+            'POST mata-kuliah/{n}/ujian/{n}/sesi'             => [$x . '/ujian/' . $t . '/sesi', $kelola],
+
+            'GET sesi/{n}'            => [$ss, $jalankan],
+            'GET sesi/{n}/pratinjau'  => [$ss . '/pratinjau', $jalankan],
+            'POST sesi/{n}/jadwal'    => [$ss . '/jadwal', $atur],
+            'POST sesi/{n}/buka'      => [$ss . '/buka', $jalankan],
+            'POST sesi/{n}/tutup'     => [$ss . '/tutup', $jalankan],
+            'POST sesi/{n}/mulai'     => [$ss . '/mulai', $jalankan],
+            'POST sesi/{n}/akhir'     => [$ss . '/akhir', $jalankan],
+            'POST sesi/{n}/akhiri'    => [$ss . '/akhiri', $jalankan],
+            'POST sesi/{n}/hapus'     => [$ss . '/hapus', $atur],
+
+            'GET ujian-saya/{n}'             => [$us, $mhs],
+            'POST ujian-saya/{n}/mulai'      => [$us . '/mulai', $mhs],
+            'GET ujian-saya/{n}/kerjakan'    => [$us . '/kerjakan', $mhs],
+            'POST ujian-saya/{n}/kumpulkan'  => [$us . '/kumpulkan', $mhs],
+            'GET api/sesi/{n}/keadaan'       => [$api . '/keadaan', $mhs],
+            'POST api/sesi/{n}/jawaban'      => [$api . '/jawaban', $mhs],
+            'POST api/sesi/{n}/peristiwa'    => [$api . '/peristiwa', $mhs],
+
+            // Gambar X ada di ujian terbit yang diberikan ke kelas XA: pengajar A melihatnya lewat
+            // pratinjau sesi, dan mahasiswa A selama pengerjaannya berjalan. Selain itu 404.
+            'GET gambar/([0-9a-f]{32})' => ['/gambar/' . ($d['gambarX'] ?? str_repeat('0', 32)), ['pengampuY' => 404, 'pengajarB' => 404, 'mhsB' => 404] + $semua],
         ];
     }
 
@@ -104,6 +145,13 @@ final class MatriksAksesTest extends UjianCase
         $this->buatSoal($http, $d['matkulX'], 'uraian', ['text' => 'Rahasia uraian X'], [], $d['kelompokX']);
         $d['ujianX']  = $this->buatDraf($http, $d['matkulX'], 'Rahasia ujian X', ['s' . $d['soalX'], 'k' . $d['kelompokX']]);
         $d['gambarX'] = (string) $this->db->query('SELECT kunci FROM images')->fetch_assoc()['kunci'];
+        // Tahap U3: ujian terbit kedua (memuat soal bergambar itu), diberikan ke kelas XA, sudah
+        // dimulai dosen, dan mahasiswa A sedang mengerjakannya.
+        $d['ujianT'] = $this->buatDraf($http, $d['matkulX'], 'Rahasia ujian terbit X', ['s' . $d['soalX']]);
+        $this->assertContains($this->kirim($http, '/mata-kuliah/' . $d['matkulX'] . '/ujian/' . $d['ujianT'] . '/terbit')->status, [302, 303]);
+        $d['sesiXA'] = $this->beri($http, $d['matkulX'], $d['ujianT'], $d['kelasXA']);
+        $this->assertStringEndsWith('?pesan=dimulai', (string) $this->kirim($http, '/sesi/' . $d['sesiXA'] . '/mulai', ['menit' => '60'])->header('Location'));
+        $this->mulaiKerja($this->sebagai($d['mhsA']), $d['sesiXA'], (string) $d['mhsA']['id']);
 
         return $d;
     }
@@ -199,7 +247,7 @@ final class MatriksAksesTest extends UjianCase
     {
         $d = $this->dunia();
         $this->idn->query("UPDATE app_access SET enabled = 0 WHERE user_id = '{$d['pengampuX']['id']}' AND app = 'lokaujian'");
-        foreach (['/beranda', '/mata-kuliah', '/mata-kuliah/' . $d['matkulX'], '/kelas/' . $d['kelasXA'], '/mata-kuliah/' . $d['matkulX'] . '/bank', '/mata-kuliah/' . $d['matkulX'] . '/ujian'] as $jalur) {
+        foreach (['/beranda', '/mata-kuliah', '/mata-kuliah/' . $d['matkulX'], '/kelas/' . $d['kelasXA'], '/mata-kuliah/' . $d['matkulX'] . '/bank', '/mata-kuliah/' . $d['matkulX'] . '/ujian', '/sesi/1'] as $jalur) {
             $r = $this->sebagai($d['pengampuX'])->get($jalur);
             $this->assertSame(403, $r->status, $jalur);
             $this->assertStringNotContainsString('UJX101', $r->body, $jalur);

@@ -23,3 +23,40 @@
 .gambar-kecil { max-width: 12rem; max-height: 8rem; height: auto; width: auto; border: 1px solid var(--garis); border-radius: .25rem; background: #fff; display: block; margin: .25rem 0; }
 .daftar-galat { margin: 0; padding-inline-start: 1.25rem; color: var(--bahaya); }
 .sel-centang { width: 2.5rem; }
+
+/* ---- Halaman ujian mahasiswa (tahap U3, SPEC-LOKAUJIAN.md §8) ---- */
+.sr-saja { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.ujian-kepala { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; align-items: center; justify-content: space-between;
+  background: var(--kartu); border: 1px solid var(--garis); border-radius: .5rem; padding: .5rem 1rem; }
+.ujian-judul { display: flex; flex-direction: column; min-width: 0; }
+.ujian-jam { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ujian-jam[data-tingkat="10"] { color: var(--emas); }
+.ujian-jam[data-tingkat="5"], .ujian-jam[data-tingkat="1"] { color: var(--bahaya); }
+.ujian-jam[data-tingkat="1"] { text-decoration: underline; }
+.ujian-simpan { font-size: .9rem; }
+.ujian-simpan[data-keadaan="tersimpan"] { color: var(--hijau); }
+.ujian-simpan[data-keadaan="belum"] { color: var(--bahaya); font-weight: 700; }
+.ujian-badan { display: grid; grid-template-columns: minmax(0, 1fr) 14rem; gap: 1rem; margin-top: 1rem; align-items: start; }
+@media (max-width: 800px) { .ujian-badan { grid-template-columns: minmax(0, 1fr); } }
+.ujian-area { position: relative; overflow: hidden; }
+.ujian-bersama { border: 2px solid var(--garis); border-radius: .5rem; padding: .75rem 1rem; }
+.ujian-alat { display: flex; flex-wrap: wrap; gap: .75rem 1.25rem; align-items: center; margin: 0 0 1rem; }
+.ujian-pindah { justify-content: space-between; }
+.ujian-peta { border: 1px solid var(--garis); border-radius: .5rem; padding: .75rem; background: var(--kartu); }
+.peta-kisi { display: grid; grid-template-columns: repeat(auto-fill, minmax(2.4rem, 1fr)); gap: .35rem; }
+.peta-tombol { min-height: 2.4rem; min-width: 2.4rem; padding: 0 .4rem; border: 1px solid var(--garis); border-radius: .35rem; background: var(--kartu); color: var(--teks); font: inherit; cursor: pointer; }
+.peta-tombol.terjawab, .peta-contoh.terjawab { background: var(--utama); color: var(--utama-teks); border-color: var(--utama); }
+.peta-tombol.ragu, .peta-contoh.ragu { box-shadow: inset 0 -0.35rem 0 var(--emas); }
+.peta-tombol.kini { outline: 3px solid var(--fokus); outline-offset: 1px; }
+.peta-contoh { display: inline-block; width: 1rem; height: 1rem; border: 1px solid var(--garis); border-radius: .2rem; vertical-align: middle; }
+.ujian-toast { position: fixed; inset-inline: 0; bottom: 1rem; margin-inline: auto; width: max-content; max-width: 90vw; z-index: 20;
+  background: var(--teks); color: var(--kartu); padding: .5rem 1rem; border-radius: .5rem; }
+/* Tanda air: nomor induk, nama dan jam, menutupi area soal. Tidak menghalangi klik. */
+.tanda-air { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; opacity: .09; display: flex; flex-wrap: wrap; align-content: space-around;
+  justify-content: space-around; gap: 2.5rem 1.5rem; font-size: .95rem; font-weight: 700; }
+.tanda-air span { transform: rotate(-24deg); white-space: nowrap; }
+/* Teks soal tidak bisa diseleksi; kotak jawaban tetap bisa diketik. */
+#ujian .soal-teks, #ujian .opsi-isi, #ujian .soal-kepala, #ujian .ujian-bersama { -webkit-user-select: none; user-select: none; }
+#ujian img { -webkit-user-drag: none; }
+@media print { body.badan-ujian > * { display: none !important; } body.badan-ujian::after { content: "LokaUjian"; } }
+#ujian [data-tinjau], #ujian [data-henti] { margin-top: 1rem; }

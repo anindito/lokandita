@@ -121,6 +121,31 @@ services:
       - lokaujian_media:/srv/media
     <<: *app
 
+  # Penjadwal LokaUjian (KONTRAK.md §21): image yang sama dengan `lokaujian`, .env yang sama,
+  # tanpa HTTP, hanya di jaringan data. Ia tidak memutuskan apa pun — boleh-tidaknya menjawab
+  # selalu dihitung dari waktu — jadi ujian tetap benar selagi kontainer ini mati.
+  # Variabel wajib yang hilang: keluar 78, seperti judge worker.
+  lokaujian-jadwal:
+    image: lokandita/lokaujian:aktif
+    container_name: lokaujian-jadwal
+    env_file: ../apps/lokaujian/.env
+    networks: [data]
+    entrypoint: ["/bin/sh", "-c", "php /srv/app/vendor/lokandita/auth/bin/cek-env.php /srv/app/.env.example || exit 78; exec php /srv/app/spark ujian:jadwal --no-header"]
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      # Sehat = denyutnya di Redis ada (umur kunci 60 detik) dan ditulis oleh proses kontainer ini.
+      test: ["CMD", "php", "/srv/app/spark", "ujian:jadwal", "--periksa", "--no-header"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 45s
+    <<: *log
+
   portal:
     image: lokandita/portal:aktif
     container_name: portal

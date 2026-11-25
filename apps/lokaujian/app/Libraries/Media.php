@@ -81,14 +81,46 @@ final class Media
     }
 
     /**
-     * Gambar yang boleh dilihat pengguna ini, menurut kuncinya. Tahap U2: hanya pengelola mata
-     * kuliahnya. Mahasiswa mendapat gambar mulai tahap U3, selama pengerjaannya berlangsung.
+     * Gambar yang boleh dilihat pengguna ini, menurut kuncinya (SPEC-LOKAUJIAN.md §5.3):
+     *   - yang mengelola mata kuliah gambar itu;
+     *   - staf yang boleh menjalankan sesi sebuah ujian terbit yang memuat gambar itu (pengajar
+     *     melihat pratinjau ujian yang diberikan ke kelasnya);
+     *   - mahasiswa, HANYA selama ia punya pengerjaan yang sedang berjalan pada ujian yang memuat
+     *     gambar itu.
+     * Selain itu null — sama dengan kunci yang tidak ada.
      *
      * @return array<string, mixed>|null
      */
     public function dariKunci(string $kunci): ?array
     {
-        return db_connect()->query("SELECT * FROM images WHERE kunci = ? AND {$this->akses->diKelola()}", [$kunci])->getRowArray();
+        $db    = db_connect();
+        $milik = $db->query("SELECT * FROM images WHERE kunci = ? AND {$this->akses->diKelola()}", [$kunci])->getRowArray();
+        if ($milik !== null) {
+            return $milik;
+        }
+        // Barisnya dibaca dulu tanpa syarat hak HANYA untuk mendapat id-nya; ia baru dikembalikan
+        // bila salah satu pemeriksaan di bawah lolos.
+        $g = $db->query('SELECT * FROM images WHERE kunci = ?', [$kunci])->getRowArray();
+        if ($g === null) {
+            return null;
+        }
+        $id    = (int) $g['id'];
+        $ujian = "(SELECT q.exam_id FROM exam_questions q WHERE q.image_id = {$id}
+                   UNION SELECT k.exam_id FROM exam_groups k WHERE k.image_id = {$id}
+                   UNION SELECT q2.exam_id FROM exam_options o JOIN exam_questions q2 ON q2.id = o.exam_question_id WHERE o.image_id = {$id})";
+        if ($this->akses->mahasiswa()) {
+            $boleh = $db->query(
+                "SELECT 1 FROM attempts a JOIN sessions s ON s.id = a.session_id JOIN exams x ON x.id = a.exam_id
+                 WHERE a.user_id = {$this->akses->idSql()} AND " . Tenggat::berjalan() . " AND a.exam_id IN {$ujian} LIMIT 1",
+            )->getRowArray();
+        } else {
+            $boleh = $db->query(
+                "SELECT 1 FROM sessions s JOIN exams x ON x.id = s.exam_id
+                 WHERE x.status <> 'draf' AND {$this->akses->diJalankan('s.class_id')} AND s.exam_id IN {$ujian} LIMIT 1",
+            )->getRowArray();
+        }
+
+        return $boleh === null ? null : $g;
     }
 
     /**
