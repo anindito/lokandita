@@ -1,6 +1,6 @@
 # Progress
 
-**LokaUjian stage U0 — contract and groundwork (`SPEC-LOKAUJIAN.md` §15) — built and deployed 2026-11-24, production runs `fbb2ed6`; smoke 54 pass, 0 fail. NOT closed: no tag until the owner's gate — a student logs in to LokaKode inside real SEB, the same student is refused in Chrome, and `https://lokaujian.lokandita.com` shows the maintenance page. See "LokaUjian U0" at the end of this file. Next: U1 (access), not started; it begins in a new session with a plan.**
+**LokaUjian stage U0 — contract and groundwork (`SPEC-LOKAUJIAN.md` §15) — finished 2026-11-25, tag `lokaujian-u0`, on the owner's report that the gate passed: real SEB 3.10.2 is accepted by LokaKode after the move, an ordinary browser is refused, and `lokaujian.lokandita.com` shows the maintenance page. See "LokaUjian U0" and "Gate result for LokaUjian U0" at the end of this file. LokaUjian stays in maintenance. Next: U1 (access), not started; it begins in a new session with a plan.**
 
 **Stage 13 is closed and tagged `tahap-13` (2026-11-24, owner's order). TS-PY meetings 1–5 (32 problems each) and the practical mid-term at meeting 8 (6 problems, 51 points) are built, imported and approved on the owner's order; no TS-PY meeting is published and no window is open — publishing is the owner's. Left for later: the owner's rehearsal of the mid-term with a test student (no person has seen an exam page, none opened in Safe Exam Browser), and committing the exam files after the exam (they are outside Git, listed in `.git/info/exclude`, on this server only). See "Stage 13 — TS-PY" at the end of this file.**
 
@@ -1592,3 +1592,5 @@ The owner reported "no 1 and no 2 is done". What the server recorded for the tes
 - **Check 3 (maintenance page of `lokaujian.lokandita.com` seen in a browser): not reported yet.** By curl it answers 503 with a valid certificate. No tag until the owner has said so.
 
 Left in production by the gate: the account `Dummy` is an `AKTIF` member of TS-6 (29 students now) and appears in that class's lists, leaderboard and exports; two `seb_rejected` events (one from the agent's own check with curl on 2026-11-24, one from the owner's Chrome check). The owner decides when it is set to `MENGUNDURKAN_DIRI`.
+
+- **Check 3 (2026-11-25):** the owner reported that `https://lokaujian.lokandita.com` showed the maintenance page in his browser. The gate of U0 is passed; tag `lokaujian-u0` on the commit that holds this line, then `infra/deploy.sh` for all components so production runs the tagged commit.
