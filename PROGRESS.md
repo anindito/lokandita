@@ -1,5 +1,7 @@
 # Progress
 
+**LokaUjian stage U1 — access (`SPEC-LOKAUJIAN.md` §3, §4) — built 2026-11-25, **not closed**: `lokaujian` is deployed at `69239ee` behind its maintenance page; `auth`, `lokakode`, `portal` and the judge worker still run `0059b3f` (redeploy waits for the owner's word), so `infra/smoke.sh` reports 55 pass, 4 fail — the four are check 0. The owner's gate has not been done. See "LokaUjian U1" at the end of this file.**
+
 **LokaUjian stage U0 — contract and groundwork (`SPEC-LOKAUJIAN.md` §15) — finished 2026-11-25, tag `lokaujian-u0`, on the owner's report that the gate passed: real SEB 3.10.2 is accepted by LokaKode after the move, an ordinary browser is refused, and `lokaujian.lokandita.com` shows the maintenance page. See "LokaUjian U0" and "Gate result for LokaUjian U0" at the end of this file. LokaUjian stays in maintenance. Next: U1 (access), not started; it begins in a new session with a plan.**
 
 **Stage 13 is closed and tagged `tahap-13` (2026-11-24, owner's order). TS-PY meetings 1–5 (32 problems each) and the practical mid-term at meeting 8 (6 problems, 51 points) are built, imported and approved on the owner's order; no TS-PY meeting is published and no window is open — publishing is the owner's. Left for later: the owner's rehearsal of the mid-term with a test student (no person has seen an exam page, none opened in Safe Exam Browser), and committing the exam files after the exam (they are outside Git, listed in `.git/info/exclude`, on this server only). See "Stage 13 — TS-PY" at the end of this file.**
@@ -1594,3 +1596,42 @@ The owner reported "no 1 and no 2 is done". What the server recorded for the tes
 Left in production by the gate: the account `Dummy` is an `AKTIF` member of TS-6 (29 students now) and appears in that class's lists, leaderboard and exports; two `seb_rejected` events (one from the agent's own check with curl on 2026-11-24, one from the owner's Chrome check). The owner decides when it is set to `MENGUNDURKAN_DIRI`.
 
 - **Check 3 (2026-11-25):** the owner reported that `https://lokaujian.lokandita.com` showed the maintenance page in his browser. The gate of U0 is passed; tag `lokaujian-u0` on the commit that holds this line, then `infra/deploy.sh` for all components so production runs the tagged commit.
+
+## LokaUjian U1 — access (2026-11-25)
+
+Plan approved by the owner ("confirm all approve all"), with four decisions recorded in `DECISIONS.md`: §17 point 9 confirmed; the class page lists the `AKTIF` students; lists show the active academic year only; the host is opened for the gate and closed again. Three commits: `588b644` (way in), `fe64add` (policy layer and pages), `69239ee` (smoke check 14).
+
+Built:
+
+- **Way in** (`KONTRAK.md` §4): filter `masuk`, the account routes, and `GET /` — a short public page with "Masuk", `noindex` (`Publik::data(…, indeks: false)` in the shared package; the other apps are unchanged).
+- **Policy layer** (`KONTRAK.md` §19): `App\Policy\Akses` holds the rules as SQL conditions over the roster views; `App\Libraries\Roster` holds every roster query on the `roster_reader` connection. Scoped roles are derived on every request.
+- **Pages:** `/beranda` (staff: their classes of the active year; mahasiswa: the empty exam list and their own classes), `/mata-kuliah`, `/mata-kuliah/{id}`, `/kelas/{id}` (with the `AKTIF` students). Read-only; texts in `id`, `en`, `ar`.
+- No table, no migration, no environment variable.
+- Smoke check 14; the shared `ClientAppTest` now runs in LokaUjian's suite.
+
+Verified by the agent (commands and output shown in the session):
+
+- `infra/tes.sh lokaujian` → `OK (50 tests, 1435 assertions)`, against real MySQL, `auth-tes`, `lokaujian-tes` and the roster views in `lokakode_test`: the 20 shared client tests (login, logout through LokaAuth, no app access → 403); `MatriksAksesTest` (every registered route, six actors; fails when a route is missing from the matrix; no session → login); `LingkupKelasTest` — **the gate case**: pengajar A on class B gets 404 with no name, nomor induk or class name of B, and the answer is identical to that for an id that does not exist; a removed assignment and a replaced pengampu are refused on the next request; a student sees the empty list and only their own class; `LULUS`, withdrawn, archived class and archived year give no class.
+- Because the shared package changed: `infra/tes.sh auth` → 111 tests, 1706 assertions; `portal` → 89 tests, 9048 assertions; `lokakode` → 298 tests, 16754 assertions. All pass, the same numbers of tests as at U0.
+- `infra/cek-env.sh` → LULUS. `infra/deploy.sh lokaujian` → verified at `/healthz`, commit `69239ee`.
+- Real requests to the deployed container (from `portal`, as Caddy would send them): `/` → 200; `/beranda`, `/mata-kuliah`, `/kelas/1`, `/kelas/99999999` → 302 to the LokaAuth login with the right `next`; `/data-saya` → 404 (U5). From the internet `https://lokaujian.lokandita.com/beranda` → 503.
+- `infra/smoke.sh` → 55 pass, **4 fail**: check 0 for `auth`, `lokakode`, `portal` and the judge worker, which were not redeployed. Check 14 passes (5 lines).
+
+Not verified, or weaker than it looks:
+
+- **No logged-in request has reached the deployed LokaUjian.** The agent does not create sessions for production accounts; everything behind a login is proven only by the tests between real containers. The owner's gate is the real check.
+- **No page of U1 has been seen in a browser**, by a person or by a test: layout, the Arabic pages and dark mode. The headless browser joins LokaUjian's suite in U3. The Arabic texts were written by the agent.
+- The roster query has run in production only through smoke check 13 (counts), not through the pages.
+- **Not built although the plan named it:** id lists handed out by `Akses` for later stages — nothing would call them yet (`DECISIONS.md`).
+- The notice about Safe Exam Browser on the student's home waits for U4.
+- `infra/tes-infra.sh`, `infra/backup.sh` and `infra/uji-restore.sh` were not run: U1 adds no table, volume or infrastructure.
+
+Owner's gate for U1:
+
+1. Open the host: `infra/pemeliharaan.sh lokaujian off`. From then on every account with `lokaujian` access (238 at U0) can log in and sees an empty home.
+2. As a dosen who is pengajar of exactly one class and not its pengampu: `https://lokaujian.lokandita.com/beranda` lists that class only. Open it, then change the number in `/kelas/<n>` to another class → *Halaman tidak ditemukan*.
+3. As the student `Dummy`: the home says there is no exam or quiz yet and lists TS-PY class TS-6 only.
+4. `infra/smoke.sh` (check 1 then expects `lokaujian` to answer 2xx/3xx).
+5. Close the host again: `infra/pemeliharaan.sh lokaujian on`.
+
+After the gate: tag `lokaujian-u1` on the commit that records it.
