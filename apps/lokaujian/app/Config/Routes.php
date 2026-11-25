@@ -27,3 +27,12 @@ RuteBersama::publik($routes);
 $routes->group('', ['filter' => 'masuk'], static function (RouteCollection $routes): void {
     $routes->get('beranda', 'Beranda::index');
 });
+
+// Staf (SPEC-LOKAUJIAN.md §3): mata kuliah dan kelas yang boleh dilihatnya. Lingkupnya — pengampu
+// mata kuliahnya, pengajar kelasnya — diperiksa App\Policy\Akses di dalam kueri roster; di luar
+// lingkup dijawab 404, sama dengan nomor yang tidak ada. Mahasiswa ditolak filter (403).
+$routes->group('', ['filter' => 'masuk:superadmin,dosen'], static function (RouteCollection $routes): void {
+    $routes->get('mata-kuliah', 'Matkul::daftar');
+    $routes->get('mata-kuliah/(:num)', 'Matkul::lihat/$1');
+    $routes->get('kelas/(:num)', 'Kelas::lihat/$1');
+});

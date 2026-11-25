@@ -2,7 +2,7 @@
 
 **This file is not the contract.** It lists what `KONTRAK.md` gains for LokaUjian (`SPEC-LOKAUJIAN.md`), written 2026-11-24 for the owner to read first. `KONTRAK.md` itself is changed only by the stage that builds each item, in the same commit as the code, so that contract and code never disagree. The stage is named with every item. When the last item has been merged, this file is deleted.
 
-Section numbers are those of `KONTRAK.md`. §19 and §20 are new sections; §18 (roster views) was merged in U0.
+Section numbers are those of `KONTRAK.md`. §20 and §21 are new sections; §18 (roster views) was merged in U0 and §19 (access and scope) was written in U1.
 
 The plan of a stage may change a name below when the code shows a better one; it then changes it here and in `KONTRAK.md` in the same commit. It may not change the shape of something two components share without the owner's approval.
 
@@ -37,7 +37,7 @@ The move into `packages/lokandita-auth` was done in U0 and is in `KONTRAK.md` §
 
 ## §9 Docker networks and names — scheduler U3, pictures U2
 
-- From U3 the container `lokaujian-jadwal` (the same image `lokandita/lokaujian:<commit>`, runs the scheduler of §20, serves no HTTP, is on `data` only).
+- From U3 the container `lokaujian-jadwal` (the same image `lokandita/lokaujian:<commit>`, runs the scheduler of §21, serves no HTTP, is on `data` only).
 - Named volume `lokandita_lokaujian_media` (Compose name `lokaujian_media`), mounted at `/srv/media` in `lokaujian` only — from U2.
 
 ## §10 Environment variables — after U0
@@ -48,7 +48,7 @@ The move into `packages/lokandita-auth` was done in U0 and is in `KONTRAK.md` §
 
 ## §11 Deploy and verification — after U0
 
-- From U3 `infra/deploy.sh lokaujian` also starts `lokaujian-jadwal` and fails unless the scheduler's heartbeat (§20) carries the deployed commit.
+- From U3 `infra/deploy.sh lokaujian` also starts `lokaujian-jadwal` and fails unless the scheduler's heartbeat (§21) carries the deployed commit.
 - From U2 `infra/backup.sh` writes the picture volume as `media-lokaujian.tar.gz`; `infra/uji-restore.sh` restores it and checks every picture row against a file.
 
 New smoke checks (13, roster views, exists since U0):
@@ -57,7 +57,7 @@ New smoke checks (13, roster views, exists since U0):
 |---|---|---|
 | 14 | **Way in.** Asked at the container as in check 8: `GET /beranda` of `lokaujian` without a cookie redirects to `AUTH_LOGIN_URL` with `next` equal to its own `/beranda` | U1 |
 | 15 | **Pictures.** `GET /media/soal/smoke.png` and `/media/soal/smoke.php` of `lokaujian` answer `403`; `GET /gambar/<32 zeros>` without a cookie redirects to login | U2 |
-| 16 | **Scheduler.** The heartbeat of §20 exists, is younger than 60 s and carries the current commit | U3 |
+| 16 | **Scheduler.** The heartbeat of §21 exists, is younger than 60 s and carries the current commit | U3 |
 | 17 | **SEB of LokaUjian.** As check 10, for `lokaujian`: `/seb` names the state of enforcement, `/seb/periksa` reports no header, `SEB_ENFORCEMENT` in the container equals the `.env`; `disabled` passes with the warning line | U4 |
 | 18 | **Routes exist.** Named staff and student routes of LokaUjian without a cookie each redirect to login with the right `next` | U3, extended in U5 |
 
@@ -81,7 +81,7 @@ Never in the export: question text, options, keys, pictures, points per question
 
 `apps/portal/app/Config/Aplikasi.php`: `lokaujian` becomes `status = aktif`, `alamat = LOKAUJIAN_URL`. Smoke check 12 keeps the six cards and their order.
 
-## §19 LokaUjian exam file format (new) — U2
+## §20 LokaUjian exam file format (new) — U2
 
 One JSON file per exam, UTF-8. Used by the web import and export and by `php spark ujian:impor` / `ujian:ekspor` (`SPEC-LOKAUJIAN.md` §6.3).
 
@@ -149,7 +149,7 @@ Rules:
 - `php spark ujian:impor [file] --oleh <nomor induk of an active superadmin or of the pengampu>` reads standard input without a file argument and exits 0 only when the file is accepted. `php spark ujian:ekspor <exam id> --oleh <nomor induk>` prints the file.
 - Audit in LokaUjian's `audit_log`: `ujian.diimpor` (`{ berkas, soal, soal_baru, gambar, gambar_baru }`), `ujian.impor.ditolak` (`{ berkas, alasan }`), `ujian.diekspor`; from the command line with `lewat: cli`.
 
-## §20 LokaUjian scheduler (new) — U3
+## §21 LokaUjian scheduler (new) — U3
 
 `lokaujian-jadwal` runs `php spark ujian:jadwal` from the app image: one loop, one pass at least every 20 seconds, each pass idempotent. It has no state of its own; MySQL is the source of truth, and nothing a student may or may not do depends on it having run (`SPEC-LOKAUJIAN.md` §7.5).
 

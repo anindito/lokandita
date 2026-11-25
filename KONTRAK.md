@@ -1017,3 +1017,36 @@ Access:
 - `apps/lokakode/tests/Schema/ViewRosterTest.php` holds the columns and types above against real MySQL.
 
 **When the tables move (stage A1):** the five views are redefined, with the same names, columns, types and guarantees, wherever the tables then live; `ROSTER_READER_DSN` and the grant script follow. No reader app changes.
+
+## 19. LokaUjian — access and scope (stage U1, `SPEC-LOKAUJIAN.md` §3, §4)
+
+LokaUjian's own; no other component calls these routes. They are recorded here so that the tests against real containers have something to hold on to. Since U1 LokaUjian has **no table**: everything below is read from the roster views (§18) and from `user_directory` (§3). Nothing here adds an environment variable.
+
+Authentication is §4 with app name `lokaujian` (filter `masuk`, account routes from `Routes::akun()`), so a user without `app_access` for `lokaujian` gets `403` on every route below, whatever their classes.
+
+Scoped roles are derived on **every request** from the views and are cached nowhere:
+
+| Scoped role | Derived from |
+|---|---|
+| Pengampu of a course | `roster_courses.owner_id` |
+| Pengajar of a class | `roster_class_teachers` |
+| Mahasiswa of a class | `roster_enrollments.status = 'AKTIF'`, and the class has `archived_at IS NULL`, and its academic year is `active` |
+
+The rules live once, in `App\Policy\Akses`, as SQL conditions that `App\Libraries\Roster` puts into every roster query; no function fetches a course or a class by id alone.
+
+- **Sees a class:** superadmin; the pengampu of its course; a pengajar of that class.
+- **Sees a course:** superadmin; its pengampu; a dosen who is pengajar of at least one of its classes — who then sees its code, name, pengampu and only their own classes.
+- A dosen outside that scope gets `404` with the page *Halaman tidak ditemukan*; the answer for an id that does not exist is the same page, and the container logs `access.denied` with reason `outside_scope_or_missing`. A mahasiswa on a staff route gets `403` from the filter.
+
+| Route | Who | Does |
+|---|---|---|
+| `GET /` | public (§4) | short page with "Masuk"; with a `lokandita_sid` cookie it redirects to `/beranda` |
+| `GET /beranda` | any session; **not** behind filter `seb` (`SPEC-LOKAUJIAN.md` §9.1) | staff: the classes they see in the active academic year, with the number of `AKTIF` students and the pengajar. Mahasiswa: the list of their exams — empty until U3 — and the classes in which they are mahasiswa by the rule above |
+| `GET /mata-kuliah` | superadmin, dosen | the courses they see |
+| `GET /mata-kuliah/{id}` | same, in scope | the course and those of its classes in the active academic year that they see |
+| `GET /kelas/{id}` | same, in scope | course, academic year, pengampu, pengajar, and the `AKTIF` students (nomor induk, name) ordered by nomor induk |
+
+- Lists hold the active academic year only. `GET /kelas/{id}` also opens a class of an archived year that is in scope, marked as archived; an archived class is listed for its staff with a mark and is never a class of a mahasiswa.
+- Names and nomor induk come from `user_directory` at the moment of the request; an id without a row there is shown as "Akun Lokandita tidak ditemukan".
+- Every page is `noindex, nofollow`; pages behind a session carry `Cache-Control: no-store`.
+- `apps/lokaujian/tests/Policy/MatriksAksesTest.php` fails when a route registered in `Config/Routes.php` is missing from its matrix; `LingkupKelasTest.php` holds the cross-class cases.

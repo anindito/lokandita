@@ -5,18 +5,34 @@ declare(strict_types=1);
 namespace App\Policy;
 
 use Lokandita\Auth\Identity;
+use Lokandita\Auth\RosterDb;
 
 /**
  * Satu-satunya tempat aturan "siapa boleh apa" LokaUjian (SPEC-LOKAUJIAN.md §3).
  *
- * Peran global berasal dari LokaAuth. Peran lingkup (pengampu, pengajar, mahasiswa sebuah
- * kelas) diturunkan dari view roster pada setiap permintaan; tidak ada kolom peran dan tidak
- * ada yang disimpan melewati satu permintaan.
+ * Aturannya berbentuk syarat SQL yang ditempelkan ke kueri roster (App\Libraries\Roster),
+ * sehingga baris di luar hak pengguna tidak pernah terbaca — bukan dibaca dulu lalu
+ * disembunyikan. Peran global berasal dari LokaAuth. Peran lingkup diturunkan dari view
+ * roster (KONTRAK.md §18) pada setiap permintaan; tidak ada kolom peran dan tidak ada yang
+ * disimpan melewati satu permintaan:
+ *   pengampu  = roster_courses.owner_id (juga bertindak sebagai pengajar semua kelasnya)
+ *   pengajar  = roster_class_teachers
+ *   mahasiswa = roster_enrollments berstatus AKTIF, kelas tidak diarsipkan, tahun ajaran aktif
+ *
+ * Alias yang dipakai syarat: `c` = roster_courses, `k` = roster_classes,
+ * `e` = roster_enrollments, `t` = roster_academic_years. Kueri yang memakai syarat ini wajib
+ * memakai alias yang sama.
  */
 final class Akses
 {
+    private const SEMUA = '1 = 1';
+    private const TIDAK = '1 = 0';
+
+    private readonly string $u; // id pengguna, sudah di-escape dan berkutip untuk SQL
+
     public function __construct(private readonly Identity $identitas)
     {
+        $this->u = "'" . RosterDb::conn()->real_escape_string($identitas->userId) . "'";
     }
 
     public function identitas(): Identity
@@ -45,5 +61,66 @@ final class Akses
     public function mahasiswa(): bool
     {
         return $this->identitas->globalRole === 'mahasiswa';
+    }
+
+    /**
+     * Mata kuliah yang boleh DILIHAT: superadmin semua; dosen yang mengampunya atau mengajar
+     * salah satu kelasnya. Pengajar hanya melihat kode, nama dan kelasnya sendiri di sana.
+     */
+    public function lihatMatkul(): string
+    {
+        if ($this->superadmin()) {
+            return self::SEMUA;
+        }
+        if (! $this->dosen()) {
+            return self::TIDAK;
+        }
+
+        return "(c.owner_id = {$this->u} OR EXISTS (
+            SELECT 1 FROM roster_classes kx JOIN roster_class_teachers ctx ON ctx.class_id = kx.id
+            WHERE kx.course_id = c.id AND ctx.user_id = {$this->u}))";
+    }
+
+    /**
+     * Mata kuliah yang DIAMPU (bank soal, ujian, rilis hasil di tahap berikutnya): superadmin
+     * semua; dosen hanya yang diampunya. Di tahap U1 dipakai untuk menandai peran di daftar.
+     */
+    public function ampuMatkul(): string
+    {
+        if ($this->superadmin()) {
+            return self::SEMUA;
+        }
+
+        return $this->dosen() ? "c.owner_id = {$this->u}" : self::TIDAK;
+    }
+
+    /**
+     * Kelas yang boleh DILIHAT: superadmin semua; pengampu semua kelas mata kuliahnya;
+     * pengajar kelas yang ditugaskan kepadanya.
+     */
+    public function lihatKelas(): string
+    {
+        if ($this->superadmin()) {
+            return self::SEMUA;
+        }
+        if (! $this->dosen()) {
+            return self::TIDAK;
+        }
+
+        return "(c.owner_id = {$this->u} OR EXISTS (
+            SELECT 1 FROM roster_class_teachers ctx WHERE ctx.class_id = k.id AND ctx.user_id = {$this->u}))";
+    }
+
+    /**
+     * Kelas tempat pengguna ini MAHASISWA (SPEC-LOKAUJIAN.md §3): pendaftaran AKTIF miliknya,
+     * kelas tidak diarsipkan, tahun ajaran aktif.
+     */
+    public function kelasMahasiswa(): string
+    {
+        if (! $this->mahasiswa()) {
+            return self::TIDAK;
+        }
+
+        return "(e.user_id = {$this->u} AND e.status = 'AKTIF' AND k.archived_at IS NULL AND t.status = 'active')";
     }
 }
