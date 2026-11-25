@@ -1,6 +1,6 @@
 # Progress
 
-**LokaUjian stage U1 — access (`SPEC-LOKAUJIAN.md` §3, §4) — built 2026-11-25, **not closed**: `lokaujian` is deployed at `69239ee` behind its maintenance page; `auth`, `lokakode`, `portal` and the judge worker still run `0059b3f` (redeploy waits for the owner's word), so `infra/smoke.sh` reports 55 pass, 4 fail — the four are check 0. The owner's gate has not been done. See "LokaUjian U1" at the end of this file.**
+**LokaUjian stage U1 — access (`SPEC-LOKAUJIAN.md` §3, §4) — built 2026-11-25, **not closed and not tagged**. Gate: the student part is done (owner's report, confirmed by the log); the pengajar part (own classes only, changed class number → *Halaman tidak ditemukan*) was skipped by the owner and is proven by tests only. `lokaujian` runs `69239ee`; `auth`, `lokakode`, `portal` and the judge worker still run `0059b3f`, so `infra/smoke.sh` fails on check 0 only. The host is in maintenance again. See "LokaUjian U1" at the end of this file.**
 
 **LokaUjian stage U0 — contract and groundwork (`SPEC-LOKAUJIAN.md` §15) — finished 2026-11-25, tag `lokaujian-u0`, on the owner's report that the gate passed: real SEB 3.10.2 is accepted by LokaKode after the move, an ordinary browser is refused, and `lokaujian.lokandita.com` shows the maintenance page. See "LokaUjian U0" and "Gate result for LokaUjian U0" at the end of this file. LokaUjian stays in maintenance. Next: U1 (access), not started; it begins in a new session with a plan.**
 
@@ -1635,3 +1635,11 @@ Owner's gate for U1:
 5. Close the host again: `infra/pemeliharaan.sh lokaujian on`.
 
 After the gate: tag `lokaujian-u1` on the commit that records it.
+
+### Gate result for LokaUjian U1 (2026-11-25)
+
+- The agent opened the host on the owner's order ("do no 1") at about 12:19 WIB and closed it again on his order at about 12:27 WIB; it answers 503 from the internet.
+- **Step 3 (student): done.** The owner reported "no 3 done". The container log has one `GET /beranda` → 200 at 12:20:38 WIB followed by `POST /keluar` → 303, and LokaAuth's audit log has one `logout` with `app = lokaujian` by an account of role mahasiswa at 12:20:47 WIB. This is the first logged-in request to the deployed LokaUjian, and the first logout from it. What the page showed is the owner's observation.
+- **Step 2 (pengajar sees only own classes; a changed class number gives *Halaman tidak ditemukan*): skipped by the owner** ("just skip no 2"). No dosen has opened the deployed LokaUjian; the log has no request to `/kelas/…` or `/mata-kuliah` with a session and no `access.denied`. That half of the gate of `SPEC-LOKAUJIAN.md` §15 rests on `LingkupKelasTest` and `MatriksAksesTest` only.
+- **Step 4:** `infra/smoke.sh` with the host open → **54 pass, 5 fail**. All five are check 0: `auth`, `lokakode`, `portal` and the judge worker run `0059b3f`, `lokaujian` runs `69239ee`, and `HEAD` was the commit that holds only `PROGRESS.md`. Check 1 for the open host and check 14 pass.
+- Not done: the redeploy of the other four components (it needs the owner's word), and with it a passing smoke run. No tag `lokaujian-u1` until the owner says the stage is closed.
