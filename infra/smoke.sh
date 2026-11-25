@@ -303,6 +303,25 @@ fi
 if [ "$tolak" = "1142,1142,1142" ]; then ok "roster_reader ditolak membaca tabel enrollments dan submissions, dan ditolak menulis ke view (1142)"; else tidak "roster_reader seharusnya ditolak tiga kali (1142,1142,1142): '$tolak'"; fi
 if [ -n "$hitung" ] && [ "$hitung" = "$tabel" ]; then ok "jumlah baris tiap view sama dengan tabelnya, ditanyakan lewat lokakode"; else tidak "jumlah baris view ($hitung) berbeda dari tabelnya ($tabel)"; fi
 
+echo "14. jalan masuk LokaUjian (tahap U1, KONTRAK.md §19)"
+# Ditanyakan seperti cek 8: langsung ke kontainer lokaujian dari kontainer portal, dengan header
+# yang dikirim Caddy, supaya cek ini juga berjalan selagi host-nya masih pemeliharaan.
+url="$(nilai_env "$AKAR/apps/lokaujian/.env" APP_URL)"
+login_url="$(nilai_env "$AKAR/apps/lokaujian/.env" AUTH_LOGIN_URL)"
+j="$(tanya portal lokaujian /)"
+if [ "$j" = "200 " ] && isi portal | grep -q '<meta name="robots" content="noindex, nofollow">' && isi portal | grep -q 'href="/beranda"'; then
+	ok "lokaujian GET / tanpa cookie -> 200, halaman depan dengan tombol Masuk, tidak untuk diindeks"
+else
+	tidak "lokaujian GET / tanpa cookie -> '$j' (seharusnya 200 dengan robots noindex dan tautan ke /beranda)"
+fi
+# Tanpa cookie setiap halaman bersesi mengarah ke LokaAuth dengan next ke alamat itu sendiri:
+# rutenya ada di kode yang berjalan, dan tidak ada yang terbuka tanpa masuk.
+for jalur in /beranda /mata-kuliah /mata-kuliah/1 /kelas/1; do
+	j="$(tanya portal lokaujian "$jalur")"
+	harap="302 $login_url?next=$(jq -rn --arg u "$url$jalur" '$u|@uri')"
+	if [ "$j" = "$harap" ]; then ok "lokaujian GET $jalur tanpa cookie -> $j"; else tidak "lokaujian GET $jalur tanpa cookie -> '$j' (seharusnya '$harap')"; fi
+done
+
 echo
 echo "smoke: $lulus lulus, $gagal_n gagal, $tunda belum aktif"
 if [ "$gagal_n" -gt 0 ]; then

@@ -51,11 +51,10 @@ The move into `packages/lokandita-auth` was done in U0 and is in `KONTRAK.md` §
 - From U3 `infra/deploy.sh lokaujian` also starts `lokaujian-jadwal` and fails unless the scheduler's heartbeat (§21) carries the deployed commit.
 - From U2 `infra/backup.sh` writes the picture volume as `media-lokaujian.tar.gz`; `infra/uji-restore.sh` restores it and checks every picture row against a file.
 
-New smoke checks (13, roster views, exists since U0):
+New smoke checks (13, roster views, exists since U0; 14, the way in, since U1):
 
 | # | Check | Stage |
 |---|---|---|
-| 14 | **Way in.** Asked at the container as in check 8: `GET /beranda` of `lokaujian` without a cookie redirects to `AUTH_LOGIN_URL` with `next` equal to its own `/beranda` | U1 |
 | 15 | **Pictures.** `GET /media/soal/smoke.png` and `/media/soal/smoke.php` of `lokaujian` answer `403`; `GET /gambar/<32 zeros>` without a cookie redirects to login | U2 |
 | 16 | **Scheduler.** The heartbeat of §21 exists, is younger than 60 s and carries the current commit | U3 |
 | 17 | **SEB of LokaUjian.** As check 10, for `lokaujian`: `/seb` names the state of enforcement, `/seb/periksa` reports no header, `SEB_ENFORCEMENT` in the container equals the `.env`; `disabled` passes with the warning line | U4 |
