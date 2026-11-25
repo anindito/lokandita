@@ -1651,3 +1651,74 @@ Carried into U2:
 - `Akses` does not yet hand out id lists for LokaUjian's own tables; U2 writes that with the question bank, together with the audit table.
 - The Portal card stays "segera" until U6 (the owner asked about it on 2026-11-25 and was told why).
 - 238 accounts have `lokaujian` access and get in whenever the host is open.
+
+## LokaUjian U2 — question authoring (2026-11-25)
+
+Plan presented and answered by the owner: §17 point 10 **overruled** ("possible picture on options instead of narrative"), the minimal draft exam approved, the host to be opened for the gate, and a sample exam with every type of content asked for. Choices are in `DECISIONS.md`. Two commits: `858704f` (application, `KONTRAK.md` §20) and `d186408` (picture volume, backup, restore test, smoke check 15). **Built and deployed; not closed — the owner's gate is open, no tag yet.**
+
+Built:
+
+- **Tables** (the first of LokaUjian): `audit_log`, `images`, `question_groups`, `questions`, `question_options`, `exams`, `exam_items`.
+- **What U1 left:** `Akses::idMatkulDiampu()` / `diKelola()` — the ids of the courses a user manages, read from the roster once per request; every query of the bank, the pictures and the exams is bound to it and to the course of the route. The audit table and `App\Libraries\Audit` came with their first callers.
+- **Bank per course:** the four types with points; groups with shared text and/or picture and 1–20 questions in fixed order; archive and delete (delete only when no exam uses the item); search and filter; preview of a question, a group and a whole exam through the partial the student page will use, with no key in it.
+- **Pictures:** checked from the content, rewritten from the pixels, alternative text required, one per question, per group and — the owner's change — per option, whose text may then be empty. Stored in the volume `lokandita_lokaujian_media`; answered only by `GET /gambar/<kunci>` after authorisation.
+- **Draft exam** from ticked bank items; **JSON export and import** on the web and as `spark ujian:impor` / `ujian:ekspor`; a strict importer that reports every mistake with JSON path and line and stores nothing when there is one.
+- **Sample:** `apps/lokaujian/contoh/ujian-contoh.json` — nine questions: true/false, multiple choice with text options, with a picture, and with four picture options, short answer, long answer, and a group with text, a picture and three questions. It names course `DDP101`.
+- `infra/backup.sh` writes `media-lokaujian.tar.gz`; `infra/uji-restore.sh` checks it; `infra/tes-infra.sh` section A3; smoke check 15; `docs/RESTORE.md`.
+- No environment variable. No change in `auth`, `lokakode`, `portal`, the shared package or the judge.
+
+Verified by the agent (commands and output shown in the session):
+
+- `infra/tes.sh lokaujian` → `OK (64 tests, 4435 assertions)`, against real MySQL, Redis, `auth-tes` and `lokaujian-tes`. Among them:
+  - `MatriksAksesTest`: all 28 routes × six actors. For the 23 new routes of the bank and the exams: pengampu of another course 404, pengajar of the course 403, mahasiswa 403; for `/gambar/<kunci>` all three get 404. Every refused write is sent with a valid CSRF token and the checksum of all seven tables is the same before and after.
+  - Cross-course (`SoalTest`): the pengampu of Y gets 404 for a question of X under either course's address, the answer equals that for an id that does not exist, four kinds of write change nothing, and a draft in Y cannot hold a question of X. A replaced pengampu loses the bank on the next request.
+  - Pictures (`GambarTest`): a PNG with PHP appended is stored without the appended bytes and under a random name; `/gambar/<kunci>` answers the pengampu and the superadmin, redirects to login without a session, and is 404 — identical to an unknown key — for the pengampu of another course, a pengajar and a student; `/media/soal/<kunci>.png` of the stored file is 403. PHP named `.png`, SVG, GIF, a truncated PNG, more than 5 MB and a missing alternative text are refused with nothing stored.
+  - The gate (`ImporEksporTest`): one question of each type, picture options and a group with a picture → export → import → export is **byte-identical**, and the import adds no question and no picture to the bank. The sample file imported into an empty bank exports as itself. 45 single mistakes each refuse the whole file, name their JSON path, and leave all tables unchanged; three mistakes in one file are reported together with lines 8, 11 and 14.
+  - `spark ujian:impor` / `ujian:ekspor`: accepted for the pengampu and the superadmin, exit 1 for a pengajar, another pengampu and a student; audit rows carry `lewat: cli`.
+- `infra/cek-env.sh` → LULUS. `infra/deploy.sh lokaujian` → migration done, volume `lokandita_lokaujian_media` created, `/healthz` reports `d186408`.
+- `infra/smoke.sh` → 61 pass, **4 fail**: check 0 for `auth`, `lokakode`, `portal` and the judge worker, which still run `f3134f4` and were not redeployed (the owner's instruction). Check 15 passes (6 lines).
+- `infra/tes-infra.sh` → 74 pass, **5 fail**, all five because `auth`, `lokakode` and `portal` do not run `HEAD`. Section A3 passes: the volume is mounted, writable, and `/media/` serves neither a file named like a question picture nor PHP.
+- `infra/backup.sh` → four files, `media-lokaujian.tar.gz` with 0 pictures. `infra/uji-restore.sh` → LULUS, 59 schemas/tables, the seven new tables among them.
+- Production schema `lokaujian` holds the seven tables, all empty. `https://lokaujian.lokandita.com/mata-kuliah/1/bank` from the internet → 503 (maintenance).
+
+Not verified, or weaker than it looks:
+
+- **No logged-in request has reached the deployed bank.** The agent does not create sessions for production accounts. Everything behind a login — forms, upload, preview, export, import — is proven only by the tests between real containers. The owner's gate is the first real use.
+- **No page of U2 has been seen in a browser**, by a person or by a test: layout, the forms with six option rows, pictures in the preview, Arabic, dark mode. The headless browser joins LokaUjian's suite in U3. The Arabic texts (189 keys) were written by the agent.
+- **The restore test has compared no picture yet:** production has none. The check of every `images` row against its file runs for the first time on the backup made after the gate.
+- The `spark` commands were run in production only without `--oleh` (they answer with their usage); no file has been imported into production.
+- Export to a file above 24 MB is possible in principle (40 pictures of up to 5 MB) and such a file would be refused on import. Not guarded.
+- When a form is refused, chosen picture files must be chosen again; a form whose pictures together exceed 25 MB is dropped by PHP and shows a generic refusal.
+- The suites of `auth`, `lokakode` and `portal` were not run: no file of theirs or of the shared package changed (`git diff f3134f4 --stat` lists only `apps/lokaujian`, `infra`, `docs/RESTORE.md` and the root documents).
+- `PROGRESS.md` is committed after the deploy, so `infra/smoke.sh` check 0 reports a different commit for `lokaujian` too until the closing deploy.
+
+Mistakes of this session:
+
+- Two expectations in the new tests were wrong on the first run (a number formatted with a thousands separator; the actor's own name counted as a secret of the target), one string and one array order on the second. No application code changed because of them.
+- The plan promised four commits; there are two (`DECISIONS.md`).
+
+Owner's gate for U2 (`SPEC-LOKAUJIAN.md` §15):
+
+1. Open the host: `infra/pemeliharaan.sh lokaujian off`. Every account with `lokaujian` access can then log in; students see only the empty home.
+2. As superadmin or pengampu: *Mata kuliah* → a course → **Bank soal**. Write one question of each type.
+3. *Kelompok soal*: a shared text and a picture, then two questions in it.
+4. Open each question and the group: the preview shows them as a student will see them, the picture included.
+5. Copy the address of a picture (`/gambar/…`) into a private window: the login page appears, not the picture.
+6. Back in the bank: tick everything, give a title, **Buat draf ujian**; look at the preview; **Ekspor ke berkas JSON**.
+7. *Ujian dan kuis* → **Impor** that file; export the new draft; compare: `sha256sum lokaujian-*.json` must print the same value twice.
+8. Optional: import `apps/lokaujian/contoh/ujian-contoh.json` into DDP101 to see every type, picture options included.
+9. Optional, carried from U1: as a pengajar, only your own classes are listed and the bank of the course is refused.
+10. Close the host: `infra/pemeliharaan.sh lokaujian on`. Then the agent runs `infra/smoke.sh`, `infra/backup.sh` and `infra/uji-restore.sh` again, now with real pictures.
+
+After the gate: tag `lokaujian-u2` on the commit that records it. Redeploying `auth`, `lokakode`, `portal` and the judge worker so that check 0 passes needs the owner's word.
+
+For the owner to decide before U3: whether the student's question shows its maximum points (it does now, `DECISIONS.md`).
+
+Carried into U3:
+
+- The pengajar half of the U1 gate, unless step 9 above is done.
+- No page of LokaUjian has been checked in Arabic or dark mode by a person or a browser test.
+- `Akses` hands out course ids only; the list of class ids comes with sessions.
+- Students get pictures only from U3 (`Media::dariKunci` knows no attempt yet).
+- Reordering, settings, publishing and freezing of exams; a draft follows bank edits until then.
+- The Portal card stays "segera" until U6; 238 accounts have `lokaujian` access and get in whenever the host is open.
