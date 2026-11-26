@@ -1,5 +1,7 @@
 # Progress
 
+**LokaUjian stage U4 — SEB enforcement and integrity events (`SPEC-LOKAUJIAN.md` §9.1, §9.3) — built and deployed on 2026-11-27 (`lokaujian` and its scheduler run `9e506ce`, with `SEB_ENFORCEMENT=enabled`); **not closed, no tag: the owner's gate is open.** By the owner's decision of 2026-11-27 the SEB configuration is **per ujian/kuis**, not per course. **No real Safe Exam Browser has reached LokaUjian, no logged-in request has reached the deployed U4 code, and no person has seen its pages.** `auth`, `lokakode`, `portal` and the judge worker still run `fdbf765` (smoke 81 pass, 4 fail: the commit check only). The host is in maintenance. See "LokaUjian U4" at the end of this file.**
+
 **LokaUjian stage U3 — exam setup and delivery (`SPEC-LOKAUJIAN.md` §6, §7, §8, §9.2) — built and deployed on 2026-11-25; **closed on the owner's order on 2026-11-26 with three clauses of the gate unseen; tag `lokaujian-u3` on `fdbf765`, all components run that commit, smoke 76 pass, 0 fail.** Next: U4 (SEB enforcement and integrity events), begun 2026-11-27 with a plan for the owner's approval. The owner ran the gate on 2026-11-26: one exam in each timing mode was completed by the test student on the deployed system; **pasting, closing and reopening the browser, and a save after the deadline were not tried** (see "Gate result for LokaUjian U3"). `auth`, `lokakode`, `portal` and the judge worker were not redeployed and still run `abf9717`, so smoke is 72 pass, 4 fail (check 0 and the worker's commit only). It runs with `SEB_ENFORCEMENT=disabled`; the host `lokaujian.lokandita.com` is in maintenance. See "LokaUjian U3" at the end of this file.**
 
 **LokaUjian stage U2 — question authoring (`SPEC-LOKAUJIAN.md` §5, §6.3) — finished 2026-11-25, tag `lokaujian-u2` on `abf9717`, closed on the owner's order with gate step 7 skipped: **importing a file and export → import → export giving the same file have not been seen on the deployed system and rest on `ImporEksporTest` only.** All five components run `abf9717`; smoke 65 pass, 0 fail. The host `lokaujian.lokandita.com` is in maintenance. See "LokaUjian U2" and what follows it at the end of this file. Next: U3 (exam setup and delivery), begun 2026-11-25 with a plan for the owner's approval.**
@@ -1908,4 +1910,76 @@ On the owner's word ("do it", 2026-11-26): before the redeploy LokaKode had 0 su
 Read again at the start of U4 (2026-11-27 00:04 WIB, read-only): `/healthz` of `auth`, `lokakode`, `portal` and `lokaujian` each answers `fdbf765…`; `infra/smoke.sh` → `76 lulus, 0 gagal`; `lokaujian.lokandita.com` in maintenance.
 
 This entry is committed after that deploy, so `infra/smoke.sh` check 0 reports a different commit for every component until the next deploy.
+
+## LokaUjian U4 — SEB enforcement and integrity events (2026-11-27)
+
+Started in the same session as the closing of U3, on the owner's order. Plan presented; the owner **overruled `SPEC-LOKAUJIAN.md` §17 point 11**: "seb configuration for lokaujian is per ujian/kuis", approved a plain list of events per session and approved that enforcement stays on after the gate. The agent then described what per exam changes and costs (a Browser Exam Key registered for every exam; one file per exam for students) and asked where students get the file; he answered **A**: from their own home list after login, no public list. The agent took "A" as approval of the revised plan. One commit: `9e506ce`. **Built and deployed; not closed — the owner's gate is open, no tag.**
+
+Built (`KONTRAK.md` §23):
+
+- **Configuration per exam:** tables `seb_configs` (by `exam_id`) and `seb_exam_keys`; a panel on the exam page for superadmin and the pengampu — create or rotate with a quit password, download, register Browser Exam Keys. The file is `LokaUjian-<course code>-<exam id>.seb` and starts SEB at `/ujian/<id>/masuk`, which sends a student to their own session of that exam. Rotation is refused (409) while the exam is running.
+- **Real enforcement:** filter `seb` is now `App\Filters\SebUjian`. A route that carries a session accepts only the configuration of that session's exam; the heartbeat and pictures accept any exam of the student. Heartbeat every 25 seconds, lease 30 seconds. Pictures are behind SEB for students.
+- **The file for students:** on the home list next to each exam, after login, in an ordinary browser (`/ujian-saya/{s}/seb`). Public `/seb` (instructions) and `/seb/periksa` (did the two headers arrive) name no exam; there is no public download.
+- **Integrity events:** `seb_rejected` (at most one a minute per student) and `seb_terminated` from the filter; `focus_lost` with its duration, `display_changed` and `reconnected` (more than 60 seconds) from the exam page; a list per session at `/sesi/{id}/peristiwa`. The exam page and the session page show whether the exam has a configuration and a registered key.
+- `SEB_ENCRYPTION_KEY` for LokaUjian (`.env.example`, startup validation, `KONTRAK.md` §10); smoke check 17; `SPEC-LOKAUJIAN.md` §3, §9.1 and §17 point 11 rewritten.
+- From the shared package only the verification, the file builder, the encryption and the lease are used. **No file of the shared package, `auth`, `lokakode` or `portal` changed** (`git diff fdbf765 --stat` lists only `apps/lokaujian`, `infra/smoke.sh` and the root documents).
+
+Verified by the agent (commands and output shown in the session):
+
+- `infra/tes.sh lokaujian` → `OK (109 tests, 10142 assertions)`, 11 minutes 45 seconds. New in U4, against the container with enforcement **on** and headers computed by the formula of `KONTRAK.md` §8:
+  - with valid headers for every address a student opens the exam, starts, saves, sends the heartbeat and submits; without headers, with headers of another address, with a wrong Config Key, and with an unregistered Browser Exam Key every one is refused (403) and nothing but the event table changes;
+  - **the file of exam A does not open exam B** of the same class (`kunci_konfigurasi`), no attempt is created; the heartbeat accepts either; an exam without a configuration is refused for everybody (`tanpa_konfigurasi`);
+  - the Config Key computed from the content of the downloaded file equals the stored one, for two exams with different keys; the file starts at `/ujian/<id>/masuk`; the stored configuration is encrypted; the quit password is in no column, no page and no audit row;
+  - rotation: new version, old keys gone, the other exam untouched; refused with 409 while a session runs, accepted afterwards;
+  - the student downloads the same bytes the pengampu does, without SEB; a student of another class gets 404; `/seb` holds no exam title and no file link; `/seb/unduh/…` is 404;
+  - `seb_rejected` once for three refusals in a row, `seb_terminated` with the attempt when a lease existed; the list page shows them to the class's pengajar and is 404 for another pengajar;
+  - a student who left the class after starting still passes inside SEB; a picture is 403 outside SEB and served inside;
+  - `MatriksAksesTest`: 61 routes × seven actors.
+  - In the browser: losing focus for two seconds, a change of the screen size, and 65 seconds without a connection each record their event with the measured value; a 12-second gap records nothing.
+- `infra/cek-env.sh` → LULUS. `infra/deploy.sh lokaujian` at `9e506ce` → migration done, `/healthz` and the scheduler's heartbeat report the commit; the container logs `penegakan SEB aktif`.
+- `infra/smoke.sh` → **81 pass, 4 fail**: the commit check of `auth`, `lokakode`, `portal` and the worker, not redeployed. Check 17 passes (10 lines).
+- `infra/tes-infra.sh` → 83 pass, **5 fail**, all five the same commit check. `infra/backup.sh` → done. `infra/uji-restore.sh` → LULUS, 68 schemas/tables.
+- From inside, `/seb` → 200; from the internet → 503 (maintenance).
+
+Not verified, or weaker than it looks:
+
+- **No real Safe Exam Browser has sent a request to LokaUjian.** Every "accepted" above is a header the test computed itself. Whether SEB 3.10.x computes the same Config Key from this file, whether the Browser Exam Key read from its Configuration Tool matches, and whether the exam page behaves inside SEB are the owner's gate and cannot be shown by any test.
+- **No logged-in request has reached the deployed U4 code, and no person has seen any page of U4**: the panel, the SEB card on the exam and session pages, the home list with its download links, the instructions, the refusal page, the event list. Tests read their HTML only; none was rendered in a browser, in any language.
+- **That a refused heartbeat stops the exam page in the browser was not tested.** The server's 403 is tested, and the page's handling of a 403 is code read, not exercised: the test browser cannot compute SEB headers per request.
+- `focus_lost` was triggered by dispatching the window's blur and focus events from a script, not by a real change of window; `display_changed` by emulating the screen size. Inside SEB, on its own desktop, these events may fire differently or not at all.
+- With enforcement on, **the two exams of the U3 gate have no configuration, so nobody can open them**; and from now on every exam needs a configuration and a registered key before any student can start.
+- A student whose only route into the exam is the file needs to download it before entering SEB: inside SEB downloads are forbidden.
+- The suites of `auth`, `lokakode` and `portal` were not run: no file of theirs, of the shared package or of `infra/tes.sh` changed.
+- The Arabic texts (97 new keys) were written by the agent and read by no Arabic speaker.
+- The run of the suite now takes about 12 minutes.
+
+Mistakes of this session:
+
+- The first run of the suite was started in the foreground and was cut off before it printed anything; it was run again in the background.
+- Three new tests failed on their first complete run, all in the tests: two compared the order of keys of a JSON column, which MySQL reorders, and one fetched a picture from the second test container, which never received the uploaded file (test containers share no volume). No application code changed because of them.
+- The first U4 plan assumed configuration per course, as the specification said; the owner's answer changed it before any code was written.
+- Smoke check 17 is printed after check 18.
+
+Changed on the server outside Git (no value shown anywhere): `apps/lokaujian/.env` gained `SEB_ENCRYPTION_KEY` (generated on the server) and `SEB_ENFORCEMENT` went from `disabled` to `enabled`. Production schema `lokaujian`: migration `2026-11-27-000003` ran (two tables). All are in the backup made after the deploy. **`SEB_ENCRYPTION_KEY` must not change from now on**; it is in every backup's `env.tar.gz`.
+
+Owner's gate for U4 (`SPEC-LOKAUJIAN.md` §15). Needs a Windows computer with SEB 3.10.x.
+
+1. Tell the agent to open the host.
+2. In Chrome, as superadmin or pengampu: make a new exam from the bank, **Terbitkan**, **Berikan ke kelas** (the test class), then **Atur Safe Exam Browser** → a quit password → **Buat konfigurasi** → **Unduh berkas .seb**.
+3. On Windows, open that file with the **SEB Configuration Tool** of SEB 3.10.x, tab *Exam*, copy the **Browser Exam Key**, paste it into the panel, **Simpan kunci**. The exam page must then say the configuration is ready.
+4. As `Dummy` in Chrome: the home lists the exam with **Unduh berkas .seb**; opening the exam itself is refused with "harus dibuka melalui Safe Exam Browser". Download the file.
+5. Double-click the file: SEB opens, log in as `Dummy`, the exam's page appears; **Mulai** (start the session as lecturer first if it is lecturer-controlled). Answer, **Selesai**, **Kumpulkan**, quit SEB.
+6. As the lecturer in Chrome during or after: the session page opens, and **Peristiwa integritas** lists what happened (the refusal of step 4 is there).
+7. The three things never tried on the deployed system in U3, now inside SEB: press **Ctrl+V** in a text box; quit SEB mid-exam with the quit password, open the file again and continue; keep typing across the end of the time.
+8. Optional: open a second exam's page inside SEB started with the first exam's file — refused.
+9. Tell the agent to close the host; it reports what the server recorded.
+
+After the gate: tag `lokaujian-u4` on the commit that records it. Redeploying `auth`, `lokakode`, `portal` and the judge worker so that the commit check passes needs the owner's word.
+
+Carried into U5:
+
+- Live view per student, extra time, reopening, scoring and correction, CSV (answers and events), result release and the review inside SEB, the audit page, own-data export.
+- Still unseen on the deployed system unless the gate does them: pasting refused, close-and-return, a save after the deadline (U3); importing an exam file (U2); a pengajar refused another class and the bank (U1).
+- The test class and `Dummy` remain in LokaKode; `Dummy` is also still an `AKTIF` member of TS-6.
+- Retention of answers (§17 point 1) is undecided; no real exam before it is.
 
