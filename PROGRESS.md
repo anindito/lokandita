@@ -1,6 +1,6 @@
 # Progress
 
-**LokaUjian stage U3 — exam setup and delivery (`SPEC-LOKAUJIAN.md` §6, §7, §8, §9.2) — built and deployed on 2026-11-25 (`lokaujian` and its new scheduler `lokaujian-jadwal` run `7694ee3`); **not closed, no tag: the owner's gate is open.** `auth`, `lokakode`, `portal` and the judge worker were not redeployed and still run `abf9717`, so smoke is 72 pass, 4 fail (check 0 and the worker's commit only). **No logged-in request has reached the deployed U3 code and no person has seen any of its pages.** It runs with `SEB_ENFORCEMENT=disabled`; the host `lokaujian.lokandita.com` is in maintenance. See "LokaUjian U3" at the end of this file.**
+**LokaUjian stage U3 — exam setup and delivery (`SPEC-LOKAUJIAN.md` §6, §7, §8, §9.2) — built and deployed on 2026-11-25 (`lokaujian` and its new scheduler `lokaujian-jadwal` run `7694ee3`); **not closed, no tag.** The owner ran the gate on 2026-11-26: one exam in each timing mode was completed by the test student on the deployed system; **pasting, closing and reopening the browser, and a save after the deadline were not tried** (see "Gate result for LokaUjian U3"). `auth`, `lokakode`, `portal` and the judge worker were not redeployed and still run `abf9717`, so smoke is 72 pass, 4 fail (check 0 and the worker's commit only). It runs with `SEB_ENFORCEMENT=disabled`; the host `lokaujian.lokandita.com` is in maintenance. See "LokaUjian U3" at the end of this file.**
 
 **LokaUjian stage U2 — question authoring (`SPEC-LOKAUJIAN.md` §5, §6.3) — finished 2026-11-25, tag `lokaujian-u2` on `abf9717`, closed on the owner's order with gate step 7 skipped: **importing a file and export → import → export giving the same file have not been seen on the deployed system and rest on `ImporEksporTest` only.** All five components run `abf9717`; smoke 65 pass, 0 fail. The host `lokaujian.lokandita.com` is in maintenance. See "LokaUjian U2" and what follows it at the end of this file. Next: U3 (exam setup and delivery), begun 2026-11-25 with a plan for the owner's approval.**
 
@@ -1862,4 +1862,33 @@ Carried into U4:
 - No page of the lecturer's side has been seen in a browser by a person or a layout test; Arabic is unread by a speaker.
 - No extra time, no reopening, no live view per student, no score, no CSV (U5). No load test (U6).
 - The Portal card stays "segera" until U6; 238 accounts have `lokaujian` access and get in whenever the host is open — **from U3 on that matters**: with SEB off they can start any exam given to their class.
+
+### Gate result for LokaUjian U3 (2026-11-26)
+
+The owner reported "i did no 1" (the test class) and ordered the host opened; the agent opened it at 23:30 WIB and closed it at 23:49 WIB after he reported "done all exams". It answers 503 from the internet again. What the server recorded in that window (counts, routes, statuses and times only):
+
+- **The test class:** both sessions belong to one class with exactly one `AKTIF` student. One student account acted; it has no `paste_allowed`.
+- **Exam 1, `per_mahasiswa`, 5 minutes, 6 questions: done.** Settings saved (three `POST …/ujian/1` → 303), published 23:32:02, given to the class 23:32:48 (by a superadmin). The student pressed *Mulai* at 23:33:26; nine saves → 200 between 23:33:50 and 23:36:54; all 6 questions answered. The deadline, 23:38:26, passed with the page open; the scheduler marked the attempt `waktu_habis` with that time. The receipt page was opened at 23:38:30.
+- **Exam 2, `dikendalikan_dosen`, 3 questions, shuffled: done.** Made from the bank 23:40:25, published 23:41:20, given to the class by the course's pengampu 23:43:14, **started at 23:43:46 by a dosen who is pengajar of that class and not its pengampu**, with an end five minutes later. The student pressed *Mulai* at 23:44:08; three saves → 200; all 3 answered. The session ended at 23:48:46 and the attempt was marked `waktu_habis`.
+- These were the first logged-in requests to the deployed U3 code: 32 routes answered, **no 4xx and no 5xx in the window**; 12 saves, 58 state polls, 7 pictures served.
+- **A pengajar has now used the deployed LokaUjian** (carried from U1): the session page opened for them and *Mulai* worked. That a class of another pengajar and the bank are refused to them was not tried.
+
+Gate steps that left no trace — **not done on the deployed system, proven by tests only:**
+
+- **Step 4, Ctrl+V refused:** no `POST …/peristiwa` and no `paste_blocked` row. No paste, copy or cut was blocked during the gate, so none was attempted in a text box.
+- **Step 5, close the browser and return:** each attempt has exactly one `GET …/kerjakan`. The exam page was never opened a second time.
+- **Step 6, a save after the deadline refused:** no save arrived after either deadline (the last ones were 92 seconds and 4 minutes 25 seconds before), so nothing was refused; no `409`.
+- **Step 8, the waiting page turning into the exam:** the student opened exam 2 at 23:44:06, twenty seconds after the lecturer's *Mulai*, so the waiting page was not on screen when the session started. **Selesai → Kumpulkan:** no `POST …/kumpulkan`; both attempts ended by time, none was submitted by the student.
+- **Step 9, Akhiri:** not pressed.
+
+So of the gate of `SPEC-LOKAUJIAN.md` §15 — "a test student completes an exam in each timing mode; closing the browser mid-exam and returning keeps answers and remaining time; submitting after the deadline is refused; Ctrl+V is refused in every text box" — **the first clause was seen on the deployed system; the other three rest on `PengerjaanTest` and `HalamanUjianTest`.** What the pages looked like is the owner's observation; he reported nothing wrong.
+
+After closing:
+
+- `infra/smoke.sh` → 70 pass, **6 fail**, all the commit check: `HEAD` is the commit that holds `PROGRESS.md`; `lokaujian` and the scheduler run `7694ee3`, the others `abf9717`.
+- `infra/backup.sh` → done. `infra/uji-restore.sh` → LULUS, 66 schemas/tables, now with the gate's sessions, attempts and answers in them.
+
+Left in production by the gate: two published exams, two sessions and two ended attempts (9 answers) of the test student in the test class. They can no longer be withdrawn or deleted, only archived — by design. The test class stays in LokaKode until the owner removes or archives it.
+
+**Not closed, no tag.** Open for the owner: close U3 with the three clauses unseen, or do them first (a few minutes with the host open: paste into a box, close and reopen the browser, type across the end of a 5-minute exam).
 
