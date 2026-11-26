@@ -1,6 +1,6 @@
 # Progress
 
-**LokaUjian stage U3 — exam setup and delivery (`SPEC-LOKAUJIAN.md` §6, §7, §8, §9.2) — built and deployed on 2026-11-25 (`lokaujian` and its new scheduler `lokaujian-jadwal` run `7694ee3`); **not closed, no tag.** The owner ran the gate on 2026-11-26: one exam in each timing mode was completed by the test student on the deployed system; **pasting, closing and reopening the browser, and a save after the deadline were not tried** (see "Gate result for LokaUjian U3"). `auth`, `lokakode`, `portal` and the judge worker were not redeployed and still run `abf9717`, so smoke is 72 pass, 4 fail (check 0 and the worker's commit only). It runs with `SEB_ENFORCEMENT=disabled`; the host `lokaujian.lokandita.com` is in maintenance. See "LokaUjian U3" at the end of this file.**
+**LokaUjian stage U3 — exam setup and delivery (`SPEC-LOKAUJIAN.md` §6, §7, §8, §9.2) — built and deployed on 2026-11-25; **closed on the owner's order on 2026-11-26 with three clauses of the gate unseen; the tag `lokaujian-u3` waits for the redeploy of the other components.** The owner ran the gate on 2026-11-26: one exam in each timing mode was completed by the test student on the deployed system; **pasting, closing and reopening the browser, and a save after the deadline were not tried** (see "Gate result for LokaUjian U3"). `auth`, `lokakode`, `portal` and the judge worker were not redeployed and still run `abf9717`, so smoke is 72 pass, 4 fail (check 0 and the worker's commit only). It runs with `SEB_ENFORCEMENT=disabled`; the host `lokaujian.lokandita.com` is in maintenance. See "LokaUjian U3" at the end of this file.**
 
 **LokaUjian stage U2 — question authoring (`SPEC-LOKAUJIAN.md` §5, §6.3) — finished 2026-11-25, tag `lokaujian-u2` on `abf9717`, closed on the owner's order with gate step 7 skipped: **importing a file and export → import → export giving the same file have not been seen on the deployed system and rest on `ImporEksporTest` only.** All five components run `abf9717`; smoke 65 pass, 0 fail. The host `lokaujian.lokandita.com` is in maintenance. See "LokaUjian U2" and what follows it at the end of this file. Next: U3 (exam setup and delivery), begun 2026-11-25 with a plan for the owner's approval.**
 
@@ -1891,4 +1891,13 @@ After closing:
 Left in production by the gate: two published exams, two sessions and two ended attempts (9 answers) of the test student in the test class. They can no longer be withdrawn or deleted, only archived — by design. The test class stays in LokaKode until the owner removes or archives it.
 
 **Not closed, no tag.** Open for the owner: close U3 with the three clauses unseen, or do them first (a few minutes with the host open: paste into a box, close and reopen the browser, type across the end of a 5-minute exam).
+
+### LokaUjian U3 closed by the owner with three clauses of the gate unseen (2026-11-26)
+
+The owner ordered "close as it is". U3 is closed on these terms:
+
+- Seen on the deployed system: a test student completed one exam in each timing mode, with every answer saved and no error; a pengajar started a session of their own class.
+- **Not seen on the deployed system by anyone:** Ctrl+V refused in a text box; closing the browser mid-exam and returning with answers and remaining time kept; a save after the deadline refused. Also unseen: the waiting page turning into the exam, *Selesai* → *Kumpulkan*, and *Akhiri*. All of these rest on `PengerjaanTest` and `HalamanUjianTest` only. The first real exam in which a student pastes, loses a browser or types across the deadline is the real check.
+
+`lokaujian` and its scheduler are deployed at the commit that holds this entry. The tag `lokaujian-u3` goes on that commit once `infra/smoke.sh` passes, which needs `auth`, `lokakode`, `portal` and the judge worker redeployed — the owner's word, not yet given.
 
