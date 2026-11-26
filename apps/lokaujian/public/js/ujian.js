@@ -144,6 +144,7 @@
     }).then(function (h) {
       s.terbang = false;
       if (h.status === 200 && h.b.ok) {
+        terjangkau();
         gagalBeruntun = 0;
         jamTersimpan = h.b.disimpan;
         setSisa(h.b.sisa);
@@ -287,6 +288,7 @@
       })
       .then(function (k) {
         if (!k || !k.pengerjaan) { return; }
+        terjangkau();
         var p = k.pengerjaan;
         if (gagalBeruntun > 0 && !soal.some(function (s) { return s.kotor || s.terbang; })) { gagalBeruntun = 0; segarkanSimpan(); }
         if (p.diambil_alih) { hentikan(T.diambilAlih); return; }
@@ -310,16 +312,19 @@
     window.clearTimeout(toastTunda);
     toastTunda = window.setTimeout(function () { elToast.hidden = true; }, 3500);
   };
+  var kirimPeristiwa = function (badan) {
+    fetch(dasarApi + '/peristiwa', {
+      method: 'POST', credentials: 'same-origin', keepalive: true,
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, Accept: 'application/json' },
+      body: JSON.stringify(badan)
+    }).catch(function () {});
+  };
   var catatTerakhir = {};
   var catat = function (jalur) {
     var saat = performance.now();
     if (catatTerakhir[jalur] && saat - catatTerakhir[jalur] < 1000) { return; }   // satu tindakan sering memicu beberapa peristiwa
     catatTerakhir[jalur] = saat;
-    fetch(dasarApi + '/peristiwa', {
-      method: 'POST', credentials: 'same-origin', keepalive: true,
-      headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf, Accept: 'application/json' },
-      body: JSON.stringify({ jenis: 'paste_blocked', jalur: jalur })
-    }).catch(function () {});
+    kirimPeristiwa({ jenis: 'paste_blocked', jalur: jalur });
   };
   var kotakTeks = function (el) { return !!(el && el.matches && el.matches('#ujian input[type="text"], #ujian textarea')); };
   var tolakTempel = function (e, jalur) { e.preventDefault(); e.stopPropagation(); toast(T.tempelDiblokir); catat(jalur); };
@@ -366,6 +371,41 @@
   window.addEventListener('keydown', function (e) {
     if ((e.ctrlKey || e.metaKey) && (e.key || '').toLowerCase() === 'p') { e.preventDefault(); }
   }, true);
+
+  // ------------------------------------------------------------------ peristiwa integritas (§9.3)
+  // Skrip ini hanya MELAPORKAN; ia tidak menghukum dan tidak menghentikan apa pun.
+  //
+  // focus_lost: halaman kehilangan fokus atau disembunyikan; dikirim saat kembali, dengan lamanya.
+  var hilangSejak = null;
+  var fokusHilang = function () { if (hilangSejak === null && !berhenti) { hilangSejak = performance.now(); } };
+  var fokusKembali = function () {
+    if (hilangSejak === null) { return; }
+    var durasi = Math.round((performance.now() - hilangSejak) / 1000);
+    hilangSejak = null;
+    if (!berhenti) { kirimPeristiwa({ jenis: 'focus_lost', durasi: durasi }); }
+  };
+  window.addEventListener('blur', fokusHilang);
+  window.addEventListener('focus', fokusKembali);
+  document.addEventListener('visibilitychange', function () { if (document.hidden) { fokusHilang(); } else { fokusKembali(); } });
+
+  // display_changed: ukuran layar atau jumlah layar berubah sejak halaman dibuka.
+  var layarKini = function () { return { lebar: window.screen.width, tinggi: window.screen.height, layar: typeof window.screen.isExtended === 'boolean' ? window.screen.isExtended : null }; };
+  var layarLama = layarKini();
+  window.setInterval(function () {
+    var l = layarKini();
+    if (berhenti || (l.lebar === layarLama.lebar && l.tinggi === layarLama.tinggi && l.layar === layarLama.layar)) { return; }
+    layarLama = l;
+    kirimPeristiwa({ jenis: 'display_changed', lebar: l.lebar, tinggi: l.tinggi, layar: l.layar });
+  }, 3000);
+
+  // reconnected: server tidak terjangkau lebih dari 60 detik, lalu terjangkau lagi. Diukur dari
+  // jawaban terakhir yang berhasil (simpan atau tanya keadaan) sampai jawaban berhasil berikutnya.
+  var terjangkauTerakhir = performance.now();
+  var terjangkau = function () {
+    var jeda = Math.round((performance.now() - terjangkauTerakhir) / 1000);
+    terjangkauTerakhir = performance.now();
+    if (jeda > 60 && !berhenti) { kirimPeristiwa({ jenis: 'reconnected', detik: jeda }); }
+  };
 
   // ------------------------------------------------------------------ tanda air
   var wadahAir = q('[data-tanda-air-wadah]');

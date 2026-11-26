@@ -513,7 +513,24 @@ final class PengerjaanTest extends UjianCase
 
         $this->assertSame(200, $kirim($mhs, ['jenis' => 'paste_blocked', 'jalur' => 'keyboard'])->status);
         $this->assertSame(422, $kirim($mhs, ['jenis' => 'paste_blocked', 'jalur' => 'jalur-karangan'])->status);
-        $this->assertSame(422, $kirim($mhs, ['jenis' => 'seb_rejected', 'jalur' => 'paste'])->status);
+        // Peristiwa SEB hanya ditulis server sendiri; halaman tidak bisa mengarangnya.
+        foreach (['seb_rejected', 'seb_terminated', 'page_taken_over', 'karangan'] as $jenis) {
+            $this->assertSame(422, $kirim($mhs, ['jenis' => $jenis, 'jalur' => 'paste'])->status, $jenis);
+        }
+        // Tahap U4: tiga peristiwa halaman lainnya, dengan nilai yang diperiksa; teks bebas dibuang.
+        $this->assertSame(200, $kirim($mhs, ['jenis' => 'focus_lost', 'durasi' => 12, 'catatan' => '<script>'])->status);
+        $this->assertSame(200, $kirim($mhs, ['jenis' => 'display_changed', 'lebar' => 1920, 'tinggi' => 1080, 'layar' => true])->status);
+        $this->assertSame(200, $kirim($mhs, ['jenis' => 'reconnected', 'detik' => 75])->status);
+        foreach ([['jenis' => 'focus_lost', 'durasi' => '12'], ['jenis' => 'focus_lost', 'durasi' => -1], ['jenis' => 'display_changed', 'lebar' => 0, 'tinggi' => 10], ['jenis' => 'reconnected', 'detik' => 59], ['jenis' => 'reconnected']] as $salah) {
+            $this->assertSame(422, $kirim($mhs, $salah)->status, json_encode($salah));
+        }
+        $lain = $this->db->query("SELECT kind, detail FROM integrity_events WHERE kind <> 'paste_blocked' ORDER BY id")->fetch_all(MYSQLI_ASSOC);
+        // assertEquals: MySQL mengurutkan kunci kolom JSON sendiri. Kunci `catatan` kiriman tidak ikut tersimpan.
+        $this->assertEquals(
+            [['focus_lost', ['durasi' => 12]], ['display_changed', ['lebar' => 1920, 'tinggi' => 1080, 'layar' => true]], ['reconnected', ['detik' => 75]]],
+            array_map(static fn (array $b): array => [$b['kind'], json_decode((string) $b['detail'], true)], $lain),
+        );
+        $this->db->query("DELETE FROM integrity_events WHERE kind <> 'paste_blocked'");
         $e = $this->db->query('SELECT kind, detail, user_id, attempt_id, user_agent FROM integrity_events')->fetch_all(MYSQLI_ASSOC);
         $this->assertCount(1, $e);
         $this->assertSame(['paste_blocked', ['jalur' => 'keyboard'], (string) $d['mhsA']['id'], (string) $d['a']['id']], [$e[0]['kind'], json_decode((string) $e[0]['detail'], true), $e[0]['user_id'], (string) $e[0]['attempt_id']]);

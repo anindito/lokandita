@@ -449,6 +449,52 @@ final class HalamanUjianTest extends UjianCase
         }
     }
 
+    /**
+     * Peristiwa integritas yang dilaporkan halaman (SPEC-LOKAUJIAN.md §9.3): kehilangan fokus dengan
+     * lamanya, perubahan layar, dan tersambung lagi sesudah terputus lebih dari 60 detik.
+     */
+    public function testHalamanMelaporkanFokusLayarDanSambungan(): void
+    {
+        $d = $this->duniaKerja();
+        $p = $this->buka($d);
+        $tercatat = fn (string $jenis): array => array_map(
+            static fn (array $b): array => (array) json_decode((string) $b['detail'], true),
+            $this->db->query("SELECT detail FROM integrity_events WHERE kind = '{$jenis}' ORDER BY id")->fetch_all(MYSQLI_ASSOC),
+        );
+
+        // Fokus hilang dua detik lalu kembali: satu peristiwa dengan lamanya.
+        $p->js("window.dispatchEvent(new Event('blur')) || true");
+        sleep(2);
+        $p->js("window.dispatchEvent(new Event('focus')) || true");
+        $this->tungguSampai(fn () => count($tercatat('focus_lost')) === 1, 6, 'focus_lost tercatat');
+        $this->assertEqualsWithDelta(2, $tercatat('focus_lost')[0]['durasi'], 1);
+
+        // Ukuran layar berubah (layar kedua dipasang, atau resolusi diganti).
+        $p->perintah('Emulation.setDeviceMetricsOverride', ['width' => 1400, 'height' => 900, 'deviceScaleFactor' => 1, 'mobile' => false, 'screenWidth' => 3840, 'screenHeight' => 1080]);
+        $this->tungguSampai(fn () => count($tercatat('display_changed')) === 1, 10, 'display_changed tercatat');
+        $l = $tercatat('display_changed')[0];
+        $this->assertSame([3840, 1080], [$l['lebar'], $l['tinggi']]);
+
+        // Server tak terjangkau 65 detik, lalu kembali: satu peristiwa dengan lamanya; jawaban yang
+        // diketik selama itu ikut terkirim.
+        $this->keSoal($p, $d, 'URAIAN');
+        $p->perintah('Network.emulateNetworkConditions', ['offline' => true, 'latency' => 0, 'downloadThroughput' => -1, 'uploadThroughput' => -1]);
+        $p->ketik('diketik selama terputus');
+        sleep(65);
+        $this->assertSame([], $tercatat('reconnected'));
+        $p->perintah('Network.emulateNetworkConditions', ['offline' => false, 'latency' => 0, 'downloadThroughput' => -1, 'uploadThroughput' => -1]);
+        $this->tungguSampai(fn () => count($tercatat('reconnected')) === 1, 25, 'reconnected tercatat');
+        $this->assertGreaterThanOrEqual(60, $tercatat('reconnected')[0]['detik']);
+        $this->tungguSampai(fn () => $this->teksJawaban($d, 'URAIAN') === 'diketik selama terputus', 15, 'jawaban selama terputus terkirim');
+        // Jeda pendek (di bawah 60 detik) tidak dilaporkan.
+        $p->perintah('Network.emulateNetworkConditions', ['offline' => true, 'latency' => 0, 'downloadThroughput' => -1, 'uploadThroughput' => -1]);
+        sleep(12);
+        $p->perintah('Network.emulateNetworkConditions', ['offline' => false, 'latency' => 0, 'downloadThroughput' => -1, 'uploadThroughput' => -1]);
+        sleep(13);
+        $this->assertCount(1, $tercatat('reconnected'));
+        $this->assertSame([], $p->js('window.__csp'));
+    }
+
     public function testHalamanMenungguBerubahSendiriKetikaDosenMemulai(): void
     {
         $d    = $this->dunia();

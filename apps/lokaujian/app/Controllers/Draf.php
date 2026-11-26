@@ -143,6 +143,7 @@ final class Draf extends BaseController
             // Bukan `kelas`: nama itu dipakai partial _gambar untuk kelas CSS, dan data view terbawa ke partial.
             'daftarKelas' => $kelas,
             'kurang' => $kurang,
+            'seb'    => \App\Libraries\SebUjian::aktif((int) $ujian['id']),
             'pesan'  => $this->pesanDariQuery(self::PESAN),
         ], $status);
     }

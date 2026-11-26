@@ -74,7 +74,7 @@ Permission matrix (one policy layer, applied in queries, never only in views):
 | Correct a key or points after the exam (§11) | yes | own course | no | no |
 | Release or withdraw results | yes | own course | no | no |
 | CSV download, integrity events | yes | own course | own classes | no |
-| SEB configuration of a course | yes | own course | no | no |
+| SEB configuration of an exam | yes | own course | no | no |
 | Start and work on an exam | no | no | no | own class, inside SEB |
 | Audit log | yes | no | no | no |
 
@@ -240,9 +240,12 @@ A **sesi** is one published exam given to one class: at most one per exam per cl
 As `SPEC.md` §13.1, with one implementation for both apps in the shared package (`KONTRAK.md`):
 
 - Enforced for **mahasiswa only**, after authentication, by role and never by URL. Staff use ordinary browsers. The User-Agent is never trusted; both SEB headers are verified cryptographically.
-- **There is no practice mode and no exam outside SEB** (D11). Every student route requires SEB, with these exceptions: the home list (read-only), the SEB instructions and download, the account routes (logging out always works), and the export of one's own data. Starting, the waiting page, the exam page, every answer endpoint and the released review are inside SEB.
-- To start or work on an exam the request must match the SEB configuration **of that exam's course**, not merely of any course of the student.
-- LokaUjian has its own configuration per course (start address, allowed addresses), so its `.seb` file and Browser Exam Keys are separate from LokaKode's. The pengampu panel is the same: create or rotate (quit password ≥ 12 characters), download the file, register Browser Exam Keys. Rotation invalidates old keys at once; rotating while a session is running is refused.
+- **There is no practice mode and no exam outside SEB** (D11). Every student route requires SEB, with these exceptions: the home list (read-only) with the download of an exam's `.seb` file, the SEB instructions, the account routes (logging out always works), and the export of one's own data. Starting, the waiting page, the exam page, every answer endpoint and the released review are inside SEB.
+- **The SEB configuration of LokaUjian is per ujian/kuis** (the owner's decision of 2026-11-27, overruling §17 point 11): every exam has its own `.seb` file and its own Browser Exam Keys, separate from LokaKode's. Opening the file starts SEB directly at that exam.
+- To start or work on an exam the request must match the SEB configuration **of that exam**. SEB opened with the file of another exam is refused.
+- An exam without a configuration, or without a registered Browser Exam Key, cannot be started by anyone while enforcement is on; the exam page and the session page say so.
+- The panel is on the exam, for superadmin and the pengampu: create or rotate (quit password ≥ 12 characters), download the file, register Browser Exam Keys. Rotation invalidates the old file and its keys at once; rotating while the exam is running is refused.
+- Students download the file of an exam from their own home list, after login, in an ordinary browser. There is no public list of exams and no public download (the owner's decision of 2026-11-27).
 - Heartbeat every 25 s, lease 30 s. A lost or invalid header stops the exam page within 30 s; saved answers stay, the clock keeps running, and the student continues after reopening the exam in SEB.
 - `SEB_ENFORCEMENT=disabled` exists for the owner's testing only: it skips the check, shows the red banner "MODE UJI: penegakan SEB dinonaktifkan" on every student page, is logged at start, and makes the smoke test print a warning.
 - Moving the verification into the shared package (stage U0) must not change LokaKode's behaviour in any way.
@@ -383,7 +386,7 @@ After U6 come the platform stages **A1** (roster tables move to the Lokandita co
 | 8 | A wrong key found after the exam | Key and points can be corrected with a full rescore; no annulling of a question in the app (§11) | U5 |
 | 9 | What a pengajar may do | Run sessions, extra time, reopening, CSV and events for own classes; no bank, no editing, no release (§3) | U1 |
 | 10 | Pictures | One per group and one per question. **Changed by the owner on 2026-11-25, before U2:** an option may carry a picture, instead of or next to its text (§5.1, §5.2) | U2 |
-| 11 | SEB configuration | Per course, separate from LokaKode's: students get a second `.seb` file and the pengampu registers Browser Exam Keys again (§9.1) | U4 |
+| 11 | SEB configuration | **Changed by the owner on 2026-11-27, before U4:** per ujian/kuis, not per course. Every exam has its own `.seb` file, which students download from their home list after login, and the pengampu registers Browser Exam Keys for every exam (§9.1) | U4 |
 | 12 | Two pages on one attempt | The newest takes over, the older stops, an event is recorded (§8) | U3 |
 | 13 | CSV separator | Semicolon by default, comma on request (§12) | U5 |
 | 14 | `kuis` and `ujian` | A label only; no difference in behaviour (§6.1) | U3 |

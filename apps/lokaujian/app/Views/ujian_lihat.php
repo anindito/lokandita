@@ -5,7 +5,7 @@
 /**
  * Pratinjau satu ujian (SPEC-LOKAUJIAN.md §5.4): butirnya ditampilkan dengan partial yang sama
  * dengan halaman mahasiswa, dalam urutan ujian. Variabel: $matkul, $ujian (Ujian::lihat),
- * $sesi (Sesi::untukUjian), $daftarKelas (kelas mata kuliah itu pada tahun aktif), $kurang.
+ * $seb (konfigurasi SEB yang berlaku atau null), $sesi (Sesi::untukUjian), $daftarKelas (kelas mata kuliah itu pada tahun aktif), $kurang.
  */
 use App\Controllers\Soal;
 use App\Libraries\Markdown;
@@ -66,6 +66,12 @@ $nomor = 1;
         <?php endif ?>
     </div>
     <p class="petunjuk" data-info-status><?= lang('Sesi.ujian.info_' . $ujian['status'], [(int) $ujian['pengerjaan']]) ?></p>
+</div>
+
+<div class="kartu" data-seb-ringkas="<?= $seb === null ? 'tanpa' : ((int) $seb['jumlah_kunci'] === 0 ? 'tanpa_kunci' : 'siap') ?>">
+    <p><strong><?= lang('SebUjian.ringkas.judul') ?></strong></p>
+    <p><?= $seb === null ? lang('SebUjian.ringkas.tanpa') : ((int) $seb['jumlah_kunci'] === 0 ? lang('SebUjian.ringkas.tanpaKunci') : lang('SebUjian.ringkas.siap', [(int) $seb['version'], (int) $seb['jumlah_kunci']])) ?></p>
+    <div class="baris-tombol"><a class="tombol tombol-sekunder" href="<?= $ini ?>/seb"><?= lang('SebUjian.ringkas.kelola') ?></a></div>
 </div>
 
 <?php if ($kurang !== []): ?>

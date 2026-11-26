@@ -21,7 +21,10 @@ final class Beranda extends BaseController
             return $this->halaman('beranda_mahasiswa', [
                 'judul' => lang('Lokandita.beranda'),
                 'kelas' => $roster->kelasSaya(),
-                'ujian' => (new \App\Libraries\Pengerjaan($this->akses()))->daftar(),
+                'ujian' => $ujian = (new \App\Libraries\Pengerjaan($this->akses()))->daftar(),
+                // Ujian mana yang sudah punya berkas .seb (KONTRAK.md §23): diunduh dari sini, di peramban biasa.
+                'seb'          => \App\Libraries\SebUjian::ringkas(array_map(static fn (array $u): int => (int) $u['exam_id'], $ujian)),
+                'sebWajib'     => \Lokandita\Auth\Seb\Seb::diberlakukan(),
             ]);
         }
 

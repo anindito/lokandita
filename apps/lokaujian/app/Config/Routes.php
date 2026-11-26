@@ -6,7 +6,8 @@ use Lokandita\Auth\Routes as RuteBersama;
 /** @var RouteCollection $routes */
 
 // LokaUjian (SPEC-LOKAUJIAN.md §15): jalan masuk dan lingkup (U1), bank soal dan draf ujian (U2),
-// penerbitan, sesi dan pengerjaan (U3). Penegakan SEB, tampilan langsung dan ekspor: U4 dan U5.
+// penerbitan, sesi dan pengerjaan (U3), Safe Exam Browser per ujian dan peristiwa integritas (U4).
+// Tampilan langsung, penilaian dan ekspor: U5.
 
 // KONTRAK.md §11: dipakai infra/deploy.sh untuk memastikan commit yang berjalan.
 $routes->get('healthz', '\Lokandita\Auth\Controllers\Healthz::index');
@@ -80,6 +81,13 @@ $routes->group('mata-kuliah/(:num)', ['filter' => 'masuk:superadmin,dosen'], sta
     $routes->post('ujian/(:num)/tarik', 'Draf::tarik/$1/$2');
     $routes->post('ujian/(:num)/arsip', 'Draf::arsip/$1/$2');
     $routes->post('ujian/(:num)/sesi', 'SesiStaf::buat/$1/$2');
+
+    // Tahap U4 (SPEC-LOKAUJIAN.md §9.1; KONTRAK.md §23): Safe Exam Browser PER UJIAN — membuat atau
+    // merotasi konfigurasi, mengunduh berkas .seb, mendaftarkan Browser Exam Key.
+    $routes->get('ujian/(:num)/seb', 'SebPanel::lihat/$1/$2');
+    $routes->post('ujian/(:num)/seb', 'SebPanel::simpan/$1/$2');
+    $routes->post('ujian/(:num)/seb/kunci', 'SebPanel::kunci/$1/$2');
+    $routes->get('ujian/(:num)/seb/unduh', 'SebPanel::unduh/$1/$2');
 });
 
 // Sesi (tahap U3, SPEC-LOKAUJIAN.md §7; KONTRAK.md §22): siapa pun yang MELIHAT kelasnya boleh
@@ -89,6 +97,7 @@ $routes->group('mata-kuliah/(:num)', ['filter' => 'masuk:superadmin,dosen'], sta
 $routes->group('sesi/(:num)', ['filter' => 'masuk:superadmin,dosen'], static function (RouteCollection $routes): void {
     $routes->get('', 'SesiStaf::lihat/$1');
     $routes->get('pratinjau', 'SesiStaf::pratinjau/$1');
+    $routes->get('peristiwa', 'SesiStaf::peristiwa/$1');
     $routes->post('jadwal', 'SesiStaf::jadwal/$1');
     $routes->post('buka', 'SesiStaf::buka/$1');
     $routes->post('tutup', 'SesiStaf::tutup/$1');
@@ -98,10 +107,10 @@ $routes->group('sesi/(:num)', ['filter' => 'masuk:superadmin,dosen'], static fun
     $routes->post('hapus', 'SesiStaf::hapus/$1');
 });
 
-// Mahasiswa (tahap U3, SPEC-LOKAUJIAN.md §8, §9.1): mulai, menunggu, halaman ujian, simpan,
-// kumpulkan. Filter `seb` selalu SESUDAH `masuk`. Di tahap U3 ia hanya memasang pita MODE UJI
-// (SEB_ENFORCEMENT=disabled) atau menolak (enabled) — App\Filters\SebSementara; penegakan
-// sungguhan tahap U4. Alamatnya memuat id SESI saja: pengerjaan dicari dari pengguna yang masuk.
+// Mahasiswa (SPEC-LOKAUJIAN.md §8, §9.1): mulai, menunggu, halaman ujian, simpan, kumpulkan.
+// Filter `seb` (App\Filters\SebUjian, KONTRAK.md §23) selalu SESUDAH `masuk`: kedua header SEB
+// harus cocok dengan konfigurasi UJIAN sesi itu. Alamatnya memuat id SESI saja: pengerjaan dicari
+// dari pengguna yang masuk.
 $routes->group('', ['filter' => ['masuk:mahasiswa', 'seb']], static function (RouteCollection $routes): void {
     $routes->get('ujian-saya/(:num)', 'Kerja::lihat/$1');
     $routes->post('ujian-saya/(:num)/mulai', 'Kerja::mulai/$1');
@@ -110,10 +119,24 @@ $routes->group('', ['filter' => ['masuk:mahasiswa', 'seb']], static function (Ro
     $routes->get('api/sesi/(:num)/keadaan', 'Kerja::keadaan/$1');
     $routes->post('api/sesi/(:num)/jawaban', 'Kerja::jawaban/$1');
     $routes->post('api/sesi/(:num)/peristiwa', 'Kerja::peristiwa/$1');
+    // Denyut SEB tiap 25 detik (KONTRAK.md §8): filter `seb` yang memeriksa dan memperpanjang sewa.
+    $routes->post('api/seb/denyut', '\Lokandita\Auth\Controllers\Seb::denyut');
 });
+
+// Di LUAR filter `seb` (SPEC-LOKAUJIAN.md §9.1): berkas .seb sebuah ujian diunduh mahasiswanya di
+// peramban biasa, dari beranda; dan alamat masuk (startURL berkas itu) hanya mengarahkan ke sesinya.
+$routes->get('ujian-saya/(:num)/seb', 'Kerja::unduhSeb/$1', ['filter' => 'masuk:mahasiswa']);
+$routes->get('ujian/(:num)/masuk', 'Kerja::masuk/$1', ['filter' => 'masuk']);
+
+// Safe Exam Browser, tanpa sesi (KONTRAK.md §4, §23): petunjuk, periksa header, alamat keluar
+// (quitURL). Tidak ada daftar atau unduhan publik: konfigurasi LokaUjian per ujian.
+$routes->get('seb', 'SebPublik::petunjuk');
+$routes->get('seb/periksa', 'SebPublik::periksa');
+$routes->get('seb/keluar', '\Lokandita\Auth\Controllers\Seb::keluar');
 
 // Gambar soal (SPEC-LOKAUJIAN.md §5.3): dijawab aplikasi sesudah hak akses diperiksa, tidak pernah
 // sebagai berkas statis. Semua peran lewat filter; siapa yang boleh melihat gambar mana diputuskan
 // di kueri (App\Libraries\Media): pengelola mata kuliahnya; staf yang menjalankan sesi ujian terbit
 // yang memuatnya; mahasiswa hanya selama pengerjaannya atas ujian itu berjalan.
-$routes->get('gambar/([0-9a-f]{32})', 'Gambar::tampil/$1', ['filter' => 'masuk']);
+// Bagi mahasiswa gambar soal adalah bagian dari ujian, jadi juga di belakang `seb`.
+$routes->get('gambar/([0-9a-f]{32})', 'Gambar::tampil/$1', ['filter' => ['masuk', 'seb']]);

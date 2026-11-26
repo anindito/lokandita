@@ -27,7 +27,7 @@ abstract class UjianCase extends TestCase
 
     /** Tabel LokaUjian, anak lebih dulu (urutan penghapusan mengikuti kunci asing). */
     protected const TABEL = [
-        'answers', 'integrity_events', 'attempts', 'sessions', 'exam_options', 'exam_questions', 'exam_groups',
+        'seb_exam_keys', 'seb_configs', 'answers', 'integrity_events', 'attempts', 'sessions', 'exam_options', 'exam_questions', 'exam_groups',
         'exam_items', 'exams', 'question_options', 'questions', 'question_groups', 'images', 'audit_log',
     ];
 
@@ -295,6 +295,57 @@ abstract class UjianCase extends TestCase
         $csrf = $this->csrf($mhs);
 
         return $mhs->postJson("/api/sesi/{$sesi}/jawaban", ['halaman' => $token, 'soal' => $soal, 'nilai' => $nilai, 'ragu' => $ragu, 'n' => $n], ['X-CSRF-TOKEN' => $csrf]);
+    }
+
+    // ------------------------------------------------------------------ tahap U4: Safe Exam Browser
+
+    public const SEB_BEK   = 'b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0';
+    public const SEB_SANDI = 'kata-sandi-keluar-uji';
+
+    /**
+     * Pengelola membuat konfigurasi SEB ujian itu lewat panelnya dan (bila $bek tidak null)
+     * mendaftarkan satu Browser Exam Key. Mengembalikan Config Key yang berlaku.
+     */
+    protected function sebSiap(Http $pengelola, int $matkul, int $ujian, ?string $bek = self::SEB_BEK): string
+    {
+        $r = $this->kirim($pengelola, "/mata-kuliah/{$matkul}/ujian/{$ujian}/seb", ['sandi_keluar' => self::SEB_SANDI]);
+        $this->assertContains($r->status, [302, 303], 'membuat konfigurasi SEB: ' . substr(strip_tags($r->body), 0, 400));
+        if ($bek !== null) {
+            $r = $this->kirim($pengelola, "/mata-kuliah/{$matkul}/ujian/{$ujian}/seb/kunci", ['kunci' => $bek]);
+            $this->assertStringEndsWith('/seb?pesan=kunci', (string) $r->header('Location'));
+        }
+
+        return (string) $this->db->query("SELECT config_key FROM seb_configs WHERE exam_id = {$ujian} AND retired_at IS NULL")->fetch_assoc()['config_key'];
+    }
+
+    /**
+     * Kedua header yang dikirim SEB untuk satu alamat, dihitung dengan rumus KONTRAK.md §8.
+     * Tidak ada tes yang bisa membuktikan bahwa klien SEB sungguhan mengirim header yang sama;
+     * itu gerbang pemilik.
+     *
+     * @return array<string, string>
+     */
+    protected static function sebHeader(string $jalur, string $kunciKonfig, string $bek = self::SEB_BEK): array
+    {
+        $url = rtrim((string) getenv('APP_URL'), '/') . $jalur;
+
+        return [
+            'X-SafeExamBrowser-ConfigKeyHash' => hash('sha256', $url . $kunciKonfig),
+            'X-SafeExamBrowser-RequestHash'   => hash('sha256', $url . $bek),
+        ];
+    }
+
+    /**
+     * Klien pada kontainer dengan penegakan SEB AKTIF (lokaujian-seb-tes), masuk sebagai $user.
+     *
+     * @param array<string, mixed> $user
+     */
+    protected function sebagaiSeb(array $user): Http
+    {
+        $http = new Http((string) getenv('APP_SEB_TES_URL'));
+        $http->cookies['lokandita_sid'] = Fixtures::session($this->idn, (string) $user['id']);
+
+        return $http;
     }
 
     /**

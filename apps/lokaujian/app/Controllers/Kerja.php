@@ -6,8 +6,10 @@ namespace App\Controllers;
 
 use App\Libraries\Jadwal;
 use App\Libraries\Pengerjaan;
+use App\Libraries\SebUjian;
 use CodeIgniter\HTTP\ResponseInterface;
 use Lokandita\Auth\Log;
+use Lokandita\Auth\RosterDb;
 
 /**
  * Halaman MAHASISWA (SPEC-LOKAUJIAN.md §8): sebelum mulai, menunggu, halaman ujian, tanda terima;
@@ -180,25 +182,115 @@ final class Kerja extends BaseController
     }
 
     /**
-     * Peristiwa integritas dari halaman ujian. Tahap U3 hanya menerima `paste_blocked`
-     * (tempel, salin atau potong yang diblokir, dengan jalurnya). Pengguna yang dibebaskan
-     * (paste_allowed) tidak pernah mengirimnya, dan kalaupun ada tidak dicatat.
+     * Peristiwa integritas dari halaman ujian (SPEC-LOKAUJIAN.md §9.3). Badan JSON:
+     *   { jenis: "paste_blocked",   jalur }                    tempel, salin atau potong yang diblokir
+     *   { jenis: "focus_lost",      durasi }                   halaman kehilangan fokus atau disembunyikan, detik
+     *   { jenis: "display_changed", lebar, tinggi, layar }     ukuran layar atau jumlah layar berubah
+     *   { jenis: "reconnected",     detik }                    server tak terjangkau lebih dari 60 detik lalu kembali
+     * Yang dicatat hanya nilai yang sudah diperiksa di sini; teks bebas tidak pernah disimpan.
+     * Pengguna yang dibebaskan (paste_allowed) tidak pernah dicatat untuk paste_blocked.
      */
     public function peristiwa(string $sesiId): ResponseInterface
     {
-        if (! $this->pustaka()->punya((int) $sesiId)) {
+        $pustaka = $this->pustaka();
+        if (! $pustaka->punya((int) $sesiId)) {
             return $this->jsonTidakAda();
         }
-        $b     = $this->badanJson();
-        $jalur = $b['jalur'] ?? null;
-        if ($b === null || ($b['jenis'] ?? '') !== 'paste_blocked' || ! in_array($jalur, ['paste', 'copy', 'cut', 'drop', 'middle_click', 'context_menu', 'keyboard', 'shift_insert'], true)) {
+        $b      = $this->badanJson() ?? [];
+        $angka  = static fn (string $k, int $min, int $maks): ?int => is_int($b[$k] ?? null) && $b[$k] >= $min && $b[$k] <= $maks ? $b[$k] : null;
+        $detail = null;
+        switch ($b['jenis'] ?? '') {
+            case 'paste_blocked':
+                $jalur = $b['jalur'] ?? null;
+                if (in_array($jalur, ['paste', 'copy', 'cut', 'drop', 'middle_click', 'context_menu', 'keyboard', 'shift_insert'], true)) {
+                    $detail = ['jalur' => $jalur];
+                }
+                break;
+
+            case 'focus_lost':
+                if (($durasi = $angka('durasi', 0, 86_400)) !== null) {
+                    $detail = ['durasi' => $durasi];
+                }
+                break;
+
+            case 'display_changed':
+                $lebar  = $angka('lebar', 1, 100_000);
+                $tinggi = $angka('tinggi', 1, 100_000);
+                if ($lebar !== null && $tinggi !== null) {
+                    $detail = ['lebar' => $lebar, 'tinggi' => $tinggi, 'layar' => is_bool($b['layar'] ?? null) ? $b['layar'] : null];
+                }
+                break;
+
+            case 'reconnected':
+                if (($detik = $angka('detik', 60, 86_400)) !== null) {
+                    $detail = ['detik' => $detik];
+                }
+                break;
+        }
+        if ($detail === null) {
             return $this->json(422, ['error' => 'bentuk']);
         }
-        if ($this->akses()->identitas()->pasteAllowed) {
+        if ($b['jenis'] === 'paste_blocked' && $this->akses()->identitas()->pasteAllowed) {
             return $this->json(200, ['ok' => true]);
         }
-        $ada = $this->pustaka()->peristiwa((int) $sesiId, 'paste_blocked', ['jalur' => $jalur], $this->request->getIPAddress(), (string) $this->request->getUserAgent());
+        if (! $this->lajuPeristiwa((int) $sesiId)) {
+            return $this->json(429, ['error' => 'terlalu_cepat']);
+        }
+        $pustaka->peristiwa((int) $sesiId, (string) $b['jenis'], $detail, $this->request->getIPAddress(), (string) $this->request->getUserAgent());
 
-        return $ada ? $this->json(200, ['ok' => true]) : $this->jsonTidakAda();
+        return $this->json(200, ['ok' => true]);
+    }
+
+    /**
+     * Paling banyak 60 peristiwa per menit per pengguna per sesi: halaman yang rusak atau skrip
+     * iseng tidak bisa membanjiri tabel. Tanpa Redis semuanya diterima.
+     */
+    private function lajuPeristiwa(int $sesiId): bool
+    {
+        try {
+            $r     = Jadwal::redis();
+            $kunci = 'lokaujian:laju:peristiwa:' . $sesiId . ':' . $this->akses()->identitas()->userId . ':' . intdiv(time(), 60);
+            $n     = $r->incr($kunci);
+            if ($n === 1) {
+                $r->expire($kunci, 120);
+            }
+
+            return $n <= 60;
+        } catch (\Throwable) {
+            return true;
+        }
+    }
+
+    /**
+     * Berkas .seb ujian sesi ini, untuk mahasiswanya sendiri (KONTRAK.md §23). Rute ini DI LUAR
+     * filter `seb`: berkasnya justru diunduh di peramban biasa, dari beranda. Sesi kelas lain
+     * dijawab 404; tidak ada daftar publik ujian.
+     */
+    public function unduhSeb(string $sesiId): ResponseInterface
+    {
+        $s = $this->pustaka()->sesi((int) $sesiId);
+        if ($s === null) {
+            return $this->tidakDitemukan('session');
+        }
+        $kode   = RosterDb::conn()->execute_query('SELECT code FROM roster_courses WHERE id = ?', [(int) $s['course_id']])->fetch_assoc();
+        $berkas = SebUjian::berkas((int) $s['exam_id'], (string) ($kode['code'] ?? ''));
+
+        return $berkas === null ? $this->tidakDitemukan('seb_file') : SebPanel::kirim($this->response, $berkas);
+    }
+
+    /**
+     * Alamat yang dibuka SEB ketika berkas sebuah ujian dijalankan (startURL). Mahasiswa diarahkan
+     * ke sesinya sendiri atas ujian itu; siapa pun yang tidak punya sesi di sana ke beranda.
+     * Tidak menampilkan apa pun dan tidak membedakan ujian yang ada dari yang tidak ada.
+     */
+    public function masuk(string $ujianId): ResponseInterface
+    {
+        foreach ($this->pustaka()->daftar() as $s) {
+            if ((int) $s['exam_id'] === (int) $ujianId) {
+                return redirect()->to('/ujian-saya/' . (int) $s['sesi_id']);
+            }
+        }
+
+        return redirect()->to('/beranda');
     }
 }

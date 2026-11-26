@@ -129,7 +129,7 @@ Routes that need no session. They never read the session or the identity databas
 |---|---|
 | Portal | `/`, `/tentang`, `/privasi`, `/ketentuan`, `/sitemap.xml`, `/robots.txt`; `/kontak` answers `301` to `/tentang` (the contact page became part of Tentang) |
 | LokaKode | `/` (public landing), `/robots.txt`, `/seb`, `/seb/periksa`, `/seb/keluar`, `/seb/unduh/<course code>.seb` (§8) |
-| LokaUjian | `/` (a short page with the way in, since stage U1), `/robots.txt` (static: disallows everything) |
+| LokaUjian | `/` (a short page with the way in, since stage U1), `/robots.txt` (static: disallows everything); since stage U4 `/seb`, `/seb/periksa`, `/seb/keluar` (§23) — instructions and a header check that read no database and name no exam; there is **no** public download |
 | every app | `/healthz`, `GET /bahasa/{id\|en\|ar}` |
 
 - `GET /` in the Portal, in LokaKode and in LokaUjian looks only at whether a `lokandita_sid` cookie **is present**: with one it redirects to `/beranda` (where §4 decides whether the session is alive), without one it shows the landing page. The value of the cookie is not read.
@@ -417,7 +417,9 @@ Rules of an import (`SPEC.md` §8.3):
 
 ## 8. Safe Exam Browser verification
 
-There is **one implementation**, in `packages/lokandita-auth` (namespace `Lokandita\Auth\Seb`), used by every app that requires SEB; today that is LokaKode. What an app supplies is listed under "Shared package and what each app supplies" below. Everything else in this section is the same for every such app.
+There is **one implementation**, in `packages/lokandita-auth` (namespace `Lokandita\Auth\Seb`), used by every app that requires SEB. What an app supplies is listed under "Shared package and what each app supplies" below. Everything else in this section is the same for every such app.
+
+**LokaKode uses all of it.** **LokaUjian (since stage U4) uses the verification only** — the two header formulas, the settings and `.seb` file builder, the Config Key, the encryption, the lease and the heartbeat — because its configurations belong to an exam, not to a course (the owner's decision of 2026-11-27). Which configuration counts, the tables, the panel, the download and the routes of LokaUjian are §23; the paragraphs below that speak of courses ("Configuration and keys", "Routes", the `Sumber` table) describe LokaKode.
 
 Applies to requests of a user whose global role is `mahasiswa`, after §4 has identified the user: filter `seb` (`Lokandita\Auth\Filters\WajibSeb`) always follows filter `masuk`. Staff are never checked. The User-Agent is never read.
 
@@ -564,11 +566,11 @@ Each app validates its required variables at start and exits naming the missing 
 | `SERVICE_TOKEN_PORTAL`, `SERVICE_TOKEN_LOKAKODE`, `SERVICE_TOKEN_LOKAUJIAN` | ✔ | | | | |
 | `MFA_ENCRYPTION_KEY` | ✔ | | | | |
 | `INSTANCE_SECRET` | | ✔ | | | |
-| `SEB_ENCRYPTION_KEY` | | ✔ | | from U4 | |
+| `SEB_ENCRYPTION_KEY` | | ✔ | | ✔ (since U4) | |
 | `SEB_ENFORCEMENT` | | ✔ | | ✔ (since U3) | |
 | `JUDGE_CONCURRENCY` | | | | | ✔ |
 
-LokaUjian has `SEB_ENFORCEMENT` since stage U3 (§22 "Safe Exam Browser in stage U3") and gets its own `SEB_ENCRYPTION_KEY` in U4, the stage whose code first reads it; until then that key is in no file. `lokaujian-jadwal` uses `apps/lokaujian/.env`, the same file as `lokaujian`; its entrypoint runs the same check of required variables and exits with code 78 when one is missing.
+LokaUjian has `SEB_ENFORCEMENT` since stage U3 and its own `SEB_ENCRYPTION_KEY` since U4 (§23): a secret of LokaUjian alone, different from LokaKode's, which must not change while configurations exist and is included in every backup. `lokaujian-jadwal` uses `apps/lokaujian/.env`, the same file as `lokaujian`; its entrypoint runs the same check of required variables and exits with code 78 when one is missing.
 
 `infra/.env` (Caddy, MySQL, Redis, backup):
 
@@ -641,7 +643,8 @@ Values are written without quotes.
   14. the way into LokaUjian (stage U1, §19), asked as in check 8 from inside `portal`: `GET /` of `lokaujian` without a cookie answers `200` with `noindex, nofollow` and a link to `/beranda`; `GET /beranda`, `/mata-kuliah`, `/mata-kuliah/1` and `/kelas/1` without a cookie each redirect to `AUTH_LOGIN_URL` with `next` equal to that address.
   15. question pictures of LokaUjian (stage U2, §20), asked as in check 8 from inside `portal`: `GET /media/soal/smoke.png` and `/media/soal/smoke.php` of `lokaujian` answer `403`; `GET /gambar/<32 zeros>`, `/mata-kuliah/1/bank` and `/mata-kuliah/1/ujian` without a cookie each redirect to `AUTH_LOGIN_URL` with `next` equal to that address; `/srv/media` of the running `lokaujian` container is the volume `lokandita_lokaujian_media`.
   16. the scheduler of LokaUjian (stage U3, §21): the heartbeat `lokaujian:jadwal` exists, carries the current `HEAD`, was written by the running `lokaujian-jadwal` container, and its `waktu` is younger than 60 seconds; the container is running.
-  18. routes of LokaUjian (stage U3, §22), asked as in check 8 from inside `portal`: `GET /mata-kuliah/1/ujian/1/sunting`, `/sesi/1`, `/sesi/1/pratinjau`, `/ujian-saya/1`, `/ujian-saya/1/kerjakan` and `/api/sesi/1/keadaan` without a cookie each redirect to `AUTH_LOGIN_URL` with `next` equal to that address; the `lokaujian` schema has the seven tables of §22; `SEB_ENFORCEMENT` in the running `lokaujian` container equals the value in `apps/lokaujian/.env`, and `disabled` passes with a warning line that says students are not required to use SEB. (Check 17, SEB of LokaUjian, comes with stage U4.)
+  18. routes of LokaUjian (stage U3, §22), asked as in check 8 from inside `portal`: `GET /mata-kuliah/1/ujian/1/sunting`, `/sesi/1`, `/sesi/1/pratinjau`, `/ujian-saya/1`, `/ujian-saya/1/kerjakan` and `/api/sesi/1/keadaan` without a cookie each redirect to `AUTH_LOGIN_URL` with `next` equal to that address; the `lokaujian` schema has the seven tables of §22. 
+  17. Safe Exam Browser of LokaUjian (stage U4, §23), asked as in check 8: `GET /seb` answers `200`, names the state of enforcement that the running container has and holds no link to a `.seb` file; `GET /seb/periksa` answers `200` and reports no SEB header; `GET /seb/unduh/UJI.seb` answers `404` (no public download); `GET /mata-kuliah/1/ujian/1/seb`, `/sesi/1/peristiwa`, `/ujian-saya/1/seb` and `/ujian/1/masuk` without a cookie each redirect to `AUTH_LOGIN_URL` with `next` equal to that address; the schema has `seb_configs` and `seb_exam_keys`; `SEB_ENCRYPTION_KEY` in the running container is 64 hexadecimal characters (never printed); `SEB_ENFORCEMENT` in the container equals `apps/lokaujian/.env`, and `disabled` passes with a warning line that says students are not required to use SEB.
 - `smoke.sh` additionally checks (as check 0) that every app container reports the current `HEAD` at `/healthz`.
 - In check 1 a host in maintenance must answer `503`, an open host `2xx`/`3xx`, and `www` a `301` to the apex; the certificate must validate.
 - Checks 3–5 become active in stage 5, check 6 in stage 7 and check 7 in stage 8, by a switch at the top of `smoke.sh`. Until then each prints `BELUM AKTIF`, is counted separately, and is not reported as passed.
@@ -660,7 +663,7 @@ Values are written without quotes.
 - For `portal`, `infra/tes.sh` also serves `lokakode-tes` on `lokakode_test` (the stage 11 gate needs three real apps; `LOKAKODE_TES_URL`) and starts the same browser with three host names mapped — `lokandita.com` → `portal-tes`, `lokakode.lokandita.com` → `lokakode-tes`, `auth.lokandita.com` → `auth-tes` — and every other name unresolvable. `apps/portal/tests/Peramban/ArabPublikTest.php` measures there that every public page of the three apps in Arabic is the mirror of its Indonesian version. `PembukaTest.php` measures the two landing pages in Indonesian and Arabic, light and dark, at 1280 and 390 pixels: the hero image loads as AVIF or WebP from the same origin, text never lies over it, no layout shift, WCAG AA contrast, and one size and stroke width for every icon.
 - With `TANGKAPAN=<host directory>` set, `infra/tes.sh` mounts that directory into the test container (`TANGKAPAN_DIR`) and the browser tests that take screenshots write them there; without it nothing is written.
 - For `lokaujian`, `infra/tes.sh` also builds LokaKode's image, recreates `lokakode_test` through the LokaKode migrations (so the views of §18 exist) and runs `infra/mysql-hak-roster.sh lokakode_test`; LokaKode itself is not served. `ROSTER_READER_DSN` of the app under test points at `lokakode_test`. Roster rows are written by the test code through `TES_ROSTER_TULIS_DSN` (user `lokakode_app`), which the app under test does not use. `apps/lokaujian/tests/RosterTest.php` proves that `roster_reader` reads the five views and nothing else, cannot write, and that `lokaujian_app` cannot touch the roster schema. Since stage U1 the shared client test (`packages/lokandita-auth/tests`) runs in LokaUjian's suite as it does in LokaKode's and the Portal's; its users get access to the app under test in addition to `portal` and `lokakode`.
-- Since stage U3, for `lokaujian`, `infra/tes.sh` also serves the same image a second time as `lokaujian-seb-tes` with `SEB_ENFORCEMENT=enabled` (`APP_SEB_TES_URL`; `lokaujian-tes` has `disabled`), starts the headless Chromium of the paragraph above with `lokaujian.lokandita.com` mapped to `lokaujian-tes` and every other name unresolvable, and runs `php spark ujian:jadwal --sekali` once against the test schema before PHPUnit. `apps/lokaujian/tests/Peramban/HalamanUjianTest.php` covers autosave, the countdown, resume after the browser is closed, working without a connection (network switched off through the DevTools Protocol), every paste path, copy and cut, takeover by a second page, the stop at the deadline, review and submit, and the waiting page; these tests fail, not skip, when the browser is missing. Tests that depend on time move the stored timestamps of the test schema (when an attempt started, when a session ends); the application under test keeps reading MySQL's clock. `tests/Jadwal/JadwalTest.php` runs the scheduler as a real process against Redis DB `15`.
+- Since stage U3, for `lokaujian`, `infra/tes.sh` also serves the same image a second time as `lokaujian-seb-tes` with `SEB_ENFORCEMENT=enabled` (`APP_SEB_TES_URL`; `lokaujian-tes` has `disabled`), starts the headless Chromium of the paragraph above with `lokaujian.lokandita.com` mapped to `lokaujian-tes` and every other name unresolvable, and runs `php spark ujian:jadwal --sekali` once against the test schema before PHPUnit. `apps/lokaujian/tests/Peramban/HalamanUjianTest.php` covers autosave, the countdown, resume after the browser is closed, working without a connection (network switched off through the DevTools Protocol), every paste path, copy and cut, takeover by a second page, the stop at the deadline, review and submit, and the waiting page; these tests fail, not skip, when the browser is missing. Tests that depend on time move the stored timestamps of the test schema (when an attempt started, when a session ends); the application under test keeps reading MySQL's clock. `tests/Jadwal/JadwalTest.php` runs the scheduler as a real process against Redis DB `15`. Since stage U4 `tests/Seb/SebUjianTest.php` runs against `lokaujian-seb-tes` and sends SEB headers it computes itself by the formula of §8, for the address of every request; no test can show that a real SEB client sends the same headers — that is the owner's gate.
 - `infra/tes.sh judge` is the only way to run the worker's tests (pytest, on the host, in `judge/.venv`). It recreates `lokakode_test` through the LokaKode migrations, gives `judge_worker` its grant there, and runs the tests against real MySQL, Redis DB `15` and real Docker. The tests refuse any schema not ending in `_test` and any Redis DB other than `15`, fail when Docker is unavailable, and fail when a test is skipped.
 
 ## 13. Production data (`SPEC.md` §17)
@@ -1324,7 +1327,7 @@ All behind `masuk:mahasiswa` and `seb` (below); `{s}` is a session id.
 | `POST /ujian-saya/{s}/kumpulkan` | submits (`submit_how = mahasiswa`); an attempt that has already ended is left as it is |
 | `GET /api/sesi/{s}/keadaan[?halaman=<token>]` | JSON `{ menerima, sesi_selesai, pengerjaan: null \| { berjalan, sisa, tanpa_akhir, berlalu, diakhiri, tambahan, dikumpulkan, diambil_alih } }` — `sisa` = seconds to the deadline; `tanpa_akhir` = lecturer-controlled without an end time (the page then shows `berlalu`, the seconds since the start) |
 | `POST /api/sesi/{s}/jawaban` | one save (below) |
-| `POST /api/sesi/{s}/peristiwa` | JSON `{ "jenis": "paste_blocked", "jalur": … }`, `jalur` one of `paste`, `keyboard`, `shift_insert`, `drop`, `middle_click`, `context_menu`, `copy`, `cut` |
+| `POST /api/sesi/{s}/peristiwa` | one integrity event reported by the exam page, as JSON (§23 "Integrity events") |
 
 **Autosave request.** `POST /api/sesi/{s}/jawaban`, `Content-Type: application/json`, header `X-CSRF-TOKEN`:
 
@@ -1345,18 +1348,9 @@ All behind `masuk:mahasiswa` and `seb` (below); `{s}` is a session id.
 
 The order of the checks is: the attempt is this user's; the page still holds it; the time rule; the question belongs to this exam and the value is valid; write. The page shows *Tersimpan* only for a `200`. On a network error, a `5xx` or a `429` it keeps the answer and sends it again until it is accepted; unsent answers live in the page's memory only, never in `localStorage`.
 
-### Integrity events of stage U3
+### Safe Exam Browser
 
-`paste_blocked` (`detail = { jalur }`) for a blocked paste, copy or cut, and `page_taken_over` (`detail = { halaman }`, once per page that was taken over). A user with `paste_allowed` (§3) may paste and nothing is recorded for them. The other events, and showing them, are stages U4 and U5.
-
-### Safe Exam Browser in stage U3
-
-LokaUjian has no SEB configuration yet (tables and panel are stage U4), so there is nothing to verify against. Filter `seb` is `App\Filters\SebSementara` for this stage:
-
-- `SEB_ENFORCEMENT=disabled`: student pages open, each with the red banner "MODE UJI: penegakan SEB dinonaktifkan".
-- `SEB_ENFORCEMENT=enabled`, or the variable missing: a mahasiswa is **refused** on every route behind `seb` (`403`; JSON `seb_wajib` under `/api/`). There is no state in which enforcement is "on" and nothing is checked.
-
-Staff pass in both cases. In U4 the alias `seb` becomes `Lokandita\Auth\Filters\WajibSeb` of §8.
+Since stage U4 filter `seb` is `App\Filters\SebUjian` and the rules are §23. (In stage U3 it was a stand-in that showed the banner with `disabled` and refused every student with `enabled`.)
 
 ### Audit
 
@@ -1368,4 +1362,77 @@ Staff pass in both cases. In U4 the alias `seb` becomes `Lokandita\Auth\Filters\
 | `sesi.dibuat`, `sesi.dijadwalkan`, `sesi.dibuka`, `sesi.ditutup`, `sesi.dimulai`, `sesi.akhir_ditetapkan`, `sesi.diakhiri`, `sesi.dihapus` | a person acts on a session |
 
 A session that opens or closes by its schedule, and an attempt that the scheduler marks, write no audit row: nobody acted. Saving settings and reordering a draft are not audited.
+
+## 23. LokaUjian — Safe Exam Browser per exam, and integrity events (stage U4, `SPEC-LOKAUJIAN.md` §9.1, §9.3)
+
+LokaUjian's own. **A SEB configuration of LokaUjian belongs to one ujian/kuis** (the owner's decision of 2026-11-27), not to a course. From §8 LokaUjian takes, unchanged: the two header formulas and `Seb::periksa`, the settings (`Seb\Setelan`), the plist, SEB-JSON and Config Key (`Seb\Plist`), the encryption (`Seb\Brankas`), the `.seb` file form, the 30-second lease, the heartbeat `POST /api/seb/denyut` with `/js/seb.js`, `GET /seb/keluar`, and the meaning of `SEB_ENFORCEMENT`. The course-based store, panel, list and download of §8 have no route in LokaUjian; `App\Libraries\SumberSeb` gives the package LokaUjian's Redis connection and answers "none" to every question about courses.
+
+### Tables (`lokaujian` schema, migration `2026-11-27-000003`)
+
+```
+seb_configs    (id, exam_id → exams ON DELETE CASCADE, version, config_enc MEDIUMBLOB, config_key CHAR(64),
+                created_by, created_at, retired_at NULL)            UNIQUE(exam_id, version)
+seb_exam_keys  (id, seb_config_id → seb_configs, exam_key CHAR(64), created_by, created_at)
+                                                                    UNIQUE(seb_config_id, exam_key)
+```
+
+As §8 with `exam_id` in place of `course_id`: at most one row per exam with `retired_at IS NULL`, the current one; rotation retires it and inserts the next `version` with a new `examKeySalt`, and every key registered for the old row stops matching at once. `seb_exam_keys` has the name and shape of §8 on purpose: `Seb::periksa` reads the registered keys from it.
+
+- Settings are those of §8 with `startURL` = `APP_URL/ujian/<exam id>/masuk` and `quitURL` = `APP_URL/seb/keluar`. The file is `LokaUjian-<course code>-<exam id>.seb`.
+- A configuration survives withdrawing the exam to `draf` and publishing it again; it is deleted with the exam (only an exam without attempts can be deleted).
+- At most 20 Browser Exam Keys per configuration. A key is valid for the file of that exam only.
+
+### Which configuration counts
+
+Filter `seb` (`App\Filters\SebUjian`, always after `masuk`) applies to a `mahasiswa` only; staff are never checked and the User-Agent is never read.
+
+| Request | Candidates given to `Seb::periksa` |
+|---|---|
+| a path that carries a session, `/ujian-saya/{s}/…` and `/api/sesi/{s}/…` | **only the current configuration of that session's exam** |
+| any other path behind the filter: `POST /api/seb/denyut`, `GET /gambar/<kunci>` | the current configurations of every exam among the student's sessions (§22: sessions of their classes, and sessions that hold their own attempt) |
+
+- SEB opened with the file of exam A is refused on exam B with reason `kunci_konfigurasi`, even when both are valid exams of the same class.
+- An exam without a configuration → `tanpa_konfigurasi`; with a configuration but no matching registered key → `kunci_peramban`. Nobody can start such an exam while enforcement is on.
+- A refusal is `403`: JSON `{ "error": "seb_wajib" }` under `/api/`, otherwise the page `seb_wajib` of the app (it speaks of the file of the exam) with `data-seb-wajib="<reason>"`.
+- **Behind the filter:** every student route of §22, the heartbeat, and — for a mahasiswa — `GET /gambar/<kunci>`. **Not behind it:** `GET /beranda`, `GET /ujian-saya/{s}/seb`, `GET /ujian/{id}/masuk`, the account routes of §4 and the public SEB pages.
+- Lease keys are `lokaujian:seb:sewa:…` and the rate limit of `seb_rejected` is `lokaujian:laju:seb:<user id>`, both in Redis DB `3`.
+
+### Routes
+
+| Route | Who | Does |
+|---|---|---|
+| `GET /mata-kuliah/{m}/ujian/{id}/seb` | whoever manages course `m` (§20) | the panel: state, the start address, the registered keys, how to read a Browser Exam Key. Never shows the quit password |
+| `POST /mata-kuliah/{m}/ujian/{id}/seb` | same | field `sandi_keluar` (12–200 characters): create, or rotate. **`409` while the exam is running** — a session of it accepts starts, or an attempt is in progress — and nothing changes |
+| `POST /mata-kuliah/{m}/ujian/{id}/seb/kunci` | same | field `kunci`: Browser Exam Keys, one per line, replacing the list; allowed while the exam runs |
+| `GET /mata-kuliah/{m}/ujian/{id}/seb/unduh` | same | the current `.seb` file; `404` when there is none |
+| `GET /ujian-saya/{s}/seb` | mahasiswa who sees session `s` (§22); `masuk:mahasiswa`, **not** behind `seb` | the same file, for download in an ordinary browser from the home list. A session of another class is `404` |
+| `GET /ujian/{id}/masuk` | any session; not behind `seb` | the `startURL`: redirects a student to `/ujian-saya/<their session of that exam>`, everybody else and every unknown id to `/beranda`. Shows nothing |
+| `GET /seb` | public, `noindex` | instructions; names the state of enforcement; **lists no exam and links to no file** |
+| `GET /seb/periksa` | public, `noindex` | whether each of the two headers arrived on this request (`data-seb-periksa` = `ada_header` or `tanpa_header`); matches them against nothing |
+| `GET /seb/keluar` | public | the `quitURL` (the shared controller of §8) |
+| `POST /api/seb/denyut` | mahasiswa, behind `seb` | heartbeat, `{ "ok": true, "sewa": 30 }` |
+| `GET /sesi/{id}/peristiwa` | whoever may run the session (§22) | the integrity events of that session, newest first, at most 500: time, student, kind, detail. The CSV export is stage U5 |
+
+- The student's home lists, next to each exam not yet finished, the link to its file — or "not available yet" when the exam has no configuration and enforcement is on.
+- The exam page and the session page show one of three states: no configuration; a configuration without a registered key; ready (`data-seb-ringkas` = `tanpa`, `tanpa_kunci`, `siap`).
+
+### Integrity events
+
+`integrity_events.kind`, each with `user_id`, `session_id`, `attempt_id` (when the student has one), IP address and user agent:
+
+| `kind` | Written by | `detail` |
+|---|---|---|
+| `seb_terminated` | filter `seb`: the refused request still held a lease (always recorded; the lease is deleted) | `{ alasan, jalur }` |
+| `seb_rejected` | filter `seb`: any other refusal, at most one per user per minute | `{ alasan, jalur }` |
+| `paste_blocked` | the exam page (since U3) | `{ jalur }`, one of `paste`, `keyboard`, `shift_insert`, `drop`, `middle_click`, `context_menu`, `copy`, `cut` |
+| `focus_lost` | the exam page, when focus or visibility returns | `{ durasi }` seconds, 0–86,400 |
+| `display_changed` | the exam page, when the screen size or the number of displays differs from before | `{ lebar, tinggi, layar }` — `layar` is `screen.isExtended` or `null` |
+| `reconnected` | the exam page, when a request succeeds more than 60 seconds after the last one that did | `{ detik }`, 60–86,400 |
+| `page_taken_over` | the save endpoint (since U3) | `{ halaman }`, once per page that was taken over |
+
+The page reports through `POST /api/sesi/{s}/peristiwa` with JSON `{ "jenis": <kind>, …the fields of detail }`. Only the four kinds the page owns are accepted, every value is checked, and nothing else from the request is stored; any other `jenis` → `422`. At most 60 events a minute per student and session (`429`). A user with `paste_allowed` (§3) may paste, and no `paste_blocked` is recorded for them. Events report; they stop nothing.
+
+### Audit
+
+`seb.dibuat`, `seb.dirotasi` (`{ versi }`), `seb.kunci` (`{ versi, jumlah }`), with `target_tipe = ujian`, the exam id and the course id — never a key or a password.
 

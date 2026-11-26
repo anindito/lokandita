@@ -456,4 +456,29 @@ final class Sesi
             throw $e;
         }
     }
+
+    /**
+     * Peristiwa integritas satu sesi, terbaru di atas (paling banyak 500). Pemanggil sudah
+     * memastikan pengguna boleh menjalankan sesi itu (lihat()).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function peristiwa(int $sesiId): array
+    {
+        return $this->db->query(
+            'SELECT e.id, e.user_id, e.kind, e.detail, e.created_at
+             FROM integrity_events e
+             WHERE e.session_id = ? OR e.attempt_id IN (SELECT a.id FROM attempts a WHERE a.session_id = ?)
+             ORDER BY e.id DESC LIMIT 500',
+            [$sesiId, $sesiId],
+        )->getResultArray();
+    }
+
+    public function jumlahPeristiwa(int $sesiId): int
+    {
+        return (int) $this->db->query(
+            'SELECT COUNT(*) AS n FROM integrity_events e WHERE e.session_id = ? OR e.attempt_id IN (SELECT a.id FROM attempts a WHERE a.session_id = ?)',
+            [$sesiId, $sesiId],
+        )->getRowArray()['n'];
+    }
 }

@@ -4,7 +4,9 @@
 /**
  * Beranda mahasiswa (SPEC-LOKAUJIAN.md §8): ujian dan kuis kelas-kelasnya — sedang dikerjakan,
  * akan datang atau terbuka, dan selesai — lalu kelas-kelasnya. Halaman ini di luar SEB dan hanya
- * untuk dibaca: tidak memuat apa pun dari isi ujian. Variabel: $ujian (Pengerjaan::daftar), $kelas.
+ * untuk dibaca: tidak memuat apa pun dari isi ujian. Berkas .seb tiap ujian diunduh dari sini
+ * (KONTRAK.md §23). Variabel: $ujian (Pengerjaan::daftar), $kelas, $seb (id ujian => keadaan
+ * konfigurasinya), $sebWajib.
  */
 use Lokandita\Auth\Waktu;
 
@@ -23,6 +25,10 @@ $waktu   = static function (array $u): string {
 <h1><?= lang('Lokandita.halo', [esc($akses->identitas()->nama)]) ?></h1>
 
 <h2><?= lang('Ujian.saya.ujianJudul') ?></h2>
+<div class="kartu" data-seb-info>
+    <p><?= lang('SebUjian.beranda.info') ?></p>
+    <p><a href="/seb"><?= lang('SebUjian.beranda.petunjuk') ?></a></p>
+</div>
 <?php if ($ujian === []): ?>
     <div class="kartu" data-ujian-kosong><p><?= $kelas === [] ? lang('Ujian.saya.tanpaKelas') : lang('Ujian.saya.ujianKosong') ?></p></div>
 <?php else: ?>
@@ -44,6 +50,13 @@ $waktu   = static function (array $u): string {
                         <td><?= $jenis($u) ?></td>
                         <td><?= $waktu($u) ?></td>
                         <td>
+                            <?php if ($bagian !== 'selesai'): ?>
+                                <?php if (isset($seb[(int) $u['exam_id']])): ?>
+                                    <a class="tombol tombol-sekunder" href="/ujian-saya/<?= (int) $u['sesi_id'] ?>/seb" data-unduh-seb><?= lang('SebUjian.beranda.unduh') ?></a>
+                                <?php elseif ($sebWajib): ?>
+                                    <span class="redup" data-seb-belum><?= lang('SebUjian.beranda.belumAda') ?></span>
+                                <?php endif ?>
+                            <?php endif ?>
                             <?php if ($bagian === 'kerja'): ?>
                                 <a class="tombol" href="/ujian-saya/<?= (int) $u['sesi_id'] ?>/kerjakan"><?= lang('Kerja.lanjutkan') ?></a>
                             <?php elseif ($bagian === 'selesai'): ?>

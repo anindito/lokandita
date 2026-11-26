@@ -368,15 +368,43 @@ done
 ada="$(printf "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='lokaujian' AND table_name IN ('exam_questions','exam_groups','exam_options','sessions','attempts','answers','integrity_events');\n" \
 	| docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N' 2> /dev/null || true)"
 if [ "$ada" = "7" ]; then ok "skema lokaujian memuat ketujuh tabel tahap U3"; else tidak "skema lokaujian: $ada dari 7 tabel tahap U3 (infra/deploy.sh lokaujian menjalankan migrasinya)"; fi
-# Tahap U3 berjalan dengan penegakan SEB dinonaktifkan (SPEC-LOKAUJIAN.md §15); penegakan dan
-# cek 17 menyusul di tahap U4. Nilai di kontainer harus sama dengan .env, dan `disabled` DIPERINGATKAN.
+
+echo "17. Safe Exam Browser LokaUjian (tahap U4, KONTRAK.md §23)"
+# Seperti cek 10, untuk lokaujian — dengan satu beda: konfigurasinya per ujian, jadi tidak ada
+# daftar atau unduhan publik. Ditanyakan seperti cek 8.
 seb_env="$(nilai_env "$AKAR/apps/lokaujian/.env" SEB_ENFORCEMENT)"
 seb_jalan="$(docker exec lokaujian printenv SEB_ENFORCEMENT 2> /dev/null || true)"
+harap_keadaan="berlaku"
+if [ "$seb_jalan" = "disabled" ]; then harap_keadaan="belum"; fi
+j="$(tanya portal lokaujian /seb)"
+if [ "$j" = "200 " ] && isi portal | grep -q "data-seb-keadaan=\"$harap_keadaan\"" && ! isi portal | grep -q '\.seb"'; then
+	ok "lokaujian GET /seb -> 200, menyebut keadaan penegakan ($harap_keadaan), tanpa tautan berkas ujian"
+else
+	tidak "lokaujian GET /seb -> '$j' (seharusnya 200 dengan data-seb-keadaan=\"$harap_keadaan\" dan tanpa tautan berkas)"
+fi
+j="$(tanya portal lokaujian /seb/periksa)"
+if [ "$j" = "200 " ] && isi portal | grep -q 'data-seb-periksa="tanpa_header"'; then
+	ok "lokaujian GET /seb/periksa tanpa header SEB -> 200, melaporkan tidak ada header"
+else
+	tidak "lokaujian GET /seb/periksa -> '$j' (seharusnya 200 dengan hasil tanpa_header)"
+fi
+j="$(tanya portal lokaujian /seb/unduh/UJI.seb)"
+if [ "$j" = "404 " ]; then ok "lokaujian GET /seb/unduh/UJI.seb -> 404 (tidak ada unduhan publik)"; else tidak "lokaujian GET /seb/unduh/UJI.seb -> '$j' (seharusnya 404)"; fi
+for jalur in /mata-kuliah/1/ujian/1/seb /sesi/1/peristiwa /ujian-saya/1/seb /ujian/1/masuk; do
+	j="$(tanya portal lokaujian "$jalur")"
+	harap="302 $login_url?next=$(jq -rn --arg u "$url$jalur" '$u|@uri')"
+	if [ "$j" = "$harap" ]; then ok "lokaujian GET $jalur tanpa cookie -> $j"; else tidak "lokaujian GET $jalur tanpa cookie -> '$j' (seharusnya '$harap')"; fi
+done
+ada="$(printf "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='lokaujian' AND table_name IN ('seb_configs','seb_exam_keys');\n" \
+	| docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N' 2> /dev/null || true)"
+if [ "$ada" = "2" ]; then ok "skema lokaujian memuat seb_configs dan seb_exam_keys"; else tidak "skema lokaujian: $ada dari 2 tabel SEB (infra/deploy.sh lokaujian menjalankan migrasinya)"; fi
+# Kunci enkripsi ada di kontainer (nilainya tidak pernah ditampilkan).
+if docker exec lokaujian sh -c 'printenv SEB_ENCRYPTION_KEY | grep -Eq "^[0-9a-f]{64}$"' 2> /dev/null; then ok "lokaujian: SEB_ENCRYPTION_KEY ada di kontainer (64 karakter heksadesimal; nilainya tidak ditampilkan)"; else tidak "lokaujian: SEB_ENCRYPTION_KEY tidak ada atau bukan 64 karakter heksadesimal di kontainer"; fi
 if [ -n "$seb_jalan" ] && [ "$seb_jalan" = "$seb_env" ]; then
 	if [ "$seb_jalan" = "disabled" ]; then
 		ok "lokaujian: SEB_ENFORCEMENT=disabled di .env dan di kontainer — PERINGATAN: MODE UJI, mahasiswa TIDAK diwajibkan memakai SEB"
 	else
-		ok "lokaujian: SEB_ENFORCEMENT=$seb_jalan di .env dan di kontainer — tahap U3: mahasiswa DITOLAK di semua rute ujian sampai tahap U4"
+		ok "lokaujian: SEB_ENFORCEMENT=$seb_jalan di .env dan di kontainer: mahasiswa wajib memakai SEB dengan berkas ujiannya"
 	fi
 else
 	tidak "lokaujian: SEB_ENFORCEMENT di kontainer ('$seb_jalan') berbeda dari apps/lokaujian/.env ('$seb_env'): deploy ulang lokaujian"

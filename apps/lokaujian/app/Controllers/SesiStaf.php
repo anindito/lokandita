@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Libraries\Jadwal;
+use App\Libraries\SebUjian;
 use App\Libraries\Sesi;
 use App\Libraries\Ujian;
 use CodeIgniter\HTTP\ResponseInterface;
+use Lokandita\Auth\Seb\Seb;
+use Lokandita\Auth\UserDirectory;
 
 /**
  * Sesi dari sisi staf (SPEC-LOKAUJIAN.md §7, tahap U3: kendali paling sedikit untuk menjalankan
@@ -87,7 +90,32 @@ final class SesiStaf extends BaseController
             'hitungan' => $pustaka->hitungan((int) $sesi['id']),
             'aktif'    => count($this->roster()->mahasiswaAktif((int) $sesi['class_id'])),
             'denyut'   => Jadwal::denyut(),
+            'seb'      => SebUjian::aktif((int) $sesi['exam_id']),
+            'sebWajib' => Seb::diberlakukan(),
+            'peristiwa' => $pustaka->jumlahPeristiwa((int) $sesi['id']),
             'pesan'    => $this->pesanDariQuery(self::PESAN),
+        ]);
+    }
+
+    /**
+     * Peristiwa integritas sesi ini (SPEC-LOKAUJIAN.md §9.3), bagi siapa pun yang boleh
+     * menjalankannya. Peristiwa melaporkan; dosen yang memutuskan. Ekspor CSV-nya tahap U5.
+     */
+    public function peristiwa(string $id): ResponseInterface
+    {
+        $pustaka = new Sesi($this->akses());
+        $sesi    = $pustaka->lihat((int) $id);
+        if ($sesi === null) {
+            return $this->tidakDitemukan('session');
+        }
+        $baris = $pustaka->peristiwa((int) $sesi['id']);
+
+        return $this->halaman('sesi_peristiwa', [
+            'judul'     => lang('SebUjian.peristiwa.judul') . ' — ' . $sesi['title'],
+            'sesi'      => $sesi,
+            'peristiwa' => $baris,
+            // Nama dan nomor induk dibaca dari direktori LokaAuth; tidak disalin.
+            'orang'     => UserDirectory::byIds(array_values(array_unique(array_map(static fn (array $b): string => (string) $b['user_id'], $baris)))),
         ]);
     }
 

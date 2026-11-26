@@ -28,7 +28,7 @@ final class MatriksAksesTest extends UjianCase
 
     // Rute tanpa sesi. Hanya boleh berisi rute yang tidak membaca data apa pun:
     // halaman depan dan pilihan bahasa (tests/KerangkaTest.php dan ClientAppTest di paket).
-    private const PUBLIK = ['GET /', 'GET bahasa/([^/]+)'];
+    private const PUBLIK = ['GET /', 'GET bahasa/([^/]+)', 'GET seb', 'GET seb/periksa', 'GET seb/keluar'];
 
     /**
      * Pola rute => [jalur untuk dunia uji, jawaban yang diharapkan per pelaku].
@@ -106,6 +106,19 @@ final class MatriksAksesTest extends UjianCase
             'POST mata-kuliah/{n}/ujian/{n}/arsip'            => [$x . '/ujian/' . $t . '/arsip', $kelola],
             'POST mata-kuliah/{n}/ujian/{n}/sesi'             => [$x . '/ujian/' . $t . '/sesi', $kelola],
 
+            // Tahap U4: panel SEB ujian — hanya yang mengelola mata kuliahnya.
+            'GET mata-kuliah/{n}/ujian/{n}/seb'         => [$x . '/ujian/' . $t . '/seb', $kelola],
+            'POST mata-kuliah/{n}/ujian/{n}/seb'        => [$x . '/ujian/' . $t . '/seb', $kelola],
+            'POST mata-kuliah/{n}/ujian/{n}/seb/kunci'  => [$x . '/ujian/' . $t . '/seb/kunci', $kelola],
+            'GET mata-kuliah/{n}/ujian/{n}/seb/unduh'   => [$x . '/ujian/' . $t . '/seb/unduh', $kelola],
+            'GET sesi/{n}/peristiwa'  => [$ss . '/peristiwa', $jalankan],
+            // Berkas .seb ujian: mahasiswa kelasnya sendiri; mahasiswa B 404. Alamat masuk (startURL)
+            // hanya mengalihkan — ke sesi sendiri atau ke beranda — dan tidak membedakan siapa pun.
+            'GET ujian-saya/{n}/seb'  => [$us . '/seb', $mhs],
+            'GET ujian/{n}/masuk'     => ['/ujian/' . $t . '/masuk', $semua, 302],
+            // Denyut SEB: mahasiswa mana pun (di kontainer tes ini penegakan dinonaktifkan).
+            'POST api/seb/denyut'     => ['/api/seb/denyut', ['mhsA' => 'ok', 'mhsB' => 'ok'] + array_fill_keys(self::PELAKU, 403)],
+
             'GET sesi/{n}'            => [$ss, $jalankan],
             'GET sesi/{n}/pratinjau'  => [$ss . '/pratinjau', $jalankan],
             'POST sesi/{n}/jadwal'    => [$ss . '/jadwal', $atur],
@@ -150,6 +163,8 @@ final class MatriksAksesTest extends UjianCase
         $d['ujianT'] = $this->buatDraf($http, $d['matkulX'], 'Rahasia ujian terbit X', ['s' . $d['soalX']]);
         $this->assertContains($this->kirim($http, '/mata-kuliah/' . $d['matkulX'] . '/ujian/' . $d['ujianT'] . '/terbit')->status, [302, 303]);
         $d['sesiXA'] = $this->beri($http, $d['matkulX'], $d['ujianT'], $d['kelasXA']);
+        // Tahap U4: ujian terbit itu punya konfigurasi SEB (supaya berkasnya ada untuk diunduh).
+        $this->assertStringEndsWith('?pesan=dibuat', (string) $this->kirim($http, '/mata-kuliah/' . $d['matkulX'] . '/ujian/' . $d['ujianT'] . '/seb', ['sandi_keluar' => 'kata-sandi-keluar-uji'])->header('Location'));
         $this->assertStringEndsWith('?pesan=dimulai', (string) $this->kirim($http, '/sesi/' . $d['sesiXA'] . '/mulai', ['menit' => '60'])->header('Location'));
         $this->mulaiKerja($this->sebagai($d['mhsA']), $d['sesiXA'], (string) $d['mhsA']['id']);
 
@@ -184,14 +199,16 @@ final class MatriksAksesTest extends UjianCase
     {
         $d       = $this->duniaBerisi();
         $rahasia = ['UJX101', 'Uji Ujian X', 'Pengajar Aminah', 'Pengampu Xaverius', 'Rahasia', 'Diagram rahasia'];
-        foreach ($this->matriks($d) as $pola => [$jalur, $harapan]) {
-            $tulis = str_starts_with($pola, 'POST ');
+        foreach ($this->matriks($d) as $pola => $baris) {
+            [$jalur, $harapan] = $baris;
+            $statusOk          = $baris[2] ?? 200;
+            $tulis             = str_starts_with($pola, 'POST ');
             foreach (self::PELAKU as $p) {
                 $http = $this->sebagai($d[$p]);
                 if ($harapan[$p] === 'ok') {
                     // Rute tulis yang diizinkan diuji isinya di tests/Bank dan tests/Berkas; di sini cukup rute baca.
                     if (! $tulis) {
-                        $this->assertSame(200, $http->get($jalur)->status, "{$pola} sebagai {$p}: seharusnya diizinkan");
+                        $this->assertSame($statusOk, $http->get($jalur)->status, "{$pola} sebagai {$p}: seharusnya diizinkan");
                     }
 
                     continue;
@@ -222,7 +239,8 @@ final class MatriksAksesTest extends UjianCase
     {
         $d   = $this->duniaBerisi();
         $url = rtrim((string) getenv('APP_URL'), '/');
-        foreach ($this->matriks($d) as $pola => [$jalur]) {
+        foreach ($this->matriks($d) as $pola => $baris) {
+            $jalur = $baris[0];
             if (str_starts_with($pola, 'POST ')) {
                 // Tanpa sesi tidak ada token CSRF: permintaan tulis berhenti di sana dan tidak mengubah apa pun.
                 $sebelum = $this->sidikBank();

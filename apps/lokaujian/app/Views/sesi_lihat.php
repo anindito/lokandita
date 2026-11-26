@@ -9,7 +9,8 @@
  * sedikit). Tidak menampilkan jawaban atau skor. Tidak memuat ulang sendiri: tampilan langsung
  * per mahasiswa adalah tahap U5.
  * Variabel: $sesi (Sesi::lihat), $kelas (roster), $hitungan, $aktif (jumlah mahasiswa AKTIF),
- * $denyut (denyut penjadwal atau null).
+ * $denyut (denyut penjadwal atau null), $seb (konfigurasi SEB ujiannya atau null), $sebWajib,
+ * $peristiwa (jumlah peristiwa integritas sesi ini).
  */
 use Lokandita\Auth\Waktu;
 
@@ -61,8 +62,16 @@ $jalan = $sesi['ujian_status'] === 'terbit';
     <div class="baris-tombol">
         <a class="tombol tombol-sekunder" href="<?= $ini ?>"><?= lang('Sesi.muatUlang') ?></a>
         <a class="tombol tombol-sekunder" href="<?= $ini ?>/pratinjau"><?= lang('Sesi.pratinjau') ?></a>
+        <a class="tombol tombol-sekunder" href="<?= $ini ?>/peristiwa" data-peristiwa-taut><?= lang('SebUjian.peristiwa.tautan', [(int) $peristiwa]) ?></a>
     </div>
     <p class="petunjuk"><?= lang('Sesi.infoU3') ?></p>
+</div>
+
+<div class="kartu" data-seb-ringkas="<?= $seb === null ? 'tanpa' : ((int) $seb['jumlah_kunci'] === 0 ? 'tanpa_kunci' : 'siap') ?>">
+    <p><strong><?= lang('SebUjian.ringkas.judul') ?></strong></p>
+    <p><?= $seb === null ? lang('SebUjian.ringkas.tanpa') : ((int) $seb['jumlah_kunci'] === 0 ? lang('SebUjian.ringkas.tanpaKunci') : lang('SebUjian.ringkas.siap', [(int) $seb['version'], (int) $seb['jumlah_kunci']])) ?></p>
+<?php if ($sesi['boleh_atur']): ?>    <div class="baris-tombol"><a class="tombol tombol-sekunder" href="/mata-kuliah/<?= (int) $sesi['course_id'] ?>/ujian/<?= (int) $sesi['exam_id'] ?>/seb"><?= lang('SebUjian.ringkas.kelola') ?></a></div>
+<?php endif ?>
 </div>
 
 <?php if ($jalan && $per): ?>
