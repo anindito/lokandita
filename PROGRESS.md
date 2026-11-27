@@ -1,5 +1,7 @@
 # Progress
 
+**LokaUjian stage U6 — readiness (`SPEC-LOKAUJIAN.md` §14, §15) — started 2026-11-27, plan approved. Built and `lokaujian` deployed at `9ee168a`: the load test (`infra/uji-beban.sh`), the judge queue warning, the restore test comparing LokaUjian's rows, Arabic and dark-mode screenshots for review. **NOT closed, no tag: the 110-student run — the gate — has not been made and waits for a time from the owner; only 6 and 25 students were tried (0 lost answers).** The Portal card is on branch `u6-portal`, untested and not deployed. Open with the owner: retention and privacy text, who keeps access, when the host opens. **Found on the way: production MySQL hit its connection limit during a LokaKode class on 2026-11-23 (1,369 refused connections).** Smoke 87 pass, 4 fail (commit check of the components not redeployed). See "LokaUjian U6" at the end of this file.**
+
 **Header on phones — not a numbered stage, no tag — built on 2026-11-27 on the owner's bug report (the Portal's header wrapped into several rows at 360–412 px). Below 768 px every public header is now one row — logo, *Masuk*, a menu button that opens a panel with the links and the languages — on the Portal and, by the owner's word, on the landings of LokaKode and LokaUjian too; the header after login is unchanged. The change is in the shared package, so all five components are redeployed at the commit that holds this entry. **Measured in a headless Chromium only; the owner's gate (DevTools at six widths, three languages, logged out and in, light and dark) is not done yet.** See "Header on phones" at the end of this file.**
 
 **LokaUjian stage U5 — lecturer control, scoring and export (`SPEC-LOKAUJIAN.md` §7.3, §10, §11, §12, §13) — built and deployed on 2026-11-27; **the owner ran the gate on 2026-11-27 and reported every item passed: a lecturer-controlled session with two test students in real SEB 3.10.2, extra time, *Akhiri*, and both CSV files opened in Excel. Closed on the owner's instruction; all five components are redeployed at the commit that holds the gate result and the tag `lokaujian-u5` goes on it once smoke passes there.** Three things the gate did **not** exercise, by the server's record: no Arabic text was in any downloaded file, no answer began with `=` (so the formula guard was not triggered), and the exam had no automatically scored question (every score is 0 of 0). Reopening, correction, release, the review, the audit page and own data were not opened by anyone. The host is in maintenance. **Closed: on the owner's word all five components were redeployed at `225e513`, smoke 91 pass, 0 fail, tag `lokaujian-u5` on that commit** (see "Closing deploy of LokaUjian U5"). Next: U6 (readiness), begun 2026-11-27 with a plan for the owner's approval; nothing built yet. See "LokaUjian U5" and "Gate result for LokaUjian U5" at the end of this file.**
@@ -2217,4 +2219,59 @@ This entry is committed after that deploy, so `infra/smoke.sh` check 0 reports a
 
 ## LokaUjian U6 — readiness (started 2026-11-27)
 
-Begun with a plan for the owner's approval (`SPEC-LOKAUJIAN.md` §14 and §15, and both "Carried into U6" lists). **Nothing is built yet.**
+Begun with a plan for the owner's approval (`SPEC-LOKAUJIAN.md` §14 and §15, and both "Carried into U6" lists). The owner answered "approve all".
+
+**Where it stands (2026-11-27, 15:40 WIB): built and `lokaujian` deployed at `9ee168a`; NOT closed, no tag. The gate of the stage — 110 students at once with no lost answer — has NOT been run: the full run waits for a time named by the owner. The load test has only been tried with 6 and with 25 students.**
+
+Built (commits `af23367`, `9ee168a`; `KONTRAK.md` §6, §10, §11, §12, §24):
+
+- **Load test:** `infra/uji-beban.sh <students> [minutes] [--restart]`, PHPUnit suite `Beban` (not part of `infra/tes.sh lokaujian`). One process plays every student's page as a port of `ujian.js` and `seb.js`: real login through LokaAuth, waiting page, *Mulai*, state every 10 s, SEB heartbeat every 25 s, saves with rising counters and retries; some students submit, lose the connection for 75 s or reopen the page; a lecturer watches the live view, gives extra time and downloads CSV. Every save answered `200 ok` is compared with `answers` and with the long CSV. The helper functions of `infra/tes.sh` moved unchanged into `infra/lib-tes.sh`.
+- **Kept from production:** only `*_test` schemas and Redis DB 15, test containers, invented accounts. The script refuses to start, and stops a run, when LokaKode has a submission or an unfinished judge job; the generator is limited to one core.
+- **Judge queue warning** on the session page and in the live view: LokaUjian reads the length of LokaKode's two judge queues (new variable `JUDGE_QUEUE_REDIS_URL`), remembers "busy" for 60 seconds, shows a notice; nothing is refused because of it.
+- **Restore test:** `infra/uji-restore.sh` now prints LokaUjian's row counts (restored / live) and compares a checksum of `answers` and `attempts`.
+- **Arabic and dark mode:** `tests/Peramban/HalamanArabGelapTest.php` opens 18 pages of lecturer, superadmin and student in Arabic light, Arabic dark, Indonesian dark and Arabic dark at 390 px, and writes 82 screenshots to `docs/tangkapan/lokaujian-u6/` for the owner to look through.
+- **Portal side, on branch `u6-portal` (`0f30044`), not merged, not deployed, NOT TESTED:** the LokaUjian card as a link (`LOKAUJIAN_URL`), the `/data-saya` link, a smoke line, `KONTRAK.md` §4, §10, §11, §14, §16. The privacy text is not written: it needs the owner's decision on retention.
+
+Verified by the agent (commands and output shown in the session):
+
+- `infra/tes.sh lokaujian` → `OK (126 tests, 13884 assertions)`: the 124 of before plus `AntreanJudgeTest` (2). This run also proves the moved functions of `infra/lib-tes.sh` for `lokaujian`; `worker_tes` (used only by the LokaKode suite) moved with them and was **not** run.
+- `infra/tes.sh lokaujian --filter 'HalamanArabGelap|testArabDanModeGelap'` → `OK (2 tests, 665 assertions)`: every page has the right direction, nothing overflows sideways at 1280 or 390 px, no script error, no CSP violation.
+- `infra/uji-beban.sh 6 3` → pass: 124 saves sent, 124 confirmed, 0 lost. `infra/uji-beban.sh 25 4` → pass: 602 saves sent, 602 confirmed, 0 repeated, 0 lost, 0 answers of 4xx or 5xx; one page reopened with its counters intact; the scheduler marked and scored all 25; long CSV 1000 rows. Slowest save 2.0 s, 95 % under 0.15 s. Average CPU during the run: `lokaujian` 13 %, `mysql` 17 %, generator 3 % of one core; the public landing of production LokaKode never took longer than 0.3 s. **These two runs prove the harness, not the gate.**
+- `infra/cek-env.sh` → LULUS. Before the deploy: 0 attempts in progress in production, host in maintenance.
+- `infra/deploy.sh lokaujian` at `9ee168a` → `/healthz` and the scheduler's heartbeat report the commit.
+- In the deployed container `App\Libraries\AntreanJudge::baca()` → `{"antre":0,"sibuk":false}` while `LLEN lokandita:judge:normal` is 0. The "busy" state was seen in the test only; nothing was pushed into the real queue.
+- `infra/smoke.sh` → **87 pass, 4 fail**: the commit check of `auth`, `lokakode`, `portal` and the worker, not redeployed by the owner's instruction.
+- `infra/backup.sh` → done (`lokandita-20261127-082617`, 1 question picture). `infra/uji-restore.sh` → LULUS, 69 schemas/tables; attempts 5 / 5, answers 14 / 14, checksum of `answers` and `attempts` equal; the one picture restored with its recorded size and SHA-256.
+
+**Found while measuring — production, not LokaUjian:**
+
+- **MySQL ran out of connections during a real LokaKode class.** `Max_used_connections` is 152 with a limit of 151, reached on 2026-11-23 at 13:52 WIB; `Connection_errors_max_connections` is 1,369 since MySQL started seven days ago. Between 13:45 and 14:30 WIB that day LokaKode took 477 Run and 124 Submit jobs. What students saw is not known: the app containers have been recreated since and their logs are gone.
+- Each app container allows 150 Apache workers and a request of a client app opens up to three MySQL connections (own schema, identity reader, roster reader for LokaUjian); MySQL allows 151 for everything. Nothing was changed: `max_connections` belongs to `infra` and changing it restarts MySQL for every app. The 110-student run will show how many connections one exam needs; the fix is the owner's to approve.
+
+Not verified, or weaker than it looks:
+
+- **The gate has not been run.** No run with 110 students, none with 250, none with the restart in the middle.
+- The load generator is not a browser and not SEB: it computes the SEB headers itself, sends no static-file requests, and reaches the apps through a test Caddy over plain HTTP on the server itself. Campus network, TLS and real clients are outside it.
+- The generator, the loaded containers and production share four cores; numbers of a large run are for this server as it is, with LokaKode idle.
+- The size of the "all classes" CSV in memory is not measured; the test only sees whether the download succeeds and how long it takes.
+- The Portal branch was never run: the Portal's test container needs `LOKAUJIAN_URL` in `apps/portal/.env`, and adding that line was not allowed in this session. It is a public address, not a secret.
+- Arabic wording (now also the judge notice) is the agent's and was read by no Arabic speaker. Seen by the agent in three screenshots: in the review, an answer whose first line is Arabic draws a following Latin line right-to-left, with its full stop at the wrong end.
+- The confirmation pages of extra time and reopening are not among the screenshots (they are answers to a form, not addresses).
+- `PROGRESS.md` is committed after the deploy, so smoke's commit check reports a different commit for `lokaujian` too until the next deploy.
+
+Mistakes of this session:
+
+- A copy of `apps/lokaujian/.env` was made next to it before the new variable was added (`.env.sebelum-u6`). It was not ignored by Git and not excluded from the image build. It was deleted within the same minute, before any build or commit.
+- The first start of `infra/uji-beban.sh` stopped silently after its first line (a `[ … ] && echo` inside an assignment under `set -e`); corrected.
+- The load generator spun on one core while waiting; corrected before the 25-student run (average 3 %).
+- The plan promised small commits per topic; the load test, the warning and the restore test went into one commit because they share hunks of `KONTRAK.md` and `infra/lib-tes.sh` and were tested as one.
+
+Changed on the server outside Git: `apps/lokaujian/.env` gained `JUDGE_QUEUE_REDIS_URL` (the value of `REDIS_URL` with DB 0; never printed). Nothing in any other `.env`, nothing in MySQL's settings, no `app_access` row, no flag of any host.
+
+Waiting for the owner:
+
+1. **A time for the 110-student run** (about 25 minutes; then 250 students, then 110 with a restart). The script refuses to run while LokaKode is in use.
+2. Whether `LOKAUJIAN_URL` may be added to `apps/portal/.env` so the Portal branch can be tested (the running Portal is not restarted by it).
+3. Retention of answers and the privacy text; which accounts keep `lokaujian` access; when the host opens and the Portal branch is merged and deployed; what happens to the test exams in production.
+4. What to do about MySQL's connection limit.
+5. His own checks (`SPEC-LOKAUJIAN.md` §15 and the lists carried into U6): the screenshots in `docs/tangkapan/lokaujian-u6/`; Excel with Arabic text and a cell beginning with `=`; one exam with automatically scored questions; reopening, correction, release with the review inside SEB; `/audit`; `/data-saya`.
