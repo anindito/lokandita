@@ -1,6 +1,6 @@
 # Progress
 
-**LokaUjian stage U5 — lecturer control, scoring and export (`SPEC-LOKAUJIAN.md` §7.3, §10, §11, §12, §13) — built and deployed on 2026-11-27 (`lokaujian` and its scheduler run `4febf28`); **not closed: the owner's gate is open, no tag.** `auth`, `lokakode`, `portal` and the judge worker were not touched and still run `926aee4`, so smoke is 87 pass, 4 fail (the commit check only). **No logged-in request has reached the deployed U5 code, no person has seen any of its pages, and no CSV has been opened in Excel.** The gate needs a second test student in the test class, which the owner creates. The host is in maintenance. See "LokaUjian U5" at the end of this file.**
+**LokaUjian stage U5 — lecturer control, scoring and export (`SPEC-LOKAUJIAN.md` §7.3, §10, §11, §12, §13) — built and deployed on 2026-11-27; **the owner ran the gate on 2026-11-27 and reported every item passed: a lecturer-controlled session with two test students in real SEB 3.10.2, extra time, *Akhiri*, and both CSV files opened in Excel. Closed on the owner's instruction; all five components are redeployed at the commit that holds the gate result and the tag `lokaujian-u5` goes on it once smoke passes there.** Three things the gate did **not** exercise, by the server's record: no Arabic text was in any downloaded file, no answer began with `=` (so the formula guard was not triggered), and the exam had no automatically scored question (every score is 0 of 0). Reopening, correction, release, the review, the audit page and own data were not opened by anyone. The host is in maintenance. Next: U6 (readiness), not started; it begins in a new session with a plan. See "LokaUjian U5" and "Gate result for LokaUjian U5" at the end of this file.**
 
 **LokaUjian stage U4 — SEB enforcement and integrity events (`SPEC-LOKAUJIAN.md` §9.1, §9.3) — built and deployed on 2026-11-27 with `SEB_ENFORCEMENT=enabled`; **closed on the owner's order on 2026-11-27, tag `lokaujian-u4` on `926aee4`, all five components run that commit, smoke 85 pass, 0 fail.** By the owner's decision of 2026-11-27 the SEB configuration is **per ujian/kuis**, not per course. **The owner ran the gate on 2026-11-27: a real SEB 3.10.2 client was accepted and finished an exam, the same student was refused outside SEB, and a lecturer in Chrome got in** (see "Gate result for LokaUjian U4"). The host is in maintenance. See "LokaUjian U4" at the end of this file.**
 
@@ -2122,3 +2122,49 @@ Carried into U6:
 - Arabic and dark-mode review by a person; the load test at 110 students (the live view and the two polls per student belong in it); the warning about queued judge jobs; retention of answers (`SPEC-LOKAUJIAN.md` §17 point 1) and the privacy text; the Portal card and its `/data-saya` link; maintenance off.
 - Still unseen on the deployed system unless a gate does them: a save after the deadline refused (U3); the list of integrity events, one exam's file refused on another, a refused heartbeat stopping the exam page, rotation (U4); importing an exam file (U2); a pengajar refused another class and the bank (U1).
 - The test class, `Dummy` and three published test exams remain in production.
+
+### Gate result for LokaUjian U5 (2026-11-27)
+
+The owner reported that the second test student was in the test class; the agent opened the host at 09:51 WIB and closed it at 11:30 WIB on his report. It answers 503 from the internet again. The owner had one laptop and one phone: the lecturer's pages were used from two addresses (setup and downloads from one, the running of the session from another), and the two students worked one after the other in SEB.
+
+**The owner's report:** nothing went wrong in the session; the countdown of the student who was given extra time grew and the other's did not; both files held all answers; `=1+1` was shown as text; a line break stayed in one cell; Arabic was readable; scores were correct; nothing else looked wrong. He left the line about *Akhiri* unfilled.
+
+**What the server recorded** between 11:14 and 11:28 WIB (counts, routes, statuses and times only):
+
+- **Exam and session:** a new lecturer-controlled exam with 2 questions, both `uraian`, made from the bank and published at 11:14; its SEB configuration created at 11:15 and one Browser Exam Key registered at 11:16; given to the test class (2 `AKTIF` students) at 11:16; **started at 11:21:20 with 30 minutes**.
+- **First student:** *Mulai* at 11:22:18; one of two questions answered (last save 11:22:46); **submitted by the student at 11:23:35**.
+- **Extra time:** at 11:23:10, while that student was working, the confirmation page was answered (`200`) and then 5 minutes were granted (`303`, `waktu.ditambah`, one row in `time_grants`). The attempt carries `extra_minutes = 5`; the other student's carries 0.
+- **Second student:** *Mulai* at 11:25:02, joining late; both questions answered, last save 11:25:57.
+- **Akhiri:** pressed at 11:25:29; the session's end became 11:25:59, and the second student's attempt was marked `diakhiri_dosen` with that time — two seconds after the last save. The first student had already submitted and was not affected.
+- **Live view:** `/sesi/4/langsung` was asked 57 times, every answer `200`.
+- **CSV:** *Lebar* at 11:27:21 (2 rows) and *Panjang* at 11:27:27 (4 rows = 2 students × 2 questions), both with the semicolon, both `200`, both audited.
+- **Real SEB:** 57 requests from a client naming itself `SEB/3.10.2`, answered 200, 302 or 303 and **none 403**. No integrity event was recorded.
+- 200 requests in the window besides the health check: 170 × 200, 29 redirects, one 404 (a `POST /` from a script on the internet). **No 5xx.**
+- These were the first logged-in requests to the deployed U5 code.
+
+**What the gate did not exercise — the report says "yes" or "correct", the server's record shows the case did not occur:**
+
+- **Arabic:** no stored answer, no question, no exam title and neither student's name contains a character outside ASCII. No Arabic text was in either downloaded file, so its display in Excel has **not** been seen. It rests on `CsvTest` only.
+- **`=1+1`:** one answer contains `=`, but not as its first character (it follows a line break). A cell is treated as a formula only when it **begins** with `=`, and only then does the app add the apostrophe. So the answer was rightly shown as text, and the formula guard itself was **not** triggered. It rests on `CsvTest` only.
+- **Scores:** the exam had no `benar_salah` or `pilihan_ganda` question. Both attempts have the objective score 0.00 out of 0 points available — correct, and no test of scoring. Scoring on real data is the three older attempts the scheduler scored at the deploy (2, 1 and 1 of 2), which nobody has compared with the answers.
+- **Not opened by anyone:** reopening, correction, release of results, the student's review, `/audit`, `/data-saya`, the events CSV, the "all classes" download, the comma separator. No route of them appears in the log.
+- **Not seen as a class would produce it:** the two students were never working at the same moment, so the live table never showed two rows in *Mengerjakan*, and *Akhiri* stopped one page, not two.
+
+What the pages and the two files looked like is the owner's observation; he reported nothing wrong.
+
+So the gate of `SPEC-LOKAUJIAN.md` §15 for U5 — "the owner runs a lecturer-controlled session with two test students, ends it, and opens both CSV files in Excel with correct characters and every answer present" — **was done on the deployed system**: the session, the ending and the two downloads are in the server's record, and the files' appearance in Excel is the owner's report. "Correct characters" was seen for Latin text and a line break only.
+
+### LokaUjian U5 closed on the owner's instruction (2026-11-27)
+
+The owner's instruction with his report: "If everything passed, redeploy auth, lokakode, portal and the worker so the commit check passes, run infra/smoke.sh, then tag lokaujian-u5 and update PROGRESS.md." Every item of his report passed, and the written gate is met; the agent took that as the condition fulfilled and says here plainly what the gate left unexercised (above), so that closing is not read as "everything of U5 was seen".
+
+Right before the redeploy: 0 LokaKode submissions in the last 10 minutes, 0 unfinished judge jobs, no active student session other than the gate's own two accounts, 0 LokaUjian attempts in progress.
+
+All five components are deployed at the commit that holds this entry, and `infra/smoke.sh` is run there; the tag `lokaujian-u5` is put on this commit only when that run passes. Their output is in the session; this file is not changed again afterwards, because a later commit would make the commit check fail for every component.
+
+Left in production by the gate: a fourth published exam with its SEB configuration and one key, one session, two ended attempts (3 answers) and one grant of extra time — all of the two test students in the test class.
+
+Carried into U6, in addition to the list under "LokaUjian U5":
+
+- Open a CSV that holds Arabic text and an answer beginning with `=` in Excel; run one exam with automatically scored questions and compare a score with the answers; open reopening, correction, release with the review inside SEB, `/audit` and `/data-saya` once on the deployed system.
+- A second test student now exists in the test class.
