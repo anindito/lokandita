@@ -93,12 +93,19 @@ final class BebanTest extends UjianCase
         // Satu hash untuk semua akun: yang diukur adalah LOGIN (Argon2id di server), bukan pembuatan akun.
         $sandi = 'Sandi-Beban-' . bin2hex(random_bytes(4));
         $hash  = password_hash($sandi, PASSWORD_ARGON2ID);
+        $akunSemua = [];
+        for ($i = 0; $i < $n; $i++) {
+            $akunSemua[$i] = $this->user('mahasiswa', sprintf('Murid Beban %03d', $i + 1), ['password' => $sandi, 'password_hash' => $hash, 'nomor_induk' => sprintf('beban%04d', $i + 1)]);
+            $this->daftar($akunSemua[$i], $kelas);
+        }
+        // Jam mesin mulai SESUDAH semua akun dibuat, supaya login benar-benar tersebar dalam 60 detik.
+        // (Pada jalan pertama 110 mahasiswa, 2026-11-27, jam mulai sebelum akun dibuat: login
+        // menumpuk dalam ±15 detik — lebih berat daripada yang dimaksud.)
         $mesin = new Mesin();
         $murid = [];
         $ujianDetik = $menit * 60;
         for ($i = 0; $i < $n; $i++) {
-            $akun = $this->user('mahasiswa', sprintf('Murid Beban %03d', $i + 1), ['password' => $sandi, 'password_hash' => $hash, 'nomor_induk' => sprintf('beban%04d', $i + 1)]);
-            $this->daftar($akun, $kelas);
+            $akun = $akunSemua[$i];
             // Tiap sepuluh murid: satu mengumpulkan sendiri; tiap dua puluh: satu putus sambungan 75
             // detik, satu menutup peramban dan melanjutkan.
             $rencana = [

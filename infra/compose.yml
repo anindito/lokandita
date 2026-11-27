@@ -55,7 +55,10 @@ services:
     image: mysql:8.4.13
     container_name: mysql
     restart: unless-stopped
-    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci", "--default-time-zone=+00:00"]
+    # max-connections: bawaan MySQL (151) habis pada 2026-11-23 selagi kelas LokaKode bekerja, dan
+    # lagi pada uji beban 250 mahasiswa LokaUjian (PROGRESS.md, "LokaUjian U6"). Tiap kontainer
+    # aplikasi punya sampai 150 pekerja Apache dan satu permintaan memegang sampai tiga sambungan.
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_0900_ai_ci", "--default-time-zone=+00:00", "--max-connections=500"]
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     ports:

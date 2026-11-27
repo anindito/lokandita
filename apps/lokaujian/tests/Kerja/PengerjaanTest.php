@@ -277,6 +277,10 @@ final class PengerjaanTest extends UjianCase
         $this->assertSame(1200, strtotime($b['submitted_at']) - strtotime($b['started_at']), 'waktu kumpul harus tenggatnya sendiri');
         [, $lagi] = $this->spark(['ujian:jadwal', '--sekali']);
         $this->assertStringContainsString('0 pengerjaan ditandai', $lagi, 'lintasan kedua harus tidak mengubah apa pun');
+        // Sesudah penjadwal menandainya pun, halaman yang masih terbuka diberi tahu "tidak berjalan",
+        // bukan "dikumpulkan": yang mengakhiri adalah waktu, bukan mahasiswa (tahap U6).
+        $k = $mhs->get("/api/sesi/{$d['sesi']}/keadaan")->json()['pengerjaan'];
+        $this->assertSame([false, false], [$k['berjalan'], $k['dikumpulkan']]);
     }
 
     public function testPenjadwalMenungguTenggangDanTambahanWaktuMenggeserTenggat(): void
