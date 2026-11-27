@@ -169,9 +169,11 @@ final class PembukaTest extends TestCase
                 $bahasa === 'ar'
                     ? $this->assertGreaterThanOrEqual($k['nama']['kanan'], $k['ikon']['kiri'], $apa . ' ikon di kanan nama')
                     : $this->assertLessThanOrEqual($k['nama']['kiri'], $k['ikon']['kanan'], $apa . ' ikon di kiri nama');
-                $this->assertSame($k['kode'] === 'lokakode', $k['tautan'], $apa . ' hanya LokaKode yang bertaut');
-                $this->assertSame($k['kode'] === 'lokakode' ? 'none' : 'grayscale(1)', $k['saring'], $apa);
-                $this->assertSame($k['kode'] === 'lokakode' ? '1' : '0.65', $k['buram'], $apa);
+                // Sejak LokaUjian tahap U6 dua aplikasi hidup: LokaKode dan LokaUjian (KONTRAK.md §16).
+                $hidup = in_array($k['kode'], ['lokakode', 'lokaujian'], true);
+                $this->assertSame($hidup, $k['tautan'], $apa . ' hanya LokaKode dan LokaUjian yang bertaut');
+                $this->assertSame($hidup ? 'none' : 'grayscale(1)', $k['saring'], $apa);
+                $this->assertSame($hidup ? '1' : '0.65', $k['buram'], $apa);
             }
             // Jarak ikon ke tepi kartu sama di semua kartu: ikon-ikon dalam satu kolom lurus.
             $this->assertEqualsWithDelta(56, $u['kartu'][0]['ikon']['lebar'], 0.5, $nama);
