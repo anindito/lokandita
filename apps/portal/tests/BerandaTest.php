@@ -35,8 +35,8 @@ final class BerandaTest extends PortalCase
 
         // LokaKode: diizinkan dan sudah dibangun -> tautan ke berandanya.
         $this->assertStringContainsString('<a class="kartu-aplikasi" href="https://lokakode.lokandita.com/beranda" data-aplikasi="lokakode">', $r->body);
-        // LokaUjian: diizinkan tetapi belum dibangun -> "segera", bukan tautan.
-        $this->assertStringContainsString('<div class="kartu-aplikasi kartu-aplikasi-segera" data-aplikasi="lokaujian">', $r->body);
+        // LokaUjian: diizinkan dan, sejak tahap U6, dibuka -> tautan ke berandanya.
+        $this->assertStringContainsString('<a class="kartu-aplikasi" href="https://lokaujian.lokandita.com/beranda" data-aplikasi="lokaujian">', $r->body);
         // LokaSiber: tidak diizinkan -> tidak ditampilkan sama sekali.
         $this->assertStringNotContainsString('LokaSiber', $r->body);
         $this->assertStringNotContainsString('data-aplikasi="auth"', $r->body, 'tautan admin hanya untuk superadmin');
@@ -81,6 +81,19 @@ final class BerandaTest extends PortalCase
         $this->assertStringNotContainsString('belum diberi akses', $r->body);
     }
 
+    /**
+     * Halaman privasi menyebut LokaUjian dan lamanya jawaban ujian disimpan (SPEC-LOKAUJIAN.md §13:
+     * tanpa kalimat itu LokaUjian tidak boleh dipakai untuk ujian sungguhan).
+     */
+    public function testPrivasiMenyebutLokaUjianDanPenyimpananJawaban(): void
+    {
+        $isi = $this->tamu()->get('/privasi')->body;
+        $this->assertStringContainsString('Data ujian di LokaUjian', $isi);
+        $this->assertStringContainsString('Catatan integritas di LokaUjian selama ujian', $isi);
+        $this->assertStringContainsString('tidak dihapus secara otomatis', $isi);
+        $this->assertStringContainsString('Terakhir diperbarui: 28 November 2026', $isi);
+    }
+
     public function testDataSayaMenautkanKeEksporTiapAplikasi(): void
     {
         $user = $this->user(['apps' => ['portal', 'lokakode']]);
@@ -88,7 +101,14 @@ final class BerandaTest extends PortalCase
         $this->assertSame(200, $r->status);
         $this->assertStringContainsString('href="https://auth.lokandita.com/data-saya"', $r->body);
         $this->assertStringContainsString('href="https://lokakode.lokandita.com/data-saya"', $r->body);
+        $this->assertStringNotContainsString('lokaujian.lokandita.com', $r->body, 'tanpa akses lokaujian tidak ada tautannya');
         $this->assertStringContainsString('<meta name="robots" content="noindex, nofollow">', $r->body);
+
+        // Sejak LokaUjian tahap U6: pengguna dengan akses lokaujian mendapat tautan ekspornya juga.
+        $ujian = $this->user(['apps' => ['portal', 'lokaujian']]);
+        $r     = $this->sebagai($ujian)->get('/data-saya');
+        $this->assertStringContainsString('href="https://lokaujian.lokandita.com/data-saya"', $r->body);
+        $this->assertStringNotContainsString('lokakode.lokandita.com', $r->body);
 
         $tanpa = $this->user(['apps' => ['portal']]);
         $r     = $this->sebagai($tanpa)->get('/data-saya');

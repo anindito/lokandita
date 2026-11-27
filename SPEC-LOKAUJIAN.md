@@ -321,7 +321,7 @@ For one session, or for all sessions of an exam the requester may see. Two files
 - Append-only audit log in LokaUjian's schema, written in the same transaction as the change: exam created, published, withdrawn, archived; import and export of JSON; session created, opened, closed, started, end set, ended; extra time; reopening; key or points corrected; results released or withdrawn; CSV export; SEB configuration created or rotated, keys registered. The superadmin has a filterable page. No endpoint changes or deletes an audit row.
 - No permanent delete of an exam with attempts, an attempt, an answer or an integrity event.
 - **Export of a user's own data**, as in the other apps and outside SEB: a student's attempts (times, how submitted, extra time), their own answers by question number, their integrity events, and scores only where released. Never the questions, the keys or anything of another person.
-- Exam answers are personal data and may be assessment records. **The retention period is the owner's decision and is open** (§17). Until it is set and stated in the Portal's privacy text, nothing is removed automatically and LokaUjian must not be used for a real exam.
+- Exam answers are personal data and assessment records. **They are kept: nothing is removed automatically and there is no retention period** (the owner's decision of 2026-11-28, §17 point 1). The Portal's privacy text says so since stage U6, and names what LokaUjian stores.
 
 ## 14. Non-functional
 
@@ -377,7 +377,7 @@ After U6 come the platform stages **A1** (roster tables move to the Lokandita co
 
 | # | Point | Written as | Before |
 |---|---|---|---|
-| 1 | Retention of answers | **Open.** Nothing is removed automatically; no real exam before it is decided and in the privacy text (§13) | U6 |
+| 1 | Retention of answers | **Decided by the owner on 2026-11-28: keep.** Nothing is removed automatically; the privacy text says so (§13) | U6 |
 | 2 | Who releases results, and for whom | Pengampu or superadmin, per class, not per exam (§11). **Confirmed 2026-11-27** | U5 |
 | 3 | What a student can open outside SEB | Only the read-only list of their exams; the released review with correct answers is inside SEB (§8, §9.1) | U3 |
 | 4 | `per_mahasiswa`: a student who starts shortly before the window closes | Gets the full duration (§7.1) | U3 |

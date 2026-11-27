@@ -116,9 +116,9 @@ return [
     'privasi' => [
         'judul'      => 'Privacy policy',
         'deskripsi'  => 'Which personal data Lokandita stores, what for, who can see it, and what your rights are.',
-        'diperbarui' => 'Last updated: 22 November 2026',
+        'diperbarui' => 'Last updated: 28 November 2026',
         'pembuka'    => [
-            'This page describes the personal data processed by Lokandita (Lokandita accounts, LokaKode and this Portal), with reference to Indonesian Law Number 27 of 2022 on Personal Data Protection.',
+            'This page describes the personal data processed by Lokandita (Lokandita accounts, LokaKode, LokaUjian and this Portal), with reference to Indonesian Law Number 27 of 2022 on Personal Data Protection.',
             'The data is managed by the Lokandita administrator, who can be reached at {email}.',
         ],
         'bagian'     => [
@@ -132,6 +132,8 @@ return [
                     'Learning data in LokaKode: the classes you are in, the program code you submit, automatically saved drafts, judging results and scores.',
                     'Integrity records in LokaKode, for example attempts to paste text into the editor.',
                     'Unusual typing in LokaKode: when 300 characters or more enter the editor at 150 characters per second or faster, what is recorded is the time, the problem, the number of characters, the duration and your IP address — not what you typed.',
+                    'Exam data in LokaUjian: the exams and quizzes you take, when you start and submit, extra time given to you, your answers, and your objective score.',
+                    'Integrity records in LokaUjian during an exam: attempts to paste, copy or cut text; the exam page losing focus and for how long; a change of display; a connection that dropped and came back; the exam page being opened somewhere else; and refusals by Safe Exam Browser — each with the time, IP address and browser type. There is no camera, microphone or screen recording.',
                     'Audit log: important actions on your account, such as its creation and password resets.',
                 ],
             ],
@@ -141,6 +143,7 @@ return [
                 'butir' => [
                     'Recognising you at sign-in and keeping your account secure.',
                     'Running and judging practice work, and showing your progress.',
+                    'Running exams and quizzes, and handing your answers to the lecturer for marking.',
                     'Helping lecturers follow their classes and uphold academic honesty.',
                     'Investigating faults and misuse of the system.',
                 ],
@@ -153,6 +156,7 @@ return [
                     'The lecturer in charge of your course and the lecturers of your class: your name, ID number, submissions, scores and integrity records in that class.',
                     'Your classmates: your name and score on the class leaderboard, unless the lecturer has anonymised it.',
                     'Your classmates also see your name next to a clarification question you asked about a problem, when a lecturer publishes the answer to the whole class. A question answered privately is seen only by you and the lecturers.',
+                    'In LokaUjian: the lecturer in charge of the course and the lecturers of your class see your answers, your objective score and the integrity records of your exams. Other students see nothing of your exams.',
                     'Superadmin: all of the above, in order to run the system.',
                 ],
             ],
@@ -173,6 +177,7 @@ return [
                 'isi'   => [
                     'Data is stored on a server run by the Lokandita administrator. Every connection uses HTTPS. Backups are made daily and kept for 14 days.',
                     'Accounts are not permanently deleted, because scores and submissions refer to the account that owns them. An account that is no longer used is disabled so that nobody can sign in with it.',
+                    'Exam and quiz answers in LokaUjian are assessment records: they are kept for as long as Lokandita is in use and are not deleted automatically.',
                 ],
             ],
             [

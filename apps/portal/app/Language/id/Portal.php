@@ -116,9 +116,9 @@ return [
     'privasi' => [
         'judul'      => 'Kebijakan privasi',
         'deskripsi'  => 'Data pribadi apa yang disimpan Lokandita, untuk apa, siapa yang dapat melihatnya, dan apa hak Anda.',
-        'diperbarui' => 'Terakhir diperbarui: 22 November 2026',
+        'diperbarui' => 'Terakhir diperbarui: 28 November 2026',
         'pembuka'    => [
-            'Halaman ini menjelaskan data pribadi yang diproses Lokandita (Akun Lokandita, LokaKode dan Portal ini), dengan mengacu pada Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi.',
+            'Halaman ini menjelaskan data pribadi yang diproses Lokandita (Akun Lokandita, LokaKode, LokaUjian dan Portal ini), dengan mengacu pada Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi.',
             'Data dikelola oleh pengelola Lokandita, yang dapat dihubungi di {email}.',
         ],
         'bagian'     => [
@@ -132,6 +132,8 @@ return [
                     'Data belajar di LokaKode: kelas yang Anda ikuti, kode program yang Anda kirim, draf yang tersimpan otomatis, hasil penilaian dan nilai.',
                     'Catatan integritas di LokaKode, misalnya upaya menempel teks ke editor.',
                     'Ketikan tak wajar di LokaKode: bila 300 karakter atau lebih masuk ke editor dengan laju 150 karakter per detik atau lebih, yang dicatat adalah waktu, soal, jumlah karakter, lamanya dan alamat IP Anda — bukan isi ketikan Anda.',
+                    'Data ujian di LokaUjian: ujian dan kuis yang Anda kerjakan, waktu Anda mulai dan mengumpulkan, tambahan waktu yang diberikan, jawaban Anda, dan skor objektif Anda.',
+                    'Catatan integritas di LokaUjian selama ujian: upaya menempel, menyalin atau memotong teks; halaman ujian kehilangan fokus dan berapa lama; perubahan layar; sambungan yang terputus lalu kembali; halaman ujian dibuka di tempat lain; dan penolakan Safe Exam Browser — masing-masing dengan waktu, alamat IP dan jenis peramban. Tidak ada kamera, mikrofon atau rekaman layar.',
                     'Log audit: tindakan penting atas akun Anda, seperti pembuatan akun dan pengaturan ulang kata sandi.',
                 ],
             ],
@@ -141,6 +143,7 @@ return [
                 'butir' => [
                     'Mengenali Anda saat masuk dan menjaga keamanan akun.',
                     'Menjalankan dan menilai latihan, serta menampilkan kemajuan Anda.',
+                    'Menjalankan ujian dan kuis, dan menyerahkan jawaban Anda kepada dosen untuk dinilai.',
                     'Membantu dosen memantau kelasnya dan menjaga kejujuran akademik.',
                     'Menelusuri gangguan dan penyalahgunaan sistem.',
                 ],
@@ -153,6 +156,7 @@ return [
                     'Dosen pengampu mata kuliah dan dosen pengajar kelas Anda: nama, nomor induk, kiriman, nilai dan catatan integritas Anda di kelas itu.',
                     'Teman sekelas: nama dan nilai Anda di papan peringkat kelas, kecuali bila dosen menganonimkannya.',
                     'Teman sekelas juga melihat nama Anda di samping pertanyaan klarifikasi Anda tentang sebuah soal, bila dosen menerbitkan jawabannya untuk seluruh kelas. Pertanyaan yang dijawab secara pribadi hanya dilihat Anda dan dosen.',
+                    'Di LokaUjian: dosen pengampu mata kuliah dan dosen pengajar kelas Anda melihat jawaban, skor objektif dan catatan integritas ujian Anda. Mahasiswa lain tidak melihat apa pun dari ujian Anda.',
                     'Superadmin: semua data di atas, untuk mengelola sistem.',
                 ],
             ],
@@ -173,6 +177,7 @@ return [
                 'isi'   => [
                     'Data disimpan di server yang dikelola pengelola Lokandita. Semua hubungan memakai HTTPS. Cadangan dibuat setiap hari dan disimpan selama 14 hari.',
                     'Akun tidak dihapus permanen, karena nilai dan kiriman merujuk ke akun pemiliknya. Akun yang tidak lagi dipakai dinonaktifkan sehingga tidak bisa dipakai masuk.',
+                    'Jawaban ujian dan kuis di LokaUjian adalah catatan penilaian: disimpan selama Lokandita dipakai dan tidak dihapus secara otomatis.',
                 ],
             ],
             [

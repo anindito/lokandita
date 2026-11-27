@@ -234,6 +234,13 @@ if [ "$j" = "200 " ] && isi lokakode | grep -q 'jauh lebih cepat daripada ketika
 else
 	tidak "portal GET /ketentuan -> '$j' atau tidak memuat kalimat tentang ketikan tak wajar (bila teksnya diubah lewat /admin/teks, tambahkan kalimat itu di sana)"
 fi
+# Sejak LokaUjian tahap U6: halaman privasi menyebut LokaUjian dan penyimpanan jawaban ujian.
+j="$(tanya lokakode portal /privasi)"
+if [ "$j" = "200 " ] && isi lokakode | grep -q 'Data ujian di LokaUjian' && isi lokakode | grep -q 'tidak dihapus secara otomatis'; then
+	ok "portal GET /privasi -> 200, menyebut LokaUjian dan penyimpanan jawaban ujian"
+else
+	tidak "portal GET /privasi -> '$j' atau tidak menyebut LokaUjian dan penyimpanan jawaban (bila teksnya diubah lewat /admin/teks, tambahkan di sana)"
+fi
 
 echo "12. merek (KONTRAK.md §16 \"Brand files\")"
 # Setiap situs menyajikan ikon, manifest dan logo kepalanya dari kode yang BERJALAN; halaman depan
@@ -253,6 +260,8 @@ done
 tanya lokakode portal / > /dev/null
 kartu="$(isi lokakode | grep -o 'data-aplikasi="[a-z]*"' | sed 's/.*="//; s/"//' | tr '\n' ' ')"
 if [ "$kartu" = "lokakode lokaujian lokakelas lokasiber lokaretas lokadata " ]; then ok "portal GET /: enam kartu aplikasi dalam urutannya"; else tidak "portal GET /: kartu aplikasi '$kartu'"; fi
+# Sejak LokaUjian tahap U6 kartu LokaUjian adalah tautan ke host-nya (KONTRAK.md §16).
+if isi lokakode | grep -q "<a class=\"kartu-aplikasi\" href=\"https://$(host_aplikasi lokaujian)/\" data-aplikasi=\"lokaujian\">"; then ok "portal GET /: kartu LokaUjian bertaut ke https://$(host_aplikasi lokaujian)/"; else tidak "portal GET /: kartu LokaUjian bukan tautan ke https://$(host_aplikasi lokaujian)/"; fi
 sisa=""
 for jalur in / /tentang /privasi /ketentuan; do
 	tanya lokakode portal "$jalur" > /dev/null
