@@ -1,6 +1,6 @@
 # Progress
 
-**LokaUjian stage U4 — SEB enforcement and integrity events (`SPEC-LOKAUJIAN.md` §9.1, §9.3) — built and deployed on 2026-11-27 (`lokaujian` and its scheduler run `9e506ce`, with `SEB_ENFORCEMENT=enabled`); **closed on the owner's order on 2026-11-27.** By the owner's decision of 2026-11-27 the SEB configuration is **per ujian/kuis**, not per course. **The owner ran the gate on 2026-11-27: a real SEB 3.10.2 client was accepted and finished an exam, the same student was refused outside SEB, and a lecturer in Chrome got in** (see "Gate result for LokaUjian U4"). `auth`, `lokakode`, `portal` and the judge worker still run `fdbf765` (smoke 81 pass, 4 fail: the commit check only). The host is in maintenance. See "LokaUjian U4" at the end of this file.**
+**LokaUjian stage U4 — SEB enforcement and integrity events (`SPEC-LOKAUJIAN.md` §9.1, §9.3) — built and deployed on 2026-11-27 with `SEB_ENFORCEMENT=enabled`; **closed on the owner's order on 2026-11-27, tag `lokaujian-u4` on `926aee4`, all five components run that commit, smoke 85 pass, 0 fail.** Next: U5 (lecturer control, scoring and export), begun 2026-11-27 with a plan for the owner's approval. By the owner's decision of 2026-11-27 the SEB configuration is **per ujian/kuis**, not per course. **The owner ran the gate on 2026-11-27: a real SEB 3.10.2 client was accepted and finished an exam, the same student was refused outside SEB, and a lecturer in Chrome got in** (see "Gate result for LokaUjian U4"). The host is in maintenance. See "LokaUjian U4" at the end of this file.**
 
 **LokaUjian stage U3 — exam setup and delivery (`SPEC-LOKAUJIAN.md` §6, §7, §8, §9.2) — built and deployed on 2026-11-25; **closed on the owner's order on 2026-11-26 with three clauses of the gate unseen; tag `lokaujian-u3` on `fdbf765`, all components run that commit, smoke 76 pass, 0 fail.** Next: U4 (SEB enforcement and integrity events), begun 2026-11-27 with a plan for the owner's approval. The owner ran the gate on 2026-11-26: one exam in each timing mode was completed by the test student on the deployed system; **pasting, closing and reopening the browser, and a save after the deadline were not tried** (see "Gate result for LokaUjian U3"). `auth`, `lokakode`, `portal` and the judge worker were not redeployed and still run `abf9717`, so smoke is 72 pass, 4 fail (check 0 and the worker's commit only). It runs with `SEB_ENFORCEMENT=disabled`; the host `lokaujian.lokandita.com` is in maintenance. See "LokaUjian U3" at the end of this file.**
 
@@ -2024,3 +2024,17 @@ The owner ordered: "add 3.10.3 to SEB version that can be used. after that close
 
 All five components are deployed at the commit that holds this entry; the tag `lokaujian-u4` goes on that commit once `infra/smoke.sh` passes there.
 
+### Closing deploy of LokaUjian U4 — 2026-11-27
+
+Recorded on the owner's word at the start of the U5 session: on 2026-11-27 all five components were redeployed at `926aee4`, `infra/smoke.sh` passed with 85 pass and 0 fail, and the tag `lokaujian-u4` was placed. The output of that deploy and that smoke run is in the session that made them, not in this one.
+
+Read again at the start of U5 (2026-11-27 08:40 WIB, read-only):
+
+- `GET /healthz` inside `auth`, `lokakode`, `portal` and `lokaujian` → each answers commit `926aee4409358fd8b853109091777045bcfd0853`; the scheduler's heartbeat carries the same commit.
+- `git rev-parse lokaujian-u4^{commit}` → the same commit; `git ls-remote --tags origin` lists `lokaujian-u4`; `main` equals `origin/main`.
+- `infra/smoke.sh` → `85 lulus, 0 gagal`.
+- `infra/pemeliharaan.sh status` → `lokaujian.lokandita.com` in maintenance (503); the other three hosts open.
+
+Not read again: the judge worker's commit on its own (smoke check 6 covers it and passed), `infra/tes-infra.sh`, backup and restore.
+
+This entry is committed after that deploy, so `infra/smoke.sh` check 0 reports a different commit for every component until the next deploy.
