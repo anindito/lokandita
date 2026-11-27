@@ -109,7 +109,8 @@ final class PublikTest extends PortalCase
                 $r = $tamu->get($jalur);
                 $this->assertSame(200, $r->status, "{$bahasa} {$jalur}");
                 $this->assertStringContainsString($h[$jalur], $r->body, "{$bahasa} {$jalur}");
-                $this->assertStringContainsString($h['tanggal'], $r->body, "{$bahasa} {$jalur}");
+                // Privasi berubah pada 28 November 2026 (LokaUjian tahap U6); ketentuan tidak.
+                $this->assertStringContainsString($jalur === '/privasi' ? str_replace('22', '28', $h['tanggal']) : $h['tanggal'], $r->body, "{$bahasa} {$jalur}");
                 // Privasi juga mengatakan bahwa teman sekelas melihat nama penanya klarifikasi yang diterbitkan.
                 if ($jalur === '/privasi') {
                     $this->assertStringContainsString(['id' => 'di samping pertanyaan klarifikasi Anda', 'en' => 'next to a clarification question you asked', 'ar' => 'بجانب سؤال الاستيضاح الذي طرحته'][$bahasa], $r->body, $bahasa);

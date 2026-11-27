@@ -81,6 +81,19 @@ final class BerandaTest extends PortalCase
         $this->assertStringNotContainsString('belum diberi akses', $r->body);
     }
 
+    /**
+     * Halaman privasi menyebut LokaUjian dan lamanya jawaban ujian disimpan (SPEC-LOKAUJIAN.md §13:
+     * tanpa kalimat itu LokaUjian tidak boleh dipakai untuk ujian sungguhan).
+     */
+    public function testPrivasiMenyebutLokaUjianDanPenyimpananJawaban(): void
+    {
+        $isi = $this->tamu()->get('/privasi')->body;
+        $this->assertStringContainsString('Data ujian di LokaUjian', $isi);
+        $this->assertStringContainsString('Catatan integritas di LokaUjian selama ujian', $isi);
+        $this->assertStringContainsString('tidak dihapus secara otomatis', $isi);
+        $this->assertStringContainsString('Terakhir diperbarui: 28 November 2026', $isi);
+    }
+
     public function testDataSayaMenautkanKeEksporTiapAplikasi(): void
     {
         $user = $this->user(['apps' => ['portal', 'lokakode']]);
