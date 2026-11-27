@@ -30,6 +30,8 @@ return [
     'halo'             => 'Hello, {0}',
     'masuk'            => 'Sign in',
     'navUtama'         => 'Main navigation',
+    // Tombol menu di kepala halaman publik pada layar sempit.
+    'menu'             => 'Menu',
     'privasi'          => 'Privacy policy',
     'ketentuan'        => 'Terms of use',
     'segera'           => 'Coming soon',

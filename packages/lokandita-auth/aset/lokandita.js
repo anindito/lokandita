@@ -35,6 +35,35 @@
     });
   });
 
+  // Menu kepala halaman publik di layar sempit (di bawah 768 px; lihat .kepala-menu di lokandita.css).
+  // Tombol membuka dan menutup panel; panel juga tertutup oleh Escape, klik di luar, klik pada
+  // tautan di dalamnya, dan saat layar melebar. Fokus masuk ke panel saat dibuka dengan tombol
+  // dan kembali ke tombol saat ditutup dengan tombol atau Escape.
+  document.querySelectorAll('[data-menu-kepala]').forEach(function (wadah) {
+    var tombol = wadah.querySelector('[data-menu-tombol]');
+    var panel = tombol ? document.getElementById(tombol.getAttribute('aria-controls')) : null;
+    if (!tombol || !panel) { return; }
+    var terbuka = function () { return tombol.getAttribute('aria-expanded') === 'true'; };
+    var atur = function (buka, pindahFokus) {
+      tombol.setAttribute('aria-expanded', buka ? 'true' : 'false');
+      wadah.toggleAttribute('data-menu-buka', buka);
+      if (pindahFokus) { (buka ? panel.querySelector('a') || tombol : tombol).focus(); }
+    };
+    tombol.addEventListener('click', function () { atur(!terbuka(), true); });
+    panel.addEventListener('click', function (e) {
+      if (e.target.closest('a')) { atur(false, false); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && terbuka()) { atur(false, true); }
+    });
+    document.addEventListener('click', function (e) {
+      if (terbuka() && !wadah.contains(e.target)) { atur(false, false); }
+    });
+    window.matchMedia('(min-width: 768px)').addEventListener('change', function (e) {
+      if (e.matches && terbuka()) { atur(false, false); }
+    });
+  });
+
   // Sesi: peringatan 2 menit sebelum habis, tombol "Tetap masuk", dan keluar-otomatis
   // setelah 30 menit tanpa aktivitas (SPEC.md §4.4). Server tetap yang menentukan;
   // skrip ini hanya membuat pengguna tidak terkejut.

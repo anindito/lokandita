@@ -85,7 +85,7 @@
   .kepala { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .6rem 1.25rem; background: var(--kartu); border-bottom: 1px solid var(--garis); }
   .merek { display: flex; align-items: center; gap: .6rem; font-weight: 700; font-size: 1.1rem; color: var(--teks); text-decoration: none; }
   /* Logo kepala: gambar merek (nama sudah di dalamnya), ragam terang atau gelap menurut mode. */
-  /* Logo tidak pernah menyempit: di layar sempit navigasi di sebelahnya yang turun ke baris berikut. */
+  /* Logo tidak pernah menyempit; kepala selalu satu baris (di layar sempit navigasi masuk ke panel menu). */
   .merek { flex: none; }
   .merek picture, .merek img { display: block; }
   .merek img { width: auto; height: 2.5rem; max-width: none; }
@@ -95,9 +95,45 @@
   .kaki-tautan { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; justify-content: center; }
   .kaki-butir { display: inline-flex; gap: .4rem; align-items: center; }
 
-  /* Halaman publik (Portal, halaman depan LokaKode): kepala dengan navigasi, bahasa dan tombol Masuk. */
-  .kepala-publik { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; align-items: center; justify-content: flex-end; }
-  .nav-publik { display: flex; flex-wrap: wrap; gap: 1rem; font-size: .95rem; }
+  /* Halaman publik (Portal, halaman depan LokaKode dan LokaUjian): kepala dengan navigasi, bahasa dan
+     tombol Masuk — selalu SATU baris. Dari 768 px semuanya sebaris; di bawahnya navigasi dan bahasa
+     pindah ke panel (.kepala-menu) yang dibuka tombol menu (lokandita.js). */
+  .kepala { position: relative; }
+  .kepala-publik { display: flex; flex-wrap: nowrap; gap: 1.25rem; align-items: center; justify-content: flex-end; white-space: nowrap; }
+  .kepala-publik .tombol { flex: none; }
+  .kepala-menu { display: flex; gap: 1.25rem; align-items: center; }
+  .nav-publik { display: flex; gap: 1rem; font-size: .95rem; }
+  .kepala-menu-tombol { display: none; flex: none; place-items: center; width: 2.75rem; height: 2.75rem; padding: 0; color: var(--teks); background: none; border: 1px solid var(--garis); border-radius: .5rem; cursor: pointer; }
+  .kepala-menu-tombol[aria-expanded=true] { background: var(--latar); }
+  @media (min-width: 768px) and (max-width: 1023.98px) {
+    .kepala-publik, .kepala-menu { gap: .9rem; }
+    .nav-publik { gap: .8rem; }
+    .kepala-publik .bahasa { gap: .6rem; }
+  }
+  @media (max-width: 767.98px) {
+    /* 360 px harus memuat merek, "Masuk" terpanjang (Arab) dan tombol menu: jarak dan tombol sedikit dirapatkan. */
+    .kepala { gap: .5rem; }
+    .kepala-publik { gap: .5rem; }
+    .kepala-publik .tombol { padding: .55rem .7rem; font-size: .9rem; }
+    .kepala-menu-tombol { display: grid; }
+    /* Panel: di bawah kepala, menempel di sisi AKHIR (kanan; kiri untuk bahasa Arab). */
+    .kepala-menu { display: none; position: absolute; top: calc(100% + .4rem); inset-inline-end: 1.25rem; z-index: 30; flex-direction: column; align-items: stretch; gap: 0;
+      min-width: 14rem; max-width: calc(100vw - 2.5rem); padding: .5rem; white-space: normal; background: var(--kartu); border: 1px solid var(--garis); border-radius: .75rem; box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
+    [data-menu-buka] > .kepala-menu { display: flex; }
+    .nav-publik { flex-direction: column; gap: 0; font-size: 1rem; }
+    .nav-publik a { padding: .6rem .75rem; border-radius: .4rem; }
+    .kepala-menu .bahasa { flex-wrap: wrap; justify-content: flex-start; gap: .25rem 1rem; padding: .6rem .75rem; font-size: .95rem; }
+    .kepala-menu .nav-publik + .bahasa { margin-top: .25rem; border-top: 1px solid var(--garis); }
+  }
+  /* Tanpa JavaScript tombol menu tidak berguna: disembunyikan, dan isi panel menjadi baris kedua selebar kepala. */
+  @media (max-width: 767.98px) and (scripting: none) {
+    .kepala { flex-wrap: wrap; }
+    .kepala-publik { display: contents; }
+    .kepala-menu-tombol { display: none; }
+    .kepala-menu { display: flex; position: static; order: 3; flex: 1 0 100%; flex-direction: row; flex-wrap: wrap; justify-content: space-between; gap: .25rem 1rem; max-width: none; padding: 0; border: 0; box-shadow: none; background: none; }
+    .nav-publik { flex-direction: row; flex-wrap: wrap; }
+    .kepala-menu .nav-publik + .bahasa { margin-top: 0; border-top: 0; }
+  }
   .nav-publik a { color: var(--teks); text-decoration: none; }
   .nav-publik a:hover, .nav-publik a[aria-current] { text-decoration: underline; text-underline-offset: .3em; text-decoration-thickness: 2px; }
   /* ---- Halaman publik: satu skala jarak, satu gaya kartu, satu ukuran ikon ---- */

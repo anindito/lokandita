@@ -30,6 +30,8 @@ return [
     'halo'             => 'مرحبًا، {0}',
     'masuk'            => 'تسجيل الدخول',
     'navUtama'         => 'التنقل الرئيسي',
+    // Tombol menu di kepala halaman publik pada layar sempit.
+    'menu'             => 'القائمة',
     'privasi'          => 'سياسة الخصوصية',
     'ketentuan'        => 'شروط الاستخدام',
     'segera'           => 'قريبًا',

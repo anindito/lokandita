@@ -86,20 +86,24 @@ $logo      = is_array($logo) && isset($logo['lebar'], $logo['tinggi']) ? $logo :
     <?php if ($identitas !== null): ?>
         <?= view('Lokandita\Auth\Views\menu_akun', ['identitas' => $identitas]) ?>
     <?php elseif ($publik): ?>
-        <div class="kepala-publik">
-            <?php if (($navPublik ?? []) !== []): ?>
-                <nav class="nav-publik" aria-label="<?= lang('Lokandita.navUtama') ?>">
-                    <?php foreach ($navPublik as $n): ?>
-                        <a href="<?= esc($n['href']) ?>" <?= $n['href'] === $jalur ? 'aria-current="page"' : '' ?>><?= esc($n['teks']) ?></a>
+        <?php // Di bawah 768 px navigasi dan pilihan bahasa pindah ke panel yang dibuka tombol menu (lokandita.js). ?>
+        <div class="kepala-publik" data-menu-kepala>
+            <div class="kepala-menu" id="menu-kepala">
+                <?php if (($navPublik ?? []) !== []): ?>
+                    <nav class="nav-publik" aria-label="<?= lang('Lokandita.navUtama') ?>">
+                        <?php foreach ($navPublik as $n): ?>
+                            <a href="<?= esc($n['href']) ?>" <?= $n['href'] === $jalur ? 'aria-current="page"' : '' ?>><?= esc($n['teks']) ?></a>
+                        <?php endforeach ?>
+                    </nav>
+                <?php endif ?>
+                <nav class="bahasa bahasa-kepala" aria-label="<?= lang('Lokandita.bahasa') ?>">
+                    <?php foreach (['id' => 'bahasaId', 'en' => 'bahasaEn', 'ar' => 'bahasaAr'] as $kode => $kunci): ?>
+                        <a href="/bahasa/<?= $kode ?>?kembali=<?= esc(rawurlencode($jalur)) ?>" lang="<?= $kode ?>" rel="nofollow" <?= $kode === $locale ? 'aria-current="true"' : '' ?>><?= lang('Lokandita.' . $kunci) ?></a>
                     <?php endforeach ?>
                 </nav>
-            <?php endif ?>
-            <nav class="bahasa bahasa-kepala" aria-label="<?= lang('Lokandita.bahasa') ?>">
-                <?php foreach (['id' => 'bahasaId', 'en' => 'bahasaEn', 'ar' => 'bahasaAr'] as $kode => $kunci): ?>
-                    <a href="/bahasa/<?= $kode ?>?kembali=<?= esc(rawurlencode($jalur)) ?>" lang="<?= $kode ?>" rel="nofollow" <?= $kode === $locale ? 'aria-current="true"' : '' ?>><?= lang('Lokandita.' . $kunci) ?></a>
-                <?php endforeach ?>
-            </nav>
+            </div>
             <a class="tombol" href="/beranda" rel="nofollow"><?= lang('Lokandita.masuk') ?></a>
+            <button type="button" class="kepala-menu-tombol" data-menu-tombol aria-expanded="false" aria-controls="menu-kepala" aria-label="<?= lang('Lokandita.menu') ?>"><?= \Lokandita\Auth\Ikon::svg('menu') ?></button>
         </div>
     <?php endif ?>
 </header>

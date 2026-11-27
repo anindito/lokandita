@@ -1,5 +1,7 @@
 # Progress
 
+**Header on phones — not a numbered stage, no tag — built on 2026-11-27 on the owner's bug report (the Portal's header wrapped into several rows at 360–412 px). Below 768 px every public header is now one row — logo, *Masuk*, a menu button that opens a panel with the links and the languages — on the Portal and, by the owner's word, on the landings of LokaKode and LokaUjian too; the header after login is unchanged. The change is in the shared package, so all five components are redeployed at the commit that holds this entry. **Measured in a headless Chromium only; the owner's gate (DevTools at six widths, three languages, logged out and in, light and dark) is not done yet.** See "Header on phones" at the end of this file.**
+
 **LokaUjian stage U5 — lecturer control, scoring and export (`SPEC-LOKAUJIAN.md` §7.3, §10, §11, §12, §13) — built and deployed on 2026-11-27; **the owner ran the gate on 2026-11-27 and reported every item passed: a lecturer-controlled session with two test students in real SEB 3.10.2, extra time, *Akhiri*, and both CSV files opened in Excel. Closed on the owner's instruction; all five components are redeployed at the commit that holds the gate result and the tag `lokaujian-u5` goes on it once smoke passes there.** Three things the gate did **not** exercise, by the server's record: no Arabic text was in any downloaded file, no answer began with `=` (so the formula guard was not triggered), and the exam had no automatically scored question (every score is 0 of 0). Reopening, correction, release, the review, the audit page and own data were not opened by anyone. The host is in maintenance. Next: U6 (readiness), not started; it begins in a new session with a plan. See "LokaUjian U5" and "Gate result for LokaUjian U5" at the end of this file.**
 
 **LokaUjian stage U4 — SEB enforcement and integrity events (`SPEC-LOKAUJIAN.md` §9.1, §9.3) — built and deployed on 2026-11-27 with `SEB_ENFORCEMENT=enabled`; **closed on the owner's order on 2026-11-27, tag `lokaujian-u4` on `926aee4`, all five components run that commit, smoke 85 pass, 0 fail.** By the owner's decision of 2026-11-27 the SEB configuration is **per ujian/kuis**, not per course. **The owner ran the gate on 2026-11-27: a real SEB 3.10.2 client was accepted and finished an exam, the same student was refused outside SEB, and a lecturer in Chrome got in** (see "Gate result for LokaUjian U4"). The host is in maintenance. See "LokaUjian U4" at the end of this file.**
@@ -2168,3 +2170,31 @@ Carried into U6, in addition to the list under "LokaUjian U5":
 
 - Open a CSV that holds Arabic text and an answer beginning with `=` in Excel; run one exam with automatically scored questions and compare a score with the answers; open reopening, correction, release with the review inside SEB, `/audit` and `/data-saya` once on the deployed system.
 - A second test student now exists in the test class.
+
+## Header on phones (2026-11-27) — not a stage
+
+**The report.** On a 412 px Android Chrome the Portal's header showed the logo on the left and the links, the three languages and *Masuk* piled in three or four rows beside it.
+
+**Where it was.** Not in `apps/portal`: the header is `packages/lokandita-auth/src/Views/tata_letak.php` with `gaya/lokandita.css` and `aset/lokandita.js`, used by every page of the four apps. The owner was told before anything was touched and approved changing the shared package; he then asked for the landings of LokaKode and LokaUjian to change as well. Alpine.js, named in the request, is not in this system (`DECISIONS.md`, 2026-11-15); the menu is 25 lines of plain JavaScript.
+
+**What changed.**
+
+- Below 768 px a public header is one row: logo at the start; *Masuk* and a menu button at the end. The button (`aria-expanded`, `aria-controls`, a label in three languages) opens a panel under the header with the links (Portal only) and the three languages. It closes on Escape, a second click, a click outside, a click on one of its links, and when the screen becomes 768 px or wider. Focus goes to the first link on opening and back to the button on Escape or the second click. In Arabic the panel hangs from the left edge.
+- From 768 px the row is as before but cannot wrap; between 768 and 1024 px the gaps are smaller. It fits at 768 px in all three languages, so **no compact language dropdown was built**.
+- Below 768 px *Masuk* is slightly smaller (padding and font), because the Arabic "تسجيل الدخول" did not fit at 360 px.
+- The header after login (logo, account menu) has the same markup and style as before.
+- Every page with the public header changes, which is more than the three landings: the Portal's `/tentang`, `/privasi`, `/ketentuan`, and the public SEB pages of LokaKode and LokaUjian. LokaAuth's login page has no public header and is unchanged.
+- No new external asset, no change to the CSP, no route, no variable. `KONTRAK.md` changes in §12 only (the new tests).
+
+**Tests, all against real containers through `infra/tes.sh`:** portal 103 tests, auth 111, lokaujian 124, lokakode 298 — each `OK`. New: `apps/portal/tests/Peramban/KepalaTest.php` and `apps/lokaujian/tests/Peramban/KepalaDepanTest.php` on the shared `Lokandita\Auth\Testing\Kepala` (what they measure is in `KONTRAK.md` §12).
+
+**Said plainly:**
+
+- `PembukaTest` ("kartu lokakode ikon tidak termuat", phone width) failed **once** during this work and passed in the three runs after it, the full suite included. It asks whether an app icon has loaded; the header is not involved as far as can be seen, but why it failed that once was not found.
+- `PembukaTest` was changed: it now measures only icons that are drawn, because the menu icon is in the page but not displayed from 768 px.
+- The first run of LokaKode's suite was cut off when the session's background job was stopped; the result above is a second, complete run.
+- A test browser is not a phone. The 20 px of spare room demanded at 360 px is a margin for other fonts, not proof for every phone.
+- Without JavaScript the panel's content is a second row. That was written, not tested in a browser with JavaScript off.
+- The deploy and `infra/smoke.sh` are run at the commit that holds this entry; their output is in the session. This file is not changed afterwards, because a later commit would make the commit check fail for every component.
+
+**The owner's gate:** Chrome DevTools at 360, 390, 412, 768, 1024 and 1440 px, in Indonesian, English and Arabic, logged out and logged in, light and dark — one row everywhere, nothing overlapping. Also worth one look on the real phone that showed the bug.
