@@ -26,7 +26,7 @@ class Aplikasi extends BaseConfig
     /** @var array<string, array{nama: string, status: string, alamat: ?string, ikon: ?string}> */
     public array $daftar = [
         'lokakode'  => ['nama' => 'LokaKode',  'status' => 'aktif',  'alamat' => 'LOKAKODE_URL', 'ikon' => 'lokakode'],
-        'lokaujian' => ['nama' => 'LokaUjian', 'status' => 'segera', 'alamat' => null,           'ikon' => 'lokaujian'],
+        'lokaujian' => ['nama' => 'LokaUjian', 'status' => 'aktif',  'alamat' => 'LOKAUJIAN_URL', 'ikon' => 'lokaujian'],
         'lokakelas' => ['nama' => 'LokaKelas', 'status' => 'segera', 'alamat' => null,           'ikon' => 'lokakelas'],
         'lokasiber' => ['nama' => 'LokaSiber', 'status' => 'segera', 'alamat' => null,           'ikon' => 'lokasiber'],
         'lokaretas' => ['nama' => 'LokaRetas', 'status' => 'segera', 'alamat' => null,           'ikon' => 'lokaretas'],

@@ -253,6 +253,8 @@ done
 tanya lokakode portal / > /dev/null
 kartu="$(isi lokakode | grep -o 'data-aplikasi="[a-z]*"' | sed 's/.*="//; s/"//' | tr '\n' ' ')"
 if [ "$kartu" = "lokakode lokaujian lokakelas lokasiber lokaretas lokadata " ]; then ok "portal GET /: enam kartu aplikasi dalam urutannya"; else tidak "portal GET /: kartu aplikasi '$kartu'"; fi
+# Sejak LokaUjian tahap U6 kartu LokaUjian adalah tautan ke host-nya (KONTRAK.md §16).
+if isi lokakode | grep -q "<a class=\"kartu-aplikasi\" href=\"https://$(host_aplikasi lokaujian)/\" data-aplikasi=\"lokaujian\">"; then ok "portal GET /: kartu LokaUjian bertaut ke https://$(host_aplikasi lokaujian)/"; else tidak "portal GET /: kartu LokaUjian bukan tautan ke https://$(host_aplikasi lokaujian)/"; fi
 sisa=""
 for jalur in / /tentang /privasi /ketentuan; do
 	tanya lokakode portal "$jalur" > /dev/null

@@ -50,6 +50,10 @@ final class Beranda extends BaseController
         if (SessionReader::hasAccess($identitas->userId, 'lokakode')) {
             $tautan['LokaKode'] = Aplikasi::daftar()['lokakode']['url'] . '/data-saya';
         }
+        // Sejak LokaUjian tahap U6 (KONTRAK.md §14).
+        if (SessionReader::hasAccess($identitas->userId, 'lokaujian')) {
+            $tautan['LokaUjian'] = Aplikasi::daftar()['lokaujian']['url'] . '/data-saya';
+        }
 
         return $this->response->setBody(view('data_saya', [
             'judul'  => lang('Portal.data.judul'),

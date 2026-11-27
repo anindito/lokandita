@@ -143,7 +143,8 @@ final class PublikTest extends PortalCase
 
     /**
      * Daftar aplikasi (Config\Aplikasi, docs/branding/LOKANDITA-BRAND.md): enam kartu dalam urutan
-     * yang ditetapkan; LokaKode hidup dan bertaut, lima lainnya "Segera" dan bukan tautan. Setiap
+     * yang ditetapkan; LokaKode dan (sejak LokaUjian tahap U6) LokaUjian hidup dan bertaut, empat
+     * lainnya "Segera" dan bukan tautan. Setiap
      * kartu punya ikon mereknya sendiri (terang dan gelap), nama, satu baris keterangan dan status.
      */
     public function testKartuAplikasiDiHalamanDepan(): void
@@ -168,9 +169,9 @@ final class PublikTest extends PortalCase
                 $this->assertStringContainsString('<strong>' . $urutan[$kode] . '</strong>', $isi, $apa);
                 $this->assertStringContainsString('<span>' . htmlspecialchars($ket[$kode], ENT_QUOTES) . '</span>', $isi, $apa);
                 $this->assertStringNotContainsString('<a ', $isi, $apa);
-                if ($kode === 'lokakode') {
+                if ($kode === 'lokakode' || $kode === 'lokaujian') {
                     $this->assertSame('a', $tag, $apa);
-                    $this->assertStringContainsString('href="https://lokakode.lokandita.com/"', $atribut, $apa);
+                    $this->assertStringContainsString('href="https://' . $kode . '.lokandita.com/"', $atribut, $apa);
                     $this->assertStringContainsString('<span class="lencana lencana-tersedia">' . $tersedia . '</span>', $isi, $apa);
                 } else {
                     $this->assertSame('div', $tag, "{$apa} tidak boleh berupa tautan");
@@ -178,7 +179,7 @@ final class PublikTest extends PortalCase
                     $this->assertStringContainsString('<span class="lencana lencana-segera">' . $segera . '</span>', $isi, $apa);
                 }
             }
-            $this->assertDoesNotMatchRegularExpression('/href="[^"]*(lokaujian|lokakelas|lokasiber|lokaretas|lokadata)/i', $r->body, $bahasa);
+            $this->assertDoesNotMatchRegularExpression('/href="[^"]*(lokakelas|lokasiber|lokaretas|lokadata)/i', $r->body, $bahasa);
         }
         // Setiap ikon kartu dijawab, 112 × 112 (2× ukuran tampil), PNG dan WebP.
         foreach (array_keys($urutan) as $kode) {
