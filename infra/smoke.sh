@@ -262,6 +262,10 @@ tanya portal lokakode / > /dev/null
 if isi portal | grep -qi 'lokaauth'; then sisa="$sisa lokakode:/"; fi
 if [ -z "$sisa" ]; then ok "halaman publik tidak memuat nama lama LokaAuth"; else tidak "nama lama LokaAuth masih tampil di:$sisa (bila dari /admin/teks, betulkan di sana)"; fi
 
+echo "19. MySQL mengizinkan sekurangnya 500 sambungan (KONTRAK.md §9)"
+maks="$(docker exec mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N -e "SELECT @@global.max_connections"' 2> /dev/null || true)"
+if [[ "$maks" =~ ^[0-9]+$ ]] && [ "$maks" -ge 500 ]; then ok "max_connections = $maks"; else tidak "max_connections = '${maks:-tidak terbaca}' (seharusnya >= 500; infra/compose.yml)"; fi
+
 echo "13. view roster (KONTRAK.md §18): lokaujian membaca kelima view sebagai roster_reader, dan tidak lebih"
 # Dari dalam kontainer lokaujian, lewat ROSTER_READER_DSN miliknya. Hanya jumlah baris yang dicetak.
 j="$(docker exec -i lokaujian php <<'PHP' 2>&1 || true

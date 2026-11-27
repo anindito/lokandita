@@ -463,7 +463,10 @@ final class Pengerjaan
                 // Pengerjaan yang dibuka ulang berjalan dengan tenggatnya sendiri, walau sesinya sudah diakhiri.
                 'diakhiri'     => $s['ended_by'] !== null && $s['reopen_until'] === null,
                 'tambahan'     => (int) $s['extra_minutes'],
-                'dikumpulkan'  => $s['submitted_at'] !== null,
+                // "Dikumpulkan" hanya bila mahasiswa itu sendiri yang mengumpulkan, seperti pada simpan:
+                // pengerjaan yang ditandai penjadwal berakhir karena waktu, dan halaman berkata begitu.
+                // (Uji beban U6: dua dari 110 halaman berkata "sudah dikumpulkan" ketika waktunya habis.)
+                'dikumpulkan'  => $s['submitted_at'] !== null && $s['submit_how'] === 'mahasiswa',
                 'diambil_alih' => $token !== '' && ! hash_equals((string) $s['page_token'], $token),
             ];
         }
