@@ -1,6 +1,8 @@
 # Progress
 
-**LokaUjian stage U4 — SEB enforcement and integrity events (`SPEC-LOKAUJIAN.md` §9.1, §9.3) — built and deployed on 2026-11-27 with `SEB_ENFORCEMENT=enabled`; **closed on the owner's order on 2026-11-27, tag `lokaujian-u4` on `926aee4`, all five components run that commit, smoke 85 pass, 0 fail.** Next: U5 (lecturer control, scoring and export), begun 2026-11-27 with a plan for the owner's approval. By the owner's decision of 2026-11-27 the SEB configuration is **per ujian/kuis**, not per course. **The owner ran the gate on 2026-11-27: a real SEB 3.10.2 client was accepted and finished an exam, the same student was refused outside SEB, and a lecturer in Chrome got in** (see "Gate result for LokaUjian U4"). The host is in maintenance. See "LokaUjian U4" at the end of this file.**
+**LokaUjian stage U5 — lecturer control, scoring and export (`SPEC-LOKAUJIAN.md` §7.3, §10, §11, §12, §13) — built and deployed on 2026-11-27 (`lokaujian` and its scheduler run `4febf28`); **not closed: the owner's gate is open, no tag.** `auth`, `lokakode`, `portal` and the judge worker were not touched and still run `926aee4`, so smoke is 87 pass, 4 fail (the commit check only). **No logged-in request has reached the deployed U5 code, no person has seen any of its pages, and no CSV has been opened in Excel.** The gate needs a second test student in the test class, which the owner creates. The host is in maintenance. See "LokaUjian U5" at the end of this file.**
+
+**LokaUjian stage U4 — SEB enforcement and integrity events (`SPEC-LOKAUJIAN.md` §9.1, §9.3) — built and deployed on 2026-11-27 with `SEB_ENFORCEMENT=enabled`; **closed on the owner's order on 2026-11-27, tag `lokaujian-u4` on `926aee4`, all five components run that commit, smoke 85 pass, 0 fail.** By the owner's decision of 2026-11-27 the SEB configuration is **per ujian/kuis**, not per course. **The owner ran the gate on 2026-11-27: a real SEB 3.10.2 client was accepted and finished an exam, the same student was refused outside SEB, and a lecturer in Chrome got in** (see "Gate result for LokaUjian U4"). The host is in maintenance. See "LokaUjian U4" at the end of this file.**
 
 **LokaUjian stage U3 — exam setup and delivery (`SPEC-LOKAUJIAN.md` §6, §7, §8, §9.2) — built and deployed on 2026-11-25; **closed on the owner's order on 2026-11-26 with three clauses of the gate unseen; tag `lokaujian-u3` on `fdbf765`, all components run that commit, smoke 76 pass, 0 fail.** Next: U4 (SEB enforcement and integrity events), begun 2026-11-27 with a plan for the owner's approval. The owner ran the gate on 2026-11-26: one exam in each timing mode was completed by the test student on the deployed system; **pasting, closing and reopening the browser, and a save after the deadline were not tried** (see "Gate result for LokaUjian U3"). `auth`, `lokakode`, `portal` and the judge worker were not redeployed and still run `abf9717`, so smoke is 72 pass, 4 fail (check 0 and the worker's commit only). It runs with `SEB_ENFORCEMENT=disabled`; the host `lokaujian.lokandita.com` is in maintenance. See "LokaUjian U3" at the end of this file.**
 
@@ -2038,3 +2040,85 @@ Read again at the start of U5 (2026-11-27 08:40 WIB, read-only):
 Not read again: the judge worker's commit on its own (smoke check 6 covers it and passed), `infra/tes-infra.sh`, backup and restore.
 
 This entry is committed after that deploy, so `infra/smoke.sh` check 0 reports a different commit for every component until the next deploy.
+
+## LokaUjian U5 — lecturer control, scoring and export (2026-11-27)
+
+Plan presented and answered by the owner with "approve all": `SPEC-LOKAUJIAN.md` §17 points 2, 6, 7, 8, 13 and 15 confirmed; release only after the class's session is over, and no reopening while a class is released with the answers; correction allowed while attempts run; SEB stays enforced for the gate; a pengajar gets the long CSV with its keys. Choices are in `DECISIONS.md`. One commit: `4febf28`. **Built and deployed; not closed — the owner's gate is open, no tag.**
+
+Built (`KONTRAK.md` §24, and LokaUjian's part of §14):
+
+- **Scoring:** `attempts.score`, the objective score, computed in full when an attempt ends — on *Kumpulkan*, and in the scheduler's pass, which now marks and then scores.
+- **Extra time:** 1–240 minutes for the ticked students of the live table, any number of times, only adding; a student who has not started gets it at the start; one selected student who has already finished refuses the whole request.
+- **Reopen for one student:** 1–600 minutes and a reason; the same attempt with every answer, deadline counted from the reopening; also for a student who never started once the session is over. Refused while the class is released with the answers.
+- Both are two requests: a page that names the students, the minutes and the reason, then the same form with a confirmation. Both are audited, one row per student.
+- **Live view:** the session page lists every `AKTIF` student of the class (and the owner of an attempt who has left it): not arrived, waiting, working (connected, or disconnected since hh:mm), finished and how; answered out of total; last save; time left; extra and reopening minutes; integrity events; totals on top. It refreshes itself every 5 seconds from `/sesi/{id}/langsung` without reloading. No answer and no score on it.
+- **Correction:** `/mata-kuliah/{m}/ujian/{id}/koreksi` shows every question of the published exam with its key; key or points of one question can be changed, every submitted attempt is rescored in the same transaction, and the audit row holds old value, new value and how many scores changed. The bank's question is not touched.
+- **Release per class:** `nilai` or `nilai_dan_kunci`, and withdrawal, for superadmin and the pengampu, only when the session is over. Releasing answers while another class of the exam is unfinished shows a warning that names the class and needs a second confirmation. Students see the score on their home and receipt; the review (`/ujian-saya/{s}/tinjau`) is inside SEB with that exam's file, and the home keeps the file's link for it. Pictures are answered for a released review.
+- **CSV:** long, wide and integrity events for one session; long and wide for all sessions of an exam the requester may see. UTF-8 with BOM, CRLF, semicolon or comma, apostrophe before a cell that starts like a formula, times in Asia/Jakarta, downloads audited.
+- **Audit page** `/audit` for the superadmin (filter by action, course, actor's nomor induk, dates; read-only) and **own data** at `/data-saya`, outside SEB.
+- Migration `2026-11-27-000004`; texts in `id`, `en`, `ar` (one new language file, 164 keys); smoke check 18 extended; `SPEC-LOKAUJIAN.md` §7.3, §11, §12 and §17 updated with the owner's answers; `KONTRAK-LOKAUJIAN.md` now holds only what U6 adds.
+- **No file of `auth`, `lokakode`, `portal`, the judge or the shared package changed** (`git diff c7fc75c --stat` lists only `apps/lokaujian`, `infra/smoke.sh` and the root documents).
+
+Verified by the agent (commands and output shown in the session):
+
+- `infra/tes.sh lokaujian` at the final code → `OK (121 tests, 12546 assertions)`, 15 minutes 23 seconds, against real MySQL, Redis, `auth-tes`, `lokaujian-tes`, `lokaujian-seb-tes` and a real headless Chromium. New in U5:
+  - `MatriksAksesTest`: 74 routes × seven actors. The 13 new ones: pengajar B and the pengampu of another course get 404 on the live view, extra time, reopening and both CSV routes of class XA; a pengajar gets 404 on release and 403 on correction; only the superadmin opens `/audit`; student B gets 404 on student A's review; every refused write is sent with valid fields and a valid CSRF token and leaves the checksum of all seventeen tables unchanged.
+  - `KendaliTest`: the live view through a whole session (not arrived, waiting, working with 2 of 6, disconnected since a time, unknown with Redis empty, finished) and no answer text in it; extra time with its confirmation page, applied to a running attempt and to a student who starts later, **a save accepted after the session's end because of it while the other student's is refused**; every refusal changes nothing; reopening: refused while running, then the same attempt id, the same order and the stored answers, deadline 30 minutes from the reopening, extra time moving it, `waktu_habis` and a full rescore when it ends; a student who never started may start after the session is over and only that student.
+  - `NilaiRilisTest`: scores at *Kumpulkan* and after the scheduler; a corrected key turns 1 and 1 into 0 and 2 with "2 rescored, 2 changed" in the audit row; points 2,5; key letters `B` → `A`; invalid points and keys refused with nothing changed; the bank question and the frozen text unchanged. Release: refused before the session is over and to a pengajar; `nilai` shows "Skor objektif: 1 dari 2" and opens no review; `nilai_dan_kunci` with class XB unfinished shows the page that names XB and changes nothing until confirmed; the review holds the student's own answers and the keys and nobody else's answer; a correction after release reaches the student's page; withdrawal hides everything again. With enforcement **on**: the review and its picture are 403 without SEB headers and 200 with the headers of that exam.
+  - `CsvTest`: both files and the event file fetched over HTTP and read back — BOM, every record ending in CRLF, the long file's 15 headers and 6 rows, `'=1+1` and `'-minus di depan`, an answer with a line break, a semicolon, quotes, a comma and Arabic text coming back byte for byte, `2,5` with the semicolon and `2.5` with the comma, the wide file with the student who never started and with the one who left the class, "Sedang mengerjakan" while the session runs. A pengajar's "all classes" file holds only their own class; five kinds of outsider get 404 and no audit row.
+  - `AuditDataSayaTest`: the audit page and its filters; no route of any method other than `GET /audit` names the audit; the own-data file holds the student's attempts, answers by the number they saw and events, no question text, option, key or other person's row, the score only after release, and a second download within a minute is 429.
+  - `TampilanLangsungTest`, in the browser: the table updates itself (status, answered, time left, extra minutes) while `window` is not reloaded and a ticked box stays ticked; a changed session state shows the reload notice; no CSP violation and no script error.
+- The first complete run had 4 failures out of 121; the second run passed. See "Mistakes" below.
+- `infra/cek-env.sh` → LULUS. Before the deploy: 0 attempts in progress in production, host in maintenance.
+- `infra/deploy.sh lokaujian` at `4febf28` → migration done; `/healthz` and the scheduler's heartbeat (from the new container) report the commit.
+- `infra/smoke.sh` → **87 pass, 4 fail**: the commit check of `auth`, `lokakode`, `portal` and the worker — not redeployed, by the owner's instruction. Check 18 passes with its six new lines.
+- **The scheduler scored the three attempts already in production** on its first pass: 2.00 of 2, 1.00 of 2 and 1.00 of 2 objective points (all of the test student). `time_grants` is empty and no session is released.
+- From inside, `/js/langsung.js` → 200; from the internet `/sesi/1/langsung` → 503 (maintenance).
+- `infra/backup.sh` → done. `infra/uji-restore.sh` → LULUS, 69 schemas/tables.
+
+Not verified, or weaker than it looks:
+
+- **No logged-in request has reached the deployed U5 code, and no person has seen any page of U5**: the live table, the confirmation pages, correction, release, the review, the audit page, own data. One page — the live view — was driven by the test browser; the others were read as HTML by tests only. None was looked at in Arabic or dark mode.
+- **No CSV has been opened in Excel.** The tests prove bytes and structure. Whether Excel with Indonesian settings shows the columns, the Arabic text, the line breaks and `2,5` as a number is the owner's gate. The decimal comma is the agent's reasoning about Excel, not something seen.
+- **No real SEB has opened the review.** Its acceptance is a header the test computed itself. Inside SEB a student reaches it from the exam's start address → the receipt → *Buka tinjauan*.
+- "Connected" is a mark in Redis written when the student's page asks the server; a student whose page is open but whose network is gone shows as disconnected after 30 seconds, and a student in the 10-second gap between two polls may show as disconnected for a moment after a restart of Redis.
+- The time left in the live table is the server's value every 5 seconds; it does not count down in between.
+- A correction or a release takes effect at once and is audited, but nothing asks "are you sure" on the server for a correction — only a browser dialog.
+- With several hundred students the two "all classes" files are built in memory; not measured (U6).
+- The warning about queued judge jobs on the session page (`SPEC-LOKAUJIAN.md` §14) is **not built**; it needs LokaUjian to read LokaKode's state (U6).
+- The suites of `auth`, `lokakode` and `portal` were not run: no file of theirs, of the shared package or of `infra/tes.sh` changed.
+- The Arabic texts (164 new keys) were written by the agent and read by no Arabic speaker.
+- `PROGRESS.md` is committed after the deploy, so smoke's commit check reports a different commit for `lokaujian` too until the closing deploy.
+
+Mistakes of this session:
+
+- **The student's home page wrote to the database on every load.** To "bring the state up to date" the agent first ran the scheduler's pass on every view of the home and the receipt. An existing test caught it (a refused save "changed data"). Corrected before any deploy: those two pages run the pass only when a released result has no score yet.
+- **A save after the time ran out could be answered "dikumpulkan".** Once an ended attempt had been marked, the save endpoint said the student had submitted. It now says `waktu_habis` unless the student submitted. The same answer was possible before U5 whenever the scheduler had already passed; U5 made it visible.
+- The staff CSV and live view first reused the student's wording for how an attempt ended ("Anda kumpulkan sendiri"); staff now have their own words.
+- Three tests were wrong or out of date on the first runs: one uploaded a picture to another test container than the one that served it (the same slip as in U4), one assumed the live rows were ordered by name (they are ordered by nomor induk), and two older tests still described `/data-saya` as absent and the old three-count sentence.
+- The first full run was cut off with the session and had to be read from the test container; nothing was lost.
+- The plan said the live view would be drawn from JSON by the page; it is drawn by the server and the page copies the server's sentences — one renderer instead of two (`DECISIONS.md`).
+
+Changed on the server outside Git: nothing in any `.env`. Production schema `lokaujian`: migration `2026-11-27-000004` ran (one table, four columns on `attempts`, three on `sessions`), and the three existing attempts received a score. All of it is in the backup of 2026-11-27 02:43 UTC.
+
+Owner's gate for U5 (`SPEC-LOKAUJIAN.md` §15): a lecturer-controlled session with two test students, ended, and both CSV files opened in Excel with correct characters and every answer present. SEB is enforced, so both students work in SEB on Windows — on two machines, or one after the other on one (the second joins late with the time that is left).
+
+1. **Before opening the host:** a second test student in the test class, `AKTIF`, with `lokaujian` access (LokaAuth and LokaKode). Give one of the two a name or type an answer with Arabic text, so the characters can be checked.
+2. Tell the agent to open the host.
+3. In Chrome, as superadmin or pengampu: a new exam from the bank with at least one multiple-choice, one short and one long question → **Terbitkan** → **Atur Safe Exam Browser** → create the configuration, register the Browser Exam Key of your SEB (as in the U4 gate) → **Berikan ke kelas** (the test class) → open the session.
+4. The session page lists both students as *Belum hadir*. Press **Mulai** with 15 minutes.
+5. Student 1 in SEB: open the exam's file, **Mulai**, answer; in one text box type a line break and an answer that begins with `=` (for example `=1+1`). Watch the lecturer's page: the row turns to *Mengerjakan — tersambung*, the answered count and the last save move by themselves.
+6. Tick student 1, **Tambahan waktu** 5 minutes → the confirmation names the student → confirm. The student's countdown gains 5 minutes within about 10 seconds.
+7. Student 1: **Selesai** → **Kumpulkan**. Student 2 in SEB: start late, answer something, stay on the page.
+8. Press **Akhiri**. After about 40 seconds both rows say *Selesai*.
+9. **Unduh CSV**: *Lebar* and then *Panjang*, separator *Titik koma*. Open both in Excel: one student per row in the wide file, one row per question in the long one, Indonesian and Arabic characters correct, the line break inside its cell, `=1+1` shown as text and not as 2, every answer present. If your Excel splits nothing into columns, download again with *Koma* and say so.
+10. Optional, a few minutes each: **Buka ulang** for student 1 with 5 minutes and a reason (the student continues with the old answers); **Koreksi kunci dan poin** on one question; **Rilis hasil** *Skor objektif saja* and look at the student's home; `/audit` as superadmin; `/data-saya` as a student.
+11. Tell the agent to close the host; it reports what the server recorded and runs smoke, backup and the restore test.
+
+After the gate: tag `lokaujian-u5` on the commit that records it. Redeploying `auth`, `lokakode`, `portal` and the judge worker so that the commit check passes needs the owner's word.
+
+Carried into U6:
+
+- Arabic and dark-mode review by a person; the load test at 110 students (the live view and the two polls per student belong in it); the warning about queued judge jobs; retention of answers (`SPEC-LOKAUJIAN.md` §17 point 1) and the privacy text; the Portal card and its `/data-saya` link; maintenance off.
+- Still unseen on the deployed system unless a gate does them: a save after the deadline refused (U3); the list of integrity events, one exam's file refused on another, a refused heartbeat stopping the exam page, rotation (U4); importing an exam file (U2); a pengajar refused another class and the bank (U1).
+- The test class, `Dummy` and three published test exams remain in production.
