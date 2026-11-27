@@ -8,5 +8,6 @@
 <nav class="admin-nav" aria-label="<?= lang('Ujian.navigasi') ?>">
     <a href="/beranda"><?= lang('Ujian.nav.beranda') ?></a>
     <a href="/mata-kuliah"><?= lang('Ujian.nav.matkul') ?></a>
+    <?php if ($akses->superadmin()): ?><a href="/audit"><?= lang('Hasil.audit.judul') ?></a><?php endif ?>
 </nav>
 <?php endif ?>

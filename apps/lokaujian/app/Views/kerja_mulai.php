@@ -9,7 +9,8 @@
  *   belum mulai   judul, jumlah soal, durasi atau mode, petunjuk, aturan, lalu Mulai — atau
  *                 halaman menunggu yang berubah sendiri ketika dosen memulai;
  *   berjalan      tautan Lanjutkan;
- *   berakhir      tanda terima: jawaban diterima, kapan, berapa yang terjawab. Tanpa skor.
+ *   berakhir      tanda terima: jawaban diterima, kapan, berapa yang terjawab. Skor objektif
+ *                 hanya bila hasil kelasnya dirilis, dan tautan tinjauan bila dirilis dengan kunci.
  * Tidak memuat satu soal pun. Variabel: $sesi (Pengerjaan::sesi).
  */
 use App\Libraries\Markdown;
@@ -41,6 +42,16 @@ $terima  = (int) $sesi['menerima'] === 1;
         </dl>
         <p class="petunjuk"><?= lang('Kerja.terima.info') ?></p>
     </div>
+    <?php // Hasil hanya tampil bila kelasnya dirilis (SPEC-LOKAUJIAN.md §11). ?>
+    <?php if ($sesi['release_level'] !== null && $sesi['score'] !== null): ?>
+        <div class="kartu" data-nilai>
+            <p><strong><?= lang('Hasil.nilai.objektif', [esc(\App\Libraries\Nilai::tampil($sesi['score'])), esc(\App\Libraries\Nilai::tampil($sesi['poin_objektif']))]) ?></strong></p>
+            <p class="petunjuk"><?= lang('Hasil.nilai.manual') ?></p>
+            <?php if ($sesi['release_level'] === 'nilai_dan_kunci'): ?>
+                <div class="baris-tombol"><a class="tombol" href="/ujian-saya/<?= $id ?>/tinjau" data-tinjau><?= lang('Hasil.tinjau.buka') ?></a></div>
+            <?php endif ?>
+        </div>
+    <?php endif ?>
 <?php elseif ($jalan): ?>
     <div class="kartu" data-berjalan>
         <p><?= lang('Kerja.berjalan') ?></p>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Libraries\Hadir;
 use App\Libraries\Jadwal;
 use App\Libraries\Pengerjaan;
 use App\Libraries\SebUjian;
@@ -101,6 +102,26 @@ final class Kerja extends BaseController
         ]);
     }
 
+    /**
+     * Tinjauan sesudah hasil kelasnya dirilis dengan kunci (SPEC-LOKAUJIAN.md §11), di dalam SEB
+     * dengan berkas ujian itu: tiap soal, jawaban mahasiswa itu sendiri, dan kunci soal yang
+     * dinilai otomatis. Selain itu kembali ke tanda terimanya.
+     */
+    public function tinjau(string $sesiId): ResponseInterface
+    {
+        Jadwal::lintasan();
+        $pustaka = $this->pustaka();
+        if ($pustaka->sesi((int) $sesiId) === null) {
+            return $this->tidakDitemukan('session');
+        }
+        $data = $pustaka->tinjau((int) $sesiId);
+        if ($data === null) {
+            return redirect()->to('/ujian-saya/' . (int) $sesiId);
+        }
+
+        return $this->halaman('kerja_tinjau', ['judul' => lang('Hasil.tinjau.judul') . ' — ' . $data['title'], 'kelasBadan' => 'badan-ujian', 'sesi' => $data]);
+    }
+
     public function kumpulkan(string $sesiId): ResponseInterface
     {
         if ($this->pustaka()->kumpulkan((int) $sesiId) === 'tidak_ada') {
@@ -113,8 +134,16 @@ final class Kerja extends BaseController
     public function keadaan(string $sesiId): ResponseInterface
     {
         $k = $this->pustaka()->keadaan((int) $sesiId, (string) $this->request->getGet('halaman'));
+        if ($k === null) {
+            return $this->jsonTidakAda();
+        }
+        // Tanda "terakhir terlihat" untuk tampilan langsung dosen (SPEC-LOKAUJIAN.md §10). Hanya
+        // tampilan: tidak ada keputusan yang membacanya.
+        if ($k['pengerjaan'] === null || $k['pengerjaan']['berjalan']) {
+            Hadir::catat((int) $sesiId, $this->akses()->identitas()->userId, $k['pengerjaan'] === null ? 'tunggu' : 'kerja');
+        }
 
-        return $k === null ? $this->jsonTidakAda() : $this->json(200, $k);
+        return $this->json(200, $k);
     }
 
     /**
@@ -141,6 +170,8 @@ final class Kerja extends BaseController
         switch ($hasil['kode']) {
             case 'ok':
             case 'usang':
+                Hadir::catat((int) $sesiId, $this->akses()->identitas()->userId, 'kerja');
+
                 return $this->json(200, ['ok' => true, 'n' => $hasil['n'], 'disimpan' => $hasil['disimpan'], 'sisa' => $hasil['sisa']]);
 
             case 'tidak_ada':

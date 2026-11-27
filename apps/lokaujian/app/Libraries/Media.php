@@ -86,7 +86,8 @@ final class Media
      *   - staf yang boleh menjalankan sesi sebuah ujian terbit yang memuat gambar itu (pengajar
      *     melihat pratinjau ujian yang diberikan ke kelasnya);
      *   - mahasiswa, HANYA selama ia punya pengerjaan yang sedang berjalan pada ujian yang memuat
-     *     gambar itu.
+     *     gambar itu, atau (tahap U5) pengerjaan di kelas yang hasilnya dirilis dengan kunci —
+     *     untuk tinjauannya.
      * Selain itu null — sama dengan kunci yang tidak ada.
      *
      * @return array<string, mixed>|null
@@ -111,7 +112,7 @@ final class Media
         if ($this->akses->mahasiswa()) {
             $boleh = $db->query(
                 "SELECT 1 FROM attempts a JOIN sessions s ON s.id = a.session_id JOIN exams x ON x.id = a.exam_id
-                 WHERE a.user_id = {$this->akses->idSql()} AND " . Tenggat::berjalan() . " AND a.exam_id IN {$ujian} LIMIT 1",
+                 WHERE a.user_id = {$this->akses->idSql()} AND (" . Tenggat::berjalan() . " OR s.release_level = 'nilai_dan_kunci') AND a.exam_id IN {$ujian} LIMIT 1",
             )->getRowArray();
         } else {
             $boleh = $db->query(

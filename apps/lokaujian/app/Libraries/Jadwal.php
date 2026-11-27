@@ -38,12 +38,15 @@ final class Jadwal
         $tenggat = Tenggat::tenggat();
         $db->query(
             "UPDATE attempts a JOIN sessions s ON s.id = a.session_id JOIN exams x ON x.id = a.exam_id
-             SET a.submit_how = IF(x.mode = 'dikendalikan_dosen' AND s.ended_by IS NOT NULL AND a.extra_minutes = 0, 'diakhiri_dosen', 'waktu_habis'),
+             SET a.submit_how = IF(x.mode = 'dikendalikan_dosen' AND s.ended_by IS NOT NULL AND a.extra_minutes = 0 AND a.reopen_until IS NULL, 'diakhiri_dosen', 'waktu_habis'),
                  a.submitted_at = {$tenggat}
              WHERE a.submitted_at IS NULL AND UTC_TIMESTAMP() >= {$tenggat} + INTERVAL " . Tenggat::TENGGANG_DETIK . ' SECOND',
         );
+        $n = $db->affectedRows();
+        // Tahap U5: setiap pengerjaan yang sudah dikumpulkan dan belum bernilai dinilai (§11).
+        Nilai::hitung($db, 'a.submitted_at IS NOT NULL AND a.scored_at IS NULL');
 
-        return $db->affectedRows();
+        return $n;
     }
 
     public static function redis(): \Redis

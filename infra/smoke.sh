@@ -356,7 +356,7 @@ if [[ "$umur" =~ ^-?[0-9]+$ ]] && [ "$umur" -ge -5 ] && [ "$umur" -lt 60 ]; then
 s="$(docker inspect -f '{{.State.Status}}' lokaujian-jadwal 2> /dev/null || true)"
 if [ "$s" = "running" ]; then ok "kontainer lokaujian-jadwal: running"; else tidak "kontainer lokaujian-jadwal: '${s:-tidak ada}' (seharusnya running)"; fi
 
-echo "18. rute LokaUjian ada di kode yang berjalan (tahap U3, KONTRAK.md §22)"
+echo "18. rute LokaUjian ada di kode yang berjalan (tahap U3 dan U5, KONTRAK.md §22, §24)"
 # Ditanyakan seperti cek 8. Tanpa cookie setiap rute staf dan mahasiswa mengarah ke LokaAuth
 # dengan next ke alamat itu sendiri: rutenya terdaftar, dan tidak ada yang terbuka tanpa masuk.
 for jalur in /mata-kuliah/1/ujian/1/sunting /sesi/1 /sesi/1/pratinjau /ujian-saya/1 /ujian-saya/1/kerjakan /api/sesi/1/keadaan; do
@@ -368,6 +368,16 @@ done
 ada="$(printf "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='lokaujian' AND table_name IN ('exam_questions','exam_groups','exam_options','sessions','attempts','answers','integrity_events');\n" \
 	| docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N' 2> /dev/null || true)"
 if [ "$ada" = "7" ]; then ok "skema lokaujian memuat ketujuh tabel tahap U3"; else tidak "skema lokaujian: $ada dari 7 tabel tahap U3 (infra/deploy.sh lokaujian menjalankan migrasinya)"; fi
+# Tahap U5 (KONTRAK.md §24): tampilan langsung, koreksi, tinjauan, log audit, data saya — rutenya
+# terdaftar dan tidak ada yang terbuka tanpa masuk; migrasinya sudah berjalan.
+for jalur in /sesi/1/langsung /mata-kuliah/1/ujian/1/koreksi /ujian-saya/1/tinjau /audit /data-saya; do
+	j="$(tanya portal lokaujian "$jalur")"
+	harap="302 $login_url?next=$(jq -rn --arg u "$url$jalur" '$u|@uri')"
+	if [ "$j" = "$harap" ]; then ok "lokaujian GET $jalur tanpa cookie -> $j"; else tidak "lokaujian GET $jalur tanpa cookie -> '$j' (seharusnya '$harap')"; fi
+done
+ada="$(printf "SELECT (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='lokaujian' AND table_name='time_grants') + (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema='lokaujian' AND ((table_name='attempts' AND column_name IN ('score','reopen_until')) OR (table_name='sessions' AND column_name='release_level')));\n" \
+	| docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N' 2> /dev/null || true)"
+if [ "$ada" = "4" ]; then ok "skema lokaujian memuat time_grants dan kolom nilai, buka ulang dan rilis (tahap U5)"; else tidak "skema lokaujian: $ada dari 4 tanda migrasi tahap U5 (infra/deploy.sh lokaujian menjalankan migrasinya)"; fi
 
 echo "17. Safe Exam Browser LokaUjian (tahap U4, KONTRAK.md §23)"
 # Seperti cek 10, untuk lokaujian — dengan satu beda: konfigurasinya per ujian, jadi tidak ada

@@ -40,10 +40,13 @@ final class Tenggat
      * Tenggat satu pengerjaan:
      *   per_mahasiswa      = mulai + durasi + tambahan
      *   dikendalikan_dosen = akhir sesi + tambahan
+     *   dibuka ulang (U5)  = a.reopen_until — saat buka ulang + menitnya, menggantikan yang di atas
+     *                        (SPEC-LOKAUJIAN.md §7.3). Tambahan waktu selama buka ulang memajukan
+     *                        reopen_until itu sendiri.
      */
     public static function tenggat(): string
     {
-        return "(CASE WHEN x.mode = 'per_mahasiswa' THEN a.started_at + INTERVAL x.duration_minutes MINUTE ELSE "
+        return "COALESCE(a.reopen_until, CASE WHEN x.mode = 'per_mahasiswa' THEN a.started_at + INTERVAL x.duration_minutes MINUTE ELSE "
             . self::akhirSesi() . ' END + INTERVAL a.extra_minutes MINUTE)';
     }
 
@@ -85,6 +88,19 @@ final class Tenggat
     public static function berlangsung(): string
     {
         return '(s.started_at IS NOT NULL AND UTC_TIMESTAMP() < ' . self::akhirSesi() . ')';
+    }
+
+    /**
+     * Sesi sudah USAI (tahap U5): tidak menerima mulai lagi menurut waktunya, dan tidak ada
+     * pengerjaan yang masih berjalan — termasuk yang mendapat tambahan waktu atau dibuka ulang.
+     * Sesi per_mahasiswa yang dibuka "sampai ditutup" belum usai. Dipakai untuk rilis hasil dan
+     * buka ulang. Subkueri memakai alias a; pemanggil tidak boleh memakai alias itu di luarnya.
+     */
+    public static function usai(): string
+    {
+        return "((CASE WHEN x.mode = 'per_mahasiswa' THEN (s.open_at IS NOT NULL AND s.close_at IS NOT NULL AND s.close_at <= UTC_TIMESTAMP())
+                  ELSE (s.started_at IS NOT NULL AND UTC_TIMESTAMP() >= " . self::akhirSesi() . ') END)
+                 AND NOT EXISTS (SELECT 1 FROM attempts a WHERE a.session_id = s.id AND ' . self::berjalan() . '))';
     }
 
     /**

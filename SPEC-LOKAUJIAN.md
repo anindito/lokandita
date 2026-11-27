@@ -192,6 +192,7 @@ A **sesi** is one published exam given to one class: at most one per exam per cl
 - **Extra time** (D7): staff who run the session may give one student, or several selected students, 1–240 more minutes, before or during the exam, any number of times. Grants only add; none can be taken back. The student's countdown follows within seconds.
 - **Reopen for one student**: for a student whose attempt has ended, or who has none after the session is over. The lecturer gives a number of minutes (1–600) and a reason. The student continues the **same** attempt with every answer kept, or starts one; `deadline = moment of reopening + minutes`. The session itself stays as it is for everyone else.
 - Both need a confirmation that names the student and the minutes, and both are audited.
+- Extra time is for an attempt that has not ended; one that has ended is reopened instead. Extra time given during a reopening extends that reopening. A reopening is refused while the results of that class are released with the correct answers (the owner's decision of 2026-11-27): the release is withdrawn first.
 
 ### 7.4 One attempt
 
@@ -289,7 +290,7 @@ A lecturer must be able to act when things go wrong: a dead laptop, SEB that wil
 - `benar_salah` and `pilihan_ganda`: full points for the correct answer, 0 otherwise, 0 for no answer. `isian` and `uraian` have no score in the app (D3, D4).
 - An attempt's **objective score** is the points earned on automatically scored questions, shown always together with the points available on them. It is computed when the attempt ends and is always recomputed in full, never adjusted.
 - There is no total grade, no percentage of the whole exam and no pass mark: the lecturer combines the objective score with their own marking outside the app.
-- **Correction after the exam.** The pengampu or a superadmin may change the key or the points of a question of a published exam. Every attempt is then rescored; the change, the old and new values and the number of attempts whose score changed are audited. Text and options are not changed after the first attempt. A question cannot be annulled in the app; that is done in the lecturer's own marking.
+- **Correction after the exam.** The pengampu or a superadmin may change the key or the points of a question of a published exam. Every attempt is then rescored; the change, the old and new values and the number of attempts whose score changed are audited. A correction is possible from publication on, also while attempts are still running (the owner's decision of 2026-11-27). Text and options are not changed after the first attempt. A question cannot be annulled in the app; that is done in the lecturer's own marking.
 
 **What students see afterwards** (D8) — nothing by default. The pengampu or a superadmin releases results **per class**, at one of two levels, and can withdraw the release:
 
@@ -298,7 +299,7 @@ A lecturer must be able to act when things go wrong: a dead laptop, SEB that wil
 | `nilai` | the objective score out of the objective points, with the sentence that short and long answers are marked by the lecturer outside the app |
 | `nilai_dan_kunci` | that, and a review inside SEB: each question, the student's own answer, and for automatically scored questions the correct answer |
 
-Releasing `nilai_dan_kunci` while another class of the same exam has not finished shows a warning that names the class and needs a second confirmation. Release and withdrawal are audited.
+Results of a class can be released only when its session is over and nobody in it is still working (the owner's decision of 2026-11-27). Releasing `nilai_dan_kunci` while another class of the same exam has not finished shows a warning that names the class and needs a second confirmation. Release and withdrawal are audited.
 
 ## 12. CSV export
 
@@ -307,13 +308,13 @@ For one session, or for all sessions of an exam the requester may see. Two files
 | File | Rows | Columns |
 |---|---|---|
 | **Long** | one per student per question, for every student with an attempt | class, nomor induk, name, question number (exam order), question number as that student saw it, question id, group number, type, question text (plain, first 200 characters), answer, key, correct (1 / 0 / empty), maximum points, points (empty for `isian` and `uraian`), time of the last save |
-| **Wide** | one per `AKTIF` student of the class, including those who never started | class, nomor induk, name, status, started, submitted, how it was submitted, extra minutes, questions answered, objective score, objective points available, points to be marked by hand, number of integrity events, then one column per question in exam order holding the answer |
+| **Wide** | one per `AKTIF` student of the class, including those who never started, and one per student who has an attempt there but has left the class (marked in the status) | class, nomor induk, name, status, started, submitted, how it was submitted, extra minutes, reopening minutes, questions answered, objective score, objective points available, points to be marked by hand, number of integrity events, then one column per question in exam order holding the answer |
 
-- A `pilihan_ganda` answer is written as the option's letter in exam order and its text; `benar_salah` as *Benar* or *Salah*; text answers in full with their line breaks.
-- UTF-8 **with BOM**, CRLF line ends, every field quoted where needed, so Excel shows Indonesian and Arabic text correctly. The separator is chosen at download: semicolon (default, for Excel with Indonesian regional settings) or comma.
+- A `pilihan_ganda` answer is written as the option's letter in exam order and its text (for an option that is only a picture: its alternative text); `benar_salah` as *Benar* or *Salah*; text answers in full with their line breaks.
+- UTF-8 **with BOM**, CRLF line ends, every field quoted where needed, so Excel shows Indonesian and Arabic text correctly. The separator is chosen at download: semicolon (default, for Excel with Indonesian regional settings) or comma. Numbers follow it: a decimal comma with the semicolon, a decimal point with the comma.
 - A cell that begins with `=`, `+`, `-`, `@` or a tab is written with a leading apostrophe, so that a student's answer can never run as a formula in the lecturer's spreadsheet.
-- Times are Asia/Jakarta. The file name carries the course code, exam, class and date.
-- An export can be taken while a session runs; it then says so in its first status column. Every export is audited: who, which sessions, row count.
+- Times are Asia/Jakarta. The file name carries the course code, the exam's number, the class and the date. The long file contains every key and is downloaded by whoever may run the session, a pengajar included (confirmed by the owner on 2026-11-27).
+- An export can be taken while a session runs; the status column of the wide file then says who is still working (the long file has no status column). Every export is audited: who, which sessions, row count.
 
 ## 13. Audit and personal data
 
@@ -377,17 +378,17 @@ After U6 come the platform stages **A1** (roster tables move to the Lokandita co
 | # | Point | Written as | Before |
 |---|---|---|---|
 | 1 | Retention of answers | **Open.** Nothing is removed automatically; no real exam before it is decided and in the privacy text (§13) | U6 |
-| 2 | Who releases results, and for whom | Pengampu or superadmin, per class, not per exam (§11) | U5 |
+| 2 | Who releases results, and for whom | Pengampu or superadmin, per class, not per exam (§11). **Confirmed 2026-11-27** | U5 |
 | 3 | What a student can open outside SEB | Only the read-only list of their exams; the released review with correct answers is inside SEB (§8, §9.1) | U3 |
 | 4 | `per_mahasiswa`: a student who starts shortly before the window closes | Gets the full duration (§7.1) | U3 |
 | 5 | Ending by the lecturer | Announced 30 seconds ahead; saves accepted up to 10 seconds after any deadline (§7.2, §7.4) | U3 |
-| 6 | Reopening for one student | Same attempt, answers kept, N minutes counted from the moment of reopening; also for a student who never started (§7.3) | U5 |
-| 7 | Extra time | Can only be added, never taken back (§7.3) | U5 |
-| 8 | A wrong key found after the exam | Key and points can be corrected with a full rescore; no annulling of a question in the app (§11) | U5 |
+| 6 | Reopening for one student | Same attempt, answers kept, N minutes counted from the moment of reopening; also for a student who never started (§7.3). **Confirmed 2026-11-27** | U5 |
+| 7 | Extra time | Can only be added, never taken back (§7.3). **Confirmed 2026-11-27** | U5 |
+| 8 | A wrong key found after the exam | Key and points can be corrected with a full rescore; no annulling of a question in the app (§11). **Confirmed 2026-11-27** | U5 |
 | 9 | What a pengajar may do | Run sessions, extra time, reopening, CSV and events for own classes; no bank, no editing, no release (§3) | U1 |
 | 10 | Pictures | One per group and one per question. **Changed by the owner on 2026-11-25, before U2:** an option may carry a picture, instead of or next to its text (§5.1, §5.2) | U2 |
 | 11 | SEB configuration | **Changed by the owner on 2026-11-27, before U4:** per ujian/kuis, not per course. Every exam has its own `.seb` file, which students download from their home list after login, and the pengampu registers Browser Exam Keys for every exam (§9.1) | U4 |
 | 12 | Two pages on one attempt | The newest takes over, the older stops, an event is recorded (§8) | U3 |
-| 13 | CSV separator | Semicolon by default, comma on request (§12) | U5 |
+| 13 | CSV separator | Semicolon by default, comma on request (§12). **Confirmed 2026-11-27** | U5 |
 | 14 | `kuis` and `ujian` | A label only; no difference in behaviour (§6.1) | U3 |
-| 15 | Marking | No negative marking, no partial points, no total grade in the app (§11) | U5 |
+| 15 | Marking | No negative marking, no partial points, no total grade in the app (§11). **Confirmed 2026-11-27** | U5 |

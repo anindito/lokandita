@@ -27,7 +27,7 @@ abstract class UjianCase extends TestCase
 
     /** Tabel LokaUjian, anak lebih dulu (urutan penghapusan mengikuti kunci asing). */
     protected const TABEL = [
-        'seb_exam_keys', 'seb_configs', 'answers', 'integrity_events', 'attempts', 'sessions', 'exam_options', 'exam_questions', 'exam_groups',
+        'seb_exam_keys', 'seb_configs', 'answers', 'integrity_events', 'attempts', 'time_grants', 'sessions', 'exam_options', 'exam_questions', 'exam_groups',
         'exam_items', 'exams', 'question_options', 'questions', 'question_groups', 'images', 'audit_log',
     ];
 
@@ -295,6 +295,43 @@ abstract class UjianCase extends TestCase
         $csrf = $this->csrf($mhs);
 
         return $mhs->postJson("/api/sesi/{$sesi}/jawaban", ['halaman' => $token, 'soal' => $soal, 'nilai' => $nilai, 'ragu' => $ragu, 'n' => $n], ['X-CSRF-TOKEN' => $csrf]);
+    }
+
+    // ------------------------------------------------------------------ tahap U5: kendali, nilai, ekspor
+
+    /**
+     * Ujian dikendalikan dosen di kelas XA dengan dua mahasiswa (Ani dan Citra); sesi sudah dimulai,
+     * berakhir 60 menit lagi.
+     *
+     * @return array<string, mixed>
+     */
+    protected function duniaSesi(string $mode = 'dikendalikan_dosen'): array
+    {
+        $d            = $this->dunia();
+        $d['mhsC']    = $this->user('mahasiswa', 'Mahasiswa Citra');
+        $this->daftar($d['mhsC'], $d['kelasXA']);
+        $d['dosen']   = $this->sebagai($d['pengampuX']);
+        $d['ujian']   = $this->ujianTerbit($d['dosen'], $d['matkulX'], 'Ujian kendali', $mode === 'per_mahasiswa' ? ['mode' => 'per_mahasiswa', 'durasi' => '20'] : []);
+        $d['sesi']    = $this->beri($d['dosen'], $d['matkulX'], $d['ujian'], $d['kelasXA']);
+        if ($mode !== 'per_mahasiswa') {
+            $this->assertStringEndsWith('?pesan=dimulai', (string) $this->kirim($d['dosen'], "/sesi/{$d['sesi']}/mulai", ['menit' => '60'])->header('Location'));
+        }
+        $d['q'] = $this->soalBeku($d['ujian']);
+
+        return $d;
+    }
+
+    /** Redis DB 15 kontainer tes. */
+    protected function redisTes(): \Redis
+    {
+        $u = parse_url((string) getenv('REDIS_URL'));
+        $this->assertSame('15', ltrim((string) $u['path'], '/'), 'tes hanya memakai Redis DB 15');
+        $r = new \Redis();
+        $r->connect((string) $u['host'], (int) ($u['port'] ?? 6379));
+        $r->auth((string) $u['pass']);
+        $r->select(15);
+
+        return $r;
     }
 
     // ------------------------------------------------------------------ tahap U4: Safe Exam Browser

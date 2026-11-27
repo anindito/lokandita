@@ -402,8 +402,7 @@ final class PengerjaanTest extends UjianCase
         $this->assertSame(200, $this->simpan($telat, $sesi, $tokenTelat, $q['ISIAN'], 'jawaban si terlambat', 1)->status);
         // Hitungan di halaman sesi dosen.
         $hal = $http->get("/sesi/{$sesi}")->body;
-        $this->assertStringContainsString('2 dari 2 mahasiswa sudah mulai', $hal);
-        $this->assertStringContainsString('2 sedang mengerjakan', $hal);
+        $this->assertStringContainsString('Hadir 2 dari 2 · mengerjakan 2', $hal);
         $this->assertStringNotContainsString('jawaban si terlambat', $hal, 'halaman sesi tidak menampilkan jawaban');
 
         // Mahasiswa terlambat mendapat tambahan 5 menit; lalu dosen mengakhiri.

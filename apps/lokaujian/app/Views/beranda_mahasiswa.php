@@ -61,6 +61,17 @@ $waktu   = static function (array $u): string {
                                 <a class="tombol" href="/ujian-saya/<?= (int) $u['sesi_id'] ?>/kerjakan"><?= lang('Kerja.lanjutkan') ?></a>
                             <?php elseif ($bagian === 'selesai'): ?>
                                 <?= lang('Kerja.daftar.diterima', [esc(Waktu::lokal($u['submitted_at'] ?? $u['tenggat']))]) ?>
+                                <?php // Hasil hanya tampil bila kelasnya dirilis (SPEC-LOKAUJIAN.md §11). Tinjauan dengan kunci dibuka di dalam SEB. ?>
+                                <?php if ($u['release_level'] !== null && $u['score'] !== null): ?>
+                                    <br><strong data-nilai><?= lang('Hasil.nilai.objektif', [esc(\App\Libraries\Nilai::tampil($u['score'])), esc(\App\Libraries\Nilai::tampil($u['poin_objektif']))]) ?></strong>
+                                    <br><span class="redup"><?= lang('Hasil.nilai.manual') ?></span>
+                                    <?php if ($u['release_level'] === 'nilai_dan_kunci'): ?>
+                                        <br><span data-tinjau-info><?= lang('Hasil.nilai.tinjauDiSeb') ?></span>
+                                        <?php if (isset($seb[(int) $u['exam_id']])): ?>
+                                            <a class="tombol tombol-sekunder" href="/ujian-saya/<?= (int) $u['sesi_id'] ?>/seb" data-unduh-seb><?= lang('SebUjian.beranda.unduh') ?></a>
+                                        <?php endif ?>
+                                    <?php endif ?>
+                                <?php endif ?>
                             <?php elseif ((int) $u['menerima'] === 1): ?>
                                 <span class="lencana"><?= lang('Kerja.daftar.terbuka') ?></span>
                             <?php else: ?>

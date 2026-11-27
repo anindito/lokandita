@@ -41,11 +41,12 @@ final class Sesi
                      ELSE 'tertutup' END
             WHEN s.started_at IS NULL THEN 'menunggu'
             WHEN %berlangsung% THEN IF(s.ended_by IS NULL, 'berlangsung', 'diakhiri')
-            ELSE 'selesai' END) AS keadaan";
+            ELSE 'selesai' END) AS keadaan,
+        %usai% AS usai";
 
     private static function pilih(): string
     {
-        return strtr(self::PILIH, ['%akhir%' => Tenggat::akhirSesi(), '%terbuka%' => Tenggat::terbuka(), '%berlangsung%' => Tenggat::berlangsung()]);
+        return strtr(self::PILIH, ['%akhir%' => Tenggat::akhirSesi(), '%terbuka%' => Tenggat::terbuka(), '%berlangsung%' => Tenggat::berlangsung(), '%usai%' => Tenggat::usai()]);
     }
 
     /**
@@ -423,6 +424,83 @@ final class Sesi
                 'ended_by' => $pelaku,
             ], ['sebelumnya' => $s['end_at']]];
         });
+    }
+
+    /**
+     * Kelas-kelas LAIN yang menerima ujian yang sama dan sesinya belum usai (belum dimulai,
+     * masih berjalan, atau masih ada yang mengerjakan). Merilis kunci selagi ada kelas seperti itu
+     * perlu konfirmasi kedua (SPEC-LOKAUJIAN.md §11).
+     *
+     * @return list<int> id kelas
+     */
+    public function kelasBelumUsai(int $ujianId, int $kecualiSesi): array
+    {
+        $baris = $this->db->query(
+            'SELECT s.class_id FROM sessions s JOIN exams x ON x.id = s.exam_id
+             WHERE s.exam_id = ? AND s.id <> ? AND NOT ' . Tenggat::usai() . ' ORDER BY s.class_id',
+            [$ujianId, $kecualiSesi],
+        )->getResultArray();
+
+        return array_map('intval', array_column($baris, 'class_id'));
+    }
+
+    /**
+     * MERILIS hasil satu kelas (yang mengelola mata kuliahnya), pada tingkat `nilai` atau
+     * `nilai_dan_kunci`. Hanya sesudah sesi kelas itu usai. Tingkat `nilai_dan_kunci` selagi kelas
+     * lain belum usai mengembalikan `kelas_lain` kecuali $yakin.
+     *
+     * @return 'ok'|'tidak_ada'|'diarsipkan'|'tingkat'|'belum_usai'|'sudah'|'kelas_lain'
+     */
+    public function rilis(int $id, string $tingkat, bool $yakin): string
+    {
+        $pelaku = $this->akses->identitas()->userId;
+
+        return $this->tindak($id, true, function (array $s) use ($tingkat, $yakin, $pelaku): array|string {
+            if (! in_array($tingkat, ['nilai', 'nilai_dan_kunci'], true)) {
+                return 'tingkat';
+            }
+            if ((int) $s['usai'] !== 1) {
+                return 'belum_usai';
+            }
+            if ($s['release_level'] === $tingkat) {
+                return 'sudah';
+            }
+            $lain = $tingkat === 'nilai_dan_kunci' ? $this->kelasBelumUsai((int) $s['exam_id'], (int) $s['id']) : [];
+            if ($lain !== [] && ! $yakin) {
+                return 'kelas_lain';
+            }
+
+            return ['hasil.dirilis', ['release_level' => $tingkat, 'released_at' => 'sql:UTC_TIMESTAMP()', 'released_by' => $pelaku], ['tingkat' => $tingkat, 'sebelumnya' => $s['release_level'], 'kelas_belum_usai' => $lain]];
+        });
+    }
+
+    /**
+     * MENARIK rilis: mahasiswa kelas itu kembali tidak melihat apa pun.
+     */
+    public function tarikRilis(int $id): string
+    {
+        return $this->tindak($id, true, static function (array $s): array|string {
+            if ($s['release_level'] === null) {
+                return 'sudah';
+            }
+
+            return ['hasil.ditarik', ['release_level' => null, 'released_at' => null, 'released_by' => null], ['tingkat' => $s['release_level']]];
+        });
+    }
+
+    /**
+     * Sesi-sesi satu ujian yang boleh DIJALANKAN pengguna ini — untuk ekspor CSV "semua kelas
+     * yang saya lihat" (SPEC-LOKAUJIAN.md §12). Pengajar hanya mendapat kelasnya sendiri.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function dilihatUntukUjian(int $ujianId): array
+    {
+        return $this->db->query(
+            'SELECT ' . self::pilih() . " FROM sessions s JOIN exams x ON x.id = s.exam_id
+             WHERE s.exam_id = ? AND x.status <> 'draf' AND {$this->akses->diJalankan('s.class_id')} ORDER BY s.id",
+            [$ujianId],
+        )->getResultArray();
     }
 
     /**

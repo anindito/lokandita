@@ -15,7 +15,9 @@ use Lokandita\Auth\Waktu;
  * Dipanggil DI DALAM transaksi yang sama dengan perubahannya (koneksi yang sama), sehingga
  * perubahan tanpa baris audit tidak bisa terjadi.
  *
- * Jangan pernah memasukkan kunci jawaban, kata sandi atau token ke $detail.
+ * Jangan pernah memasukkan kata sandi atau token ke $detail, dan jangan kunci jawaban — dengan
+ * satu pengecualian yang diminta SPEC-LOKAUJIAN.md §11: koreksi kunci mencatat kunci lama dan
+ * baru (sebagai huruf opsi atau benar/salah). Halaman log audit hanya untuk superadmin.
  */
 final class Audit
 {

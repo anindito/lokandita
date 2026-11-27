@@ -47,10 +47,12 @@ final class Pengerjaan
                    s.ended_by, x.title, x.kind, x.mode, x.duration_minutes, x.instructions, x.shuffle_questions, x.shuffle_options,
                    (SELECT COUNT(*) FROM exam_questions q WHERE q.exam_id = x.id) AS jumlah_soal,
                    a.id AS attempt_id, a.started_at AS mulai, a.submitted_at, a.submit_how, a.extra_minutes, a.page_token, a.urutan,
+                   a.reopen_until, a.reopened_minutes, a.score, s.release_level,
+                   (SELECT COALESCE(SUM(q2.points), 0) FROM exam_questions q2 WHERE q2.exam_id = x.id AND q2.type IN ('benar_salah','pilihan_ganda')) AS poin_objektif,
                    IF(a.id IS NULL, NULL, {$tenggat}) AS tenggat,
                    IF(a.id IS NULL, NULL, " . Tenggat::sisa() . ') AS sisa,
                    IF(a.id IS NULL, 0, ' . Tenggat::berjalan() . ') AS berjalan,
-                   ' . Tenggat::menerimaMulai() . " AS menerima,
+                   (' . Tenggat::menerimaMulai() . ' OR ' . $this->dibukaUlang() . ") AS menerima,
                    IF(x.mode = 'dikendalikan_dosen' AND s.started_at IS NOT NULL, TIMESTAMPDIFF(SECOND, s.started_at, UTC_TIMESTAMP()), NULL) AS berlalu,
                    IF(x.mode = 'dikendalikan_dosen' AND s.started_at IS NOT NULL AND UTC_TIMESTAMP() >= {$akhir}, 1, 0) AS sesi_selesai,
                    (SELECT COUNT(*) FROM answers j WHERE j.attempt_id = a.id AND (j.option_id IS NOT NULL OR j.benar IS NOT NULL OR COALESCE(j.text, '') <> '')) AS terjawab
@@ -59,6 +61,15 @@ final class Pengerjaan
             LEFT JOIN attempts a ON a.exam_id = s.exam_id AND a.user_id = {$this->u}
             WHERE x.status = 'terbit'
               AND ((a.id IS NULL AND {$this->akses->diKelasSaya('s.class_id')}) OR a.session_id = s.id)";
+    }
+
+    /**
+     * Mahasiswa ini mendapat BUKA ULANG yang masih berlaku di sesi `s` tanpa pernah punya
+     * pengerjaan (SPEC-LOKAUJIAN.md §7.3): ia boleh mulai walau sesinya sudah usai.
+     */
+    private function dibukaUlang(): string
+    {
+        return "EXISTS (SELECT 1 FROM time_grants g WHERE g.session_id = s.id AND g.user_id = {$this->u} AND g.kind = 'buka_ulang' AND g.until_at > UTC_TIMESTAMP())";
     }
 
     /**
@@ -169,11 +180,18 @@ final class Pengerjaan
         $urutan = self::acak(Ujian::beku($this->db, (int) $s['exam_id']), (bool) $s['shuffle_questions'], (bool) $s['shuffle_options']);
         // Syarat "menerima mulai" diperiksa lagi DI DALAM pernyataan yang menyisipkan, dengan jam
         // MySQL yang sama: tidak ada celah antara memeriksa dan menulis.
+        // Tambahan waktu yang diberikan SEBELUM mulai ikut masuk di sini. Mahasiswa yang mulai
+        // karena buka ulang (sesinya sendiri sudah usai) mendapat tenggat buka ulang itu.
+        $biasa = Tenggat::menerimaMulai();
+        $hibah = "FROM time_grants g WHERE g.session_id = s.id AND g.user_id = {$this->u}";
         $this->db->query(
-            "INSERT IGNORE INTO attempts (session_id, exam_id, class_id, user_id, started_at, urutan, page_token)
-             SELECT s.id, s.exam_id, s.class_id, {$this->u}, UTC_TIMESTAMP(), ?, ?
+            "INSERT IGNORE INTO attempts (session_id, exam_id, class_id, user_id, started_at, urutan, page_token, extra_minutes, reopen_until, reopened_minutes)
+             SELECT s.id, s.exam_id, s.class_id, {$this->u}, UTC_TIMESTAMP(), ?, ?,
+                    (SELECT COALESCE(SUM(g.minutes), 0) {$hibah} AND g.kind = 'tambahan'),
+                    IF({$biasa}, NULL, (SELECT MAX(g.until_at) {$hibah} AND g.kind = 'buka_ulang')),
+                    IF({$biasa}, 0, (SELECT COALESCE(SUM(g.minutes), 0) {$hibah} AND g.kind = 'buka_ulang'))
              FROM sessions s JOIN exams x ON x.id = s.exam_id
-             WHERE s.id = ? AND x.status = 'terbit' AND {$this->akses->diKelasSaya('s.class_id')} AND " . Tenggat::menerimaMulai(),
+             WHERE s.id = ? AND x.status = 'terbit' AND {$this->akses->diKelasSaya('s.class_id')} AND ({$biasa} OR {$this->dibukaUlang()})",
             [json_encode($urutan), bin2hex(random_bytes(16)), $sesiId],
         );
         $s = $this->sesi($sesiId);
@@ -198,6 +216,37 @@ final class Pengerjaan
         $this->db->query("UPDATE attempts SET page_token = ? WHERE id = ? AND user_id = {$this->u}", [$token, (int) $s['attempt_id']]);
         $s['page_token'] = $token;
 
+        return $this->susun($s, false);
+    }
+
+    /**
+     * TINJAUAN sesudah hasil dirilis dengan tingkat `nilai_dan_kunci` (SPEC-LOKAUJIAN.md §11):
+     * soal menurut urutan mahasiswa ini, jawabannya sendiri, dan — hanya di sini — kunci soal
+     * yang dinilai otomatis. Null bila pengerjaannya belum berakhir atau kelasnya belum dirilis
+     * pada tingkat itu.
+     *
+     * @return array<string, mixed>|null
+     */
+    public function tinjau(int $sesiId): ?array
+    {
+        $s = $this->sesi($sesiId);
+        if ($s === null || $s['attempt_id'] === null || (int) $s['berjalan'] === 1 || $s['release_level'] !== 'nilai_dan_kunci') {
+            return null;
+        }
+
+        return $this->susun($s, true);
+    }
+
+    /**
+     * Soal ujian menurut urutan mahasiswa ini, dengan jawabannya. Kunci hanya ikut bila
+     * $denganKunci (tinjauan); halaman ujian tidak pernah menerimanya.
+     *
+     * @param array<string, mixed> $s
+     *
+     * @return array<string, mixed>
+     */
+    private function susun(array $s, bool $denganKunci): array
+    {
         $urutan   = json_decode((string) $s['urutan'], true, 8, JSON_THROW_ON_ERROR);
         $soal     = [];
         $kelompok = [];
@@ -206,11 +255,13 @@ final class Pengerjaan
                 $kelompok[(int) $b['kelompok']['id']] = ['id' => (int) $b['kelompok']['id'], 'text' => $b['kelompok']['text'], 'image' => $b['kelompok']['image']];
             }
             foreach ($b['jenis'] === 'soal' ? [$b['soal']] : $b['kelompok']['questions'] as $q) {
-                unset($q['answer']); // kunci tidak pernah sampai ke view mahasiswa
-                foreach ($q['options'] as &$o) {
-                    unset($o['correct']);
+                if (! $denganKunci) {
+                    unset($q['answer']); // kunci tidak pernah sampai ke halaman ujian
+                    foreach ($q['options'] as &$o) {
+                        unset($o['correct']);
+                    }
+                    unset($o);
                 }
-                unset($o);
                 $soal[(int) $q['id']] = $q;
             }
         }
@@ -249,7 +300,7 @@ final class Pengerjaan
     private function kunci(int $sesiId): ?array
     {
         return $this->db->query(
-            'SELECT a.id, a.exam_id, a.page_token, a.submitted_at, a.urutan, ' . Tenggat::bolehSimpan() . ' AS boleh, ' . Tenggat::berjalan() . ' AS berjalan, '
+            'SELECT a.id, a.exam_id, a.page_token, a.submitted_at, a.submit_how, a.urutan, ' . Tenggat::bolehSimpan() . ' AS boleh, ' . Tenggat::berjalan() . ' AS berjalan, '
             . Tenggat::sisa() . " AS sisa
              FROM attempts a JOIN sessions s ON s.id = a.session_id JOIN exams x ON x.id = a.exam_id
              WHERE a.session_id = ? AND a.user_id = {$this->u} FOR UPDATE OF a",
@@ -298,7 +349,9 @@ final class Pengerjaan
             return ['kode' => 'diambil_alih'];
         }
         if ((int) $a['boleh'] !== 1) {
-            return ['kode' => $a['submitted_at'] !== null ? 'dikumpulkan' : 'waktu_habis'];
+            // "Dikumpulkan" hanya bila mahasiswa itu sendiri yang mengumpulkan; pengerjaan yang
+            // ditandai penjadwal (atau oleh halaman yang memutakhirkan keadaan) berakhir karena waktu.
+            return ['kode' => $a['submitted_at'] !== null && $a['submit_how'] === 'mahasiswa' ? 'dikumpulkan' : 'waktu_habis'];
         }
         $q = $this->db->query('SELECT id, type FROM exam_questions WHERE id = ? AND exam_id = ?', [$soalId, (int) $a['exam_id']])->getRowArray();
         if ($q === null || $pencacah < 1) {
@@ -375,6 +428,8 @@ final class Pengerjaan
             }
             if ((int) $a['berjalan'] === 1) {
                 $this->db->query("UPDATE attempts SET submitted_at = UTC_TIMESTAMP(), submit_how = 'mahasiswa' WHERE id = ?", [(int) $a['id']]);
+                // Skor objektif dihitung saat pengerjaan berakhir, dalam transaksi yang sama (§11).
+                Nilai::hitung($this->db, 'a.id = ?', [(int) $a['id']]);
             }
             $this->db->transCommit();
 
@@ -403,9 +458,10 @@ final class Pengerjaan
                 'berjalan'     => (int) $s['berjalan'] === 1,
                 'sisa'         => (int) $s['sisa'],
                 // Dikendalikan dosen tanpa waktu akhir: yang ditampilkan waktu berlalu, bukan hitung mundur.
-                'tanpa_akhir'  => $s['mode'] === 'dikendalikan_dosen' && $s['end_at'] === null,
+                'tanpa_akhir'  => $s['mode'] === 'dikendalikan_dosen' && $s['end_at'] === null && $s['reopen_until'] === null,
                 'berlalu'      => $s['berlalu'] === null ? null : (int) $s['berlalu'],
-                'diakhiri'     => $s['ended_by'] !== null,
+                // Pengerjaan yang dibuka ulang berjalan dengan tenggatnya sendiri, walau sesinya sudah diakhiri.
+                'diakhiri'     => $s['ended_by'] !== null && $s['reopen_until'] === null,
                 'tambahan'     => (int) $s['extra_minutes'],
                 'dikumpulkan'  => $s['submitted_at'] !== null,
                 'diambil_alih' => $token !== '' && ! hash_equals((string) $s['page_token'], $token),

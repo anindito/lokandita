@@ -49,13 +49,13 @@ final class KerangkaTest extends TestCase
     }
 
     /**
-     * Yang belum dibangun tetap 404: ekspor data sendiri (U5) dan API internal, yang hanya milik
-     * LokaAuth. Panel SEB per MATA KULIAH milik paket bersama juga tidak ada di sini: konfigurasi
+     * Yang tidak dibangun di sini tetap 404: API internal, yang hanya milik LokaAuth (ekspor data
+     * sendiri ada sejak tahap U5 dan diuji di tests/Hasil/AuditDataSayaTest.php). Panel SEB per MATA KULIAH milik paket bersama juga tidak ada di sini: konfigurasi
      * SEB LokaUjian per ujian (KONTRAK.md §23). Rute akun menolak POST tanpa token CSRF.
      */
     public function testYangBelumDibangunTetapTidakAda(): void
     {
-        foreach (['/data-saya', '/mata-kuliah/1/seb', '/seb/unduh/UJX101.seb', '/internal/session/touch'] as $jalur) {
+        foreach (['/mata-kuliah/1/seb', '/seb/unduh/UJX101.seb', '/internal/session/touch'] as $jalur) {
             $r = $this->tamu()->get($jalur);
             $this->assertSame(404, $r->status, $jalur);
         }

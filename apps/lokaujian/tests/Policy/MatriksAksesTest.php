@@ -129,6 +129,24 @@ final class MatriksAksesTest extends UjianCase
             'POST sesi/{n}/akhiri'    => [$ss . '/akhiri', $jalankan],
             'POST sesi/{n}/hapus'     => [$ss . '/hapus', $atur],
 
+            // Tahap U5. Tampilan langsung, tambahan waktu, buka ulang dan CSV: yang menjalankan sesi.
+            // Rilis hasil dan koreksi: hanya yang mengelola mata kuliahnya (404 bagi pengajar A pada
+            // rilis, seperti jadwal; 403 pada koreksi, seperti bank). Log audit: superadmin saja.
+            'GET sesi/{n}/langsung'       => [$ss . '/langsung', $jalankan],
+            'POST sesi/{n}/tambah-waktu'  => [$ss . '/tambah-waktu', $jalankan],
+            'POST sesi/{n}/buka-ulang'    => [$ss . '/buka-ulang', $jalankan],
+            'POST sesi/{n}/csv'           => [$ss . '/csv', $jalankan],
+            'POST sesi/{n}/rilis'         => [$ss . '/rilis', $atur],
+            'POST sesi/{n}/rilis/tarik'   => [$ss . '/rilis/tarik', $atur],
+            'POST ujian/{n}/csv'          => ['/ujian/' . $t . '/csv', $jalankan],
+            'GET mata-kuliah/{n}/ujian/{n}/koreksi'       => [$x . '/ujian/' . $t . '/koreksi', $kelola],
+            'POST mata-kuliah/{n}/ujian/{n}/koreksi/{n}'  => [$x . '/ujian/' . $t . '/koreksi/' . ($d['soalT'] ?? 0), $kelola],
+            'GET audit'                   => ['/audit', ['superadmin' => 'ok'] + array_fill_keys(self::PELAKU, 403)],
+            'GET data-saya'               => ['/data-saya', $semua],
+            'POST data-saya/unduh'        => ['/data-saya/unduh', $semua],
+            // Tinjauan: mahasiswa A diarahkan kembali ke tanda terimanya (hasil belum dirilis).
+            'GET ujian-saya/{n}/tinjau'   => [$us . '/tinjau', $mhs, 302],
+
             'GET ujian-saya/{n}'             => [$us, $mhs],
             'POST ujian-saya/{n}/mulai'      => [$us . '/mulai', $mhs],
             'GET ujian-saya/{n}/kerjakan'    => [$us . '/kerjakan', $mhs],
@@ -163,6 +181,7 @@ final class MatriksAksesTest extends UjianCase
         $d['ujianT'] = $this->buatDraf($http, $d['matkulX'], 'Rahasia ujian terbit X', ['s' . $d['soalX']]);
         $this->assertContains($this->kirim($http, '/mata-kuliah/' . $d['matkulX'] . '/ujian/' . $d['ujianT'] . '/terbit')->status, [302, 303]);
         $d['sesiXA'] = $this->beri($http, $d['matkulX'], $d['ujianT'], $d['kelasXA']);
+        $d['soalT']  = (int) $this->db->query('SELECT id FROM exam_questions WHERE exam_id = ' . $d['ujianT'])->fetch_assoc()['id'];
         // Tahap U4: ujian terbit itu punya konfigurasi SEB (supaya berkasnya ada untuk diunduh).
         $this->assertStringEndsWith('?pesan=dibuat', (string) $this->kirim($http, '/mata-kuliah/' . $d['matkulX'] . '/ujian/' . $d['ujianT'] . '/seb', ['sandi_keluar' => 'kata-sandi-keluar-uji'])->header('Location'));
         $this->assertStringEndsWith('?pesan=dimulai', (string) $this->kirim($http, '/sesi/' . $d['sesiXA'] . '/mulai', ['menit' => '60'])->header('Location'));
@@ -216,7 +235,11 @@ final class MatriksAksesTest extends UjianCase
                 $sebelum = $this->sidikBank();
                 // Permintaan tulis membawa token CSRF yang sah milik pelaku itu: penolakannya berasal
                 // dari hak akses, bukan dari token yang hilang.
-                $r = $tulis ? $this->kirim($http, $jalur, ['arsip' => '1', 'judul' => 'Curian', 'text' => 'Curian', 'type' => 'isian', 'points' => '1', 'arah' => 'naik']) : $http->get($jalur);
+                $r = $tulis ? $this->kirim($http, $jalur, [
+                    'arsip' => '1', 'judul' => 'Curian', 'text' => 'Curian', 'type' => 'isian', 'points' => '1', 'arah' => 'naik',
+                    // Tahap U5: isian yang SAH bagi yang berhak, supaya penolakannya berasal dari hak akses.
+                    'mahasiswa' => (string) $d['mhsA']['id'], 'menit' => '10', 'alasan' => 'Curian', 'yakin' => '1', 'tingkat' => 'nilai', 'bentuk' => 'panjang', 'poin' => '5', 'kunci' => '',
+                ]) : $http->get($jalur);
                 $this->assertSame($harapan[$p], $r->status, "{$pola} sebagai {$p}: seharusnya ditolak");
                 $this->assertSame($sebelum, $this->sidikBank(), "{$pola} sebagai {$p}: penolakan mengubah data");
                 // Penolakan tidak memuat apa pun tentang sasarannya. Nama dan nomor induk mahasiswa A

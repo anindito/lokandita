@@ -58,6 +58,9 @@ $nomor = 1;
                 <button type="submit" class="tombol tombol-sekunder"><?= lang($ujian['status'] === 'arsip' ? 'Sesi.ujian.pulihkan' : 'Sesi.ujian.arsipkan') ?></button>
             </form>
         <?php endif ?>
+        <?php if ($ujian['status'] !== 'draf'): ?>
+            <a class="tombol tombol-sekunder" href="<?= $ini ?>/koreksi" data-koreksi-taut><?= lang('Hasil.koreksi.judul') ?></a>
+        <?php endif ?>
         <?php if ((int) $ujian['pengerjaan'] === 0): ?>
             <form method="post" action="<?= $ini ?>/hapus" class="inline">
                 <?= csrf_field() ?>

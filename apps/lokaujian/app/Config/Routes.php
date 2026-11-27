@@ -7,7 +7,7 @@ use Lokandita\Auth\Routes as RuteBersama;
 
 // LokaUjian (SPEC-LOKAUJIAN.md §15): jalan masuk dan lingkup (U1), bank soal dan draf ujian (U2),
 // penerbitan, sesi dan pengerjaan (U3), Safe Exam Browser per ujian dan peristiwa integritas (U4).
-// Tampilan langsung, penilaian dan ekspor: U5.
+// Tampilan langsung, tambahan waktu, buka ulang, nilai, koreksi, rilis, CSV, log audit, data saya (U5).
 
 // KONTRAK.md §11: dipakai infra/deploy.sh untuk memastikan commit yang berjalan.
 $routes->get('healthz', '\Lokandita\Auth\Controllers\Healthz::index');
@@ -27,7 +27,13 @@ RuteBersama::publik($routes);
 // daftarnya hanya untuk dibaca.
 $routes->group('', ['filter' => 'masuk'], static function (RouteCollection $routes): void {
     $routes->get('beranda', 'Beranda::index');
+    // Ekspor data sendiri (KONTRAK.md §14): di luar SEB, tanpa id di alamatnya.
+    $routes->get('data-saya', 'DataSaya::index');
+    $routes->post('data-saya/unduh', 'DataSaya::unduh');
 });
+
+// Log audit (SPEC-LOKAUJIAN.md §13): superadmin saja, hanya membaca.
+$routes->get('audit', 'AuditLog::daftar', ['filter' => 'masuk:superadmin']);
 
 // Staf (SPEC-LOKAUJIAN.md §3): mata kuliah dan kelas yang boleh dilihatnya. Lingkupnya — pengampu
 // mata kuliahnya, pengajar kelasnya — diperiksa App\Policy\Akses di dalam kueri roster; di luar
@@ -88,6 +94,10 @@ $routes->group('mata-kuliah/(:num)', ['filter' => 'masuk:superadmin,dosen'], sta
     $routes->post('ujian/(:num)/seb', 'SebPanel::simpan/$1/$2');
     $routes->post('ujian/(:num)/seb/kunci', 'SebPanel::kunci/$1/$2');
     $routes->get('ujian/(:num)/seb/unduh', 'SebPanel::unduh/$1/$2');
+
+    // Tahap U5 (SPEC-LOKAUJIAN.md §11; KONTRAK.md §24): koreksi kunci atau poin sesudah ujian.
+    $routes->get('ujian/(:num)/koreksi', 'Koreksi::lihat/$1/$2');
+    $routes->post('ujian/(:num)/koreksi/(:num)', 'Koreksi::ubah/$1/$2/$3');
 });
 
 // Sesi (tahap U3, SPEC-LOKAUJIAN.md §7; KONTRAK.md §22): siapa pun yang MELIHAT kelasnya boleh
@@ -105,7 +115,18 @@ $routes->group('sesi/(:num)', ['filter' => 'masuk:superadmin,dosen'], static fun
     $routes->post('akhir', 'SesiStaf::akhir/$1');
     $routes->post('akhiri', 'SesiStaf::akhiri/$1');
     $routes->post('hapus', 'SesiStaf::hapus/$1');
+    // Tahap U5 (SPEC-LOKAUJIAN.md §7.3, §10, §12; KONTRAK.md §24): tampilan langsung, tambahan
+    // waktu, buka ulang dan CSV bagi yang menjalankan sesi; rilis hanya bagi yang mengelola mata
+    // kuliahnya (404 bagi pengajar, seperti jadwal).
+    $routes->get('langsung', 'SesiStaf::langsung/$1');
+    $routes->post('tambah-waktu', 'SesiStaf::tambahWaktu/$1');
+    $routes->post('buka-ulang', 'SesiStaf::bukaUlang/$1');
+    $routes->post('csv', 'SesiStaf::csv/$1');
+    $routes->post('rilis', 'SesiStaf::rilis/$1');
+    $routes->post('rilis/tarik', 'SesiStaf::tarikRilis/$1');
 });
+// CSV semua sesi satu ujian yang boleh DILIHAT pemintanya (pengajar: kelasnya sendiri saja).
+$routes->post('ujian/(:num)/csv', 'SesiStaf::csvUjian/$1', ['filter' => 'masuk:superadmin,dosen']);
 
 // Mahasiswa (SPEC-LOKAUJIAN.md §8, §9.1): mulai, menunggu, halaman ujian, simpan, kumpulkan.
 // Filter `seb` (App\Filters\SebUjian, KONTRAK.md §23) selalu SESUDAH `masuk`: kedua header SEB
@@ -116,6 +137,8 @@ $routes->group('', ['filter' => ['masuk:mahasiswa', 'seb']], static function (Ro
     $routes->post('ujian-saya/(:num)/mulai', 'Kerja::mulai/$1');
     $routes->get('ujian-saya/(:num)/kerjakan', 'Kerja::kerjakan/$1');
     $routes->post('ujian-saya/(:num)/kumpulkan', 'Kerja::kumpulkan/$1');
+    // Tinjauan sesudah hasil dirilis dengan kunci (SPEC-LOKAUJIAN.md §11): di dalam SEB.
+    $routes->get('ujian-saya/(:num)/tinjau', 'Kerja::tinjau/$1');
     $routes->get('api/sesi/(:num)/keadaan', 'Kerja::keadaan/$1');
     $routes->post('api/sesi/(:num)/jawaban', 'Kerja::jawaban/$1');
     $routes->post('api/sesi/(:num)/peristiwa', 'Kerja::peristiwa/$1');
