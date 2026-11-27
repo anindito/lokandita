@@ -1,6 +1,6 @@
 # Progress
 
-**LokaUjian stage U6 — readiness (`SPEC-LOKAUJIAN.md` §14, §15) — started 2026-11-27. **The gate passed on 2026-11-27: 110 simulated students at once, 8,872 saves confirmed, none lost; again with the app container restarted mid-exam; restore test passed; `lokaujian` runs `bed8f1e`.** 250 students lost nothing but exhausted MySQL's 151 connections; the limit is now 500 (set live, no restart; in `infra/compose.yml`) and 250 then passed, slowly at peak moments. That limit had already been hit in a real LokaKode class on 2026-11-23. **NOT closed, no tag:** open with the owner are the retention of answers and the privacy text, who keeps access, when the host opens (Portal card on branch `u6-portal`, tested, not deployed), and his own checks. Smoke 88 pass, 4 fail (commit check of the components not redeployed). See "LokaUjian U6" and "Load test results and what followed" at the end of this file.**
+**LokaUjian stage U6 — readiness (`SPEC-LOKAUJIAN.md` §14, §15) — **closed on the owner's instruction on 2026-11-28: all five components are deployed at the commit that holds this entry, `lokaujian.lokandita.com` is open, the Portal card is a link, and the tag `lokaujian-u6` goes on that commit once smoke passes there.** The gate passed on 2026-11-27: 110 simulated students at once, 8,872 saves confirmed, none lost; again with the app restarted mid-exam; restore test passed. MySQL's connection limit is 500 (it was hit at 151 by 250 simulated students, and by a real LokaKode class on 2026-11-23). Owner's decisions: answers are kept (privacy page says so), all 241 accounts keep access. **Closed with the owner's own checks NOT done** (Arabic and dark-mode screenshots, Excel, a scored exam, reopening, correction, release in SEB, `/audit`, `/data-saya`), and four test exams still published in production. See "LokaUjian U6", "Load test results and what followed" and "LokaUjian U6 closed on the owner's instruction" at the end of this file.**
 
 **Header on phones — not a numbered stage, no tag — built on 2026-11-27 on the owner's bug report (the Portal's header wrapped into several rows at 360–412 px). Below 768 px every public header is now one row — logo, *Masuk*, a menu button that opens a panel with the links and the languages — on the Portal and, by the owner's word, on the landings of LokaKode and LokaUjian too; the header after login is unchanged. The change is in the shared package, so all five components are redeployed at the commit that holds this entry. **Measured in a headless Chromium only; the owner's gate (DevTools at six widths, three languages, logged out and in, light and dark) is not done yet.** See "Header on phones" at the end of this file.**
 
@@ -2322,4 +2322,37 @@ Still open — the stage is NOT closed and has no tag:
 2. Owner's checks: the screenshots in `docs/tangkapan/lokaujian-u6/`; Excel with Arabic text and a cell beginning with `=`; one exam with automatically scored questions; reopening, correction, release with the review inside SEB; `/audit`; `/data-saya`.
 3. `infra/deploy.sh infra` at a quiet moment, so that MySQL's limit no longer depends on a running value.
 4. The closing deploy of all five components and the tag `lokaujian-u6`.
+
+### LokaUjian U6 closed on the owner's instruction (2026-11-28)
+
+The owner's answers to the six open points, in his words: "1 keep 2 all 3 now 4 run after do no 6 in the end. close other stale terminals". Read as:
+
+1. **Retention: keep.** Exam answers are assessment records; nothing is removed automatically and there is no period. `SPEC-LOKAUJIAN.md` §13 and §17 point 1 say so now, and so does the Portal's privacy page, which until today did not mention LokaUjian at all: what LokaUjian stores (attempts, answers, objective score, the integrity events with IP address and browser type, "no camera, microphone or screen recording"), what it is used for, who sees it, and that answers are not deleted automatically. Indonesian, English and Arabic; the date of the page is 28 November 2026. **The wording is the agent's and was not shown to the owner before it went live; the Arabic was read by no Arabic speaker.** It can be changed without a deploy at `/admin/teks`.
+2. **Access: all.** The 241 accounts keep `lokaujian` access; no row of `app_access` was touched.
+3. **The host opens now.** Branch `u6-portal` is merged into `main` (`7bfb9fd`): the LokaUjian card of the Portal is a link, `/data-saya` of the Portal links to LokaUjian's export, `LOKAUJIAN_URL` is a variable of the Portal. `KONTRAK-LOKAUJIAN.md` is deleted: its last items are in `KONTRAK.md` §4, §10, §14 and §16.
+4. and 6. **The closing deploy first, the recreate of MySQL after it** — "4 run after do no 6" was read in that order.
+5. was not answered: **the owner's own checks are not done.** U6 is closed with them open, as U1 to U5 were closed with parts of their gates unseen.
+
+"Close other stale terminals": at 01:10 WIB no other terminal and no other Claude Code process existed on the server; nothing was closed.
+
+Verified before this entry: `infra/tes.sh portal` on the branch → `OK (104 tests, 15000 assertions)` (two tests had to follow the change: the browser test that said only LokaKode is a link, and the test that expected the old date on the privacy page). `infra/cek-env.sh` → LULUS.
+
+What happens with the commit that holds this entry, in this order; the output is in the session, and this file is not changed afterwards, because a later commit would make the commit check fail for every component:
+
+1. `infra/deploy.sh` for `auth`, `lokakode`, `portal`, `lokaujian` and `judge` — after reading that no LokaKode submission, no unfinished judge job and no LokaUjian attempt is in progress.
+2. `infra/pemeliharaan.sh lokaujian off`: **`lokaujian.lokandita.com` is open from then on.**
+3. `infra/smoke.sh`; the tag `lokaujian-u6` is put on this commit **only when that run passes with 0 failures**.
+4. `infra/deploy.sh infra`, which recreates MySQL from `infra/compose.yml` (`max_connections = 500`), then `infra/smoke.sh` again, `infra/backup.sh` and `infra/uji-restore.sh`.
+
+If a step fails, the steps after it are not taken and the owner is told in the session; this entry then describes an intention, not a fact, until a later entry corrects it.
+
+**Open after U6, and to be known before the first real exam:**
+
+- **The host is open with all 237 students allowed in, and four test exams of the test class are still published in production** (the owner did not answer what to do with them). Students of other classes do not see them; the two test students do.
+- **None of the owner's checks of the plan has been done:** the 82 screenshots of Arabic and dark mode; a CSV with Arabic text and a cell beginning with `=` in Excel; one exam with automatically scored questions compared by hand; reopening, correction, release with the review inside SEB; `/audit`; `/data-saya`. From earlier stages still unseen on the deployed system: a save refused after the deadline, the integrity events list, one exam's `.seb` file refused on another, rotation, importing an exam file, a pengajar refused another class.
+- **"No exam while a LokaKode class is working" stays in force** (`SPEC-LOKAUJIAN.md` §14): no load run was made with both at once.
+- 250 students hold, slowly at peak moments (all 150 Apache workers of LokaUjian in use). One cohort of about 110 is comfortable.
+- `SPEC-LOKAUJIAN.md` §15: before real use, one low-stakes quiz with a single class.
+- The header-on-phones gate (not a stage) is still open.
+- Next by `SPEC-LOKAUJIAN.md` §15: the platform stages A1 and A2, not part of LokaUjian. Not started.
 
