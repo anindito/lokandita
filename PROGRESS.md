@@ -2,7 +2,7 @@
 
 **Header on phones — not a numbered stage, no tag — built on 2026-11-27 on the owner's bug report (the Portal's header wrapped into several rows at 360–412 px). Below 768 px every public header is now one row — logo, *Masuk*, a menu button that opens a panel with the links and the languages — on the Portal and, by the owner's word, on the landings of LokaKode and LokaUjian too; the header after login is unchanged. The change is in the shared package, so all five components are redeployed at the commit that holds this entry. **Measured in a headless Chromium only; the owner's gate (DevTools at six widths, three languages, logged out and in, light and dark) is not done yet.** See "Header on phones" at the end of this file.**
 
-**LokaUjian stage U5 — lecturer control, scoring and export (`SPEC-LOKAUJIAN.md` §7.3, §10, §11, §12, §13) — built and deployed on 2026-11-27; **the owner ran the gate on 2026-11-27 and reported every item passed: a lecturer-controlled session with two test students in real SEB 3.10.2, extra time, *Akhiri*, and both CSV files opened in Excel. Closed on the owner's instruction; all five components are redeployed at the commit that holds the gate result and the tag `lokaujian-u5` goes on it once smoke passes there.** Three things the gate did **not** exercise, by the server's record: no Arabic text was in any downloaded file, no answer began with `=` (so the formula guard was not triggered), and the exam had no automatically scored question (every score is 0 of 0). Reopening, correction, release, the review, the audit page and own data were not opened by anyone. The host is in maintenance. Next: U6 (readiness), not started; it begins in a new session with a plan. See "LokaUjian U5" and "Gate result for LokaUjian U5" at the end of this file.**
+**LokaUjian stage U5 — lecturer control, scoring and export (`SPEC-LOKAUJIAN.md` §7.3, §10, §11, §12, §13) — built and deployed on 2026-11-27; **the owner ran the gate on 2026-11-27 and reported every item passed: a lecturer-controlled session with two test students in real SEB 3.10.2, extra time, *Akhiri*, and both CSV files opened in Excel. Closed on the owner's instruction; all five components are redeployed at the commit that holds the gate result and the tag `lokaujian-u5` goes on it once smoke passes there.** Three things the gate did **not** exercise, by the server's record: no Arabic text was in any downloaded file, no answer began with `=` (so the formula guard was not triggered), and the exam had no automatically scored question (every score is 0 of 0). Reopening, correction, release, the review, the audit page and own data were not opened by anyone. The host is in maintenance. **Closed: on the owner's word all five components were redeployed at `225e513`, smoke 91 pass, 0 fail, tag `lokaujian-u5` on that commit** (see "Closing deploy of LokaUjian U5"). Next: U6 (readiness), begun 2026-11-27 with a plan for the owner's approval; nothing built yet. See "LokaUjian U5" and "Gate result for LokaUjian U5" at the end of this file.**
 
 **LokaUjian stage U4 — SEB enforcement and integrity events (`SPEC-LOKAUJIAN.md` §9.1, §9.3) — built and deployed on 2026-11-27 with `SEB_ENFORCEMENT=enabled`; **closed on the owner's order on 2026-11-27, tag `lokaujian-u4` on `926aee4`, all five components run that commit, smoke 85 pass, 0 fail.** By the owner's decision of 2026-11-27 the SEB configuration is **per ujian/kuis**, not per course. **The owner ran the gate on 2026-11-27: a real SEB 3.10.2 client was accepted and finished an exam, the same student was refused outside SEB, and a lecturer in Chrome got in** (see "Gate result for LokaUjian U4"). The host is in maintenance. See "LokaUjian U4" at the end of this file.**
 
@@ -2198,3 +2198,23 @@ Carried into U6, in addition to the list under "LokaUjian U5":
 - The deploy and `infra/smoke.sh` are run at the commit that holds this entry; their output is in the session. This file is not changed afterwards, because a later commit would make the commit check fail for every component.
 
 **The owner's gate:** Chrome DevTools at 360, 390, 412, 768, 1024 and 1440 px, in Indonesian, English and Arabic, logged out and logged in, light and dark — one row everywhere, nothing overlapping. Also worth one look on the real phone that showed the bug.
+
+### Closing deploy of LokaUjian U5 — 2026-11-27
+
+Recorded on the owner's word at the start of the U6 session: on 2026-11-27 all five components were redeployed at `225e513`, `infra/smoke.sh` passed with 91 pass and 0 fail, and the tag `lokaujian-u5` was placed. The output of that deploy and that smoke run is in the session that made them, not in this one.
+
+Read again at the start of U6 (2026-11-27 14:35 WIB, read-only):
+
+- `git rev-parse lokaujian-u5^{commit}` → `225e513da6727655c57c0f814b3d8ce5e3f385b0`; `git ls-remote --tags origin` lists `lokaujian-u5` on the same commit; `main` equals `origin/main`.
+- **The containers no longer run `225e513`.** After the closing deploy the header change ("Header on phones", above) was deployed: `GET /healthz` inside `auth`, `lokakode`, `portal` and `lokaujian` → each answers commit `cb387d310bb4f378ce43260529eb3d3f40360da8`, which is `HEAD`. So the deploy at `225e513` cannot be read from the server any more; it rests on the owner's word and on the tag.
+- `infra/smoke.sh` at `cb387d3` → `91 lulus, 0 gagal, 0 belum aktif`.
+- `infra/pemeliharaan.sh status` → `lokaujian.lokandita.com` in maintenance (503); the other three hosts open.
+- Counts only: 241 accounts have `lokaujian` in `app_access` (237 mahasiswa, 3 dosen, 1 superadmin — every active account; earlier entries say 238). Production schema `lokaujian`: 4 exams, 4 sessions, 5 attempts, none in progress, 1 picture.
+
+Not read again: `infra/tes-infra.sh`, backup and restore, any test suite.
+
+This entry is committed after that deploy, so `infra/smoke.sh` check 0 reports a different commit for every component until the next deploy. Nothing is deployed for it: the owner's instruction for U6 is not to deploy `lokakode`, `auth` or `portal` without asking.
+
+## LokaUjian U6 — readiness (started 2026-11-27)
+
+Begun with a plan for the owner's approval (`SPEC-LOKAUJIAN.md` §14 and §15, and both "Carried into U6" lists). **Nothing is built yet.**
