@@ -28,7 +28,7 @@ Smoke checks 13–18 are in `KONTRAK.md` §11 (13 since U0; 14 since U1; 15 sinc
 
 ## §12 Tests — after U0
 
-- Nothing left: the tests of U5 are in `KONTRAK.md` §12. The load test is U6.
+- Nothing left: the load test (`infra/uji-beban.sh`) and the judge queue warning's test were written into `KONTRAK.md` §12 in U6.
 
 ## §14 Export of a user's own data — U6
 

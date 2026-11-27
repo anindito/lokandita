@@ -10,3 +10,5 @@ writable/
 # status buka/tutup tiap host adalah keadaan server, bukan kode
 infra/caddy/bendera/*.buka
 judge/var/
+# hasil uji beban: keluaran dan log kontainer tes, bukan kode
+infra/beban-hasil/

@@ -28,6 +28,7 @@ return [
     'penjadwalHidup' => 'running',
     'penjadwalTidak' => 'not running',
     'penjadwalMati' => 'The LokaUjian scheduler is not running. The exam is still safe: time is still counted by the server and answers are still saved. Tell the superadmin.',
+    'judgeSibuk' => 'The server is busy judging LokaKode submissions: {0} judge jobs are waiting right now. The exam keeps running and answers are still saved, but pages may feel slower. If the exam has not started yet, it is better to wait until this notice disappears.',
     'waktuServer' => 'Server time',
     'muatUlang' => 'Reload',
     'pratinjau' => 'Preview the exam',

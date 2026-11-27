@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Libraries\AntreanJudge;
 use App\Libraries\Audit;
 use App\Libraries\Csv;
 use App\Libraries\Hasil;
@@ -117,6 +118,7 @@ final class SesiStaf extends BaseController
             'hitungan' => $pustaka->hitungan((int) $sesi['id']),
             'langsung' => $langsung,
             'denyut'   => Jadwal::denyut(),
+            'judge'    => AntreanJudge::baca(),
             'seb'      => SebUjian::aktif((int) $sesi['exam_id']),
             'sebWajib' => Seb::diberlakukan(),
             'peristiwa' => $pustaka->jumlahPeristiwa((int) $sesi['id']),
@@ -136,7 +138,8 @@ final class SesiStaf extends BaseController
         if ($sesi === null) {
             return $this->tidakDitemukan('session');
         }
-        $jam = static fn (?string $utc): ?string => $utc === null ? null : (new \DateTimeImmutable($utc, new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone('Asia/Jakarta'))->format('H:i:s');
+        $jam   = static fn (?string $utc): ?string => $utc === null ? null : (new \DateTimeImmutable($utc, new \DateTimeZone('UTC')))->setTimezone(new \DateTimeZone('Asia/Jakarta'))->format('H:i:s');
+        $judge = AntreanJudge::baca();
 
         return $this->response->setStatusCode(200)->setHeader('Cache-Control', 'no-store')->setJSON([
             'kini'      => $jam((string) $sesi['kini']),
@@ -144,6 +147,8 @@ final class SesiStaf extends BaseController
             'akhir'     => $sesi['mode'] === 'dikendalikan_dosen' && $sesi['started_at'] !== null ? $jam($sesi['akhir']) : null,
             'penjadwal' => Jadwal::denyut() !== null,
             'usai'      => (int) $sesi['usai'] === 1,
+            'judge'     => $judge,
+            'judge_teks' => lang('Sesi.judgeSibuk', [(int) $judge['antre']]),
         ] + $this->kendali()->langsung($sesi));
     }
 

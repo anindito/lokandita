@@ -66,6 +66,46 @@ if [ "$hidup" != "$pulih" ]; then
 	gagal "daftar skema/tabel hasil restore berbeda dari database yang hidup"
 fi
 
+# --- Isi tabel LokaUjian (tahap U6) -----------------------------------------
+# Daftar tabel yang sama belum berarti isinya kembali. Untuk tabel LokaUjian yang barisnya tidak
+# pernah dihapus (SPEC-LOKAUJIAN.md §13) jumlah baris hasil restore tidak boleh melebihi yang
+# hidup; dan bila jumlah jawaban sama serta tidak ada pengerjaan yang sedang berjalan, sidik
+# seluruh tabel `answers` dan `attempts` harus sama: setiap jawaban kembali persis.
+# Hanya angka yang dicetak.
+hitung() { # <kontainer>
+	docker exec -i "$1" sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N' <<'SQL'
+SELECT 'exams', COUNT(*) FROM lokaujian.exams UNION ALL
+SELECT 'exam_questions', COUNT(*) FROM lokaujian.exam_questions UNION ALL
+SELECT 'sessions', COUNT(*) FROM lokaujian.sessions UNION ALL
+SELECT 'attempts', COUNT(*) FROM lokaujian.attempts UNION ALL
+SELECT 'answers', COUNT(*) FROM lokaujian.answers UNION ALL
+SELECT 'integrity_events', COUNT(*) FROM lokaujian.integrity_events UNION ALL
+SELECT 'time_grants', COUNT(*) FROM lokaujian.time_grants UNION ALL
+SELECT 'images', COUNT(*) FROM lokaujian.images UNION ALL
+SELECT 'seb_configs', COUNT(*) FROM lokaujian.seb_configs UNION ALL
+SELECT 'audit_log', COUNT(*) FROM lokaujian.audit_log;
+SQL
+}
+sidik() { # <kontainer>
+	docker exec -i "$1" sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N' <<< 'CHECKSUM TABLE lokaujian.answers, lokaujian.attempts;' | awk '{ print $2 }' | paste -sd ' '
+}
+hitung_hidup="$(hitung mysql)"
+hitung_pulih="$(hitung "$NAMA")"
+echo "baris tabel LokaUjian (hasil restore / hidup):"
+paste <(echo "$hitung_pulih") <(echo "$hitung_hidup") | awk '{ printf "  %-18s %s / %s\n", $1, $2, $4 }'
+for t in attempts answers integrity_events images audit_log; do
+	p="$(awk -v t="$t" '$1 == t { print $2 }' <<< "$hitung_pulih")"
+	h="$(awk -v t="$t" '$1 == t { print $2 }' <<< "$hitung_hidup")"
+	[ "$p" -le "$h" ] || gagal "lokaujian.$t: hasil restore memuat $p baris, yang hidup hanya $h — baris tabel ini tidak pernah dihapus"
+done
+berjalan="$(docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N' <<< 'SELECT COUNT(*) FROM lokaujian.attempts WHERE submitted_at IS NULL;')"
+if [ "$berjalan" = "0" ] && [ "$(grep -E '^(attempts|answers)\s' <<< "$hitung_pulih")" = "$(grep -E '^(attempts|answers)\s' <<< "$hitung_hidup")" ]; then
+	[ "$(sidik mysql)" = "$(sidik "$NAMA")" ] || gagal "isi lokaujian.answers atau lokaujian.attempts hasil restore berbeda dari yang hidup, padahal jumlah barisnya sama dan tidak ada pengerjaan berjalan"
+	echo "  sidik answers dan attempts hasil restore sama dengan yang hidup: setiap jawaban kembali persis"
+else
+	echo "  sidik answers/attempts TIDAK dibandingkan: ada pengerjaan berjalan ($berjalan) atau ada jawaban sesudah backup dibuat"
+fi
+
 # --- Foto Portal -----------------------------------------------------------
 # 1. Arsip dibongkar ke direktori sementara di host (bukan ke volume yang hidup).
 tar -C "$bongkar" -xzf "$sumber/media.tar.gz" || gagal "media.tar.gz tidak dapat dibongkar"

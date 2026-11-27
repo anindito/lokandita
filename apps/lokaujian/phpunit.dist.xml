@@ -12,12 +12,18 @@
     failOnSkipped="true"
     failOnIncomplete="true"
     cacheDirectory="writable/.phpunit.cache"
+    defaultTestSuite="App"
 >
     <testsuites>
         <testsuite name="App">
             <directory>./tests</directory>
+            <!-- Uji beban punya suite sendiri dan hanya dijalankan infra/uji-beban.sh (KONTRAK.md §12). -->
+            <exclude>./tests/Beban</exclude>
             <!-- Tes kontrak paket bersama dijalankan di setiap aplikasi klien (sejak tahap U1). -->
             <directory>./vendor/lokandita/auth/tests</directory>
+        </testsuite>
+        <testsuite name="Beban">
+            <directory>./tests/Beban</directory>
         </testsuite>
     </testsuites>
 

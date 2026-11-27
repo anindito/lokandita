@@ -28,6 +28,7 @@ return [
     'penjadwalHidup' => 'berjalan',
     'penjadwalTidak' => 'tidak berjalan',
     'penjadwalMati' => 'Penjadwal LokaUjian sedang tidak berjalan. Ujian tetap aman: waktu tetap dihitung server dan jawaban tetap tersimpan. Beri tahu superadmin.',
+    'judgeSibuk' => 'Server sedang sibuk menilai kiriman LokaKode: {0} pekerjaan judge mengantre saat ini. Ujian tetap berjalan dan jawaban tetap tersimpan, tetapi halaman bisa terasa lebih lambat. Bila ujian belum dimulai, sebaiknya tunggu sampai peringatan ini hilang.',
     'waktuServer' => 'Waktu server',
     'muatUlang' => 'Muat ulang',
     'pratinjau' => 'Pratinjau ujian',

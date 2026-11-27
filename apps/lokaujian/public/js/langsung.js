@@ -14,6 +14,8 @@
     isi(q('[data-ringkas]'), d.ringkas_teks);
     var pita = q('[data-penjadwal]');
     if (pita) { pita.dataset.penjadwal = d.penjadwal ? 'hidup' : 'mati'; pita.hidden = d.penjadwal; }
+    var judge = q('[data-judge]');
+    if (judge && d.judge) { judge.dataset.judge = d.judge.sibuk ? 'sibuk' : 'lengang'; isi(judge, d.judge_teks); judge.hidden = !d.judge.sibuk; }
     var usang = d.keadaan !== akar.dataset.keadaan;
     d.baris.forEach(function (b) {
       var tr = akar.querySelector('tr[data-id="' + b.id + '"]');

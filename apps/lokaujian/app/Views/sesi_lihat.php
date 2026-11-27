@@ -33,6 +33,8 @@ $jalan = $sesi['ujian_status'] === 'terbit';
 </p>
 
 <div class="pita-bahaya" role="alert" data-penjadwal="<?= $denyut === null ? 'mati' : 'hidup' ?>"<?= $denyut === null ? '' : ' hidden' ?>><?= lang('Sesi.penjadwalMati') ?></div>
+<?php // Antrean judge LokaKode (SPEC-LOKAUJIAN.md §14): peringatan saja, tidak menghalangi apa pun. ?>
+<p class="kartu-peringatan" role="status" data-judge="<?= $judge['sibuk'] ? 'sibuk' : 'lengang' ?>"<?= $judge['sibuk'] ? '' : ' hidden' ?>><?= lang('Sesi.judgeSibuk', [(int) $judge['antre']]) ?></p>
 
 <div class="kartu">
     <dl>
