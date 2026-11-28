@@ -2417,3 +2417,27 @@ Measured by the agent (counts and states only; no row of a person was printed):
 **Not seen by the agent — the owner's statement, as the unedited sentences of the template:** in the browser, the LokaKode class page, participants and class move work, and the test student sees the same meetings and scores; the LokaUjian class list and exam participants are the same as before. The agent has no account and opened no page while logged in. **"Anything that looked wrong" was left blank by the owner**; this entry does not read that as "nothing".
 
 The tag `roster-a1` is on the commit that holds this entry. That commit differs from the deployed `c9b5eac` only in this file and was **not** redeployed, so as not to restart the containers for a text change; `infra/smoke.sh` check 0 fails until the next deploy. `tahap-a1` stays on `c9b5eac`.
+
+### Stage A2, step 1 — roster screens built in Akun Lokandita; LokaKode untouched (2026-11-28)
+
+The stage is **open**: no tag. Branch `a2-roster`. Plan and the owner's four decisions ("approve all"): `DECISIONS.md`, 2026-11-28; contract: `KONTRAK.md` §18 "Management screens".
+
+Done in this step:
+
+- LokaAuth has the roster screens under `/admin/` — overview, academic years with the new-year tool, courses, classes, pengajar, enrolment with preview from typed numbers or CSV, withdraw, move, graduate and undo — superadmin only, in `id`, `en` and `ar` (`app/Language/*/Roster.php`, 189 keys each, taken from LokaKode's wording). Code: `app/Libraries/Roster.php`, `RosterDaftar.php`, `app/Controllers/Admin/Roster/`, `app/Views/admin/roster/`.
+- Audit rows of these screens go to `identity.audit_log` with `app = 'roster'`, in the transaction of the change; `/admin/audit` has `roster` in its app filter.
+- New variable `ROSTER_SCHEMA` (LokaAuth): `.env.example`, `apps/auth/.env` on the server, `KONTRAK.md` §10, `infra/lib-tes.sh`. `infra/cek-env.sh` → `cek-env: LULUS`.
+- `infra/smoke.sh` check 21; `infra/tes.sh auth` builds `roster_test` in the production layout.
+- **LokaKode, LokaUjian and the Portal are not changed.** LokaKode's screens still work and `lokakode_app` still writes the roster; both apps write until step 2.
+
+Tests, all against real containers, on this tree:
+
+- `infra/tes.sh auth` → `OK (128 tests, 3045 assertions)`; 17 of them are new (`tests/Roster/`): every roster route refuses a pengampu, a pengajar and a mahasiswa with 403 for their own class and for another, and the test fails if `Routes.php` has a roster route it does not list; cross-class cases (an enrolment id of class B sent to class A, a move to another course, year or archived class, removing a pengajar through another class) change nothing; a class with a real LokaKode announcement cannot be deleted.
+- `infra/tes.sh lokaujian` → `OK (127 tests, 14445 assertions)`; `portal` → `OK (104 tests, 15000 assertions)`; `lokakode` → `OK (300 tests, 16769 assertions)`. The judge suite was not run: nothing it uses changed.
+- A bug found by the tests and fixed before any deploy: a class delete refused by a foreign key was answered with "Kelas dihapus" (`DECISIONS.md`).
+
+Not verified: no page was opened in a browser — the agent has no account. Arabic right-to-left and dark mode use the shared layout and styles and were only checked as "the page answers 200 in `ar` with `dir="rtl"` and no untranslated key"; **the owner must look at them.** The Arabic of the eleven new sentences was written by the agent and not read by an Arabic speaker.
+
+What happens with the commit that holds this entry: `infra/deploy.sh auth` only, then `infra/smoke.sh`. Check 0 will fail for `lokakode`, `portal` and `lokaujian`, which stay on the A1 commit on purpose until step 2. The output is in the session and is recorded in the next entry.
+
+Open — step 2, after the owner says the screens are proven: remove LokaKode's management screens and redirect their addresses, end `lokakode_app`'s write rights, copy LokaKode's old roster audit rows, move `data:pengajar` and `data:pendaftaran`, stop the curriculum seed creating courses and classes, roster stamp in the leaderboard cache key, test fixtures through `auth_app`, `SPEC.md` §3 and §5, `SPEC-LOKAUJIAN.md` §2 and §4, backup, deploy of all apps, smoke, gate, tag.

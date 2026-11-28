@@ -92,6 +92,13 @@ if [ -f "apps/auth/app/Database/Seeds/TesSeeder.php" ]; then
 	jalan auth php spark db:seed TesSeeder 2>&1 | grep -v '^$' | tail -n 3
 fi
 docker exec redis redis-cli -n 15 flushdb > /dev/null
+# Akun Lokandita mengelola roster (tahap A2): tes auth butuh roster_test dalam tata letak produksi,
+# yang dibuat migrasi LokaKode lalu dipindahkan (KONTRAK.md §18).
+if [ "$app" = "auth" ]; then
+	bangun lokakode
+	env_tes lokakode
+	skema_lokakode_tes
+fi
 layani auth auth-tes auth-internal-tes
 
 if [ "$app" != "auth" ]; then

@@ -2,5 +2,8 @@
     <a href="/admin/pengguna"><?= lang('Admin.pengguna') ?></a>
     <a href="/admin/pengguna/baru"><?= lang('Admin.tambah') ?></a>
     <a href="/admin/impor"><?= lang('Admin.impor.judul') ?></a>
+    <a href="/admin/roster"><?= lang('Roster.nav.roster') ?></a>
+    <a href="/admin/mata-kuliah"><?= lang('Roster.nav.matkul') ?></a>
+    <a href="/admin/tahun-ajaran"><?= lang('Roster.nav.tahun') ?></a>
     <a href="/admin/audit"><?= lang('Admin.audit.judul') ?></a>
 </nav>

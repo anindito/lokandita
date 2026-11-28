@@ -565,6 +565,7 @@ Each app validates its required variables at start and exits naming the missing 
 | `DB_DSN` (own schema) | ✔ | ✔ | ✔ | ✔ | ✔ |
 | `IDENTITY_READER_DSN` | | ✔ | ✔ | ✔ | |
 | `ROSTER_READER_DSN` (§18) | | | | ✔ | |
+| `ROSTER_SCHEMA` (§18; `roster`) | ✔ (since A2) | | | | |
 | `REDIS_URL` | ✔ | ✔ | ✔ | ✔ | ✔ |
 | `JUDGE_QUEUE_REDIS_URL` (the Redis DB that holds the judge queues, §6; read-only use) | | | | ✔ (since U6) | |
 | `AUTH_PUBLIC_URL`, `AUTH_LOGIN_URL` | | ✔ | ✔ | ✔ | |
@@ -622,6 +623,8 @@ Rules:
 
 `INSTANCE_SECRET` must never change once students have instances. It and `SEB_ENCRYPTION_KEY` are included in every backup.
 
+`ROSTER_SCHEMA` (LokaAuth only, since stage A2) is the name of the roster schema, `roster`. LokaAuth reaches the roster on the connection of `DB_DSN` (user `auth_app`), with this name in front of every roster table; it accepts only `roster` and, in tests, `roster_test` (`infra/tes.sh` rewrites it and refuses anything else).
+
 `ROSTER_READER_DSN` is `MySQLi://roster_reader:<password>@mysql:3306/roster` — the schema that holds the roster views (until stage A1 it was `lokakode`). The schema name appears nowhere in a reader's code, which connects through `Lokandita\Auth\RosterDb` and names only the views. Every reader app carries the same variable with the same value.
 
 Values are written without quotes.
@@ -655,6 +658,7 @@ Values are written without quotes.
   17. Safe Exam Browser of LokaUjian (stage U4, §23), asked as in check 8: `GET /seb` answers `200`, names the state of enforcement that the running container has and holds no link to a `.seb` file; `GET /seb/periksa` answers `200` and reports no SEB header; `GET /seb/unduh/UJI.seb` answers `404` (no public download); `GET /mata-kuliah/1/ujian/1/seb`, `/sesi/1/peristiwa`, `/ujian-saya/1/seb` and `/ujian/1/masuk` without a cookie each redirect to `AUTH_LOGIN_URL` with `next` equal to that address; the schema has `seb_configs` and `seb_exam_keys`; `SEB_ENCRYPTION_KEY` in the running container is 64 hexadecimal characters (never printed); `SEB_ENFORCEMENT` in the container equals `apps/lokaujian/.env`, and `disabled` passes with a warning line that says students are not required to use SEB.
   19. MySQL allows at least 500 connections (§9; since LokaUjian stage U6).
   20. the roster in the core (stage A1, §18), asked as MySQL root: the six roster tables are the only tables of `roster`; in `lokakode` the six old names are `SQL SECURITY INVOKER` views and there is no other view; the five contract views in `roster` have definer `auth_app`; six foreign keys of `lokakode` point into `roster`; the table privileges in `roster` are exactly `lokakode_app`'s four on the six tables and `roster_reader`'s `SELECT` on the five views; `roster_reader` has no privilege in any other schema; only `auth_app` has schema-wide rights on `roster`; `ROSTER_READER_DSN` in the running `lokaujian` and `lokaujian-jadwal` containers names the schema `roster`.
+  21. the roster screens of Akun Lokandita (stage A2, §18), asked at the public address of LokaAuth: `GET /admin/roster`, `/admin/tahun-ajaran`, `/admin/tahun-ajaran/baru`, `/admin/mata-kuliah`, `/admin/mata-kuliah/1` and `/admin/kelas/1` without a cookie each redirect to `/login` with `next` equal to that address; `ROSTER_SCHEMA` in the running `auth` container is `roster`.
 - `smoke.sh` additionally checks (as check 0) that every app container reports the current `HEAD` at `/healthz`.
 - In check 1 a host in maintenance must answer `503`, an open host `2xx`/`3xx`, and `www` a `301` to the apex; the certificate must validate.
 - Checks 3–5 become active in stage 5, check 6 in stage 7 and check 7 in stage 8, by a switch at the top of `smoke.sh`. Until then each prints `BELUM AKTIF`, is counted separately, and is not reported as passed.
@@ -674,6 +678,7 @@ Values are written without quotes.
 - The header of the shared layout is one row at every width (owner's rule of 2026-11-27). `Lokandita\Auth\Testing\Kepala` measures it in the browser — every visible item crosses one horizontal line, no two items touch, no text wraps, nothing leaves the screen — at 360, 390, 412, 768, 1024 and 1440 pixels. `apps/portal/tests/Peramban/KepalaTest.php` applies it to the Portal's landing and `/tentang` and to LokaKode's landing in Indonesian, English and Arabic, light and dark, and to the Portal after login; it also drives the menu button that holds the links and languages below 768 pixels (open, Escape, second click, click outside, widening, a link; focus; `aria-expanded`; the panel on the end side, left in Arabic). `apps/lokaujian/tests/Peramban/KepalaDepanTest.php` does the same for LokaUjian's landing. Fonts of a real phone are not the test browser's; the owner's gate in DevTools and on a phone stays.
 - With `TANGKAPAN=<host directory>` set, `infra/tes.sh` mounts that directory into the test container (`TANGKAPAN_DIR`) and the browser tests that take screenshots write them there; without it nothing is written.
 - For `lokaujian`, `infra/tes.sh` also builds LokaKode's image and recreates `lokakode_test` and `roster_test` in the layout of §18 (LokaKode's migrations, then `infra/mysql-pindah-roster.sh pindah lokakode_test`); LokaKode itself is not served. The same is done whenever `lokakode_test` is recreated — for `lokakode`, `portal` and `judge` too. `ROSTER_READER_DSN` of the app under test points at `roster_test`. Roster rows are written by the test code through `TES_ROSTER_TULIS_DSN` (user `lokakode_app`, schema `lokakode_test`, the old-name views), which the app under test does not use. LokaKode's suite gets `TES_ROSTER_READER_DSN` (`roster_reader` on `roster_test`) for `ViewRosterTest`. `apps/lokaujian/tests/RosterTest.php` proves that `roster_reader` reads the five views and nothing else, cannot write, and that `lokaujian_app` cannot touch the roster schema. Since stage U1 the shared client test (`packages/lokandita-auth/tests`) runs in LokaUjian's suite as it does in LokaKode's and the Portal's; its users get access to the app under test in addition to `portal` and `lokakode`.
+- Since stage A2, for `auth`, `infra/tes.sh` recreates `lokakode_test` and `roster_test` in the same way, because LokaAuth's roster screens are tested on the production layout; `ROSTER_SCHEMA` of `auth-tes` is rewritten to `roster_test` and anything else is refused. The test that a class with LokaKode data cannot be deleted writes one real LokaKode row as `lokakode_app` (`TES_LOKAKODE_DSN`). Roster rows of tests are prepared with `Lokandita\Auth\Testing\RosterFixtures` in the shared package.
 - Since stage U3, for `lokaujian`, `infra/tes.sh` also serves the same image a second time as `lokaujian-seb-tes` with `SEB_ENFORCEMENT=enabled` (`APP_SEB_TES_URL`; `lokaujian-tes` has `disabled`), starts the headless Chromium of the paragraph above with `lokaujian.lokandita.com` mapped to `lokaujian-tes` and every other name unresolvable, and runs `php spark ujian:jadwal --sekali` once against the test schema before PHPUnit. `apps/lokaujian/tests/Peramban/HalamanUjianTest.php` covers autosave, the countdown, resume after the browser is closed, working without a connection (network switched off through the DevTools Protocol), every paste path, copy and cut, takeover by a second page, the stop at the deadline, review and submit, and the waiting page; these tests fail, not skip, when the browser is missing. Tests that depend on time move the stored timestamps of the test schema (when an attempt started, when a session ends); the application under test keeps reading MySQL's clock. `tests/Jadwal/JadwalTest.php` runs the scheduler as a real process against Redis DB `15`. Since stage U4 `tests/Seb/SebUjianTest.php` runs against `lokaujian-seb-tes` and sends SEB headers it computes itself by the formula of §8, for the address of every request; no test can show that a real SEB client sends the same headers — that is the owner's gate. Since stage U6 `tests/Kendali/AntreanJudgeTest.php` fills the two judge queues in Redis DB `15` and reads the warning from the session page and the live view. Since stage U5 `tests/Kendali/KendaliTest.php` (live view, extra time and reopening, proven through the real save endpoint), `tests/Hasil/NilaiRilisTest.php` (scoring, correction with full rescore, release per class, the review inside SEB with computed headers), `tests/Hasil/CsvTest.php` (both files and the event file read back byte by byte and through a CSV parser: BOM, CRLF, both separators, Arabic text, line breaks inside an answer, formula cells, every answer present) and `tests/Hasil/AuditDataSayaTest.php` join, and `tests/Peramban/TampilanLangsungTest.php` drives the live view in the headless browser. No test can show that Excel displays the files correctly — that is the owner's gate.
 - **Load test of LokaUjian (stage U6, `SPEC-LOKAUJIAN.md` §14):** `infra/uji-beban.sh <students> [minutes] [--restart]` is the only way to run it; `infra/tes.sh lokaujian` does not (PHPUnit suite `Beban`, outside the default suite `App`). It shares `infra/lib-tes.sh` with `infra/tes.sh`: the same test image, the same refusal of any schema not ending in `_test` and any Redis DB other than `15`, invented accounts only.
   - **What is loaded:** `auth-tes` and `lokaujian-seb-tes` (enforcement on), behind a test Caddy (`caddy-beban`, plain HTTP), with a real scheduler on the test schema (`jadwal-beban`). `apps/lokaujian/tests/Beban/BebanTest.php` builds one exam of 40 questions (10 true/false, 20 multiple choice, 6 short, 4 long, one picture, both shuffles on) for one class of N students.
@@ -989,7 +994,7 @@ In an archived academic year a dosen can read these pages but not answer, post o
 
 ## 18. Academic roster (Lokandita core)
 
-The academic structure of `SPEC.md` §5 — academic years, courses, classes, teacher assignments, enrollments — is **platform data** since stage A1 (2026-11-28): it lives in the core schema `roster`, owned by `auth_app`, and every app reads it. Until stage A2 it is still managed on LokaKode's screens.
+The academic structure of `SPEC.md` §5 — academic years, courses, classes, teacher assignments, enrollments — is **platform data** since stage A1 (2026-11-28): it lives in the core schema `roster`, owned by `auth_app`, and every app reads it. It is managed in **Akun Lokandita** (LokaAuth), by a superadmin only — see "Management screens" below. Until step 2 of stage A2 LokaKode's own management screens still exist next to them.
 
 ### Where things are
 
@@ -1057,7 +1062,7 @@ What a reader may rely on:
 
 | MySQL user | On the `roster` schema | Until |
 |---|---|---|
-| `auth_app` | everything (owner). No LokaAuth code touches the roster yet; its screens come with stage A2 | |
+| `auth_app` | everything (owner). Written by LokaAuth's roster screens since stage A2 | |
 | `lokakode_app` | `SELECT`, `INSERT`, `UPDATE`, `DELETE` on the six tables, used only through the old-name views in its own schema. No DDL, nothing on the contract views | `INSERT`, `UPDATE`, `DELETE` end with stage A2, when the management screens move to Akun Lokandita; `SELECT` stays |
 | `roster_reader` | `SELECT` on the five contract views. Nothing on any table, no write privilege, nothing in any other schema | |
 | every other user | nothing | |
@@ -1066,6 +1071,28 @@ What a reader may rely on:
 - A reader stores `class_id`, `course_id`, `academic_year_id` as plain BIGINT UNSIGNED and `user_id` as CHAR(36), without foreign keys, and never joins its own schema with the roster: it first reads the ids it may see, then binds its own queries to them.
 - **LokaKode is not a reader app in that sense.** Its queries join the roster with its own tables, so it reads the roster on the connection of its own schema, through the old-name views, with the table rights above. After stage A2 those rights are read-only.
 - What cannot go through an old-name view: a foreign key (hence the six cross-schema keys above) and DDL (`ALTER TABLE`, `TRUNCATE`). A change to the shape of a roster table is no longer a LokaKode migration; it is LokaAuth's, from stage A2.
+
+### Management screens (Akun Lokandita, stage A2)
+
+All under `https://auth.lokandita.com/admin/`, behind the filter `sesi:superadmin`: a pengampu, a pengajar and a mahasiswa get 403 on every one of them, for their own class as for any other (`apps/auth/tests/Roster/HakRosterTest.php`, which also fails when a roster route exists that it does not list). The rules of each action are those of `SPEC.md` §5.
+
+| Route | What |
+|---|---|
+| `GET roster` | overview: active year, classes, active students, classes without a pengajar |
+| `GET` `POST tahun-ajaran`, `GET` `POST tahun-ajaran/{id}`, `POST tahun-ajaran/{id}/aktifkan` | list and create, edit, activate (archives the active one) |
+| `GET` `POST tahun-ajaran/baru`, `POST tahun-ajaran/baru/jalankan` | new-year tool: form, summary, run |
+| `GET mata-kuliah`, `GET mata-kuliah/baru`, `POST mata-kuliah`, `GET mata-kuliah/{id}`, `GET mata-kuliah/{id}/ubah`, `POST mata-kuliah/{id}` | courses: list, create, page with its classes per year, edit |
+| `POST mata-kuliah/{id}/kelas` | create a class (field `tahun`, default the active year) |
+| `GET kelas/{id}`, `GET kelas/{id}/ubah`, `POST kelas/{id}`, `POST kelas/{id}/arsip`, `POST kelas/{id}/hapus` | class page, edit, archive or reopen, delete when empty |
+| `POST kelas/{id}/pengajar`, `POST kelas/{id}/pengajar/hapus` | assign a pengajar by nomor induk, remove one |
+| `POST kelas/{id}/daftar`, `POST kelas/{id}/daftar/jalankan` | enrolment: preview (typed numbers and/or CSV, 1 MB, 2,000 numbers), run |
+| `POST kelas/{id}/mundur`, `pindah`, `lulus`, `batal-lulus` | withdraw, move within course and year, graduate, undo graduation |
+
+- An enrolment id sent by the browser counts only if that enrolment is in the class of the URL; a move is accepted only to another, not archived class of the same course and year.
+- **A class is deleted only when it has no enrolment and no move history**; the refusal states both counts. LokaAuth cannot see what other apps hold for a class. LokaKode's data is protected by the six cross-schema foreign keys: MySQL refuses the delete (1451) and the page says that LokaKode data depends on the class, without a count. **A reader app has no foreign key**, so nothing stops the delete of an empty class that a reader has stored something for; the reader must keep working, as "What a reader may rely on" says.
+- Every roster transaction throws on a failed statement (`App\Libraries\Roster::mulai`): CodeIgniter otherwise rolls back silently and the page would report success.
+
+**Audit.** A roster change and its audit row are written in one transaction, on one connection: the row goes to `identity.audit_log` (§3) with `app = 'roster'` and the action names LokaKode used (`tahun.*`, `matkul.*`, `kelas.*`, `pengajar.*`, `pendaftaran.*`). `target_id` is the user id when the target is a person, otherwise the id of the roster row; `detail` carries what LokaKode's row carried plus `target_tipe`, `course_id` and `class_id`. The page is `/admin/audit` with the filter `app = roster`. Roster rows written by LokaKode before the move stay in `lokakode.audit_log` and are copied here in step 2 of stage A2.
 
 ### How it is put in place
 

@@ -47,6 +47,38 @@ $routes->group('admin', ['filter' => 'sesi:superadmin'], static function (RouteC
     $routes->post('impor/jalankan', 'Admin\Impor::jalankan');
     $routes->get('kredensial/(:segment)', 'Admin\Kredensial::unduh/$1');
     $routes->get('audit', 'Admin\AuditLog::index');
+
+    // Roster akademik (SPEC.md §5, KONTRAK.md §18): sejak tahap A2 dikelola di sini, superadmin saja.
+    // Setiap rute baru WAJIB didaftarkan juga di tests/Roster/HakRosterTest.php.
+    $routes->get('roster', 'Admin\Roster\Ringkasan::index');
+    $routes->get('tahun-ajaran', 'Admin\Roster\TahunAjaran::index');
+    $routes->post('tahun-ajaran', 'Admin\Roster\TahunAjaran::simpan');
+    $routes->get('tahun-ajaran/baru', 'Admin\Roster\TahunAjaran::baruForm');
+    $routes->post('tahun-ajaran/baru', 'Admin\Roster\TahunAjaran::baruRingkas');
+    $routes->post('tahun-ajaran/baru/jalankan', 'Admin\Roster\TahunAjaran::baruJalankan');
+    $routes->get('tahun-ajaran/(:num)', 'Admin\Roster\TahunAjaran::sunting/$1');
+    $routes->post('tahun-ajaran/(:num)', 'Admin\Roster\TahunAjaran::perbarui/$1');
+    $routes->post('tahun-ajaran/(:num)/aktifkan', 'Admin\Roster\TahunAjaran::aktifkan/$1');
+    $routes->get('mata-kuliah', 'Admin\Roster\MataKuliah::index');
+    $routes->get('mata-kuliah/baru', 'Admin\Roster\MataKuliah::baru');
+    $routes->post('mata-kuliah', 'Admin\Roster\MataKuliah::simpan');
+    $routes->get('mata-kuliah/(:num)', 'Admin\Roster\MataKuliah::lihat/$1');
+    $routes->get('mata-kuliah/(:num)/ubah', 'Admin\Roster\MataKuliah::sunting/$1');
+    $routes->post('mata-kuliah/(:num)', 'Admin\Roster\MataKuliah::perbarui/$1');
+    $routes->post('mata-kuliah/(:num)/kelas', 'Admin\Roster\Kelas::simpan/$1');
+    $routes->get('kelas/(:num)', 'Admin\Roster\Kelas::lihat/$1');
+    $routes->get('kelas/(:num)/ubah', 'Admin\Roster\Kelas::sunting/$1');
+    $routes->post('kelas/(:num)', 'Admin\Roster\Kelas::perbarui/$1');
+    $routes->post('kelas/(:num)/arsip', 'Admin\Roster\Kelas::arsip/$1');
+    $routes->post('kelas/(:num)/hapus', 'Admin\Roster\Kelas::hapus/$1');
+    $routes->post('kelas/(:num)/pengajar', 'Admin\Roster\Kelas::tambahPengajar/$1');
+    $routes->post('kelas/(:num)/pengajar/hapus', 'Admin\Roster\Kelas::hapusPengajar/$1');
+    $routes->post('kelas/(:num)/daftar', 'Admin\Roster\Pendaftaran::pratinjau/$1');
+    $routes->post('kelas/(:num)/daftar/jalankan', 'Admin\Roster\Pendaftaran::jalankan/$1');
+    $routes->post('kelas/(:num)/mundur', 'Admin\Roster\Pendaftaran::mundur/$1');
+    $routes->post('kelas/(:num)/pindah', 'Admin\Roster\Pendaftaran::pindah/$1');
+    $routes->post('kelas/(:num)/lulus', 'Admin\Roster\Pendaftaran::lulus/$1');
+    $routes->post('kelas/(:num)/batal-lulus', 'Admin\Roster\Pendaftaran::batalLulus/$1');
 });
 
 // API internal (KONTRAK.md §5). Dari internet Caddy menjawab 404 untuk /internal/*.

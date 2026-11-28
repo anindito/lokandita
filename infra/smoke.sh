@@ -360,6 +360,18 @@ if [ "$skema_dsn" = "roster" ]; then ok "ROSTER_READER_DSN di kontainer lokaujia
 jadwal_dsn="$(docker exec lokaujian-jadwal sh -c 'printf %s "${ROSTER_READER_DSN##*/}"' 2> /dev/null || true)"
 if [ "$jadwal_dsn" = "roster" ]; then ok "ROSTER_READER_DSN di kontainer lokaujian-jadwal menunjuk skema roster"; else tidak "ROSTER_READER_DSN di kontainer lokaujian-jadwal menunjuk skema '$jadwal_dsn' (seharusnya roster)"; fi
 
+echo "21. roster dikelola di Akun Lokandita (tahap A2, KONTRAK.md §18)"
+# Halaman roster ada di kode LokaAuth yang berjalan dan tidak terbuka tanpa masuk: tanpa cookie
+# setiap alamatnya mengarah ke halaman login dengan next ke alamat itu sendiri.
+url_auth="$(nilai_env "$AKAR/apps/auth/.env" APP_URL)"
+for jalur in /admin/roster /admin/tahun-ajaran /admin/tahun-ajaran/baru /admin/mata-kuliah /admin/mata-kuliah/1 /admin/kelas/1; do
+	j="$(curl -sS -o /dev/null --max-time 15 -w '%{http_code} %{redirect_url}' "$url_auth$jalur" 2>&1 || true)"
+	harap="302 $url_auth/login?next=$(jq -rn --arg u "$url_auth$jalur" '$u|@uri')"
+	if [ "$j" = "$harap" ]; then ok "auth GET $jalur tanpa cookie -> $j"; else tidak "auth GET $jalur tanpa cookie -> '$j' (seharusnya '$harap')"; fi
+done
+skema_roster="$(docker exec auth printenv ROSTER_SCHEMA 2> /dev/null || true)"
+if [ "$skema_roster" = "roster" ]; then ok "ROSTER_SCHEMA di kontainer auth adalah roster"; else tidak "ROSTER_SCHEMA di kontainer auth: '$skema_roster' (seharusnya roster; lihat apps/auth/.env lalu deploy ulang auth)"; fi
+
 echo "14. jalan masuk LokaUjian (tahap U1, KONTRAK.md §19)"
 # Ditanyakan seperti cek 8: langsung ke kontainer lokaujian dari kontainer portal, dengan header
 # yang dikirim Caddy, supaya cek ini juga berjalan selagi host-nya masih pemeliharaan.

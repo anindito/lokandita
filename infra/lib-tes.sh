@@ -19,6 +19,7 @@ env_tes() {
 		-e 's#^(DB_DSN=.*/[a-z]+)$#\1_test#' \
 		-e 's#^(IDENTITY_READER_DSN=.*/identity)$#\1_test#' \
 		-e 's#^(ROSTER_READER_DSN=.*/)(roster|lokakode)$#\1roster_test#' \
+		-e 's#^ROSTER_SCHEMA=roster$#ROSTER_SCHEMA=roster_test#' \
 		-e 's#^(REDIS_URL=.*/)[0-9]+$#\115#' \
 		-e 's#^(JUDGE_QUEUE_REDIS_URL=.*/)[0-9]+$#\115#' \
 		-e 's#^AUTH_INTERNAL_URL=.*#AUTH_INTERNAL_URL=http://auth-internal-tes:8080#' \
@@ -33,6 +34,13 @@ env_tes() {
 		sed -n -E 's#^DB_DSN=(.*/identity)$#TES_IDENTITY_DSN=\1_test#p' apps/auth/.env >> "$tmp/$1.env"
 	fi
 	grep -q '^DB_DSN=.*_test$' "$tmp/$1.env" || gagal "env tes $1: DB_DSN tidak berakhiran _test"
+	# Akun Lokandita menulis roster (tahap A2, KONTRAK.md §18): dalam tes hanya roster_test.
+	if [ "$1" = "auth" ]; then
+		grep -q '^ROSTER_SCHEMA=roster_test$' "$tmp/$1.env" || gagal "env tes auth: ROSTER_SCHEMA bukan roster_test"
+		# Tes hapus kelas membuktikan kunci asing lintas skema dengan satu baris LokaKode sungguhan.
+		sed -n -E 's#^DB_DSN=(.*/lokakode)$#TES_LOKAKODE_DSN=\1_test#p' apps/lokakode/.env >> "$tmp/$1.env"
+		grep -q '^TES_LOKAKODE_DSN=.*_test$' "$tmp/$1.env" || gagal "env tes auth: TES_LOKAKODE_DSN tidak terbentuk"
+	fi
 	# Pembaca roster (KONTRAK.md §18): view kontraknya ada di roster_test (tahap A1), apa pun skema
 	# yang disebut .env produksi. Baris uji roster ditulis tes lewat koneksi khusus tes sebagai
 	# lokakode_app, lewat view nama lama di lokakode_test; aplikasi yang diuji tidak memakai DSN itu.

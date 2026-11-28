@@ -11,7 +11,7 @@
         <label for="app"><?= lang('Admin.aplikasi') ?></label>
         <select id="app" name="app">
             <option value=""><?= lang('Admin.semua') ?></option>
-            <?php foreach (['auth', 'portal', 'lokakode'] as $a): ?>
+            <?php foreach (['auth', 'portal', 'lokakode', 'roster'] as $a): ?>
                 <option value="<?= $a ?>" <?= $saring['app'] === $a ? 'selected' : '' ?>><?= $a ?></option>
             <?php endforeach ?>
         </select>
