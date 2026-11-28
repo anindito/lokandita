@@ -18,7 +18,7 @@ env_tes() {
 	sed -E \
 		-e 's#^(DB_DSN=.*/[a-z]+)$#\1_test#' \
 		-e 's#^(IDENTITY_READER_DSN=.*/identity)$#\1_test#' \
-		-e 's#^(ROSTER_READER_DSN=.*/lokakode)$#\1_test#' \
+		-e 's#^(ROSTER_READER_DSN=.*/)(roster|lokakode)$#\1roster_test#' \
 		-e 's#^(REDIS_URL=.*/)[0-9]+$#\115#' \
 		-e 's#^(JUDGE_QUEUE_REDIS_URL=.*/)[0-9]+$#\115#' \
 		-e 's#^AUTH_INTERNAL_URL=.*#AUTH_INTERNAL_URL=http://auth-internal-tes:8080#' \
@@ -33,12 +33,18 @@ env_tes() {
 		sed -n -E 's#^DB_DSN=(.*/identity)$#TES_IDENTITY_DSN=\1_test#p' apps/auth/.env >> "$tmp/$1.env"
 	fi
 	grep -q '^DB_DSN=.*_test$' "$tmp/$1.env" || gagal "env tes $1: DB_DSN tidak berakhiran _test"
-	# Pembaca roster (KONTRAK.md §18): view-nya ada di lokakode_test. Baris uji roster ditulis tes
-	# lewat koneksi khusus tes sebagai lokakode_app; aplikasi yang diuji tidak memakai DSN itu.
+	# Pembaca roster (KONTRAK.md §18): view kontraknya ada di roster_test (tahap A1), apa pun skema
+	# yang disebut .env produksi. Baris uji roster ditulis tes lewat koneksi khusus tes sebagai
+	# lokakode_app, lewat view nama lama di lokakode_test; aplikasi yang diuji tidak memakai DSN itu.
 	if grep -q '^ROSTER_READER_DSN=' "$tmp/$1.env"; then
-		grep -q '^ROSTER_READER_DSN=.*_test$' "$tmp/$1.env" || gagal "env tes $1: ROSTER_READER_DSN tidak berakhiran _test"
+		grep -q '^ROSTER_READER_DSN=.*/roster_test$' "$tmp/$1.env" || gagal "env tes $1: ROSTER_READER_DSN bukan roster_test"
 		sed -n -E 's#^DB_DSN=(.*/lokakode)$#TES_ROSTER_TULIS_DSN=\1_test#p' apps/lokakode/.env >> "$tmp/$1.env"
 		grep -q '^TES_ROSTER_TULIS_DSN=.*_test$' "$tmp/$1.env" || gagal "env tes $1: TES_ROSTER_TULIS_DSN tidak terbentuk"
+	fi
+	# Tes LokaKode memeriksa view kontrak roster dari sisi pembacanya (ViewRosterTest).
+	if [ "$1" = "lokakode" ]; then
+		sed -n -E 's#^ROSTER_READER_DSN=(.*/)(roster|lokakode)$#TES_ROSTER_READER_DSN=\1roster_test#p' apps/lokaujian/.env >> "$tmp/$1.env"
+		grep -q '^TES_ROSTER_READER_DSN=.*/roster_test$' "$tmp/$1.env" || gagal "env tes $1: TES_ROSTER_READER_DSN tidak terbentuk"
 	fi
 	grep -q '^REDIS_URL=.*/15$' "$tmp/$1.env" || gagal "env tes $1: REDIS_URL bukan DB 15"
 	# Antrean judge yang dibaca LokaUjian (KONTRAK.md §6): dalam tes juga DB 15, tidak pernah DB 0 produksi.
@@ -74,6 +80,17 @@ buat_ulang_skema() { # <skema_test>
 		| docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot' \
 		|| gagal "tidak bisa membuat ulang skema $1"
 	echo "skema $1 dibuat ulang (kosong)"
+}
+
+# skema_lokakode_tes — lokakode_test dan roster_test dari nol, dalam tata letak tahap A1
+# (KONTRAK.md §18): migrasi LokaKode membuat semua tabel di lokakode_test, lalu keenam tabel roster
+# dipindahkan ke roster_test dan view serta haknya dipasang, persis seperti di produksi.
+# lokakode_test dibuang lebih dulu: tabel anaknya memegang kunci asing ke roster_test.
+skema_lokakode_tes() {
+	buat_ulang_skema lokakode_test
+	buat_ulang_skema roster_test
+	migrasi lokakode lokakode_test
+	"$AKAR/infra/mysql-pindah-roster.sh" pindah lokakode_test
 }
 
 # jalan <app> <perintah…> — sekali jalan di image tes, di jaringan data dan internal.

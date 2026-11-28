@@ -276,7 +276,8 @@ maks="$(docker exec mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -ur
 if [[ "$maks" =~ ^[0-9]+$ ]] && [ "$maks" -ge 500 ]; then ok "max_connections = $maks"; else tidak "max_connections = '${maks:-tidak terbaca}' (seharusnya >= 500; infra/compose.yml)"; fi
 
 echo "13. view roster (KONTRAK.md §18): lokaujian membaca kelima view sebagai roster_reader, dan tidak lebih"
-# Dari dalam kontainer lokaujian, lewat ROSTER_READER_DSN miliknya. Hanya jumlah baris yang dicetak.
+# Dari dalam kontainer lokaujian, lewat ROSTER_READER_DSN miliknya — sejak tahap A1 skema inti
+# `roster`. Hanya jumlah baris yang dicetak.
 j="$(docker exec -i lokaujian php <<'PHP' 2>&1 || true
 <?php
 mysqli_report(MYSQLI_REPORT_OFF);
@@ -296,7 +297,8 @@ echo $u['user'], ' ', implode(',', $n), ' ', implode(',', $tolak);
 PHP
 )"
 read -r siapa hitung tolak <<< "$j"
-# Jumlah yang sama ditanyakan pada TABEL-nya, lewat lokakode (pemilik tabel itu).
+# Jumlah yang sama ditanyakan lewat lokakode, dengan nama lama tabelnya (sejak tahap A1 view
+# di atas tabel inti): kedua aplikasi melihat roster yang sama.
 tabel="$(docker exec -i lokakode php <<'PHP' 2>&1 || true
 <?php
 mysqli_report(MYSQLI_REPORT_OFF);
@@ -311,10 +313,52 @@ PHP
 if [ "$siapa" = "roster_reader" ] && [[ "$hitung" =~ ^[0-9]+(,[0-9]+){4}$ ]]; then
 	ok "roster_reader membaca kelima view (tahun, mata kuliah, kelas, pengajar, pendaftaran): $hitung baris"
 else
-	tidak "lokaujian tidak bisa membaca view roster: '$j' (deploy lokakode dulu: migrasi view dan infra/mysql-hak-roster.sh)"
+	tidak "lokaujian tidak bisa membaca view roster: '$j' (ROSTER_READER_DSN harus menunjuk skema roster; lihat infra/mysql-pindah-roster.sh status)"
 fi
 if [ "$tolak" = "1142,1142,1142" ]; then ok "roster_reader ditolak membaca tabel enrollments dan submissions, dan ditolak menulis ke view (1142)"; else tidak "roster_reader seharusnya ditolak tiga kali (1142,1142,1142): '$tolak'"; fi
 if [ -n "$hitung" ] && [ "$hitung" = "$tabel" ]; then ok "jumlah baris tiap view sama dengan tabelnya, ditanyakan lewat lokakode"; else tidak "jumlah baris view ($hitung) berbeda dari tabelnya ($tabel)"; fi
+
+echo "20. roster di inti Lokandita (tahap A1, KONTRAK.md §18)"
+# Ditanyakan sebagai root MySQL: letak tabel, view nama lama, kunci asing lintas skema, dan hak —
+# persis yang disebut kontrak, tidak lebih. Hanya angka dan nama obyek yang dicetak.
+mysql_root() { docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N' 2> /dev/null || true; }
+enam="'academic_years','courses','classes','class_teachers','enrollments','enrollment_moves'"
+letak="$(mysql_root <<SQL
+SELECT CONCAT_WS(',',
+ (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='roster' AND table_type='BASE TABLE' AND table_name IN ($enam)),
+ (SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='roster' AND table_type='BASE TABLE'),
+ (SELECT COUNT(*) FROM information_schema.views WHERE table_schema='lokakode' AND security_type='INVOKER' AND table_name IN ($enam)),
+ (SELECT COUNT(*) FROM information_schema.views WHERE table_schema='lokakode'),
+ (SELECT COUNT(*) FROM information_schema.views WHERE table_schema='roster' AND security_type='DEFINER' AND definer='auth_app@%' AND table_name LIKE 'roster\\_%'),
+ (SELECT COUNT(*) FROM information_schema.views WHERE table_schema='roster'));
+SQL
+)"
+if [ "$letak" = "6,6,6,6,5,5" ]; then
+	ok "enam tabel roster di skema roster; di lokakode keenam nama lama adalah view (INVOKER) dan tidak ada view lain; lima view kontrak di roster"
+else
+	tidak "letak roster: '$letak' (seharusnya 6,6,6,6,5,5 = tabel roster, semua tabel di roster, view nama lama, semua view di lokakode, view kontrak, semua view di roster)"
+fi
+kunci="$(mysql_root <<< "SELECT COUNT(*) FROM information_schema.referential_constraints WHERE constraint_schema='lokakode' AND unique_constraint_schema='roster';")"
+if [ "$kunci" = "6" ]; then ok "enam kunci asing tabel LokaKode menunjuk ke roster.classes dan roster.courses"; else tidak "kunci asing dari lokakode ke roster: '$kunci' (seharusnya 6)"; fi
+hak="$(mysql_root <<SQL
+SELECT CONCAT_WS(',',
+ (SELECT COUNT(*) FROM information_schema.table_privileges WHERE table_schema='roster' AND grantee="'lokakode_app'@'%'" AND privilege_type IN ('SELECT','INSERT','UPDATE','DELETE') AND table_name IN ($enam)),
+ (SELECT COUNT(*) FROM information_schema.table_privileges WHERE table_schema='roster' AND grantee="'roster_reader'@'%'" AND privilege_type='SELECT' AND table_name LIKE 'roster\\_%'),
+ (SELECT COUNT(*) FROM information_schema.table_privileges WHERE table_schema='roster'),
+ (SELECT COUNT(*) FROM information_schema.table_privileges WHERE grantee="'roster_reader'@'%'" AND table_schema NOT IN ('roster','roster_test')),
+ (SELECT COUNT(*) FROM information_schema.schema_privileges WHERE table_schema IN ('roster','roster\\_test') AND grantee <> "'auth_app'@'%'"),
+ (SELECT COUNT(*) FROM information_schema.column_privileges WHERE table_schema='roster'));
+SQL
+)"
+if [ "$hak" = "24,5,29,0,0,0" ]; then
+	ok "hak di skema roster: lokakode_app baca-tulis pada enam tabel (sampai A2), roster_reader SELECT pada lima view, tidak ada hak lain; hanya auth_app berhak atas skemanya"
+else
+	tidak "hak di skema roster: '$hak' (seharusnya 24,5,29,0,0,0 = lokakode_app, roster_reader, semua hak tabel, hak roster_reader di skema lain, hak skema selain auth_app, hak kolom)"
+fi
+skema_dsn="$(docker exec lokaujian sh -c 'printf %s "${ROSTER_READER_DSN##*/}"' 2> /dev/null || true)"
+if [ "$skema_dsn" = "roster" ]; then ok "ROSTER_READER_DSN di kontainer lokaujian menunjuk skema roster"; else tidak "ROSTER_READER_DSN di kontainer lokaujian menunjuk skema '$skema_dsn' (seharusnya roster)"; fi
+jadwal_dsn="$(docker exec lokaujian-jadwal sh -c 'printf %s "${ROSTER_READER_DSN##*/}"' 2> /dev/null || true)"
+if [ "$jadwal_dsn" = "roster" ]; then ok "ROSTER_READER_DSN di kontainer lokaujian-jadwal menunjuk skema roster"; else tidak "ROSTER_READER_DSN di kontainer lokaujian-jadwal menunjuk skema '$jadwal_dsn' (seharusnya roster)"; fi
 
 echo "14. jalan masuk LokaUjian (tahap U1, KONTRAK.md §19)"
 # Ditanyakan seperti cek 8: langsung ke kontainer lokaujian dari kontainer portal, dengan header

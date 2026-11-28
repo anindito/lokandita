@@ -21,10 +21,12 @@ tujuan="$dir/lokandita-$cap"
 mkdir "$tujuan"
 echo "[$(date -u +%FT%TZ)] backup -> $tujuan"
 
-# Skema *_test sengaja tidak ikut.
+# Skema *_test sengaja tidak ikut. `roster` (inti: roster akademik, KONTRAK.md §18) ditulis
+# SEBELUM `lokakode`: view nama lama dan kunci asing di lokakode menunjuk tabel di roster,
+# dan keduanya hanya bisa dipulihkan bersama.
 docker exec mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysqldump -uroot \
 	--single-transaction --routines --events --triggers --set-gtid-purged=OFF \
-	--databases identity lokakode portal lokaujian' | gzip > "$tujuan/db.sql.gz"
+	--databases identity roster lokakode portal lokaujian' | gzip > "$tujuan/db.sql.gz"
 
 # mysqldump menulis baris ini hanya bila selesai tanpa terputus.
 zcat "$tujuan/db.sql.gz" | tail -n 1 | grep -q '^-- Dump completed' \

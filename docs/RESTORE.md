@@ -6,7 +6,7 @@
 
 ```
 /srv/lokandita-data/backups/lokandita-YYYYmmdd-HHMMSS/     (time in UTC)
-├── db.sql.gz      mysqldump of identity, lokakode, portal, lokaujian (one consistent snapshot)
+├── db.sql.gz      mysqldump of identity, roster, lokakode, portal, lokaujian (one consistent snapshot)
 ├── env.tar.gz     every component's .env, including INSTANCE_SECRET and SEB_ENCRYPTION_KEY
 ├── media.tar.gz   the Portal's uploaded hero photos (Docker volume lokandita_portal_media, KONTRAK.md §16)
 ├── media-lokaujian.tar.gz   LokaUjian's question pictures (Docker volume lokandita_lokaujian_media, KONTRAK.md §20)
@@ -26,7 +26,7 @@ infra/uji-restore.sh                 # newest backup
 infra/uji-restore.sh <backup folder>
 ```
 
-It verifies the checksums, loads the dump into a temporary MySQL container that has no network, compares the list of schemas, tables and views (`identity`, `lokakode`, `portal`, `lokaujian`) with the live database, and removes the container. It then unpacks `media.tar.gz` into a temporary directory and checks that it holds only server-generated photo files, that every photo named in the restored `portal.foto` table is complete there (12 files each), that the published photo is among them, and that every file equals the one in the live volume. It does the same for `media-lokaujian.tar.gz`: only files named `soal/<32 hex>.png|jpg` may be in it, every row of the restored `lokaujian.images` table must have its file there with the size and SHA-256 recorded in that row, and every file must equal the one in the live volume. Since LokaUjian stage U6 it also prints the number of rows of LokaUjian's tables in the restored database next to the live one and, when no attempt is in progress and no answer was stored after the backup, compares `CHECKSUM TABLE` of `answers` and `attempts` — every answer must come back exactly. It never writes to the live database or the live volumes. Run it after each stage that adds tables. A backup made before the photos or the question pictures were included lacks `media.tar.gz` or `media-lokaujian.tar.gz` and is refused; make a new backup first.
+It verifies the checksums, loads the dump into a temporary MySQL container that has no network, compares the list of schemas, tables and views (`identity`, `roster`, `lokakode`, `portal`, `lokaujian`) with the live database, and removes the container. Since stage A1 it also checks the roster: the six tables of `roster` are printed with their row counts next to the live ones, the views with the old table names in `lokakode` must be readable in the restored database with the same counts, and the six foreign keys from `lokakode` into `roster` must have come back. It then unpacks `media.tar.gz` into a temporary directory and checks that it holds only server-generated photo files, that every photo named in the restored `portal.foto` table is complete there (12 files each), that the published photo is among them, and that every file equals the one in the live volume. It does the same for `media-lokaujian.tar.gz`: only files named `soal/<32 hex>.png|jpg` may be in it, every row of the restored `lokaujian.images` table must have its file there with the size and SHA-256 recorded in that row, and every file must equal the one in the live volume. Since LokaUjian stage U6 it also prints the number of rows of LokaUjian's tables in the restored database next to the live one and, when no attempt is in progress and no answer was stored after the backup, compares `CHECKSUM TABLE` of `answers` and `attempts` — every answer must come back exactly. It never writes to the live database or the live volumes. Run it after each stage that adds tables. A backup made before the photos or the question pictures were included lacks `media.tar.gz` or `media-lokaujian.tar.gz` and is refused; make a new backup first.
 
 ## Real restore
 
@@ -41,7 +41,7 @@ This overwrites live data. Do it only on purpose.
    ```
    zcat <backup folder>/db.sql.gz | docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot'
    ```
-7. `infra/deploy.sh auth`, `lokakode`, `portal`, `lokaujian`, then `infra/smoke.sh`. Deploying `lokakode` also gives `roster_reader` its right to read the roster views again (`infra/mysql-hak-roster.sh`); the views themselves come back with the dump.
+7. `infra/deploy.sh auth`, `lokakode`, `portal`, `lokaujian`, then `infra/smoke.sh`. The roster tables (schema `roster`), the views with the old names in `lokakode` and the contract views come back with the dump; deploying `lokakode` gives `lokakode_app` and `roster_reader` their rights on them again (`infra/mysql-pindah-roster.sh pasang`, `KONTRAK.md` §18).
 8. Restore the Portal's uploaded photos into the volume of the running `portal` container (after step 7, so that the container and its volume exist). Files that are already there are overwritten with the same content; nothing is deleted:
    ```
    docker exec -i -u www-data portal tar -C /srv/media -xzf - < <backup folder>/media.tar.gz
@@ -53,3 +53,18 @@ This overwrites live data. Do it only on purpose.
    ```
    Then open a question with a picture in a course's *Bank soal*. A picture whose file is missing is answered `404` and the LokaUjian log has a line `gambar.berkas_hilang`; exporting an exam that uses it fails with the same words.
 10. Open the hosts again with `infra/pemeliharaan.sh <app> off`.
+
+## The roster lives in two schemas (since stage A1)
+
+The six roster tables are in `roster`; LokaKode uses them through views with the old names and through foreign keys that cross from `lokakode` into `roster` (`KONTRAK.md` §18). Two consequences:
+
+- **Never restore `lokakode` without `roster`, or the other way round.** The dump holds both, `roster` first, and is loaded whole.
+- **A backup from before the move (before 2026-11-28, stage A1) does not fit the new layout.** In it the six tables are still in `lokakode`. To go back to such a backup, with every host in maintenance:
+  1. `infra/backup.sh` (the current state, in case you change your mind).
+  2. `SETUJU=produksi infra/mysql-pindah-roster.sh balik lokakode` — puts the tables back into `lokakode`; rows and ids are not touched.
+  3. Set the schema at the end of `ROSTER_READER_DSN` in `apps/lokaujian/.env` back to `lokakode`.
+  4. Load the old dump as in step 6 above, check out the commit of that time (the tag before `tahap-a1`), and deploy `lokakode` and `lokaujian` from it.
+
+  Everything written to the roster after that backup — enrolments, class moves — is lost, as with any restore.
+
+Check where the tables are at any time, without changing anything: `infra/mysql-pindah-roster.sh status`.

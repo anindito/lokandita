@@ -160,8 +160,10 @@ if ls "apps/$sasaran/app/Database/Migrations/"*.php > /dev/null 2>&1; then
 	if [ "$sasaran" = "auth" ]; then "$AKAR/infra/mysql-hak-reader.sh" identity; fi
 	if [ "$sasaran" = "lokakode" ]; then
 		"$AKAR/infra/mysql-hak-judge.sh" lokakode
-		# View roster (KONTRAK.md §18) dibuat migrasi LokaKode; hak bacanya diberikan di sini.
-		"$AKAR/infra/mysql-hak-roster.sh" lokakode
+		# Roster ada di skema inti `roster` (tahap A1, KONTRAK.md §18): view nama lama di skema
+		# LokaKode, view kontrak dan haknya dipasang ulang di sini. Ini TIDAK memindahkan tabel;
+		# bila tabelnya masih di lokakode (server baru), skrip gagal dan menyebut caranya.
+		"$AKAR/infra/mysql-pindah-roster.sh" pasang lokakode
 	fi
 fi
 

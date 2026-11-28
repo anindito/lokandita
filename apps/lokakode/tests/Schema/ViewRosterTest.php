@@ -8,9 +8,16 @@ use Lokandita\Auth\Testing\TestSchema;
 use PHPUnit\Framework\TestCase;
 
 /**
- * View roster (KONTRAK.md §18) terhadap MySQL sungguhan: kelima view ada, kolom dan tipenya
- * persis seperti di kontrak, dan isinya adalah isi tabel LokaKode — tidak lebih, tidak kurang.
- * Bahwa `roster_reader` hanya bisa membaca view ini dibuktikan dari sisi pembacanya
+ * Roster di skema inti (tahap A1, KONTRAK.md §18) terhadap MySQL sungguhan.
+ *
+ * Kontrak: kelima view roster_* ada di skema inti, kolom dan tipenya persis seperti di kontrak,
+ * dan isinya adalah isi tabel roster — tidak lebih, tidak kurang. View-nya dibaca di sini seperti
+ * aplikasi pembaca membacanya: sebagai `roster_reader` (TES_ROSTER_READER_DSN dari infra/tes.sh).
+ *
+ * Nama lama: di skema LokaKode keenam nama tabel roster kini view di atas tabel inti, dan
+ * LokaKode membaca serta menulis lewat nama itu seperti sebelumnya (DB_DSN, lokakode_app).
+ *
+ * Bahwa `roster_reader` tidak bisa membaca yang lain dibuktikan dari sisi pembacanya
  * (apps/lokaujian/tests) dan oleh infra/smoke.sh cek 13.
  */
 final class ViewRosterTest extends TestCase
@@ -30,11 +37,19 @@ final class ViewRosterTest extends TestCase
         'roster_class_teachers' => 'class_teachers', 'roster_enrollments' => 'enrollments',
     ];
 
-    private \mysqli $db;
+    private const NAMA_LAMA = ['academic_years', 'class_teachers', 'classes', 'courses', 'enrollment_moves', 'enrollments'];
+
+    private \mysqli $db;      // lokakode_app pada lokakode_test
+
+    private \mysqli $roster;  // roster_reader pada skema inti tes
+
+    private string $inti;
 
     protected function setUp(): void
     {
-        $this->db = TestSchema::connect((string) getenv('DB_DSN'));
+        $this->db     = TestSchema::connect((string) getenv('DB_DSN'));
+        $this->roster = TestSchema::connect((string) getenv('TES_ROSTER_READER_DSN'));
+        $this->inti   = TestSchema::schemaOf((string) getenv('TES_ROSTER_READER_DSN'));
         // Urutan mengikuti kunci asing. Hanya skema *_test (dijaga TestSchema).
         foreach (['announcements', 'clarifications', 'notifications', 'seb_exam_keys', 'seb_configs', 'ui_prefs', 'integrity_events', 'drafts', 'meeting_scores', 'problem_scores', 'submissions',
             'meeting_class_windows', 'problem_instances', 'meeting_problems', 'import_items', 'imports', 'problem_versions', 'problems',
@@ -45,20 +60,22 @@ final class ViewRosterTest extends TestCase
 
     public function testKelimaViewAdaDenganKolomDanTipeKontrak(): void
     {
-        $ada = array_column($this->db->query("SELECT table_name FROM information_schema.views WHERE table_schema = DATABASE() AND table_name LIKE 'roster\\_%' ORDER BY table_name")->fetch_all(), 0);
+        $this->assertNotSame(TestSchema::schemaOf((string) getenv('DB_DSN')), $this->inti, 'view kontrak tidak lagi berada di skema LokaKode');
+        $ada = array_column($this->roster->query('SHOW TABLES')->fetch_all(), 0);
+        sort($ada);
         $harap = array_keys(self::KONTRAK);
         sort($harap);
-        $this->assertSame($harap, $ada, 'view roster_* di skema ini harus persis kelima view kontrak');
+        $this->assertSame($harap, $ada, 'pembaca melihat persis kelima view kontrak di skema inti');
 
         foreach (self::KONTRAK as $view => $kolom) {
-            $baris = $this->db->query("SELECT column_name, column_type FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = '{$view}' ORDER BY ordinal_position")->fetch_all();
+            $baris = $this->roster->query("SELECT column_name, column_type FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = '{$view}' ORDER BY ordinal_position")->fetch_all();
             $this->assertSame($kolom, array_column($baris, 1, 0), "kolom {$view}");
         }
     }
 
     public function testViewDibuatDenganHakPembuatnya(): void
     {
-        $baris = $this->db->query("SELECT table_name, security_type FROM information_schema.views WHERE table_schema = DATABASE() AND table_name LIKE 'roster\\_%'")->fetch_all();
+        $baris = $this->roster->query("SELECT table_name, security_type FROM information_schema.views WHERE table_schema = DATABASE() AND table_name LIKE 'roster\\_%'")->fetch_all();
         $this->assertCount(5, $baris);
         foreach ($baris as [$view, $jenis]) {
             $this->assertSame('DEFINER', $jenis, "{$view}: pembaca tidak boleh memerlukan hak pada tabel");
@@ -83,21 +100,50 @@ final class ViewRosterTest extends TestCase
         foreach (self::KONTRAK as $view => $kolom) {
             $daftar = implode(', ', array_keys($kolom));
             $urut   = array_key_first($kolom) . ', ' . array_keys($kolom)[1];
-            $dariView  = $this->db->query("SELECT {$daftar} FROM {$view} ORDER BY {$urut}")->fetch_all();
+            $dariView  = $this->roster->query("SELECT {$daftar} FROM {$view} ORDER BY {$urut}")->fetch_all();
             $dariTabel = $this->db->query("SELECT {$daftar} FROM " . self::TABEL[$view] . " ORDER BY {$urut}")->fetch_all();
             $this->assertNotSame([], $dariView, "{$view} berisi baris uji");
             $this->assertSame($dariTabel, $dariView, "{$view} sama dengan tabelnya");
         }
         // Yang sengaja TIDAK ada di kontrak tidak boleh terbaca lewat view.
-        $this->assertSame(1054, $this->galat('SELECT capacity FROM roster_classes'));
-        $this->assertSame(1054, $this->galat('SELECT created_by FROM roster_enrollments'));
-        $this->assertSame(1054, $this->galat('SELECT assigned_by FROM roster_class_teachers'));
+        $this->assertSame(1054, $this->galat($this->roster, 'SELECT capacity FROM roster_classes'));
+        $this->assertSame(1054, $this->galat($this->roster, 'SELECT created_by FROM roster_enrollments'));
+        $this->assertSame(1054, $this->galat($this->roster, 'SELECT assigned_by FROM roster_class_teachers'));
     }
 
-    private function galat(string $sql): int
+    public function testNamaLamaDiSkemaLokaKodeAdalahViewAtasTabelInti(): void
+    {
+        $jenis = fn (string $skema): array => array_column($this->db->query("SELECT table_name, table_type FROM information_schema.tables WHERE table_schema = '{$skema}' AND table_name IN ('" . implode("','", self::NAMA_LAMA) . "') ORDER BY table_name")->fetch_all(), 1, 0);
+        $this->assertSame(array_fill_keys(self::NAMA_LAMA, 'VIEW'), $jenis((string) $this->db->query('SELECT DATABASE()')->fetch_row()[0]), 'keenam nama lama adalah view di skema LokaKode');
+        $this->assertSame(array_fill_keys(self::NAMA_LAMA, 'BASE TABLE'), $jenis($this->inti), 'keenam tabel roster ada di skema inti');
+
+        $view = $this->db->query("SELECT table_name, security_type, is_updatable FROM information_schema.views WHERE table_schema = DATABASE() ORDER BY table_name")->fetch_all();
+        $this->assertSame(self::NAMA_LAMA, array_column($view, 0), 'tidak ada view lain di skema LokaKode: view roster_* lama sudah dibuang');
+        foreach ($view as [$nama, $keamanan, $bisaDitulis]) {
+            $this->assertSame('INVOKER', $keamanan, "{$nama}: hak LokaKode atas roster ditentukan hak lokakode_app pada tabel inti, bukan oleh view");
+            $this->assertSame('YES', $bisaDitulis, "{$nama}: layar LokaKode masih menulis lewat nama lama sampai tahap A2");
+        }
+        // Semua kolom tabel ikut, dalam urutan yang sama.
+        foreach (self::NAMA_LAMA as $nama) {
+            $kolom = fn (string $skema): array => $this->db->query("SELECT column_name, column_type, is_nullable FROM information_schema.columns WHERE table_schema = '{$skema}' AND table_name = '{$nama}' ORDER BY ordinal_position")->fetch_all();
+            $this->assertSame($kolom($this->inti), $kolom((string) $this->db->query('SELECT DATABASE()')->fetch_row()[0]), "kolom view {$nama} sama dengan tabelnya");
+        }
+    }
+
+    public function testLokaKodeTidakMembacaViewKontrakDanTidakMengubahBentukTabelInti(): void
+    {
+        // View kontrak adalah milik pembaca; LokaKode memakai nama lamanya sendiri.
+        $this->assertSame(1142, $this->galat($this->db, "SELECT COUNT(*) FROM `{$this->inti}`.roster_enrollments"));
+        // DDL atas roster bukan lagi urusan LokaKode: lewat nama lama tidak mungkin, langsung ke inti ditolak.
+        $this->assertSame(1347, $this->galat($this->db, 'ALTER TABLE classes ADD COLUMN coba INT NULL'));
+        $this->assertSame(1142, $this->galat($this->db, "ALTER TABLE `{$this->inti}`.classes ADD COLUMN coba INT NULL"));
+        $this->assertSame(1142, $this->galat($this->db, "DROP TABLE `{$this->inti}`.enrollment_moves"));
+    }
+
+    private function galat(\mysqli $db, string $sql): int
     {
         try {
-            $this->db->query($sql);
+            $db->query($sql);
         } catch (\mysqli_sql_exception $e) {
             return $e->getCode();
         }

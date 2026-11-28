@@ -18,9 +18,11 @@
 # bisa dibuktikan di peramban: editor, CSP, blokir tempel, simpan draf otomatis.
 # Untuk portal, LokaKode tes (lokakode-tes, pada lokakode_test) juga dilayani:
 # gerbang tahap 11 menguji sesi yang sama di Portal dan LokaKode sungguhan.
-# Untuk lokaujian, skema lokakode_test dibuat oleh migrasi LokaKode (view roster,
-# KONTRAK.md §18) dan roster_reader diberi haknya di sana: LokaUjian membaca kelas
-# dan pendaftaran hanya lewat view itu. LokaKode sendiri tidak dilayani.
+# Untuk lokaujian, skema lokakode_test dibuat oleh migrasi LokaKode dan keenam tabel
+# roster dipindahkan ke roster_test (KONTRAK.md §18), tempat roster_reader diberi haknya:
+# LokaUjian membaca kelas dan pendaftaran hanya lewat lima view kontrak di sana.
+# LokaKode sendiri tidak dilayani.
+# Setiap kali lokakode_test dibuat ulang, roster_test ikut dibuat ulang (skema_lokakode_tes).
 #
 # Hanya skema berakhiran _test yang disentuh; skrip menolak nama lain.
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
@@ -54,8 +56,7 @@ if [ "$app" = "judge" ]; then
 	skema_auth=identity_test
 	bangun lokakode
 	env_tes lokakode
-	buat_ulang_skema lokakode_test
-	migrasi lokakode lokakode_test
+	skema_lokakode_tes
 	"$AKAR/infra/mysql-hak-judge.sh" lokakode_test
 	docker exec redis redis-cli -n 15 flushdb > /dev/null
 	"$AKAR/judge/siapkan-venv.sh" tes
@@ -95,18 +96,20 @@ layani auth auth-tes auth-internal-tes
 
 if [ "$app" != "auth" ]; then
 	skema_app="$(sed -n 's#^DB_DSN=.*/##p' "$tmp/$app.env")"
-	buat_ulang_skema "$skema_app"
-	if ls "apps/$app/app/Database/Migrations/"*.php > /dev/null 2>&1; then
-		migrasi "$app" "$skema_app"
+	if [ "$app" = "lokakode" ]; then
+		skema_lokakode_tes
+	else
+		buat_ulang_skema "$skema_app"
+		if ls "apps/$app/app/Database/Migrations/"*.php > /dev/null 2>&1; then
+			migrasi "$app" "$skema_app"
+		fi
 	fi
-	# LokaUjian membaca roster dari view di skema LokaKode (KONTRAK.md §18): skema itu dibuat
-	# oleh migrasi LokaKode sendiri, lalu roster_reader diberi hak SELECT pada kelima view.
+	# LokaUjian membaca roster dari lima view kontrak di skema inti (KONTRAK.md §18): tabelnya
+	# dibuat migrasi LokaKode, lalu dipindahkan ke roster_test seperti di produksi.
 	if [ "$app" = "lokaujian" ]; then
 		bangun lokakode
 		env_tes lokakode
-		buat_ulang_skema lokakode_test
-		migrasi lokakode lokakode_test
-		"$AKAR/infra/mysql-hak-roster.sh" lokakode_test
+		skema_lokakode_tes
 	fi
 	layani "$app" "$app-tes"
 	if [ "$app" = "lokaujian" ]; then
@@ -131,8 +134,7 @@ if [ "$app" != "auth" ]; then
 	if [ "$app" = "portal" ]; then
 		bangun lokakode
 		env_tes lokakode
-		buat_ulang_skema lokakode_test
-		migrasi lokakode lokakode_test
+		skema_lokakode_tes
 		layani lokakode lokakode-tes
 		# Tata letak halaman publik (kanan-ke-kiri) hanya bisa dibuktikan di peramban.
 		peramban_tes lokandita.com=portal-tes lokakode.lokandita.com=lokakode-tes auth.lokandita.com=auth-tes

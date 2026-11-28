@@ -4,6 +4,9 @@
 # dikirim lewat stdin, tidak lewat argumen perintah.
 #
 #   identity, identity_test  -> auth_app
+#   roster, roster_test      -> auth_app (inti Lokandita: roster akademik, KONTRAK.md §18; tabelnya
+#                               dipindahkan ke sana oleh infra/mysql-pindah-roster.sh, yang juga
+#                               memberi lokakode_app haknya pada tabel-tabel itu)
 #   lokakode, lokakode_test  -> lokakode_app
 #   portal,   portal_test    -> portal_app
 #   lokaujian, lokaujian_test -> lokaujian_app (tidak ada hak pada skema lain; roster dibaca
@@ -12,8 +15,8 @@
 #                               diberikan oleh infra/mysql-hak-reader.sh (KONTRAK.md §3)
 #   judge_worker             -> dibuat TANPA hak; hak pada judge_jobs diberikan
 #                               oleh infra/mysql-hak-judge.sh (KONTRAK.md §6)
-#   roster_reader            -> dibuat TANPA hak; hak SELECT pada lima view roster
-#                               diberikan oleh infra/mysql-hak-roster.sh (KONTRAK.md §18)
+#   roster_reader            -> dibuat TANPA hak; hak SELECT pada lima view roster di skema
+#                               roster diberikan oleh infra/mysql-hak-roster.sh (KONTRAK.md §18)
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 ENV="$AKAR/infra/.env"
 
@@ -35,6 +38,11 @@ for pasangan in "identity:auth_app:DB_PASSWORD_AUTH" "lokakode:lokakode_app:DB_P
 		tambah "CREATE DATABASE IF NOT EXISTS \`$s\` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;"
 		tambah "GRANT ALL PRIVILEGES ON \`${s//_/\\_}\`.* TO '$pengguna'@'%';"
 	done
+done
+# Skema inti untuk roster akademik: milik auth_app, seperti identity.
+for s in roster roster_test; do
+	tambah "CREATE DATABASE IF NOT EXISTS \`$s\` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;"
+	tambah "GRANT ALL PRIVILEGES ON \`${s//_/\\_}\`.* TO 'auth_app'@'%';"
 done
 buat_pengguna identity_reader DB_PASSWORD_IDENTITY_READER
 buat_pengguna judge_worker DB_PASSWORD_JUDGE

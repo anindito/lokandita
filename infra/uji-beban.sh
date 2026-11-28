@@ -84,9 +84,7 @@ buat_ulang_skema lokaujian_test
 migrasi lokaujian lokaujian_test
 bangun lokakode
 env_tes lokakode
-buat_ulang_skema lokakode_test
-migrasi lokakode lokakode_test
-"$AKAR/infra/mysql-hak-roster.sh" lokakode_test
+skema_lokakode_tes
 # Yang dibebani: image yang sama dengan penegakan SEB AKTIF, seperti produksi.
 layani lokaujian lokaujian-seb-tes "" lokaujian-seb
 

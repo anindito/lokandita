@@ -51,7 +51,7 @@ daftar() { # <kontainer>
 SELECT CONCAT(s.schema_name, IFNULL(CONCAT('.', t.table_name), ' (tanpa tabel)'))
   FROM information_schema.schemata s
   LEFT JOIN information_schema.tables t ON t.table_schema = s.schema_name
- WHERE s.schema_name IN ('identity','lokakode','portal','lokaujian')
+ WHERE s.schema_name IN ('identity','roster','lokakode','portal','lokaujian')
  ORDER BY 1;
 SQL
 }
@@ -63,7 +63,41 @@ sed 's/^/  /' <<< "$pulih"
 
 if [ "$hidup" != "$pulih" ]; then
 	diff <(echo "$hidup") <(echo "$pulih") | sed 's/^/  beda: /' || true
-	gagal "daftar skema/tabel hasil restore berbeda dari database yang hidup"
+	gagal "daftar skema/tabel hasil restore berbeda dari database yang hidup (backup dari sebelum skema roster ada, atau dari sebelum tabel roster pindah, tidak cocok lagi: buat backup baru dengan infra/backup.sh)"
+fi
+
+# --- Roster di inti (tahap A1, KONTRAK.md §18) --------------------------------
+# Enam tabel roster ada di skema `roster`; LokaKode memakainya lewat view bernama sama dan lewat
+# kunci asing lintas skema. Daftar tabel yang sama belum berarti keduanya pulih utuh: di hasil
+# restore view-nya harus terbaca dengan jumlah baris tabelnya, dan kunci asingnya harus ada.
+# Pendaftaran dan riwayat pindah kelas tidak pernah dihapus, jadi hasil restore tidak boleh
+# memuat lebih banyak daripada yang hidup. Hanya angka yang dicetak.
+roster_tabel=(academic_years courses classes class_teachers enrollments enrollment_moves)
+hitung_roster() { # <kontainer> <skema>
+	local sql="" t
+	for t in "${roster_tabel[@]}"; do sql+="SELECT '$t', COUNT(*) FROM \`$2\`.\`$t\`;"; done
+	docker exec -i "$1" sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N' <<< "$sql"
+}
+satu() { docker exec -i "$1" sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N' <<< "$2"; }
+di_inti="$(satu "$NAMA" "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='roster' AND table_type='BASE TABLE';")"
+if [ "$di_inti" = "6" ]; then
+	roster_pulih="$(hitung_roster "$NAMA" roster)"
+	roster_hidup="$(hitung_roster mysql roster)"
+	lewat_view="$(hitung_roster "$NAMA" lokakode)" || gagal "view nama lama di lokakode tidak terbaca di hasil restore"
+	echo "baris tabel roster (hasil restore / hidup):"
+	paste <(echo "$roster_pulih") <(echo "$roster_hidup") | awk '{ printf "  %-18s %s / %s\n", $1, $2, $4 }'
+	[ "$roster_pulih" = "$lewat_view" ] || gagal "hasil restore: jumlah baris lewat view nama lama di lokakode berbeda dari tabel di roster"
+	for t in enrollments enrollment_moves; do
+		p="$(awk -v t="$t" '$1 == t { print $2 }' <<< "$roster_pulih")"
+		h="$(awk -v t="$t" '$1 == t { print $2 }' <<< "$roster_hidup")"
+		[ "$p" -le "$h" ] || gagal "roster.$t: hasil restore memuat $p baris, yang hidup hanya $h — baris tabel ini tidak pernah dihapus"
+	done
+	kunci_pulih="$(satu "$NAMA" "SELECT COUNT(*) FROM information_schema.referential_constraints WHERE constraint_schema='lokakode' AND unique_constraint_schema='roster';")"
+	kunci_hidup="$(satu mysql "SELECT COUNT(*) FROM information_schema.referential_constraints WHERE constraint_schema='lokakode' AND unique_constraint_schema='roster';")"
+	[ "$kunci_pulih" = "$kunci_hidup" ] && [ "$kunci_pulih" = "6" ] || gagal "kunci asing dari lokakode ke roster: $kunci_pulih di hasil restore, $kunci_hidup hidup (seharusnya 6 dan 6)"
+	echo "  view nama lama di lokakode terbaca dengan jumlah yang sama; $kunci_pulih kunci asing lintas skema ikut pulih"
+else
+	echo "roster: backup ini dibuat SEBELUM tabel roster pindah ke inti (tahap A1) — skema roster-nya kosong, keenam tabel masih di lokakode; tidak ada yang dibandingkan untuk roster"
 fi
 
 # --- Isi tabel LokaUjian (tahap U6) -----------------------------------------
