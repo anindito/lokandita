@@ -132,7 +132,7 @@ final class AnalitikTest extends KodeCase
         $this->assertStringContainsString('Chart.js v4.6.1', $tamu->get('/grafik/chart.umd.min.js')->body);
 
         // Hanya AKTIF: yang mengundurkan diri keluar dari hitungan.
-        $this->db->query("UPDATE enrollments SET status = 'MENGUNDURKAN_DIRI' WHERE id = {$d['daftarFajar']}");
+        $this->roster->query("UPDATE enrollments SET status = 'MENGUNDURKAN_DIRI' WHERE id = {$d['daftarFajar']}");
         $r = $this->sebagai($d['pengajarA'])->get($url);
         $this->assertStringNotContainsString('Mahasiswa Fajar', $r->body);
         $this->assertMatchesRegularExpression('#data-rata>65<#', $r->body);
@@ -248,7 +248,7 @@ final class AnalitikTest extends KodeCase
         $this->assertSame(403, $mhs->get($daftar)->status);
 
         // Pindah kelas: kiriman ikut mahasiswanya. Pengajar A tidak lagi membacanya; pengajar B membacanya.
-        $this->db->query("UPDATE enrollments SET class_id = {$d['kelasXB']} WHERE id = {$d['daftarA']}");
+        $this->roster->query("UPDATE enrollments SET class_id = {$d['kelasXB']} WHERE id = {$d['daftarA']}");
         $this->assertSame(404, $http->get($satu)->status);
         $this->assertStringContainsString('rahasia-ani', $lain->get('/kelas/' . $d['kelasXB'] . '/kiriman/' . $kA)->body);
     }
@@ -299,8 +299,8 @@ final class AnalitikTest extends KodeCase
         $this->nilai($d, 'Eka', $d['pertemuanX2'], 30);
         $this->nilai($d, 'Fajar', $d['pertemuanX1'], 70);
         $this->nilai($d, 'mhsB', $d['pertemuanX1'], 55);
-        $this->db->query("UPDATE enrollments SET status = 'LULUS', graduated_on = '2026-11-01' WHERE id = {$d['daftarEka']}");
-        $this->db->query("UPDATE enrollments SET status = 'MENGUNDURKAN_DIRI' WHERE id = {$d['daftarFajar']}");
+        $this->roster->query("UPDATE enrollments SET status = 'LULUS', graduated_on = '2026-11-01' WHERE id = {$d['daftarEka']}");
+        $this->roster->query("UPDATE enrollments SET status = 'MENGUNDURKAN_DIRI' WHERE id = {$d['daftarFajar']}");
         $dasar = '/kelas/' . $d['kelasXA'] . '/ekspor/';
         $http  = $this->sebagai($d['pengajarA']);
 

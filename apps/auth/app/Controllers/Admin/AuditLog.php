@@ -53,7 +53,7 @@ final class AuditLog extends BaseController
         $akhir  = max(1, (int) ceil($jumlah / self::PER_HALAMAN));
         $hal    = min($akhir, max(1, (int) $this->request->getGet('hal')));
         $baris  = $q()->select('a.*, ak.nomor_induk AS aktor_nomor, ak.nama AS aktor_nama, tg.nomor_induk AS target_nomor, tg.nama AS target_nama')
-            ->orderBy('a.id', 'DESC')->limit(self::PER_HALAMAN, ($hal - 1) * self::PER_HALAMAN)->get()->getResultArray();
+            ->orderBy('a.created_at', 'DESC')->orderBy('a.id', 'DESC')->limit(self::PER_HALAMAN, ($hal - 1) * self::PER_HALAMAN)->get()->getResultArray();
 
         return $this->halaman('admin/audit', [
             'judul' => lang('Admin.audit.judul'), 'baris' => $baris, 'saring' => $s, 'hal' => $hal, 'akhir' => $akhir, 'jumlah' => $jumlah, 'pesan' => [],

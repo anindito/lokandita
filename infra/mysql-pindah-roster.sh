@@ -17,8 +17,8 @@
 #   - di skema LokaKode: enam view bernama sama dengan tabel lamanya (SQL SECURITY INVOKER, semua
 #     kolom), supaya kode LokaKode berjalan tanpa perubahan;
 #   - di skema roster: lima view kontrak roster_* (SQL SECURITY DEFINER, pembuat auth_app);
-#   - hak lokakode_app pada keenam tabel: SELECT, INSERT, UPDATE, DELETE. Tiga yang terakhir
-#     hanya sampai tahap A2, saat layar pengelolaan kelas pindah ke Akun Lokandita;
+#   - hak lokakode_app pada keenam tabel: SELECT saja. Sejak tahap A2 hanya auth_app (Akun
+#     Lokandita) yang menulis roster; hak INSERT, UPDATE, DELETE dari tahap A1 dicabut di sini;
 #   - hak roster_reader pada lima view kontrak (infra/mysql-hak-roster.sh).
 #
 # Dijalankan sebagai root MySQL: tidak ada pengguna aplikasi yang berhak atas kedua skema.
@@ -88,7 +88,8 @@ pasang() {
 		kolom="$(printf "SELECT GROUP_CONCAT(CONCAT('\`', column_name, '\`') ORDER BY ordinal_position SEPARATOR ', ') FROM information_schema.columns WHERE table_schema='%s' AND table_name='%s';\n" "$inti" "$t" | tanya)"
 		[ -n "$kolom" ] && [ "$kolom" != "NULL" ] || gagal "pasang: kolom $inti.$t tidak terbaca"
 		sql+="CREATE OR REPLACE DEFINER='lokakode_app'@'%' SQL SECURITY INVOKER VIEW \`$asal\`.\`$t\` AS SELECT $kolom FROM \`$inti\`.\`$t\`;"$'\n'
-		sql+="GRANT SELECT, INSERT, UPDATE, DELETE ON \`$inti\`.\`$t\` TO 'lokakode_app'@'%';"$'\n'
+		sql+="GRANT SELECT ON \`$inti\`.\`$t\` TO 'lokakode_app'@'%';"$'\n'
+		sql+="REVOKE IF EXISTS INSERT, UPDATE, DELETE ON \`$inti\`.\`$t\` FROM 'lokakode_app'@'%';"$'\n'
 	done
 	for v in "${VIEW_KONTRAK[@]}"; do
 		sql+="CREATE OR REPLACE DEFINER='auth_app'@'%' SQL SECURITY DEFINER VIEW \`$inti\`.\`$v\` AS SELECT ${KOLOM_KONTRAK[$v]} FROM \`$inti\`.\`${TABEL_KONTRAK[$v]}\`;"$'\n'
@@ -101,7 +102,7 @@ pasang() {
 		printf 'SELECT COUNT(*) FROM `%s`.`%s`;\n' "$inti" "$v" | tanya > /dev/null 2>&1 \
 			|| gagal "pasang: view $inti.$v tidak terbaca — auth_app belum berhak atas skema $inti? jalankan infra/mysql-init.sh, lalu '$0 pasang $asal'"
 	done
-	echo "mysql-pindah-roster: enam view nama lama di $asal, lima view kontrak di $inti, hak lokakode_app (baca-tulis sampai A2) dan roster_reader terpasang"
+	echo "mysql-pindah-roster: enam view nama lama di $asal, lima view kontrak di $inti, hak lokakode_app (hanya baca) dan roster_reader terpasang"
 }
 
 case "$aksi" in

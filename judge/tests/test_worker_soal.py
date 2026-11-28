@@ -11,7 +11,7 @@ from test_soal import GEN, soal_baik, versi
 
 
 @pytest.fixture()
-def versi_soal(db_app):
+def versi_soal(db_app, db_roster):
     """Satu soal dengan versi yang disetujui dan dipakai sebuah pertemuan, dibuat seperti oleh web."""
 
     def _buat(status: str = "APPROVED", **ganti) -> dict:
@@ -19,10 +19,12 @@ def versi_soal(db_app):
         mode = ganti.pop("comparison_mode", "trimmed")
         v = versi(**ganti)
         kode = "UJ" + uuid.uuid4().hex[:8].upper()
-        with db_app.cursor() as cur:
+        # Mata kuliah adalah baris roster: ditulis sebagai auth_app, bukan lokakode_app.
+        with db_roster.cursor() as cur:
             cur.execute("INSERT INTO courses (code, name, owner_id, created_at, updated_at)"
                         " VALUES (%s, 'Uji judge', 'pengampu-uji', UTC_TIMESTAMP(), UTC_TIMESTAMP())", (kode,))
             matkul = cur.lastrowid
+        with db_app.cursor() as cur:
             cur.execute("INSERT INTO meetings (course_id, number, title, language, created_at, updated_at)"
                         " VALUES (%s, 1, 'Uji', %s, UTC_TIMESTAMP(), UTC_TIMESTAMP())", (matkul, v["language"]))
             pertemuan = cur.lastrowid

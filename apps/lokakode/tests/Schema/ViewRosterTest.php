@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Schema;
 
+use Lokandita\Auth\Testing\RosterFixtures;
 use Lokandita\Auth\Testing\TestSchema;
 use PHPUnit\Framework\TestCase;
 
@@ -14,8 +15,9 @@ use PHPUnit\Framework\TestCase;
  * dan isinya adalah isi tabel roster — tidak lebih, tidak kurang. View-nya dibaca di sini seperti
  * aplikasi pembaca membacanya: sebagai `roster_reader` (TES_ROSTER_READER_DSN dari infra/tes.sh).
  *
- * Nama lama: di skema LokaKode keenam nama tabel roster kini view di atas tabel inti, dan
- * LokaKode membaca serta menulis lewat nama itu seperti sebelumnya (DB_DSN, lokakode_app).
+ * Nama lama: di skema LokaKode keenam nama tabel roster kini view di atas tabel inti. LokaKode
+ * MEMBACA lewat nama itu (DB_DSN, lokakode_app); sejak tahap A2 ia tidak bisa menulisnya — hanya
+ * auth_app (Akun Lokandita) yang menulis roster. Baris uji di sini ditulis sebagai auth_app.
  *
  * Bahwa `roster_reader` tidak bisa membaca yang lain dibuktikan dari sisi pembacanya
  * (apps/lokaujian/tests) dan oleh infra/smoke.sh cek 13.
@@ -43,19 +45,23 @@ final class ViewRosterTest extends TestCase
 
     private \mysqli $roster;  // roster_reader pada skema inti tes
 
+    private \mysqli $tulis;   // auth_app pada skema inti tes: satu-satunya penulis roster (tahap A2)
+
     private string $inti;
 
     protected function setUp(): void
     {
         $this->db     = TestSchema::connect((string) getenv('DB_DSN'));
         $this->roster = TestSchema::connect((string) getenv('TES_ROSTER_READER_DSN'));
+        $this->tulis  = TestSchema::connect((string) getenv('TES_ROSTER_TULIS_DSN'));
         $this->inti   = TestSchema::schemaOf((string) getenv('TES_ROSTER_READER_DSN'));
         // Urutan mengikuti kunci asing. Hanya skema *_test (dijaga TestSchema).
         foreach (['announcements', 'clarifications', 'notifications', 'seb_exam_keys', 'seb_configs', 'ui_prefs', 'integrity_events', 'drafts', 'meeting_scores', 'problem_scores', 'submissions',
             'meeting_class_windows', 'problem_instances', 'meeting_problems', 'import_items', 'imports', 'problem_versions', 'problems',
-            'meeting_concepts', 'course_base_concepts', 'meetings', 'enrollment_moves', 'enrollments', 'class_teachers', 'classes', 'courses', 'academic_years'] as $tabel) {
+            'meeting_concepts', 'course_base_concepts', 'meetings'] as $tabel) {
             $this->db->query("DELETE FROM {$tabel}");
         }
+        RosterFixtures::kosongkan($this->tulis);
     }
 
     public function testKelimaViewAdaDenganKolomDanTipeKontrak(): void
@@ -84,16 +90,16 @@ final class ViewRosterTest extends TestCase
 
     public function testIsiViewAdalahIsiTabel(): void
     {
-        $this->db->query("INSERT INTO academic_years (label, starts_on, ends_on, status, created_at, updated_at) VALUES ('2026/2027 Ganjil', '2026-08-01', '2027-01-31', 'active', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
-        $tahun = (int) $this->db->insert_id;
-        $this->db->query("INSERT INTO academic_years (label, starts_on, ends_on, status, created_at, updated_at) VALUES ('2025/2026 Genap', '2026-02-01', '2026-07-31', 'archived', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
-        $this->db->query("INSERT INTO courses (code, name, owner_id, created_at, updated_at) VALUES ('UJI101', 'Mata Kuliah Uji', 'pengampu-1', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
-        $matkul = (int) $this->db->insert_id;
-        $this->db->query("INSERT INTO classes (course_id, academic_year_id, name, capacity, archived_at, created_at, updated_at) VALUES ({$matkul}, {$tahun}, 'A', 40, NULL, UTC_TIMESTAMP(), UTC_TIMESTAMP())");
-        $kelasA = (int) $this->db->insert_id;
-        $this->db->query("INSERT INTO classes (course_id, academic_year_id, name, archived_at, created_at, updated_at) VALUES ({$matkul}, {$tahun}, 'B', '2026-11-01 02:03:04', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
-        $this->db->query("INSERT INTO class_teachers (class_id, user_id, assigned_by, assigned_at) VALUES ({$kelasA}, 'pengajar-1', 'pengampu-1', UTC_TIMESTAMP())");
-        $this->db->query("INSERT INTO enrollments (user_id, course_id, academic_year_id, class_id, status, graduated_on, created_by, created_at, updated_at)
+        $this->tulis->query("INSERT INTO academic_years (label, starts_on, ends_on, status, created_at, updated_at) VALUES ('2026/2027 Ganjil', '2026-08-01', '2027-01-31', 'active', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
+        $tahun = (int) $this->tulis->insert_id;
+        $this->tulis->query("INSERT INTO academic_years (label, starts_on, ends_on, status, created_at, updated_at) VALUES ('2025/2026 Genap', '2026-02-01', '2026-07-31', 'archived', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
+        $this->tulis->query("INSERT INTO courses (code, name, owner_id, created_at, updated_at) VALUES ('UJI101', 'Mata Kuliah Uji', 'pengampu-1', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
+        $matkul = (int) $this->tulis->insert_id;
+        $this->tulis->query("INSERT INTO classes (course_id, academic_year_id, name, capacity, archived_at, created_at, updated_at) VALUES ({$matkul}, {$tahun}, 'A', 40, NULL, UTC_TIMESTAMP(), UTC_TIMESTAMP())");
+        $kelasA = (int) $this->tulis->insert_id;
+        $this->tulis->query("INSERT INTO classes (course_id, academic_year_id, name, archived_at, created_at, updated_at) VALUES ({$matkul}, {$tahun}, 'B', '2026-11-01 02:03:04', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
+        $this->tulis->query("INSERT INTO class_teachers (class_id, user_id, assigned_by, assigned_at) VALUES ({$kelasA}, 'pengajar-1', 'pengampu-1', UTC_TIMESTAMP())");
+        $this->tulis->query("INSERT INTO enrollments (user_id, course_id, academic_year_id, class_id, status, graduated_on, created_by, created_at, updated_at)
             VALUES ('mhs-1', {$matkul}, {$tahun}, {$kelasA}, 'AKTIF', NULL, 'pengampu-1', UTC_TIMESTAMP(), UTC_TIMESTAMP()),
                    ('mhs-2', {$matkul}, {$tahun}, {$kelasA}, 'LULUS', '2026-11-20', 'pengampu-1', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
 
@@ -119,15 +125,65 @@ final class ViewRosterTest extends TestCase
 
         $view = $this->db->query("SELECT table_name, security_type, is_updatable FROM information_schema.views WHERE table_schema = DATABASE() ORDER BY table_name")->fetch_all();
         $this->assertSame(self::NAMA_LAMA, array_column($view, 0), 'tidak ada view lain di skema LokaKode: view roster_* lama sudah dibuang');
-        foreach ($view as [$nama, $keamanan, $bisaDitulis]) {
+        foreach ($view as [$nama, $keamanan]) {
             $this->assertSame('INVOKER', $keamanan, "{$nama}: hak LokaKode atas roster ditentukan hak lokakode_app pada tabel inti, bukan oleh view");
-            $this->assertSame('YES', $bisaDitulis, "{$nama}: layar LokaKode masih menulis lewat nama lama sampai tahap A2");
         }
         // Semua kolom tabel ikut, dalam urutan yang sama.
         foreach (self::NAMA_LAMA as $nama) {
             $kolom = fn (string $skema): array => $this->db->query("SELECT column_name, column_type, is_nullable FROM information_schema.columns WHERE table_schema = '{$skema}' AND table_name = '{$nama}' ORDER BY ordinal_position")->fetch_all();
             $this->assertSame($kolom($this->inti), $kolom((string) $this->db->query('SELECT DATABASE()')->fetch_row()[0]), "kolom view {$nama} sama dengan tabelnya");
         }
+    }
+
+    /**
+     * Tahap A2: hanya Akun Lokandita (auth_app) yang menulis roster. lokakode_app membaca keenam
+     * tabel, dan setiap penulisan — lewat nama lama maupun langsung ke skema inti — ditolak MySQL.
+     */
+    public function testLokaKodeMembacaTetapiTidakBisaMenulisRoster(): void
+    {
+        $this->tulis->query("INSERT INTO academic_years (label, starts_on, ends_on, status, created_at, updated_at) VALUES ('2026/2027 Ganjil', '2026-08-01', '2027-01-31', 'active', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
+        $tahun = (int) $this->tulis->insert_id;
+        $this->tulis->query("INSERT INTO courses (code, name, owner_id, created_at, updated_at) VALUES ('UJI101', 'Mata Kuliah Uji', 'pengampu-1', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
+        $matkul = (int) $this->tulis->insert_id;
+        $this->tulis->query("INSERT INTO classes (course_id, academic_year_id, name, created_at, updated_at) VALUES ({$matkul}, {$tahun}, 'A', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
+        $kelas = (int) $this->tulis->insert_id;
+        $this->tulis->query("INSERT INTO class_teachers (class_id, user_id, assigned_by, assigned_at) VALUES ({$kelas}, 'pengajar-1', 'pengampu-1', UTC_TIMESTAMP())");
+        $this->tulis->query("INSERT INTO enrollments (user_id, course_id, academic_year_id, class_id, status, created_by, created_at, updated_at) VALUES ('mhs-1', {$matkul}, {$tahun}, {$kelas}, 'AKTIF', 'pengampu-1', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
+        $daftar = (int) $this->tulis->insert_id;
+
+        // Membaca: lewat nama lama dan langsung.
+        foreach (['academic_years' => 1, 'courses' => 1, 'classes' => 1, 'class_teachers' => 1, 'enrollments' => 1, 'enrollment_moves' => 0] as $tabel => $n) {
+            $this->assertSame($n, (int) $this->db->query("SELECT COUNT(*) FROM {$tabel}")->fetch_row()[0], "baca {$tabel}");
+            $this->assertSame($n, (int) $this->db->query("SELECT COUNT(*) FROM `{$this->inti}`.{$tabel}")->fetch_row()[0], "baca {$this->inti}.{$tabel}");
+        }
+
+        // Menulis: ditolak untuk setiap tabel, setiap jenis, kedua jalan (langsung ke inti: 1142, command denied).
+        $tulis = [
+            'academic_years'   => ["INSERT INTO %s (label, starts_on, ends_on, status, created_at, updated_at) VALUES ('X', '2027-02-01', '2027-07-31', 'archived', UTC_TIMESTAMP(), UTC_TIMESTAMP())", "UPDATE %s SET label = 'Y' WHERE id = {$tahun}", "DELETE FROM %s WHERE id = {$tahun}"],
+            'courses'          => ["INSERT INTO %s (code, name, owner_id, created_at, updated_at) VALUES ('UJI102', 'X', 'p', UTC_TIMESTAMP(), UTC_TIMESTAMP())", "UPDATE %s SET owner_id = 'lain' WHERE id = {$matkul}", "DELETE FROM %s WHERE id = {$matkul}"],
+            'classes'          => ["INSERT INTO %s (course_id, academic_year_id, name, created_at, updated_at) VALUES ({$matkul}, {$tahun}, 'B', UTC_TIMESTAMP(), UTC_TIMESTAMP())", "UPDATE %s SET archived_at = UTC_TIMESTAMP() WHERE id = {$kelas}", "DELETE FROM %s WHERE id = {$kelas}"],
+            'class_teachers'   => ["INSERT INTO %s (class_id, user_id, assigned_by, assigned_at) VALUES ({$kelas}, 'pengajar-2', 'p', UTC_TIMESTAMP())", "UPDATE %s SET user_id = 'lain' WHERE class_id = {$kelas}", "DELETE FROM %s WHERE class_id = {$kelas}"],
+            'enrollments'      => ["INSERT INTO %s (user_id, course_id, academic_year_id, class_id, status, created_by, created_at, updated_at) VALUES ('mhs-2', {$matkul}, {$tahun}, {$kelas}, 'AKTIF', 'p', UTC_TIMESTAMP(), UTC_TIMESTAMP())", "UPDATE %s SET status = 'LULUS' WHERE id = {$daftar}", "DELETE FROM %s WHERE id = {$daftar}"],
+            'enrollment_moves' => ["INSERT INTO %s (enrollment_id, from_class_id, to_class_id, moved_by, moved_at) VALUES ({$daftar}, {$kelas}, {$kelas}, 'p', UTC_TIMESTAMP())", "UPDATE %s SET moved_by = 'lain'", 'DELETE FROM %s'],
+        ];
+        foreach ($tulis as $tabel => $daftarSql) {
+            foreach ($daftarSql as $sql) {
+                // Lewat nama lama (view INVOKER) MySQL menjawab 1142 atau 1356 ("definer/invoker of view lack
+                // rights"), tergantung pernyataannya; keduanya penolakan karena hak, dan tidak ada yang tertulis.
+                $this->assertContains($this->galat($this->db, sprintf($sql, $tabel)), [1142, 1356], sprintf($sql, $tabel));
+                $this->assertSame(1142, $this->galat($this->db, sprintf($sql, "`{$this->inti}`.{$tabel}")), sprintf($sql, "{$this->inti}.{$tabel}"));
+            }
+        }
+        $this->assertSame(1142, $this->galat($this->db, "TRUNCATE TABLE `{$this->inti}`.enrollment_moves"));
+
+        // Tidak ada yang berubah.
+        $this->assertSame(['2026/2027 Ganjil', 'pengampu-1', null, 'pengajar-1', 'AKTIF'], [
+            $this->db->query('SELECT label FROM academic_years')->fetch_row()[0],
+            $this->db->query('SELECT owner_id FROM courses')->fetch_row()[0],
+            $this->db->query('SELECT archived_at FROM classes')->fetch_row()[0],
+            $this->db->query('SELECT user_id FROM class_teachers')->fetch_row()[0],
+            $this->db->query('SELECT status FROM enrollments')->fetch_row()[0],
+        ]);
     }
 
     public function testLokaKodeTidakMembacaViewKontrakDanTidakMengubahBentukTabelInti(): void

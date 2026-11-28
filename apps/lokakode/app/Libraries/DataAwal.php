@@ -9,14 +9,12 @@ use Lokandita\Auth\ReaderDb;
 use Lokandita\Auth\UserDirectory;
 
 /**
- * Data produksi dari berkas CSV (SPEC.md §17, KONTRAK.md §13): penugasan
- * pengajar, pendaftaran mahasiswa, dan pencocokan jumlah berkas ↔ basis data.
+ * Pencocokan berkas CSV sumber dengan basis data (SPEC.md §17, KONTRAK.md §13). Hanya membaca.
+ * Menugaskan pengajar dan mendaftarkan mahasiswa dari berkas sejak tahap A2 dilakukan di
+ * Akun Lokandita: `docker exec -i auth php spark data:pengajar` dan `data:pendaftaran`.
  *
  * Semua fungsi mengembalikan baris laporan yang hanya berisi jumlah, nama kelas,
  * nomor baris berkas dan alasan — tidak pernah nama atau nomor induk mahasiswa.
- *
- * Pendaftaran memakai Pendaftaran::golongkan/jalankan, penugasan memakai aturan
- * yang sama dengan halaman kelas; tidak ada aturan kedua di sini.
  */
 final class DataAwal
 {
@@ -76,138 +74,6 @@ final class DataAwal
         }
 
         return $hasil;
-    }
-
-    /**
-     * Penugasan pengajar. Kolom: mata_kuliah, kelas, nip_pengajar.
-     *
-     * @param list<array<string, string|int>> $baris
-     *
-     * @return array{baris: list<string>, salah: int, ditulis: int}
-     */
-    public static function pengajar(array $baris, string $pelakuId, bool $tulis): array
-    {
-        $db     = db_connect();
-        $kelas  = self::kelasAktif();
-        $dosen  = UserDirectory::byNomorInduk(array_map(static fn ($b) => (string) $b['nip_pengajar'], $baris));
-        $lapor  = [];
-        $siap   = [];
-        $sudah  = 0;
-        $salah  = 0;
-        $pernah = [];
-
-        foreach ($baris as $b) {
-            $k     = $kelas[self::kunci((string) $b['mata_kuliah'], (string) $b['kelas'])] ?? null;
-            $d     = $dosen[(string) $b['nip_pengajar']] ?? null;
-            $galat = match (true) {
-                $k === null                    => 'kelasTidakAda',
-                $d === null                    => 'pengajarTidakAda',
-                $d['global_role'] !== 'dosen'  => 'pengajarBukanDosen',
-                $d['status'] !== 'active'      => 'pengajarTidakAktif',
-                isset($pernah[$k['id'] . '|' . $d['id']]) => 'barisGanda',
-                default                        => null,
-            };
-            if ($galat !== null) {
-                $salah++;
-                $lapor[] = sprintf('  baris %d (%s %s): %s', $b['_baris'], $b['mata_kuliah'], $b['kelas'], $galat);
-
-                continue;
-            }
-            $pernah[$k['id'] . '|' . $d['id']] = true;
-            if ($db->table('class_teachers')->where(['class_id' => $k['id'], 'user_id' => $d['id']])->countAllResults() > 0) {
-                $sudah++;
-            } else {
-                $siap[] = [$k, $d];
-            }
-        }
-        array_unshift($lapor, sprintf('penugasan baru: %d · sudah ada: %d · bermasalah: %d', count($siap), $sudah, $salah));
-
-        $ditulis = 0;
-        if ($tulis && $salah === 0) {
-            $db->transStart();
-            foreach ($siap as [$k, $d]) {
-                $db->table('class_teachers')->insert(['class_id' => $k['id'], 'user_id' => $d['id'], 'assigned_by' => $pelakuId, 'assigned_at' => Waktu::kini()]);
-                Audit::catat('pengajar.ditugaskan', 'user', $d['id'], ['kelas' => $k['name'], 'lewat' => 'cli'], (int) $k['course_id'], (int) $k['id'], $pelakuId);
-                $ditulis++;
-            }
-            $db->transComplete();
-        }
-
-        return ['baris' => $lapor, 'salah' => $salah, 'ditulis' => $ditulis];
-    }
-
-    /**
-     * Pendaftaran mahasiswa. Kolom: nomor_induk, mata_kuliah, kelas (kolom lain diabaikan).
-     *
-     * Yang boleh ada hanya: siap, aktifkanLagi, sudah. Golongan lain (akun tidak ada, bukan
-     * mahasiswa, aktif di kelas lain, lulus) membatalkan seluruh penulisan.
-     *
-     * @param list<array<string, string|int>> $baris
-     *
-     * @return array{baris: list<string>, salah: int, ditulis: int}
-     */
-    public static function pendaftaran(array $baris, string $pelakuId, bool $tulis): array
-    {
-        $kelas  = self::kelasAktif();
-        $lapor  = [];
-        $salah  = 0;
-        $perKelas = [];   // kunci kelas => [nomor induk => nomor baris]
-        $matkulOrang = []; // "KODE|nomor" => true, untuk baris ganda dalam satu mata kuliah
-
-        foreach ($baris as $b) {
-            $kunci = self::kunci((string) $b['mata_kuliah'], (string) $b['kelas']);
-            $nomor = (string) $b['nomor_induk'];
-            $ganda = strtoupper((string) $b['mata_kuliah']) . '|' . $nomor;
-            $galat = match (true) {
-                ! isset($kelas[$kunci])                               => 'kelasTidakAda',
-                preg_match('/^[A-Za-z0-9._-]{3,40}$/', $nomor) !== 1 => 'nomorInduk',
-                isset($matkulOrang[$ganda])                          => 'gandaDalamMataKuliah',
-                default                                              => null,
-            };
-            if ($galat !== null) {
-                $salah++;
-                $lapor[] = sprintf('  baris %d (%s %s): %s', $b['_baris'], $b['mata_kuliah'], $b['kelas'], $galat);
-
-                continue;
-            }
-            $matkulOrang[$ganda]      = true;
-            $perKelas[$kunci][$nomor] = (int) $b['_baris'];
-        }
-
-        $jumlah = ['siap' => 0, 'aktifkanLagi' => 0, 'sudah' => 0];
-        $ringkas = [];
-        foreach ($perKelas as $kunci => $orang) {
-            $k        = $kelas[$kunci];
-            $golongan = Pendaftaran::golongkan($k, array_map('strval', array_keys($orang)));
-            foreach ($golongan as $nama => $isi) {
-                if (isset($jumlah[$nama])) {
-                    $jumlah[$nama] += count($isi);
-
-                    continue;
-                }
-                foreach ($isi as $butir) {
-                    $salah++;
-                    $lapor[] = sprintf('  baris %d (%s %s): %s', $orang[$butir['nomor_induk']], $k['code'], $k['name'], $nama);
-                }
-            }
-            $catatan = array_sum(array_map(static fn ($n) => count(array_filter($golongan[$n], static fn ($x) => $x['tanpaAkses'] || $x['tidakAktif'])), ['siap', 'aktifkanLagi', 'sudah']));
-            $ringkas[] = sprintf('  %s %s: %d di berkas — %d baru, %d diaktifkan lagi, %d sudah terdaftar%s', $k['code'], $k['name'], count($orang),
-                count($golongan['siap']), count($golongan['aktifkanLagi']), count($golongan['sudah']),
-                $catatan > 0 ? " — PERHATIAN: {$catatan} akun tanpa akses lokakode atau tidak aktif" : '');
-        }
-        $lapor = array_merge(
-            [sprintf('pendaftaran baru: %d · diaktifkan lagi: %d · sudah terdaftar: %d · bermasalah: %d', $jumlah['siap'], $jumlah['aktifkanLagi'], $jumlah['sudah'], $salah)],
-            $ringkas, $lapor);
-
-        $ditulis = 0;
-        if ($tulis && $salah === 0) {
-            foreach ($perKelas as $kunci => $orang) {
-                $h = Pendaftaran::jalankan($kelas[$kunci], array_map('strval', array_keys($orang)), $pelakuId, 'cli');
-                $ditulis += $h['didaftarkan'] + $h['diaktifkan'];
-            }
-        }
-
-        return ['baris' => $lapor, 'salah' => $salah, 'ditulis' => $ditulis];
     }
 
     /**

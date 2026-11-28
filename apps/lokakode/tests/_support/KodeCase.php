@@ -6,6 +6,7 @@ namespace Tests\Support;
 
 use Lokandita\Auth\Testing\Fixtures;
 use Lokandita\Auth\Testing\Http;
+use Lokandita\Auth\Testing\RosterFixtures;
 use Lokandita\Auth\Testing\TestSchema;
 use PHPUnit\Framework\TestCase;
 
@@ -20,12 +21,17 @@ abstract class KodeCase extends TestCase
 
     protected \mysqli $idn; // identity_test
 
+    // roster_test sebagai auth_app. Sejak tahap A2 lokakode_app hanya MEMBACA roster (KONTRAK.md §18),
+    // jadi baris uji roster disiapkan lewat koneksi ini; aplikasi yang diuji tidak memegang DSN-nya.
+    protected \mysqli $roster;
+
     protected function setUp(): void
     {
         $this->db  = TestSchema::connect((string) getenv('DB_DSN'));
         $this->idn = TestSchema::connect((string) getenv('TES_IDENTITY_DSN'));
+        $this->roster = TestSchema::connect((string) getenv('TES_ROSTER_TULIS_DSN'));
         // Urutan mengikuti kunci asing. Hanya skema *_test (dijaga TestSchema).
-        $tabel = ['announcements', 'clarifications', 'notifications', 'seb_exam_keys', 'seb_configs', 'ui_prefs', 'integrity_events', 'drafts', 'meeting_scores', 'problem_scores', 'submissions', 'meeting_class_windows', 'judge_jobs', 'audit_log', 'problem_instances', 'meeting_problems', 'import_items', 'imports', 'problem_versions', 'problems', 'meeting_concepts', 'course_base_concepts', 'meetings', 'enrollment_moves', 'enrollments', 'class_teachers', 'classes', 'courses', 'academic_years'];
+        $tabel = ['announcements', 'clarifications', 'notifications', 'seb_exam_keys', 'seb_configs', 'ui_prefs', 'integrity_events', 'drafts', 'meeting_scores', 'problem_scores', 'submissions', 'meeting_class_windows', 'judge_jobs', 'audit_log', 'problem_instances', 'meeting_problems', 'import_items', 'imports', 'problem_versions', 'problems', 'meeting_concepts', 'course_base_concepts', 'meetings'];
         // Permintaan terakhir peramban tes sebelumnya (simpan draf otomatis) bisa tiba di tengah
         // pengosongan dan membuat kunci asing menolak; diulang sampai tiga kali.
         for ($coba = 1; ; $coba++) {
@@ -33,6 +39,7 @@ abstract class KodeCase extends TestCase
                 foreach ($tabel as $t) {
                     $this->db->query("DELETE FROM {$t}");
                 }
+                RosterFixtures::kosongkan($this->roster);
                 break;
             } catch (\mysqli_sql_exception $e) {
                 if ($coba === 3) {
@@ -81,12 +88,12 @@ abstract class KodeCase extends TestCase
 
     protected function tahun(string $label, string $status = 'active', string $mulai = '2026-08-01', string $akhir = '2027-01-31'): int
     {
-        Fixtures::insert($this->db, 'academic_years', [
+        Fixtures::insert($this->roster, 'academic_years', [
             'label' => $label, 'starts_on' => $mulai, 'ends_on' => $akhir, 'status' => $status,
             'created_at' => gmdate('Y-m-d H:i:s'), 'updated_at' => gmdate('Y-m-d H:i:s'),
         ]);
 
-        return (int) $this->db->insert_id;
+        return (int) $this->roster->insert_id;
     }
 
     /**
@@ -94,22 +101,22 @@ abstract class KodeCase extends TestCase
      */
     protected function matkul(string $kode, string $nama, array $pengampu): int
     {
-        Fixtures::insert($this->db, 'courses', [
+        Fixtures::insert($this->roster, 'courses', [
             'code' => $kode, 'name' => $nama, 'owner_id' => $pengampu['id'],
             'created_at' => gmdate('Y-m-d H:i:s'), 'updated_at' => gmdate('Y-m-d H:i:s'),
         ]);
 
-        return (int) $this->db->insert_id;
+        return (int) $this->roster->insert_id;
     }
 
     protected function kelas(int $matkul, int $tahun, string $nama, ?int $kapasitas = null): int
     {
-        Fixtures::insert($this->db, 'classes', [
+        Fixtures::insert($this->roster, 'classes', [
             'course_id' => $matkul, 'academic_year_id' => $tahun, 'name' => $nama, 'capacity' => $kapasitas,
             'created_at' => gmdate('Y-m-d H:i:s'), 'updated_at' => gmdate('Y-m-d H:i:s'),
         ]);
 
-        return (int) $this->db->insert_id;
+        return (int) $this->roster->insert_id;
     }
 
     /**
@@ -117,7 +124,7 @@ abstract class KodeCase extends TestCase
      */
     protected function ajar(int $kelas, array $dosen): void
     {
-        Fixtures::insert($this->db, 'class_teachers', [
+        Fixtures::insert($this->roster, 'class_teachers', [
             'class_id' => $kelas, 'user_id' => $dosen['id'], 'assigned_by' => 'uji', 'assigned_at' => gmdate('Y-m-d H:i:s'),
         ]);
     }
@@ -128,13 +135,13 @@ abstract class KodeCase extends TestCase
     protected function daftar(array $mahasiswa, int $kelas, string $status = 'AKTIF'): int
     {
         $k = $this->row("SELECT course_id, academic_year_id FROM classes WHERE id = {$kelas}");
-        Fixtures::insert($this->db, 'enrollments', [
+        Fixtures::insert($this->roster, 'enrollments', [
             'user_id' => $mahasiswa['id'], 'course_id' => $k['course_id'], 'academic_year_id' => $k['academic_year_id'],
             'class_id' => $kelas, 'status' => $status, 'created_by' => 'uji',
             'created_at' => gmdate('Y-m-d H:i:s'), 'updated_at' => gmdate('Y-m-d H:i:s'),
         ]);
 
-        return (int) $this->db->insert_id;
+        return (int) $this->roster->insert_id;
     }
 
     /**

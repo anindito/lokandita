@@ -22,7 +22,8 @@ use Lokandita\Auth\UserDirectory;
  * Ruang::pertemuan); tidak ada yang berangkat dari id di URL saja.
  *
  * Urutan disimpan di Redis (tanpa nama; hanya id dan angka) dan dibuang setiap
- * kali ada nilai yang dihitung ulang atau pendaftaran yang berubah. Bila Redis
+ * kali ada nilai yang dihitung ulang. Perubahan pendaftaran (di Akun Lokandita)
+ * mengganti kunci cachenya, lihat capRoster(). Bila Redis
  * tidak bisa dihubungi papan dihitung langsung dari MySQL.
  */
 final class Papan
@@ -41,7 +42,7 @@ final class Papan
      */
     public static function kelas(int $pertemuanId, int $kelasId): array
     {
-        return self::ambil("{$pertemuanId}:kelas:{$kelasId}", '
+        return self::ambil("{$pertemuanId}:kelas:{$kelasId}:" . self::capRoster('class_id', $kelasId), '
             SELECT ms.user_id, ms.score, ms.total_points, ms.surplus, ms.submissions, ms.reached_at, k.name AS kelas
             FROM enrollments e
             JOIN classes k ON k.id = e.class_id
@@ -58,7 +59,7 @@ final class Papan
      */
     public static function matkul(int $pertemuanId, int $tahunId): array
     {
-        return self::ambil("{$pertemuanId}:tahun:{$tahunId}", '
+        return self::ambil("{$pertemuanId}:tahun:{$tahunId}:" . self::capRoster('academic_year_id', $tahunId), '
             SELECT ms.user_id, ms.score, ms.total_points, ms.surplus, ms.submissions, ms.reached_at, k.name AS kelas
             FROM enrollments e
             JOIN classes k ON k.id = e.class_id
@@ -66,6 +67,25 @@ final class Papan
             JOIN meeting_scores ms ON ms.user_id = e.user_id AND ms.meeting_id = m.id
             WHERE k.academic_year_id = ? AND e.status = \'AKTIF\'
             ORDER BY ' . self::URUT, [$pertemuanId, $tahunId]);
+    }
+
+    /**
+     * Cap keadaan pendaftaran sebuah kelas atau tahun ajaran, bagian dari kunci cache.
+     *
+     * Sejak tahap A2 pendaftaran diubah di Akun Lokandita (KONTRAK.md §18), yang tidak bisa
+     * membuang cache LokaKode. Karena itu kuncinya memuat jumlah baris, jumlah yang AKTIF dan
+     * waktu perubahan terakhir: begitu ada yang pindah, mundur atau lulus, kuncinya berganti dan
+     * papan dihitung ulang. Kunci lama habis sendiri sesudah UMUR_DETIK.
+     *
+     * @param 'class_id'|'academic_year_id' $kolom
+     */
+    private static function capRoster(string $kolom, int $id): string
+    {
+        $b = db_connect()->query("
+            SELECT COUNT(*) AS n, COALESCE(SUM(status = 'AKTIF'), 0) AS aktif, COALESCE(MAX(updated_at), '') AS ubah
+            FROM enrollments WHERE {$kolom} = ?", [$id])->getRowArray();
+
+        return $b['n'] . '-' . $b['aktif'] . '-' . preg_replace('/\D/', '', (string) $b['ubah']);
     }
 
     /**
@@ -120,7 +140,7 @@ final class Papan
 
     /**
      * Membuang papan yang tersimpan: milik satu pertemuan (ada nilai yang dihitung
-     * ulang), atau semuanya (pendaftaran berubah: pindah kelas, mundur, lulus).
+     * ulang), atau semuanya.
      * Dipanggil SESUDAH transaksinya selesai.
      */
     public static function lupakan(?int $pertemuanId = null): void

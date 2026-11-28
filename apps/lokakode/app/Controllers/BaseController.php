@@ -95,41 +95,6 @@ abstract class BaseController extends Controller
     }
 
     /**
-     * Kelas untuk DIUBAH. Tiga lapis, semuanya di server:
-     *   - di luar lingkup lihat            -> 404 (sama dengan tidak ada);
-     *   - terlihat tetapi bukan pengelola  -> 403 (pengajar yang bukan pengampu);
-     *   - tahun ajarannya sudah diarsipkan -> 403 untuk dosen (hanya baca).
-     *
-     * @return array<string, mixed>|ResponseInterface baris kelas, atau jawaban penolakan
-     */
-    protected function kelasUntukDiubah(int $id): array|ResponseInterface
-    {
-        $kelas = $this->akademik()->kelas($id);
-        if ($kelas === null) {
-            return $this->tidakDitemukan('class');
-        }
-        if ((int) $kelas['boleh_kelola'] !== 1) {
-            return $this->terlarang();
-        }
-        if ($kelas['tahun_status'] !== 'active' && ! $this->akses()->superadmin()) {
-            return $this->terlarang('Kode.galat.tahunArsip');
-        }
-
-        return $kelas;
-    }
-
-    /**
-     * Benar bila pengguna ini boleh mengubah kelas itu (untuk menampilkan tombol;
-     * penolakan yang sebenarnya ada di kelasUntukDiubah()).
-     *
-     * @param array<string, mixed> $kelas baris dari Akademik::kelas()
-     */
-    protected function bolehUbahKelas(array $kelas): bool
-    {
-        return (int) $kelas['boleh_kelola'] === 1 && ($kelas['tahun_status'] === 'active' || $this->akses()->superadmin());
-    }
-
-    /**
      * Klarifikasi dan pengumuman kelas (KONTRAK.md §17): siapa pun yang melihat kelas itu boleh
      * menulis, kecuali dosen di tahun ajaran yang sudah diarsipkan (hanya baca).
      *

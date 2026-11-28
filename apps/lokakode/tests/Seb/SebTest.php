@@ -276,7 +276,7 @@ final class SebTest extends KodeCase
         $this->assertSame(403, $mhsY->get('/beranda', self::header('/beranda', $kunciY, self::BEK))->status);
         $this->assertSame(200, $mhsY->get('/beranda', self::header('/beranda', $kunciY, str_repeat('d2', 32)))->status);
         // Mahasiswa yang mundur dari mata kuliahnya tidak lagi punya konfigurasi.
-        $this->db->query("UPDATE enrollments SET status = 'MENGUNDURKAN_DIRI' WHERE id = {$d['daftarY']}");
+        $this->roster->query("UPDATE enrollments SET status = 'MENGUNDURKAN_DIRI' WHERE id = {$d['daftarY']}");
         $this->assertSame(403, $mhsY->get('/beranda', self::header('/beranda', $kunciY, str_repeat('d2', 32)))->status);
     }
 

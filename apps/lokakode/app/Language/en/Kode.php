@@ -2,6 +2,13 @@
 
 // LokaKode text: academic structure (SPEC.md §5).
 return [
+    // Sejak tahap A2 roster dikelola di Akun Lokandita (KONTRAK.md §18).
+    'roster' => [
+        'nav' => 'Manage classes',
+        'kelolaKelas' => 'Manage this class in Akun Lokandita',
+        'kelolaMatkul' => 'Manage courses in Akun Lokandita',
+        'dikelolaAdmin' => 'Classes, instructors and student lists are managed by the superadmin in Akun Lokandita. Contact the superadmin if something needs to change.',
+    ],
     'tidakDitemukan' => 'What you are looking for does not exist, or you are not allowed to see it.',
     'navigasi'       => 'LokaKode menu',
     'kosong'         => 'Nothing here yet.',

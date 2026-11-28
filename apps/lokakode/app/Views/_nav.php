@@ -10,7 +10,7 @@
     <a href="/beranda"><?= lang('Kode.nav.beranda') ?></a>
     <a href="/mata-kuliah"><?= lang('Kode.nav.matkul') ?></a>
     <?php if ($akses->superadmin()): ?>
-        <a href="/tahun-ajaran"><?= lang('Kode.nav.tahun') ?></a>
+        <a href="<?= esc(\App\Controllers\Dipindahkan::alamat('roster')) ?>"><?= lang('Kode.roster.nav') ?></a>
         <a href="/impor"><?= lang('Soal.impor.nav') ?></a>
         <a href="/audit"><?= lang('Kode.nav.audit') ?></a>
     <?php endif ?>

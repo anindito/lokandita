@@ -41,13 +41,18 @@ env_tes() {
 		sed -n -E 's#^DB_DSN=(.*/lokakode)$#TES_LOKAKODE_DSN=\1_test#p' apps/lokakode/.env >> "$tmp/$1.env"
 		grep -q '^TES_LOKAKODE_DSN=.*_test$' "$tmp/$1.env" || gagal "env tes auth: TES_LOKAKODE_DSN tidak terbentuk"
 	fi
-	# Pembaca roster (KONTRAK.md §18): view kontraknya ada di roster_test (tahap A1), apa pun skema
-	# yang disebut .env produksi. Baris uji roster ditulis tes lewat koneksi khusus tes sebagai
-	# lokakode_app, lewat view nama lama di lokakode_test; aplikasi yang diuji tidak memakai DSN itu.
+	# Pembaca roster (KONTRAK.md §18): view kontraknya ada di roster_test, apa pun skema yang
+	# disebut .env produksi.
 	if grep -q '^ROSTER_READER_DSN=' "$tmp/$1.env"; then
 		grep -q '^ROSTER_READER_DSN=.*/roster_test$' "$tmp/$1.env" || gagal "env tes $1: ROSTER_READER_DSN bukan roster_test"
-		sed -n -E 's#^DB_DSN=(.*/lokakode)$#TES_ROSTER_TULIS_DSN=\1_test#p' apps/lokakode/.env >> "$tmp/$1.env"
-		grep -q '^TES_ROSTER_TULIS_DSN=.*_test$' "$tmp/$1.env" || gagal "env tes $1: TES_ROSTER_TULIS_DSN tidak terbentuk"
+	fi
+	# Sejak tahap A2 hanya auth_app yang boleh menulis roster. Tes aplikasi klien menyiapkan baris
+	# uji roster lewat koneksi khusus tes sebagai auth_app pada roster_test; aplikasi yang diuji
+	# tidak memakai DSN itu (kontainernya dilayani dengan berkas env yang sama, tetapi kodenya
+	# tidak pernah membaca variabel TES_*).
+	if [ "$1" != "auth" ]; then
+		sed -n -E 's#^DB_DSN=(.*/)identity$#TES_ROSTER_TULIS_DSN=\1roster_test#p' apps/auth/.env >> "$tmp/$1.env"
+		grep -q '^TES_ROSTER_TULIS_DSN=.*/roster_test$' "$tmp/$1.env" || gagal "env tes $1: TES_ROSTER_TULIS_DSN tidak terbentuk"
 	fi
 	# Tes LokaKode memeriksa view kontrak roster dari sisi pembacanya (ViewRosterTest).
 	if [ "$1" = "lokakode" ]; then
@@ -164,6 +169,9 @@ env_judge_tes() {
 	grep -q '^DB_DSN=.*_test$' "$tmp/judge.env" || gagal "env tes judge: DB_DSN tidak berakhiran _test"
 	grep -q '^REDIS_URL=.*/15$' "$tmp/judge.env" || gagal "env tes judge: REDIS_URL bukan DB 15"
 	grep -q '^TES_APP_DSN=.*_test$' "$tmp/judge.env" || gagal "env tes judge: TES_APP_DSN tidak terbentuk"
+	# Mata kuliah uji ditulis sebagai auth_app pada roster_test: lokakode_app hanya membaca roster (tahap A2).
+	sed -n -E 's#^TES_ROSTER_TULIS_DSN=(.*)@mysql:3306/(roster_test)$#TES_ROSTER_DSN=\1@127.0.0.1:3306/\2#p' "$tmp/lokakode.env" >> "$tmp/judge.env"
+	grep -q '^TES_ROSTER_DSN=.*/roster_test$' "$tmp/judge.env" || gagal "env tes judge: TES_ROSTER_DSN tidak terbentuk"
 }
 
 # worker_tes — judge worker sungguhan di host, pada lokakode_test dan Redis DB 15.

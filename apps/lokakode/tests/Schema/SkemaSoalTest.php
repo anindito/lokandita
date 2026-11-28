@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Schema;
 
+use Lokandita\Auth\Testing\RosterFixtures;
 use Lokandita\Auth\Testing\TestSchema;
 use PHPUnit\Framework\TestCase;
 
@@ -13,24 +14,29 @@ use PHPUnit\Framework\TestCase;
  */
 final class SkemaSoalTest extends TestCase
 {
-    private \mysqli $db;
+    private \mysqli $db;     // lokakode_app pada lokakode_test
+
+    // auth_app pada roster_test: sejak tahap A2 hanya auth_app yang menulis roster (KONTRAK.md §18).
+    private \mysqli $roster;
 
     protected function setUp(): void
     {
         $this->db = TestSchema::connect((string) getenv('DB_DSN'));
+        $this->roster = TestSchema::connect((string) getenv('TES_ROSTER_TULIS_DSN'));
         // Urutan mengikuti kunci asing. Hanya skema *_test (dijaga TestSchema).
         foreach (['announcements', 'clarifications', 'notifications', 'ui_prefs', 'integrity_events', 'drafts', 'meeting_scores', 'problem_scores', 'submissions', 'meeting_class_windows', 'problem_instances', 'meeting_problems', 'import_items', 'imports', 'problem_versions', 'problems',
-            'meeting_concepts', 'course_base_concepts', 'meetings', 'enrollment_moves', 'enrollments', 'class_teachers', 'classes', 'courses'] as $tabel) {
+            'meeting_concepts', 'course_base_concepts', 'meetings'] as $tabel) {
             $this->db->query("DELETE FROM {$tabel}");
         }
+        RosterFixtures::kosongkan($this->roster);
     }
 
     private function matkul(string $kode): int
     {
-        $this->db->query("INSERT INTO courses (code, name, owner_id, created_at, updated_at)
+        $this->roster->query("INSERT INTO courses (code, name, owner_id, created_at, updated_at)
             VALUES ('{$kode}', 'Mata Kuliah Uji', 'pengampu-uji', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
 
-        return (int) $this->db->insert_id;
+        return (int) $this->roster->insert_id;
     }
 
     private function pertemuan(int $matkul, int $nomor, string $bahasa = 'cpp'): int

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Schema;
 
+use Lokandita\Auth\Testing\RosterFixtures;
 use Lokandita\Auth\Testing\TestSchema;
 use PHPUnit\Framework\TestCase;
 
@@ -13,47 +14,52 @@ use PHPUnit\Framework\TestCase;
  */
 final class SkemaAkademikTest extends TestCase
 {
-    private \mysqli $db;
+    private \mysqli $db;     // lokakode_app pada lokakode_test
+
+    // auth_app pada roster_test: sejak tahap A2 hanya auth_app yang menulis roster (KONTRAK.md §18).
+    private \mysqli $roster;
 
     protected function setUp(): void
     {
         $this->db = TestSchema::connect((string) getenv('DB_DSN'));
+        $this->roster = TestSchema::connect((string) getenv('TES_ROSTER_TULIS_DSN'));
         // Urutan mengikuti kunci asing. Hanya skema *_test (dijaga TestSchema).
-        foreach (['announcements', 'clarifications', 'notifications', 'ui_prefs', 'integrity_events', 'drafts', 'meeting_scores', 'problem_scores', 'submissions', 'meeting_class_windows', 'problem_instances', 'meeting_problems', 'import_items', 'imports', 'problem_versions', 'problems', 'meeting_concepts', 'course_base_concepts', 'meetings', 'enrollment_moves', 'enrollments', 'class_teachers', 'classes', 'courses', 'academic_years'] as $tabel) {
+        foreach (['announcements', 'clarifications', 'notifications', 'ui_prefs', 'integrity_events', 'drafts', 'meeting_scores', 'problem_scores', 'submissions', 'meeting_class_windows', 'problem_instances', 'meeting_problems', 'import_items', 'imports', 'problem_versions', 'problems', 'meeting_concepts', 'course_base_concepts', 'meetings'] as $tabel) {
             $this->db->query("DELETE FROM {$tabel}");
         }
+        RosterFixtures::kosongkan($this->roster);
     }
 
     private function tahun(string $label, string $status = 'archived'): int
     {
-        $this->db->query("INSERT INTO academic_years (label, starts_on, ends_on, status, created_at, updated_at)
+        $this->roster->query("INSERT INTO academic_years (label, starts_on, ends_on, status, created_at, updated_at)
             VALUES ('{$label}', '2026-08-01', '2027-01-31', '{$status}', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
 
-        return (int) $this->db->insert_id;
+        return (int) $this->roster->insert_id;
     }
 
     private function matkul(string $kode): int
     {
-        $this->db->query("INSERT INTO courses (code, name, owner_id, created_at, updated_at)
+        $this->roster->query("INSERT INTO courses (code, name, owner_id, created_at, updated_at)
             VALUES ('{$kode}', 'Mata Kuliah Uji', 'pengampu-uji', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
 
-        return (int) $this->db->insert_id;
+        return (int) $this->roster->insert_id;
     }
 
     private function kelas(int $matkul, int $tahun, string $nama): int
     {
-        $this->db->query("INSERT INTO classes (course_id, academic_year_id, name, created_at, updated_at)
+        $this->roster->query("INSERT INTO classes (course_id, academic_year_id, name, created_at, updated_at)
             VALUES ({$matkul}, {$tahun}, '{$nama}', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
 
-        return (int) $this->db->insert_id;
+        return (int) $this->roster->insert_id;
     }
 
     private function daftar(string $user, int $matkul, int $tahun, int $kelas): int
     {
-        $this->db->query("INSERT INTO enrollments (user_id, course_id, academic_year_id, class_id, created_by, created_at, updated_at)
+        $this->roster->query("INSERT INTO enrollments (user_id, course_id, academic_year_id, class_id, created_by, created_at, updated_at)
             VALUES ('{$user}', {$matkul}, {$tahun}, {$kelas}, 'uji', UTC_TIMESTAMP(), UTC_TIMESTAMP())");
 
-        return (int) $this->db->insert_id;
+        return (int) $this->roster->insert_id;
     }
 
     /**
@@ -84,7 +90,7 @@ final class SkemaAkademikTest extends TestCase
         $this->tahun('2024/2025 Genap'); // arsip boleh banyak
 
         $this->assertSame(1062, $this->ditolak(fn () => $this->tahun('2026/2027 Genap', 'active')));
-        $this->assertSame(1062, $this->ditolak(fn () => $this->db->query("UPDATE academic_years SET status = 'active' WHERE label = '2025/2026 Genap'")));
+        $this->assertSame(1062, $this->ditolak(fn () => $this->roster->query("UPDATE academic_years SET status = 'active' WHERE label = '2025/2026 Genap'")));
 
         $aktif = $this->db->query("SELECT label FROM academic_years WHERE status = 'active'")->fetch_all();
         $this->assertSame([['2026/2027 Ganjil']], $aktif);
@@ -92,7 +98,7 @@ final class SkemaAkademikTest extends TestCase
 
     public function testTahunAjaranBerakhirSesudahMulai(): void
     {
-        $this->assertSame(3819, $this->ditolak(fn () => $this->db->query("INSERT INTO academic_years (label, starts_on, ends_on, created_at, updated_at)
+        $this->assertSame(3819, $this->ditolak(fn () => $this->roster->query("INSERT INTO academic_years (label, starts_on, ends_on, created_at, updated_at)
             VALUES ('terbalik', '2027-01-31', '2026-08-01', UTC_TIMESTAMP(), UTC_TIMESTAMP())")));
     }
 
@@ -137,11 +143,11 @@ final class SkemaAkademikTest extends TestCase
 
         // Pindah kelas menyeberang mata kuliah.
         $id = $this->daftar('mhs-1', $m1, $t, $kelas1);
-        $this->assertSame(1452, $this->ditolak(fn () => $this->db->query("UPDATE enrollments SET class_id = {$kelas2} WHERE id = {$id}")));
+        $this->assertSame(1452, $this->ditolak(fn () => $this->roster->query("UPDATE enrollments SET class_id = {$kelas2} WHERE id = {$id}")));
 
         // Pindah di dalam mata kuliah yang sama: boleh.
         $kelas1b = $this->kelas($m1, $t, 'B');
-        $this->db->query("UPDATE enrollments SET class_id = {$kelas1b} WHERE id = {$id}");
+        $this->roster->query("UPDATE enrollments SET class_id = {$kelas1b} WHERE id = {$id}");
         $this->assertSame($kelas1b, (int) $this->db->query("SELECT class_id FROM enrollments WHERE id = {$id}")->fetch_row()[0]);
     }
 
@@ -152,12 +158,12 @@ final class SkemaAkademikTest extends TestCase
         $a = $this->kelas($m, $t, 'A');
         $b = $this->kelas($m, $t, 'B');
         $this->daftar('mhs-1', $m, $t, $a);
-        $this->db->query("INSERT INTO class_teachers (class_id, user_id, assigned_by, assigned_at) VALUES ({$b}, 'dosen-1', 'uji', UTC_TIMESTAMP())");
+        $this->roster->query("INSERT INTO class_teachers (class_id, user_id, assigned_by, assigned_at) VALUES ({$b}, 'dosen-1', 'uji', UTC_TIMESTAMP())");
 
-        $this->assertSame(1451, $this->ditolak(fn () => $this->db->query("DELETE FROM classes WHERE id = {$a}")));
+        $this->assertSame(1451, $this->ditolak(fn () => $this->roster->query("DELETE FROM classes WHERE id = {$a}")));
 
         // Kelas kosong boleh dihapus; penugasan pengajarnya ikut terhapus.
-        $this->db->query("DELETE FROM classes WHERE id = {$b}");
+        $this->roster->query("DELETE FROM classes WHERE id = {$b}");
         $this->assertSame(0, (int) $this->db->query('SELECT COUNT(*) FROM class_teachers')->fetch_row()[0]);
     }
 
@@ -167,8 +173,8 @@ final class SkemaAkademikTest extends TestCase
         $m  = $this->matkul('UJI101');
         $id = $this->daftar('mhs-1', $m, $t, $this->kelas($m, $t, 'A'));
         foreach (['LULUS', 'MENGUNDURKAN_DIRI', 'DIPINDAHKAN', 'AKTIF'] as $s) {
-            $this->db->query("UPDATE enrollments SET status = '{$s}' WHERE id = {$id}");
+            $this->roster->query("UPDATE enrollments SET status = '{$s}' WHERE id = {$id}");
         }
-        $this->assertSame(1265, $this->ditolak(fn () => $this->db->query("UPDATE enrollments SET status = 'HAPUS' WHERE id = {$id}")));
+        $this->assertSame(1265, $this->ditolak(fn () => $this->roster->query("UPDATE enrollments SET status = 'HAPUS' WHERE id = {$id}")));
     }
 }

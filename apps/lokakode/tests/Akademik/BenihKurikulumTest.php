@@ -52,39 +52,50 @@ final class BenihKurikulumTest extends KodeCase
         return $hasil;
     }
 
-    public function testPratinjauTidakMenulisLaluJalankanMembuatSemuanyaDanUlanganTidakMengubah(): void
+    public function testRosterTidakDibuatPertemuanDanKonsepDibuatDanUlanganTidakMengubah(): void
     {
         $d = $this->awal();
         $oleh = (string) $d['superadmin']['nomor_induk'];
 
+        // Roster kosong: mata kuliah tidak dibuat perintah ini (tahap A2), walau dengan --jalankan.
+        [$kode, $keluar] = $this->spark(['benih:kurikulum', '--oleh', $oleh, '--jalankan']);
+        $this->assertSame(0, $kode, $keluar);
+        $this->assertStringContainsString('KURANG DDP101 mata kuliah "Dasar-Dasar Pemrograman": belum ada. Buat di Akun Lokandita', $keluar);
+        $this->assertStringContainsString('ringkasan: 0 dibuat, 0 diubah, 3 beda', $keluar);
+        $this->assertSame(0, $this->hitung('SELECT COUNT(*) FROM courses') + $this->hitung('SELECT COUNT(*) FROM meetings') + $this->hitung('SELECT COUNT(*) FROM audit_log'));
+
+        // Ketiga mata kuliah dan satu kelas dibuat seperti oleh Akun Lokandita.
+        $ddp = $this->matkul('DDP101', 'Dasar-Dasar Pemrograman', $d['pengampu']);
+        $this->matkul('PBO301', 'Pemrograman Berorientasi Obyek', $d['pengampu']);
+        $this->matkul('TS-PY', 'Pemrograman untuk Teknik Sipil', $d['pengampu']);
+        $this->kelas($ddp, $d['tahun'], '7A');
+
         [$kode, $keluar] = $this->spark(['benih:kurikulum', '--oleh', $oleh]);
         $this->assertSame(0, $kode, $keluar);
         $this->assertStringContainsString('PRATINJAU: tidak ada yang ditulis', $keluar);
-        // 3 mata kuliah + 48 pertemuan + 9 kelas dibuat; konsep dasar PBO301 diisi.
-        $this->assertStringContainsString('ringkasan: 60 dibuat, 1 diubah, 0 beda', $keluar);
-        $this->assertSame(0, $this->hitung('SELECT COUNT(*) FROM courses'));
+        // 48 pertemuan dibuat; konsep dasar PBO301 diisi; 8 dari 9 kelas benih belum ada.
+        $this->assertStringContainsString('ringkasan: 48 dibuat, 1 diubah, 8 beda', $keluar);
+        $this->assertSame(0, $this->hitung('SELECT COUNT(*) FROM meetings'));
         $this->assertSame(0, $this->hitung('SELECT COUNT(*) FROM audit_log'));
 
         [$kode, $keluar] = $this->spark(['benih:kurikulum', '--oleh', $oleh, '--jalankan']);
         $this->assertSame(0, $kode, $keluar);
         $this->assertStringContainsString('DITULIS.', $keluar);
-        $this->assertStringContainsString('ringkasan: 60 dibuat, 1 diubah, 0 beda', $keluar);
+        $this->assertStringContainsString('ringkasan: 48 dibuat, 1 diubah, 8 beda', $keluar);
+        $this->assertStringContainsString('KURANG DDP101 kelas 7B (2026/2027): belum ada. Buat di Akun Lokandita', $keluar);
+        $this->assertStringNotContainsString('DDP101 kelas 7A', $keluar);
 
-        // Tiga mata kuliah milik pengampu itu, 16 pertemuan masing-masing dalam bahasanya.
+        // 16 pertemuan masing-masing dalam bahasanya; mata kuliah dan kelas tidak bertambah.
         $matkul = $this->db->query('
-            SELECT c.code, c.name, c.owner_id, COUNT(m.id) AS n, MIN(m.language) AS bahasa, COUNT(DISTINCT m.language) AS ragam
+            SELECT c.code, COUNT(m.id) AS n, MIN(m.language) AS bahasa, COUNT(DISTINCT m.language) AS ragam
             FROM courses c JOIN meetings m ON m.course_id = c.id GROUP BY c.id ORDER BY c.code')->fetch_all(MYSQLI_ASSOC);
         $this->assertSame([
-            ['code' => 'DDP101', 'name' => 'Dasar-Dasar Pemrograman', 'owner_id' => $d['pengampu']['id'], 'n' => '16', 'bahasa' => 'cpp', 'ragam' => '1'],
-            ['code' => 'PBO301', 'name' => 'Pemrograman Berorientasi Obyek', 'owner_id' => $d['pengampu']['id'], 'n' => '16', 'bahasa' => 'cpp', 'ragam' => '1'],
-            ['code' => 'TS-PY', 'name' => 'Pemrograman untuk Teknik Sipil', 'owner_id' => $d['pengampu']['id'], 'n' => '16', 'bahasa' => 'python', 'ragam' => '1'],
+            ['code' => 'DDP101', 'n' => '16', 'bahasa' => 'cpp', 'ragam' => '1'],
+            ['code' => 'PBO301', 'n' => '16', 'bahasa' => 'cpp', 'ragam' => '1'],
+            ['code' => 'TS-PY', 'n' => '16', 'bahasa' => 'python', 'ragam' => '1'],
         ], $matkul);
-
-        // Kelas di tahun aktif: DDP101 7A–7D, PBO301 6A–6D, TS-PY TS-6.
-        $kelas = array_column($this->db->query("
-            SELECT CONCAT(c.code, ' ', k.name) AS k FROM classes k JOIN courses c ON c.id = k.course_id
-            WHERE k.academic_year_id = {$d['tahun']} AND k.archived_at IS NULL ORDER BY 1")->fetch_all(MYSQLI_ASSOC), 'k');
-        $this->assertSame(['DDP101 7A', 'DDP101 7B', 'DDP101 7C', 'DDP101 7D', 'PBO301 6A', 'PBO301 6B', 'PBO301 6C', 'PBO301 6D', 'TS-PY TS-6'], $kelas);
+        $this->assertSame(3, $this->hitung('SELECT COUNT(*) FROM courses'));
+        $this->assertSame(1, $this->hitung('SELECT COUNT(*) FROM classes'));
 
         // UTS, UAS dan yang tidak bisa dinilai otomatis ada tetapi dimatikan untuk latihan.
         $mati = array_column($this->db->query('
@@ -115,7 +126,7 @@ final class BenihKurikulumTest extends KodeCase
 
         // Setiap perubahan tercatat atas nama superadmin itu, bertanda lewat benih.
         $audit = $this->db->query('SELECT action, actor_id, detail FROM audit_log')->fetch_all(MYSQLI_ASSOC);
-        $this->assertCount(61, $audit);
+        $this->assertCount(49, $audit);
         foreach ($audit as $a) {
             $this->assertSame([$d['superadmin']['id'], 'benih'], [$a['actor_id'], json_decode($a['detail'], true)['lewat']]);
         }
@@ -123,8 +134,8 @@ final class BenihKurikulumTest extends KodeCase
         // Diulang: tidak ada yang berubah dan tidak ada audit baru.
         [$kode, $keluar] = $this->spark(['benih:kurikulum', '--oleh', $oleh, '--jalankan']);
         $this->assertSame(0, $kode, $keluar);
-        $this->assertStringContainsString('ringkasan: 0 dibuat, 0 diubah, 0 beda (tidak disentuh), 63 sudah sama', $keluar);
-        $this->assertSame(61, $this->hitung('SELECT COUNT(*) FROM audit_log'));
+        $this->assertStringContainsString('ringkasan: 0 dibuat, 0 diubah, 8 beda (tidak disentuh), 55 sudah sama', $keluar);
+        $this->assertSame(49, $this->hitung('SELECT COUNT(*) FROM audit_log'));
     }
 
     public function testYangSudahAdaHanyaDilengkapiDanPerbedaanDilaporkanTanpaDiubah(): void
@@ -161,10 +172,11 @@ final class BenihKurikulumTest extends KodeCase
         $this->assertStringContainsString('BEDA   DDP101 pertemuan 15: dipakai untuk latihan, benih mematikannya; tidak diubah', $keluar);
         $this->assertSame(['language' => 'c', 'enabled' => '1'], $this->row("SELECT language, enabled FROM meetings WHERE id = {$p15}"));
 
-        // Kelas lama tetap ada di samping 7A–7D; tidak ada mata kuliah atau pertemuan ganda.
-        $this->assertSame(5, $this->hitung("SELECT COUNT(*) FROM classes WHERE course_id = {$ddp}"));
+        // Kelas lama tetap satu-satunya; mata kuliah lain tidak dibuat; tidak ada pertemuan ganda.
+        $this->assertSame(1, $this->hitung("SELECT COUNT(*) FROM classes WHERE course_id = {$ddp}"));
         $this->assertNull($this->row("SELECT archived_at FROM classes WHERE id = {$lama}")['archived_at']);
-        $this->assertSame(3, $this->hitung('SELECT COUNT(*) FROM courses'));
+        $this->assertSame(1, $this->hitung('SELECT COUNT(*) FROM courses'));
+        $this->assertStringContainsString('KURANG PBO301 mata kuliah', $keluar);
         $this->assertSame(16, $this->hitung("SELECT COUNT(*) FROM meetings WHERE course_id = {$ddp}"));
         $this->assertSame($p4, (int) $this->row("SELECT id FROM meetings WHERE course_id = {$ddp} AND number = 4")['id']);
         $this->assertSame($p9, (int) $this->row("SELECT id FROM meetings WHERE course_id = {$ddp} AND number = 9")['id']);
@@ -197,13 +209,13 @@ final class BenihKurikulumTest extends KodeCase
         $this->assertSame(1, $kode);
 
         // Tanpa tahun ajaran aktif.
-        $this->db->query("UPDATE academic_years SET status = 'archived'");
+        $this->roster->query("UPDATE academic_years SET status = 'archived'");
         [$kode, $keluar] = $this->spark(['benih:kurikulum', '--oleh', (string) $d['superadmin']['nomor_induk'], '--jalankan']);
         $this->assertSame(1, $kode);
         $this->assertStringContainsString('belum ada tahun ajaran yang aktif', $keluar);
 
         // Pengampu benih bukan dosen aktif.
-        $this->db->query("UPDATE academic_years SET status = 'active'");
+        $this->roster->query("UPDATE academic_years SET status = 'active'");
         $this->idn->query("UPDATE users SET status = 'disabled' WHERE nomor_induk = '" . self::PENGAMPU . "'");
         [$kode, $keluar] = $this->spark(['benih:kurikulum', '--oleh', (string) $d['superadmin']['nomor_induk'], '--jalankan']);
         $this->assertSame(1, $kode);

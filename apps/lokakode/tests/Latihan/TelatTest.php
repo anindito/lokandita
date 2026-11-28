@@ -323,7 +323,7 @@ final class TelatTest extends KodeCase
         $this->assertSame(0, $data['meeting']['kiriman']);
 
         // Yang sudah LULUS tidak berlatih: membaca saja pun tidak, karena kelasnya memilih "hanya nilai".
-        $this->db->query("UPDATE enrollments SET status = 'LULUS', graduated_on = '2026-11-01' WHERE id = {$d['daftarA']}");
+        $this->roster->query("UPDATE enrollments SET status = 'LULUS', graduated_on = '2026-11-01' WHERE id = {$d['daftarA']}");
         $this->assertSame(404, $http->post($d['api'] . '/kirim', ['csrf' => $csrf, 'source' => self::BENAR])->status);
         $this->assertSame(2, $this->hitung('SELECT COUNT(*) FROM submissions WHERE practice = 1'));
     }

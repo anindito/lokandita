@@ -71,21 +71,6 @@ $routes->group('', ['filter' => 'masuk:superadmin,dosen'], static function (Rout
     $routes->get('mata-kuliah', 'MataKuliah::index');
     $routes->get('mata-kuliah/(:num)', 'MataKuliah::lihat/$1');
     $routes->get('kelas/(:num)', 'Kelas::lihat/$1');
-    // Mengubah kelas: superadmin dan pengampu (BaseController::kelasUntukDiubah).
-    $routes->post('mata-kuliah/(:num)/kelas', 'Kelas::simpan/$1');
-    $routes->get('kelas/(:num)/ubah', 'Kelas::sunting/$1');
-    $routes->post('kelas/(:num)', 'Kelas::perbarui/$1');
-    $routes->post('kelas/(:num)/arsip', 'Kelas::arsip/$1');
-    $routes->post('kelas/(:num)/hapus', 'Kelas::hapus/$1');
-    $routes->post('kelas/(:num)/pengajar', 'Kelas::tambahPengajar/$1');
-    $routes->post('kelas/(:num)/pengajar/hapus', 'Kelas::hapusPengajar/$1');
-    // Pendaftaran mahasiswa: superadmin dan pengampu.
-    $routes->post('kelas/(:num)/daftar', 'Pendaftaran::pratinjau/$1');
-    $routes->post('kelas/(:num)/daftar/jalankan', 'Pendaftaran::jalankan/$1');
-    $routes->post('kelas/(:num)/mundur', 'Pendaftaran::mundur/$1');
-    $routes->post('kelas/(:num)/pindah', 'Pendaftaran::pindah/$1');
-    $routes->post('kelas/(:num)/lulus', 'Pendaftaran::lulus/$1');
-    $routes->post('kelas/(:num)/batal-lulus', 'Pendaftaran::batalLulus/$1');
     // Reset kata sandi mahasiswa: siapa pun yang boleh melihat kelas itu (termasuk pengajarnya).
     $routes->post('kelas/(:num)/reset-sandi', 'Pendaftaran::resetSandi/$1');
     // Pertemuan dan konsep (SPEC.md §6 minimal, §9): superadmin dan pengampu; pengajar 403.
@@ -143,22 +128,26 @@ $routes->group('', ['filter' => 'masuk:superadmin,dosen'], static function (Rout
     $routes->get('impor/(:segment)', 'ImporSoal::lihat/$1');
 });
 
-// Superadmin saja (SPEC.md §3): tahun ajaran dan mata kuliah.
+// Superadmin saja (SPEC.md §3).
 $routes->group('', ['filter' => 'masuk:superadmin'], static function (RouteCollection $routes): void {
-    $routes->get('tahun-ajaran', 'TahunAjaran::index');
-    $routes->post('tahun-ajaran', 'TahunAjaran::simpan');
-    $routes->get('tahun-ajaran/baru', 'TahunAjaran::baruForm');
-    $routes->post('tahun-ajaran/baru', 'TahunAjaran::baruRingkas');
-    $routes->post('tahun-ajaran/baru/jalankan', 'TahunAjaran::baruJalankan');
-    $routes->get('tahun-ajaran/(:num)', 'TahunAjaran::sunting/$1');
-    $routes->post('tahun-ajaran/(:num)', 'TahunAjaran::perbarui/$1');
-    $routes->post('tahun-ajaran/(:num)/aktifkan', 'TahunAjaran::aktifkan/$1');
     $routes->get('audit', 'AuditLog::index');
     // Unggah soal JSON: superadmin saja (SPEC.md §3, §8.3).
     $routes->get('impor', 'ImporSoal::index');
     $routes->post('impor', 'ImporSoal::unggah');
-    $routes->get('mata-kuliah/baru', 'MataKuliah::baru');
-    $routes->post('mata-kuliah', 'MataKuliah::simpan');
-    $routes->get('mata-kuliah/(:num)/ubah', 'MataKuliah::sunting/$1');
-    $routes->post('mata-kuliah/(:num)', 'MataKuliah::perbarui/$1');
+
+    // Alamat lama pengelolaan roster (KONTRAK.md §18). Sejak tahap A2 tahun ajaran, mata kuliah,
+    // kelas, pengajar dan pendaftaran dikelola di Akun Lokandita, superadmin saja. GET dialihkan
+    // ke halaman yang sama di sana; POST TIDAK mengubah apa pun dan dialihkan ke halaman induknya.
+    foreach (['tahun-ajaran', 'tahun-ajaran/baru', 'tahun-ajaran/(:num)', 'mata-kuliah/baru', 'mata-kuliah/(:num)/ubah', 'kelas/(:num)/ubah'] as $lama) {
+        $routes->get($lama, 'Dipindahkan::alih');
+    }
+    foreach ([
+        'tahun-ajaran', 'tahun-ajaran/baru', 'tahun-ajaran/baru/jalankan', 'tahun-ajaran/(:num)', 'tahun-ajaran/(:num)/aktifkan',
+        'mata-kuliah', 'mata-kuliah/(:num)', 'mata-kuliah/(:num)/kelas',
+        'kelas/(:num)', 'kelas/(:num)/arsip', 'kelas/(:num)/hapus', 'kelas/(:num)/pengajar', 'kelas/(:num)/pengajar/hapus',
+        'kelas/(:num)/daftar', 'kelas/(:num)/daftar/jalankan', 'kelas/(:num)/mundur', 'kelas/(:num)/pindah',
+        'kelas/(:num)/lulus', 'kelas/(:num)/batal-lulus',
+    ] as $lama) {
+        $routes->post($lama, 'Dipindahkan::alih');
+    }
 });

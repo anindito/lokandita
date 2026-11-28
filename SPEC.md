@@ -41,7 +41,7 @@ Execution progress in the browser uses **polling** (1 s), not SSE or WebSocket.
 
 Global role, stored in LokaAuth: `superadmin`, `dosen`, `mahasiswa`.
 
-Scoped roles, stored in LokaKode and derived from relations, never from a role column:
+Scoped roles, derived from relations in the academic roster (§5), never from a role column:
 
 | Scoped role | Derived from |
 |---|---|
@@ -57,8 +57,8 @@ Permission matrix (enforced in one policy layer, at query level, never only in t
 | Reset a user's password | anyone | students in own course | students in own classes | no |
 | Change own password | yes | yes | yes | yes |
 | Academic years, courses | yes | no | no | no |
-| Classes, enrollment in a course | yes | own course | view own classes | no |
-| Assign pengajar to class | yes | own course | no | no |
+| Classes, enrollment in a course | yes | view own course (since stage A2; before: manage) | view own classes | no |
+| Assign pengajar to class | yes | no (since stage A2; before: own course) | no | no |
 | Meetings, concepts, composition, target | yes | own course | no | no |
 | Upload problem JSON | yes | no | no | no |
 | Approve / reject / edit problems | yes | own course | no | no |
@@ -119,12 +119,14 @@ Append-only log: actor, action, target, app, time, IP, user agent. Covers user c
 
 ## 5. LokaKode — academic structure
 
+> **Since stage A2 (2026-11-28) this structure is platform data and is managed in Akun Lokandita (LokaAuth), by a superadmin only** (owner's decision with the A2 plan): academic years, courses, classes, pengajar, enrolment, class moves, graduation and the new-year tool. LokaKode, LokaUjian and later apps read it; LokaKode keeps read pages for courses and classes, and its old management addresses redirect a superadmin to Akun Lokandita. The rules below are unchanged and are now the rules of those screens. `KONTRAK.md` §18 is the contract.
+
 - **Tahun ajaran**: label, start, end, `active` or `archived`. Exactly one active at a time.
 - **Mata kuliah**: code, name, one pengampu.
-- **Kelas**: belongs to a course and an academic year; name, optional capacity; can be archived. Classes with enrollments or grades cannot be deleted; the refusal states how many records depend on it.
+- **Kelas**: belongs to a course and an academic year; name, optional capacity; can be archived. Classes with enrollments or grades cannot be deleted; the refusal states how many enrolments and class moves depend on it. Since stage A2 data that an app holds for the class is protected by the database (LokaKode's foreign keys); that refusal names no count.
 - **Enrollment**: one per student per course per academic year. Status `AKTIF`, `LULUS`, `MENGUNDURKAN_DIRI`, `DIPINDAHKAN`. Only `AKTIF` appears in leaderboards, analytics and pre-generation.
-- Enrollment by single entry or CSV of nomor induk, with preview: matched, not found in LokaAuth, already enrolled elsewhere in the same course. LokaKode never creates accounts; unknown nomor induk is reported with a link to LokaAuth.
-- **Pindah kelas** within a course keeps all instances, submissions and scores, and recomputes per-class aggregates and leaderboards.
+- Enrollment by single entry or CSV of nomor induk, with preview: matched, not found in LokaAuth, already enrolled elsewhere in the same course. Enrolling never creates accounts; an unknown nomor induk is reported.
+- **Pindah kelas** within a course keeps all instances, submissions and scores; per-class aggregates and leaderboards follow on the next request.
 - **Kelulusan**: mark one, many, or a whole class as `LULUS` with a date. Graduated students can no longer submit in that class; their data stays readable. Reversible, audited.
 - **New academic year tool**: copies classes and teacher assignments from the previous year without enrollments, shows a summary first, then archives the old year.
 - Overview page: active year, class count, active students, classes without a pengajar flagged.

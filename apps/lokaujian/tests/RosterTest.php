@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
  * membaca tabel LokaKode mana pun dan tidak bisa menulis; `lokaujian_app` tidak bisa menyentuh
  * skema LokaKode sama sekali.
  *
- * Baris uji ditulis ke lokakode_test lewat koneksi khusus tes sebagai lokakode_app
+ * Baris uji ditulis ke roster_test lewat koneksi khusus tes sebagai auth_app
  * (TES_ROSTER_TULIS_DSN dari infra/tes.sh). Aplikasi yang diuji tidak memegang DSN itu.
  */
 final class RosterTest extends TestCase
@@ -26,7 +26,7 @@ final class RosterTest extends TestCase
     private const DITOLAK_KOLOM = 1143;
     private const DITOLAK_SKEMA = 1044;  // Access denied for user … to database
 
-    private \mysqli $tulis;   // lokakode_app pada lokakode_test — hanya untuk menyiapkan baris uji
+    private \mysqli $tulis;   // auth_app pada roster_test — hanya untuk menyiapkan baris uji
 
     private \mysqli $roster;  // roster_reader, seperti aplikasinya
 

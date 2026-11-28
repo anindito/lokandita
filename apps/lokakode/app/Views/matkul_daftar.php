@@ -3,7 +3,7 @@
 <?= view('_nav', ['akses' => $akses]) ?>
 <h1><?= lang('Kode.matkul.judul') ?></h1>
 <?php if ($akses->superadmin()): ?>
-    <p><a class="tombol" href="/mata-kuliah/baru"><?= lang('Kode.matkul.tambah') ?></a></p>
+    <p><a class="tombol" href="<?= esc(\App\Controllers\Dipindahkan::alamat('mata-kuliah')) ?>"><?= lang('Kode.roster.kelolaMatkul') ?></a></p>
 <?php endif ?>
 
 <?php if ($matkul === []): ?>

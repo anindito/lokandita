@@ -141,10 +141,10 @@ final class KlarifikasiTest extends KodeCase
         $this->assertSame(['Pertanyaan dari kelas XB'], array_column($this->daftar_($d['mhsB'], $d['api']), 'pertanyaan'));
 
         // Cici pindah ke kelas XB: ia kini melihat terbitan kelas XB, tidak lagi terbitan kelas XA.
-        $this->db->query("UPDATE enrollments SET class_id = {$d['kelasXB']} WHERE user_id = '{$d['cici']['id']}'");
+        $this->roster->query("UPDATE enrollments SET class_id = {$d['kelasXB']} WHERE user_id = '{$d['cici']['id']}'");
         $this->assertSame(['Pertanyaan dari kelas XB'], array_column($this->daftar_($d['cici'], $d['api']), 'pertanyaan'));
         // Ani pindah ke XB: pertanyaannya sendiri tetap miliknya, dan tetap tercatat di kelas XA tempat ia bertanya.
-        $this->db->query("UPDATE enrollments SET class_id = {$d['kelasXB']} WHERE user_id = '{$d['mhsA']['id']}'");
+        $this->roster->query("UPDATE enrollments SET class_id = {$d['kelasXB']} WHERE user_id = '{$d['mhsA']['id']}'");
         $ani = $this->daftar_($d['mhsA'], $d['api']);
         $this->assertEqualsCanonicalizing(['Format keluarannya bagaimana?', 'Pertanyaan dari kelas XB'], array_column($ani, 'pertanyaan'));
         $this->assertStringContainsString('Format keluarannya bagaimana?', $this->sebagai($d['pengajarA'])->get('/kelas/' . $d['kelasXA'] . '/klarifikasi')->body);
@@ -250,7 +250,7 @@ final class KlarifikasiTest extends KodeCase
     {
         $d  = $this->duniaTerbuka();
         $id = (int) $this->tanya($d['mhsA'], $d['api'], 'Sebelum diarsipkan')->json()['id'];
-        $this->db->query("UPDATE academic_years SET status = 'archived' WHERE id = {$d['tahun']}");
+        $this->roster->query("UPDATE academic_years SET status = 'archived' WHERE id = {$d['tahun']}");
 
         $r = $this->sebagai($d['pengajarA'])->get('/kelas/' . $d['kelasXA'] . '/klarifikasi');
         $this->assertSame(200, $r->status);

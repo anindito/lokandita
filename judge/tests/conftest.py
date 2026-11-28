@@ -25,6 +25,8 @@ def pytest_sessionstart(session):
         pytest.exit(f"menolak berjalan: Redis DB {k.redis_db}, tes hanya boleh memakai DB 15", returncode=3)
     if not os.environ.get("TES_APP_DSN", "").endswith("_test"):
         pytest.exit("menolak berjalan: TES_APP_DSN tidak menunjuk skema *_test", returncode=3)
+    if not os.environ.get("TES_ROSTER_DSN", "").endswith("/roster_test"):
+        pytest.exit("menolak berjalan: TES_ROSTER_DSN tidak menunjuk roster_test", returncode=3)
     docker = subprocess.run(["docker", "info", "--format", "{{.ServerVersion}}"], capture_output=True, text=True)
     if docker.returncode != 0:
         pytest.exit("Docker tidak tersedia: tes judge GAGAL, tidak dilewati", returncode=3)
@@ -58,6 +60,15 @@ def db_worker(k):
 def db_app():
     """MySQL sebagai lokakode_app pada lokakode_test — peran web: yang membuat baris."""
     env = dict(os.environ, DB_DSN=os.environ["TES_APP_DSN"])
+    c = sambungan.mysql(konfig.muat(env))
+    yield c
+    c.close()
+
+
+@pytest.fixture()
+def db_roster():
+    """MySQL sebagai auth_app pada roster_test: satu-satunya yang boleh menulis roster (KONTRAK.md §18)."""
+    env = dict(os.environ, DB_DSN=os.environ["TES_ROSTER_DSN"])
     c = sambungan.mysql(konfig.muat(env))
     yield c
     c.close()

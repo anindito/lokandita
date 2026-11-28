@@ -142,21 +142,21 @@ final class RuangTest extends KodeCase
         // Dibuka manual lagi: kerja. Tetapi tahun ajaran yang diarsipkan tidak menerima kiriman.
         $atur("override = 'open'");
         $this->assertSame(200, $http->post($api . '/draf', ['csrf' => $csrf, 'source' => $kode])->status);
-        $this->db->query("UPDATE academic_years SET status = 'archived' WHERE id = {$d['tahun']}");
+        $this->roster->query("UPDATE academic_years SET status = 'archived' WHERE id = {$d['tahun']}");
         $this->assertSame(403, $http->post($api . '/kirim', ['csrf' => $csrf, 'source' => $kode])->status);
-        $this->db->query("UPDATE academic_years SET status = 'active' WHERE id = {$d['tahun']}");
+        $this->roster->query("UPDATE academic_years SET status = 'active' WHERE id = {$d['tahun']}");
 
         // Sudah LULUS: masih terbaca, tidak bisa mengirim (SPEC.md §5).
-        $this->db->query("UPDATE enrollments SET status = 'LULUS', graduated_on = '2026-11-01' WHERE id = {$d['daftarA']}");
+        $this->roster->query("UPDATE enrollments SET status = 'LULUS', graduated_on = '2026-11-01' WHERE id = {$d['daftarA']}");
         $this->assertStringContainsString('Anda sudah dinyatakan lulus di kelas ini.', $http->get($hal)->body);
         $this->assertSame(200, $http->get($soal)->status);
         $this->assertSame(403, $http->post($api . '/kirim', ['csrf' => $csrf, 'source' => $kode])->status);
 
         // Mengundurkan diri, atau pertemuan tidak dipakai latihan: tidak ada.
-        $this->db->query("UPDATE enrollments SET status = 'MENGUNDURKAN_DIRI' WHERE id = {$d['daftarA']}");
+        $this->roster->query("UPDATE enrollments SET status = 'MENGUNDURKAN_DIRI' WHERE id = {$d['daftarA']}");
         $this->assertSame(404, $http->get($hal)->status);
         $this->assertSame(404, $http->get($soal)->status);
-        $this->db->query("UPDATE enrollments SET status = 'AKTIF' WHERE id = {$d['daftarA']}");
+        $this->roster->query("UPDATE enrollments SET status = 'AKTIF' WHERE id = {$d['daftarA']}");
         $this->assertSame(200, $http->get($hal)->status);
         // Pertemuan ditarik: halamannya menyebut sebabnya (testMahasiswaDiberiTahuMengapa…), soalnya tidak ada,
         // dan jendela yang terbuka tidak membuatnya bisa dikerjakan.

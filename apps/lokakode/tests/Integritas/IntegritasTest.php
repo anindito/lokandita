@@ -178,13 +178,13 @@ final class IntegritasTest extends KodeCase
         $this->assertSame(4, $jumlah("?jenis=x'--&mahasiswa=bukan-uuid&pertemuan=abc&dari=31-12-2026"));
 
         // Cici pindah ke kelas XB: peristiwanya ikut, dan pengajar A tidak lagi melihatnya.
-        $this->db->query("UPDATE enrollments SET class_id = {$d['kelasXB']} WHERE user_id = '{$cici['id']}'");
+        $this->roster->query("UPDATE enrollments SET class_id = {$d['kelasXB']} WHERE user_id = '{$cici['id']}'");
         $this->assertSame(2, $jumlah(''));
         $r = $this->sebagai($d['pengajarB'])->get('/kelas/' . $d['kelasXB'] . '/integritas');
         $this->assertSame(2, substr_count($r->body, '<tr data-jenis='));
         $this->assertStringContainsString('Mahasiswa Cici', $r->body);
         // Yang mengundurkan diri tidak tampil.
-        $this->db->query("UPDATE enrollments SET status = 'MENGUNDURKAN_DIRI' WHERE user_id = '{$cici['id']}'");
+        $this->roster->query("UPDATE enrollments SET status = 'MENGUNDURKAN_DIRI' WHERE user_id = '{$cici['id']}'");
         $this->assertSame(0, substr_count($this->sebagai($d['pengajarB'])->get('/kelas/' . $d['kelasXB'] . '/integritas')->body, '<tr data-jenis='));
     }
 

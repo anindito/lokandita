@@ -93,8 +93,8 @@ final class PapanTest extends KodeCase
         $this->assertSame(['1', '2', '3', '3', '3'], $peringkat);
 
         // Hanya pendaftaran AKTIF yang ikut (SPEC.md §5).
-        $this->db->query("UPDATE enrollments SET status = 'MENGUNDURKAN_DIRI' WHERE id = {$d['daftarDedi']}");
-        $this->db->query("UPDATE enrollments SET status = 'LULUS', graduated_on = '2026-11-01' WHERE id = {$d['daftarEka']}");
+        $this->roster->query("UPDATE enrollments SET status = 'MENGUNDURKAN_DIRI' WHERE id = {$d['daftarDedi']}");
+        $this->roster->query("UPDATE enrollments SET status = 'LULUS', graduated_on = '2026-11-01' WHERE id = {$d['daftarEka']}");
         Papan::lupakan();
         $r = $http->get('/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'] . '/papan');
         $this->assertStringNotContainsString('Mahasiswa Dedi', $r->body);
@@ -210,7 +210,6 @@ final class PapanTest extends KodeCase
     {
         $d    = $this->duniaPapan();
         $http = $this->sebagai($d['pengampuX']);
-        $csrf = $this->csrf($http);
         $xa   = '/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'] . '/papan';
         $xb   = '/kelas/' . $d['kelasXB'] . '/pertemuan/' . $d['pertemuanX1'] . '/papan';
         $nama = fn (string $url): array => array_column($this->baris($http->get($url)->body), 2);
@@ -228,16 +227,16 @@ final class PapanTest extends KodeCase
         $baris = $this->baris($http->get($xa)->body);
         $this->assertSame(['5', 'Mahasiswa Ani', '8.33'], [$baris[4][0], $baris[4][2], $baris[4][3]]);
 
-        // Pindah kelas lewat form pengampu: Dedi (100) pindah ke XB. Nilainya ikut; kedua papan berubah seketika.
-        $r = $http->post('/kelas/' . $d['kelasXA'] . '/pindah', ['csrf' => $csrf, 'tujuan' => $d['kelasXB'], 'ids' => [$d['daftarDedi']]]);
-        $this->assertSame(303, $r->status, $r->body);
+        // Pindah kelas terjadi di Akun Lokandita (tahap A2), yang tidak bisa membuang cache LokaKode:
+        // di sini rosternya diubah langsung, TANPA Papan::lupakan(). Dedi (100) pindah ke XB; nilainya
+        // ikut, dan kedua papan berubah seketika karena kunci cachenya memuat keadaan pendaftaran.
+        $this->roster->query("UPDATE enrollments SET class_id = {$d['kelasXB']}, updated_at = UTC_TIMESTAMP() WHERE id = {$d['daftarDedi']}");
         $this->assertSame(['Mahasiswa Eka', 'Mahasiswa Fajar', 'Mahasiswa Gita', 'Mahasiswa Ani'], $nama($xa));
         $this->assertSame(['Mahasiswa Dedi', 'Mahasiswa Budi'], $nama($xb));
         $this->assertSame('100.00', $this->row("SELECT score FROM meeting_scores WHERE user_id = '{$d['Dedi']['id']}'")['score']);
 
-        // Mengundurkan diri lewat form: hilang dari papan seketika.
-        $r = $http->post('/kelas/' . $d['kelasXA'] . '/mundur', ['csrf' => $csrf, 'ids' => [$d['daftarEka']]]);
-        $this->assertSame(303, $r->status, $r->body);
+        // Mengundurkan diri: hilang dari papan seketika.
+        $this->roster->query("UPDATE enrollments SET status = 'MENGUNDURKAN_DIRI', updated_at = UTC_TIMESTAMP() WHERE id = {$d['daftarEka']}");
         $this->assertSame(['Mahasiswa Fajar', 'Mahasiswa Gita', 'Mahasiswa Ani'], $nama($xa));
     }
 }

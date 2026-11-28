@@ -48,7 +48,7 @@ Two limits accepted knowingly:
 | Front end | Server-rendered views, Tailwind, Alpine.js. No Monaco, no Chart.js. All assets self-hosted |
 | Progress in the browser | Polling. No SSE, no WebSocket |
 
-LokaUjian does not create accounts, does not manage classes and does not reset passwords; those stay where they are (LokaAuth, LokaKode). An unknown student or class is never created on the fly.
+LokaUjian does not create accounts, does not manage classes and does not reset passwords; those stay where they are (accounts and, since stage A2, classes in LokaAuth; password reset from a class page in LokaKode). An unknown student or class is never created on the fly.
 
 ## 3. Roles
 
@@ -85,12 +85,12 @@ Permission matrix (one policy layer, applied in queries, never only in views):
 
 ## 4. Roster
 
-The academic structure (academic years, courses, classes, teacher assignments, enrollments) is described in `SPEC.md` §5 and managed on LokaKode's screens. LokaUjian reads it through **five read-only views** with neutral names and fixed columns (`roster_academic_years`, `roster_courses`, `roster_classes`, `roster_class_teachers`, `roster_enrollments`), through its own read-only MySQL user. The views are the contract; their columns are in `KONTRAK.md`.
+The academic structure (academic years, courses, classes, teacher assignments, enrollments) is described in `SPEC.md` §5 and, since stage A2, managed in Akun Lokandita (LokaAuth) by a superadmin (before: on LokaKode's screens). LokaUjian reads it through **five read-only views** with neutral names and fixed columns (`roster_academic_years`, `roster_courses`, `roster_classes`, `roster_class_teachers`, `roster_enrollments`), through its own read-only MySQL user. The views are the contract; their columns are in `KONTRAK.md`.
 
 - LokaUjian queries only the views, never LokaKode's tables, and has no write privilege on anything outside its own schema.
 - A class id, course id or user id stored by LokaUjian is the id of the roster and of LokaAuth. There is no foreign key across schemas and no join across them: the policy layer first reads which classes the user may see, then every query on LokaUjian's tables is bound to those ids.
 - Names and nomor induk come from `user_directory` of LokaAuth, as in LokaKode. They are not copied.
-- After LokaUjian is finished the tables move to the Lokandita core (stages A1 and A2, outside this specification). The move redefines the views; LokaUjian's code does not change.
+- The tables moved to the Lokandita core in stages A1 and A2 (2026-11-28, outside this specification). The move redefined the views; LokaUjian's code did not change.
 
 ## 5. Questions
 

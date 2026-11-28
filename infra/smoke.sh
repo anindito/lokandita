@@ -318,7 +318,7 @@ fi
 if [ "$tolak" = "1142,1142,1142" ]; then ok "roster_reader ditolak membaca tabel enrollments dan submissions, dan ditolak menulis ke view (1142)"; else tidak "roster_reader seharusnya ditolak tiga kali (1142,1142,1142): '$tolak'"; fi
 if [ -n "$hitung" ] && [ "$hitung" = "$tabel" ]; then ok "jumlah baris tiap view sama dengan tabelnya, ditanyakan lewat lokakode"; else tidak "jumlah baris view ($hitung) berbeda dari tabelnya ($tabel)"; fi
 
-echo "20. roster di inti Lokandita (tahap A1, KONTRAK.md §18)"
+echo "20. roster di inti Lokandita (tahap A1 dan A2, KONTRAK.md §18)"
 # Ditanyakan sebagai root MySQL: letak tabel, view nama lama, kunci asing lintas skema, dan hak —
 # persis yang disebut kontrak, tidak lebih. Hanya angka dan nama obyek yang dicetak.
 mysql_root() { docker exec -i mysql sh -c 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot -N' 2> /dev/null || true; }
@@ -342,7 +342,7 @@ kunci="$(mysql_root <<< "SELECT COUNT(*) FROM information_schema.referential_con
 if [ "$kunci" = "6" ]; then ok "enam kunci asing tabel LokaKode menunjuk ke roster.classes dan roster.courses"; else tidak "kunci asing dari lokakode ke roster: '$kunci' (seharusnya 6)"; fi
 hak="$(mysql_root <<SQL
 SELECT CONCAT_WS(',',
- (SELECT COUNT(*) FROM information_schema.table_privileges WHERE table_schema='roster' AND grantee="'lokakode_app'@'%'" AND privilege_type IN ('SELECT','INSERT','UPDATE','DELETE') AND table_name IN ($enam)),
+ (SELECT COUNT(*) FROM information_schema.table_privileges WHERE table_schema='roster' AND grantee="'lokakode_app'@'%'" AND privilege_type='SELECT' AND table_name IN ($enam)),
  (SELECT COUNT(*) FROM information_schema.table_privileges WHERE table_schema='roster' AND grantee="'roster_reader'@'%'" AND privilege_type='SELECT' AND table_name LIKE 'roster\\_%'),
  (SELECT COUNT(*) FROM information_schema.table_privileges WHERE table_schema='roster'),
  (SELECT COUNT(*) FROM information_schema.table_privileges WHERE grantee="'roster_reader'@'%'" AND table_schema NOT IN ('roster','roster_test')),
@@ -350,10 +350,10 @@ SELECT CONCAT_WS(',',
  (SELECT COUNT(*) FROM information_schema.column_privileges WHERE table_schema='roster'));
 SQL
 )"
-if [ "$hak" = "24,5,29,0,0,0" ]; then
-	ok "hak di skema roster: lokakode_app baca-tulis pada enam tabel (sampai A2), roster_reader SELECT pada lima view, tidak ada hak lain; hanya auth_app berhak atas skemanya"
+if [ "$hak" = "6,5,11,0,0,0" ]; then
+	ok "hak di skema roster: lokakode_app SELECT saja pada enam tabel (tahap A2), roster_reader SELECT pada lima view, tidak ada hak lain; hanya auth_app berhak atas skemanya"
 else
-	tidak "hak di skema roster: '$hak' (seharusnya 24,5,29,0,0,0 = lokakode_app, roster_reader, semua hak tabel, hak roster_reader di skema lain, hak skema selain auth_app, hak kolom)"
+	tidak "hak di skema roster: '$hak' (seharusnya 6,5,11,0,0,0; jalankan infra/mysql-pindah-roster.sh pasang lokakode) = lokakode_app, roster_reader, semua hak tabel, hak roster_reader di skema lain, hak skema selain auth_app, hak kolom)"
 fi
 skema_dsn="$(docker exec lokaujian sh -c 'printf %s "${ROSTER_READER_DSN##*/}"' 2> /dev/null || true)"
 if [ "$skema_dsn" = "roster" ]; then ok "ROSTER_READER_DSN di kontainer lokaujian menunjuk skema roster"; else tidak "ROSTER_READER_DSN di kontainer lokaujian menunjuk skema '$skema_dsn' (seharusnya roster)"; fi
@@ -371,6 +371,53 @@ for jalur in /admin/roster /admin/tahun-ajaran /admin/tahun-ajaran/baru /admin/m
 done
 skema_roster="$(docker exec auth printenv ROSTER_SCHEMA 2> /dev/null || true)"
 if [ "$skema_roster" = "roster" ]; then ok "ROSTER_SCHEMA di kontainer auth adalah roster"; else tidak "ROSTER_SCHEMA di kontainer auth: '$skema_roster' (seharusnya roster; lihat apps/auth/.env lalu deploy ulang auth)"; fi
+# Hanya Akun Lokandita yang menulis roster. Dari dalam kontainer lokakode, dengan DB_DSN miliknya,
+# keenam tabel terbaca dan setiap penulisan ditolak MySQL (1142 atau 1356). Pernyataan ujinya memakai
+# WHERE 1 = 0: seandainya hak itu masih ada pun, tidak ada baris yang berubah.
+tulis="$(docker exec -i lokakode php <<'PHP' 2>&1 || true
+<?php
+mysqli_report(MYSQLI_REPORT_OFF);
+$u = parse_url(getenv('DB_DSN'));
+$m = @new mysqli($u['host'], $u['user'], $u['pass'], ltrim($u['path'], '/'), $u['port']);
+if ($m->connect_errno) { echo 'koneksi gagal: ', $m->connect_errno; exit; }
+$baca = 0;
+foreach (['academic_years', 'courses', 'classes', 'class_teachers', 'enrollments', 'enrollment_moves'] as $t) {
+    $baca += $m->query("SELECT COUNT(*) FROM $t") === false ? 0 : 1;
+}
+$tolak = [];
+foreach ([
+    "UPDATE academic_years SET label = label WHERE 1 = 0",
+    "UPDATE courses SET name = name WHERE 1 = 0",
+    "UPDATE classes SET name = name WHERE 1 = 0",
+    "DELETE FROM class_teachers WHERE 1 = 0",
+    "UPDATE enrollments SET status = status WHERE 1 = 0",
+    "DELETE FROM enrollment_moves WHERE 1 = 0",
+    "INSERT INTO class_teachers (class_id, user_id, assigned_by, assigned_at) SELECT class_id, user_id, assigned_by, assigned_at FROM class_teachers WHERE 1 = 0",
+    "UPDATE roster.enrollments SET status = status WHERE 1 = 0",
+] as $q) {
+    $tolak[] = $m->query($q) === false ? $m->errno : 'DITERIMA';
+}
+echo $u['user'], ' ', $baca, ' ', implode(',', $tolak);
+PHP
+)"
+# Lewat nama lama (view INVOKER) penolakannya 1142 atau 1356, tergantung pernyataannya; langsung ke inti 1142.
+if [[ "$tulis" =~ ^lokakode_app\ 6\ ((1142|1356),){7}1142$ ]]; then
+	ok "lokakode_app membaca keenam tabel roster dan ditolak menulis ke semuanya, lewat nama lama maupun langsung: $tulis"
+else
+	tidak "lokakode_app seharusnya membaca 6 tabel dan ditolak 8 kali (1142 atau 1356): '$tulis' (infra/mysql-pindah-roster.sh pasang lokakode)"
+fi
+# Alamat lama pengelolaan roster di LokaKode tidak lagi melayani halaman: tanpa cookie ke login seperti
+# rute lain; perintah yang menulis roster dari berkas ada di kontainer auth dan tidak ada di lokakode.
+perintah="$(docker exec auth php spark list 2> /dev/null | grep -c -E '^\s+data:(pengajar|pendaftaran)\s' || true),$(docker exec lokakode php spark list 2> /dev/null | grep -c -E '^\s+data:(pengajar|pendaftaran)\s' || true)"
+if [ "$perintah" = "2,0" ]; then ok "spark data:pengajar dan data:pendaftaran ada di auth dan tidak ada di lokakode"; else tidak "perintah roster dari berkas: '$perintah' (seharusnya 2 di auth, 0 di lokakode)"; fi
+# Riwayat audit roster satu (infra/mysql-salin-audit-roster.sh): setiap baris roster lama LokaKode
+# punya salinannya di identity.audit_log dengan app = roster. Hanya jumlah yang dicetak.
+salin="$("$AKAR/infra/mysql-salin-audit-roster.sh" hitung lokakode 2>&1 || true)"
+if [[ "$salin" =~ audit_log:\ ([0-9]+)\ \(sudah\ disalin:\ ([0-9]+)\) ]] && [ "${BASH_REMATCH[1]}" = "${BASH_REMATCH[2]}" ]; then
+	ok "riwayat audit roster satu: ${BASH_REMATCH[1]} baris roster lama LokaKode, ${BASH_REMATCH[2]} sudah ada di identity.audit_log (app = roster)"
+else
+	tidak "riwayat audit roster belum disalin seluruhnya: '$salin' (SETUJU=produksi infra/mysql-salin-audit-roster.sh salin lokakode)"
+fi
 
 echo "14. jalan masuk LokaUjian (tahap U1, KONTRAK.md §19)"
 # Ditanyakan seperti cek 8: langsung ke kontainer lokaujian dari kontainer portal, dengan header

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Schema;
 
+use Lokandita\Auth\Testing\RosterFixtures;
 use Lokandita\Auth\Testing\TestSchema;
 use PHPUnit\Framework\TestCase;
 
@@ -13,24 +14,32 @@ use PHPUnit\Framework\TestCase;
  */
 final class SkemaLatihanTest extends TestCase
 {
-    private \mysqli $db;
+    private \mysqli $db;     // lokakode_app pada lokakode_test
+
+    // auth_app pada roster_test: sejak tahap A2 hanya auth_app yang menulis roster (KONTRAK.md §18).
+    private \mysqli $roster;
 
     protected function setUp(): void
     {
         $this->db = TestSchema::connect((string) getenv('DB_DSN'));
+        $this->roster = TestSchema::connect((string) getenv('TES_ROSTER_TULIS_DSN'));
         // Urutan mengikuti kunci asing. Hanya skema *_test (dijaga TestSchema).
         foreach (['announcements', 'clarifications', 'notifications', 'ui_prefs', 'integrity_events', 'drafts', 'meeting_scores', 'problem_scores', 'submissions', 'meeting_class_windows',
             'problem_instances', 'meeting_problems', 'import_items', 'imports', 'problem_versions', 'problems',
-            'meeting_concepts', 'course_base_concepts', 'meetings', 'enrollment_moves', 'enrollments', 'class_teachers', 'classes', 'courses', 'academic_years'] as $tabel) {
+            'meeting_concepts', 'course_base_concepts', 'meetings'] as $tabel) {
             $this->db->query("DELETE FROM {$tabel}");
         }
+        RosterFixtures::kosongkan($this->roster);
     }
 
     private function id(string $sql): int
     {
-        $this->db->query($sql);
+        // Baris roster ditulis sebagai auth_app; selebihnya sebagai lokakode_app.
+        $roster = preg_match('/^\s*INSERT INTO (academic_years|courses|classes|class_teachers|enrollments|enrollment_moves)\b/', $sql) === 1;
+        $kon    = $roster ? $this->roster : $this->db;
+        $kon->query($sql);
 
-        return (int) $this->db->insert_id;
+        return (int) $kon->insert_id;
     }
 
     /**
@@ -195,7 +204,7 @@ final class SkemaLatihanTest extends TestCase
 
         $this->assertSame(1452, $this->ditolak(fn () => $this->db->query("INSERT INTO clarifications (meeting_problem_id, class_id, user_id, question, created_at) VALUES (999999, {$d['kelas_a']}, 'mhs-1', 'x', UTC_TIMESTAMP())")));
         $this->assertSame(1452, $this->ditolak(fn () => $this->db->query("INSERT INTO clarifications (meeting_problem_id, class_id, user_id, question, created_at) VALUES ({$d['mp']}, 999999, 'mhs-1', 'x', UTC_TIMESTAMP())")));
-        $this->assertSame(1451, $this->ditolak(fn () => $this->db->query("DELETE FROM classes WHERE id = {$d['kelas_a']}")), 'kelas yang punya klarifikasi tidak bisa dihapus');
+        $this->assertSame(1451, $this->ditolak(fn () => $this->roster->query("DELETE FROM classes WHERE id = {$d['kelas_a']}")), 'kelas yang punya klarifikasi tidak bisa dihapus');
     }
 
     public function testPengumumanDitarikDenganPenarikDanMenahanPenghapusanKelas(): void
@@ -206,7 +215,7 @@ final class SkemaLatihanTest extends TestCase
         $this->assertSame(3819, $this->ditolak(fn () => $this->db->query("UPDATE announcements SET withdrawn_by = 'dosen' WHERE id = {$p}")));
         $this->db->query("UPDATE announcements SET withdrawn_at = UTC_TIMESTAMP(), withdrawn_by = 'dosen' WHERE id = {$p}");
         $this->assertSame(1452, $this->ditolak(fn () => $this->db->query("INSERT INTO announcements (class_id, author_id, title, body, created_at) VALUES (999999, 'dosen', 'x', 'x', UTC_TIMESTAMP())")));
-        $this->assertSame(1451, $this->ditolak(fn () => $this->db->query("DELETE FROM classes WHERE id = {$d['kelas_a']}")), 'kelas yang punya pengumuman tidak bisa dihapus');
+        $this->assertSame(1451, $this->ditolak(fn () => $this->roster->query("DELETE FROM classes WHERE id = {$d['kelas_a']}")), 'kelas yang punya pengumuman tidak bisa dihapus');
     }
 
     public function testPeristiwaKetikanTakWajarDisimpanSebagaiJenisBaru(): void

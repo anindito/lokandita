@@ -102,7 +102,7 @@ final class JendelaTest extends KodeCase
     public function testTahunYangDiarsipkanHanyaBisaDibacaDosen(): void
     {
         $d = $this->dunia();
-        $this->db->query("UPDATE academic_years SET status = 'archived' WHERE id = {$d['tahun']}");
+        $this->roster->query("UPDATE academic_years SET status = 'archived' WHERE id = {$d['tahun']}");
         $url = '/kelas/' . $d['kelasXA'] . '/pertemuan/' . $d['pertemuanX1'];
 
         $http = $this->sebagai($d['pengampuX']);

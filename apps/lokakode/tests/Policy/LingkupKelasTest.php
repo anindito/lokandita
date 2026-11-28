@@ -114,7 +114,7 @@ final class LingkupKelasTest extends KodeCase
         $http = $this->sebagai($d['pengajarA']);
         $this->assertSame(200, $http->get('/kelas/' . $d['kelasXA'])->status);
 
-        $this->db->query("DELETE FROM class_teachers WHERE class_id = {$d['kelasXA']} AND user_id = '{$d['pengajarA']['id']}'");
+        $this->roster->query("DELETE FROM class_teachers WHERE class_id = {$d['kelasXA']} AND user_id = '{$d['pengajarA']['id']}'");
         $this->assertSame(404, $http->get('/kelas/' . $d['kelasXA'])->status);
         $this->assertSame(404, $http->get('/mata-kuliah/' . $d['matkulX'])->status);
     }

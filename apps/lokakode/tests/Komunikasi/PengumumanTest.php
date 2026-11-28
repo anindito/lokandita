@@ -66,9 +66,9 @@ final class PengumumanTest extends KodeCase
         $this->assertLessThan(strpos($semua, 'Isi Kedua'), strpos($semua, 'Isi Keempat'), 'terbaru lebih dulu');
 
         // Mahasiswa yang lulus masih membaca; yang mengundurkan diri tidak.
-        $this->db->query("UPDATE enrollments SET status = 'LULUS' WHERE id = {$d['daftarA']}");
+        $this->roster->query("UPDATE enrollments SET status = 'LULUS' WHERE id = {$d['daftarA']}");
         $this->assertStringContainsString('Isi Keempat', $this->sebagai($d['mhsA'])->get('/pengumuman')->body);
-        $this->db->query("UPDATE enrollments SET status = 'MENGUNDURKAN_DIRI' WHERE id = {$d['daftarA']}");
+        $this->roster->query("UPDATE enrollments SET status = 'MENGUNDURKAN_DIRI' WHERE id = {$d['daftarA']}");
         $this->assertStringNotContainsString('Isi Keempat', $this->sebagai($d['mhsA'])->get('/pengumuman')->body);
     }
 
@@ -143,19 +143,22 @@ final class PengumumanTest extends KodeCase
     public function testTahunArsipHanyaBacaDanKelasBerpengumumanTidakBisaDihapus(): void
     {
         $d = $this->dunia();
-        // Kelas kosong (tanpa pendaftaran) yang punya pengumuman: tidak bisa dihapus, dan jumlahnya disebut.
+        // Kelas kosong (tanpa pendaftaran) yang punya pengumuman tidak bisa dihapus: kunci asing
+        // lintas skema menolaknya, juga bagi auth_app — satu-satunya yang boleh menghapus kelas.
         $kosong = $this->kelas($d['matkulX'], $d['tahun'], 'XC');
         $this->umumkan($d['pengampuX'], $kosong, 'Selamat datang', 'Kelas baru.');
-        $x = $this->sebagai($d['pengampuX']);
-        $r = $x->post("/kelas/{$kosong}/hapus", ['csrf' => $this->csrf($x), 'yakin' => '1']);
-        $this->assertSame(409, $r->status);
-        $this->assertStringContainsString('masih ada 1 pengumuman dan 0 pertanyaan klarifikasi', $r->body);
+        try {
+            $this->roster->query("DELETE FROM classes WHERE id = {$kosong}");
+            $this->fail('Kelas yang punya pengumuman terhapus.');
+        } catch (\mysqli_sql_exception $e) {
+            $this->assertSame(1451, $e->getCode());
+        }
         $this->assertSame(1, $this->hitung("SELECT COUNT(*) FROM classes WHERE id = {$kosong}"));
 
         // Tahun ajaran diarsipkan: dosen membaca, tidak menulis dan tidak menarik; superadmin masih bisa.
         $this->umumkan($d['pengajarA'], $d['kelasXA'], 'Sebelum arsip', 'Isi.');
         $id = (int) $this->row("SELECT id FROM announcements WHERE class_id = {$d['kelasXA']}")['id'];
-        $this->db->query("UPDATE academic_years SET status = 'archived' WHERE id = {$d['tahun']}");
+        $this->roster->query("UPDATE academic_years SET status = 'archived' WHERE id = {$d['tahun']}");
         $a = $this->sebagai($d['pengajarA']);
         $r = $a->get('/kelas/' . $d['kelasXA'] . '/pengumuman');
         $this->assertSame(200, $r->status);

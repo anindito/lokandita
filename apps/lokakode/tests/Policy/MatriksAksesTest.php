@@ -60,6 +60,7 @@ final class MatriksAksesTest extends KodeCase
             'GET mata-kuliah' => ['/mata-kuliah', $staf],
             // Pengajar A dan B mengajar kelas di mata kuliah X, jadi boleh melihat mata kuliahnya.
             'GET mata-kuliah/{n}' => ['/mata-kuliah/' . $d['matkulX'], ['pengampuY' => 404] + $staf],
+            // Alamat lama tahun ajaran dan mata kuliah: pengalihan ke Akun Lokandita, superadmin saja.
             'GET tahun-ajaran'               => ['/tahun-ajaran', $admin],
             'POST tahun-ajaran'              => ['/tahun-ajaran', $admin],
             'GET tahun-ajaran/{n}'           => ['/tahun-ajaran/' . $d['tahun'], $admin],
@@ -72,29 +73,26 @@ final class MatriksAksesTest extends KodeCase
             'GET mata-kuliah/baru'           => ['/mata-kuliah/baru', $admin],
             'POST mata-kuliah'               => ['/mata-kuliah', $admin],
             'GET mata-kuliah/{n}/ubah'       => ['/mata-kuliah/' . $d['matkulX'] . '/ubah', $admin],
-            // Pengampu X sekalipun tidak boleh mengubah mata kuliahnya sendiri.
             'POST mata-kuliah/{n}'           => ['/mata-kuliah/' . $d['matkulX'], $admin],
 
-            // Mengubah kelas XA: superadmin dan pengampu X. Pengajar A melihat kelas itu
-            // tetapi bukan pengelola (403); pengajar B dan pengampu Y tidak melihatnya (404).
-            'GET kelas/{n}/ubah'            => ['/kelas/' . $d['kelasXA'] . '/ubah', $kelolaXA],
-            'POST kelas/{n}'                => ['/kelas/' . $d['kelasXA'], $kelolaXA],
-            'POST kelas/{n}/arsip'          => ['/kelas/' . $d['kelasXA'] . '/arsip', $kelolaXA],
-            'POST kelas/{n}/hapus'          => ['/kelas/' . $d['kelasXA'] . '/hapus', $kelolaXA],
-            'POST kelas/{n}/pengajar'       => ['/kelas/' . $d['kelasXA'] . '/pengajar', $kelolaXA],
-            'POST kelas/{n}/pengajar/hapus' => ['/kelas/' . $d['kelasXA'] . '/pengajar/hapus', $kelolaXA],
-            // Pendaftaran di kelas XA: sama dengan mengubah kelas.
-            'POST kelas/{n}/daftar'          => ['/kelas/' . $d['kelasXA'] . '/daftar', $kelolaXA],
-            'POST kelas/{n}/daftar/jalankan' => ['/kelas/' . $d['kelasXA'] . '/daftar/jalankan', $kelolaXA],
-            'POST kelas/{n}/mundur'          => ['/kelas/' . $d['kelasXA'] . '/mundur', $kelolaXA],
-            'POST kelas/{n}/pindah'          => ['/kelas/' . $d['kelasXA'] . '/pindah', $kelolaXA],
-            'POST kelas/{n}/lulus'           => ['/kelas/' . $d['kelasXA'] . '/lulus', $kelolaXA],
-            'POST kelas/{n}/batal-lulus'     => ['/kelas/' . $d['kelasXA'] . '/batal-lulus', $kelolaXA],
+            // Alamat lama pengelolaan kelas dan pendaftaran (KONTRAK.md §18): sejak tahap A2 hanya mengalihkan
+            // superadmin ke Akun Lokandita; pengampu X pun 403. Bahwa tidak ada yang berubah: RosterHanyaBacaTest.
+            'GET kelas/{n}/ubah'            => ['/kelas/' . $d['kelasXA'] . '/ubah', $admin],
+            'POST kelas/{n}'                => ['/kelas/' . $d['kelasXA'], $admin],
+            'POST kelas/{n}/arsip'          => ['/kelas/' . $d['kelasXA'] . '/arsip', $admin],
+            'POST kelas/{n}/hapus'          => ['/kelas/' . $d['kelasXA'] . '/hapus', $admin],
+            'POST kelas/{n}/pengajar'       => ['/kelas/' . $d['kelasXA'] . '/pengajar', $admin],
+            'POST kelas/{n}/pengajar/hapus' => ['/kelas/' . $d['kelasXA'] . '/pengajar/hapus', $admin],
+            'POST kelas/{n}/daftar'          => ['/kelas/' . $d['kelasXA'] . '/daftar', $admin],
+            'POST kelas/{n}/daftar/jalankan' => ['/kelas/' . $d['kelasXA'] . '/daftar/jalankan', $admin],
+            'POST kelas/{n}/mundur'          => ['/kelas/' . $d['kelasXA'] . '/mundur', $admin],
+            'POST kelas/{n}/pindah'          => ['/kelas/' . $d['kelasXA'] . '/pindah', $admin],
+            'POST kelas/{n}/lulus'           => ['/kelas/' . $d['kelasXA'] . '/lulus', $admin],
+            'POST kelas/{n}/batal-lulus'     => ['/kelas/' . $d['kelasXA'] . '/batal-lulus', $admin],
             // Reset kata sandi: siapa pun yang melihat kelas XA, termasuk pengajar A (SPEC.md §3).
-            // Tanpa user_id jawabannya 404 untuk semua; hak yang sebenarnya diuji di KelulusanDanSandiTest.
+            // Tanpa user_id jawabannya 404 untuk semua; hak yang sebenarnya diuji di ResetSandiTest.
             'POST kelas/{n}/reset-sandi'     => ['/kelas/' . $d['kelasXA'] . '/reset-sandi', array_fill_keys(['superadmin', 'pengampuX', 'pengampuY', 'pengajarA', 'pengajarB'], 404) + ['mhsA' => 403]],
-            // Kelas baru di mata kuliah X: kedua pengajar melihat mata kuliahnya, tetapi bukan pengelola.
-            'POST mata-kuliah/{n}/kelas'    => ['/mata-kuliah/' . $d['matkulX'] . '/kelas', ['pengajarB' => 403] + $kelolaXA],
+            'POST mata-kuliah/{n}/kelas'    => ['/mata-kuliah/' . $d['matkulX'] . '/kelas', $admin],
 
             // Pertemuan dan konsep mata kuliah X: superadmin dan pengampu X. Kedua pengajar
             // melihat mata kuliahnya tetapi bukan pengelola (403); pengampu Y tidak melihatnya (404).

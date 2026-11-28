@@ -5,7 +5,7 @@
 <p class="redup">
     <?= lang('Kode.matkul.pengampu') ?>: <?= esc($orang[$matkul['owner_id']]['nama'] ?? lang('Kode.mhs.akunHilang')) ?>
     <?php if ($akses->superadmin()): ?>
-        · <a href="/mata-kuliah/<?= (int) $matkul['id'] ?>/ubah"><?= lang('Kode.matkul.ubah') ?></a>
+        · <a href="<?= esc(\App\Controllers\Dipindahkan::alamat('mata-kuliah/' . (int) $matkul['id'])) ?>"><?= lang('Kode.roster.kelolaMatkul') ?></a>
     <?php endif ?>
     <?php if ((int) $matkul['boleh_kelola'] === 1): ?>
         · <a href="/mata-kuliah/<?= (int) $matkul['id'] ?>/pertemuan"><?= lang('Soal.pertemuan.kelola') ?></a>
@@ -60,24 +60,8 @@
         </div>
     <?php endif ?>
 
-    <?php if ($bolehTambahKelas): ?>
-        <h2><?= lang('Kode.kelas.tambah') ?></h2>
-        <div class="kartu">
-            <form method="post" action="/mata-kuliah/<?= (int) $matkul['id'] ?>/kelas">
-                <?= csrf_field() ?>
-                <input type="hidden" name="tahun" value="<?= (int) $tahun['id'] ?>">
-                <label for="name"><?= lang('Kode.kelas.namaKelas') ?></label>
-                <input type="text" id="name" name="name" maxlength="60" required>
-                <p class="petunjuk"><?= lang('Kode.kelas.namaPetunjuk') ?></p>
-                <label for="capacity"><?= lang('Kode.kelas.kapasitasIsi') ?></label>
-                <input type="number" id="capacity" name="capacity" class="ltr" min="1" max="99999">
-                <div class="baris-tombol">
-                    <button type="submit" class="tombol"><?= lang('Kode.kelas.tambah') ?></button>
-                </div>
-            </form>
-        </div>
-    <?php elseif ((int) $matkul['boleh_kelola'] === 1): ?>
-        <p class="petunjuk"><?= lang('Kode.kelas.tahunArsip') ?></p>
+    <?php if (! $akses->superadmin()): ?>
+        <p class="petunjuk"><?= lang('Kode.roster.dikelolaAdmin') ?></p>
     <?php endif ?>
 <?php endif ?>
 <?= $this->endSection() ?>

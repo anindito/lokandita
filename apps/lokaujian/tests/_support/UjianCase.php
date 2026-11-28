@@ -11,15 +11,16 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Dasar tes LokaUjian: HTTP sungguhan ke kontainer lokaujian-tes, yang membaca sesi dari
- * identity_test, berbicara dengan auth-tes, dan membaca roster lewat lima view di lokakode_test
+ * identity_test, berbicara dengan auth-tes, dan membaca roster lewat lima view di roster_test
  * sebagai roster_reader.
  *
- * Baris roster disiapkan tes lewat TES_ROSTER_TULIS_DSN (lokakode_app pada lokakode_test);
+ * Baris roster disiapkan tes lewat TES_ROSTER_TULIS_DSN (auth_app pada roster_test: sejak tahap A2
+ * hanya auth_app yang menulis roster);
  * aplikasi yang diuji tidak memegang DSN itu (KONTRAK.md §12).
  */
 abstract class UjianCase extends TestCase
 {
-    protected \mysqli $roster; // lokakode_test, sebagai lokakode_app — hanya untuk menyiapkan baris uji
+    protected \mysqli $roster; // roster_test, sebagai auth_app — hanya untuk menyiapkan baris uji
 
     protected \mysqli $idn;    // identity_test
 

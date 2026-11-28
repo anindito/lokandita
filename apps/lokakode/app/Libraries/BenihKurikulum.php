@@ -8,10 +8,14 @@ use CodeIgniter\Database\BaseConnection;
 use Lokandita\Auth\UserDirectory;
 
 /**
- * Data awal kurikulum (SPEC.md §17): tiga mata kuliah, 16 pertemuan masing-masing
- * dengan konsepnya, dan kelas-kelasnya, dari `app/Data/benih.json`.
+ * Data awal kurikulum (SPEC.md §17): 16 pertemuan dengan konsepnya untuk tiap mata kuliah di
+ * `app/Data/benih.json`.
  *
- * Aturannya satu: yang BELUM ADA dibuat; yang SUDAH ADA dan berbeda hanya
+ * Mata kuliah dan kelas adalah baris roster (KONTRAK.md §18): sejak tahap A2 LokaKode hanya
+ * membacanya. Yang belum ada dilaporkan (KURANG) supaya dibuat di Akun Lokandita; perintah ini
+ * tidak membuatnya.
+ *
+ * Untuk pertemuan dan konsep aturannya satu: yang BELUM ADA dibuat; yang SUDAH ADA dan berbeda hanya
  * dilaporkan (BEDA) dan tidak disentuh. Dua pengecualian, keduanya tidak bisa
  * merusak apa pun yang sudah dipakai:
  *   - judul pertemuan disamakan dengan benih (keputusan pemilik, 2026-11-19);
@@ -61,7 +65,7 @@ final class BenihKurikulum
         }
         $tahun = $ini->db->query("SELECT id, label FROM academic_years WHERE status = 'active'")->getRowArray();
         if ($tahun === null) {
-            throw new \RuntimeException('belum ada tahun ajaran yang aktif; kelas tidak bisa dibuat');
+            throw new \RuntimeException('belum ada tahun ajaran yang aktif; kelas tidak bisa diperiksa');
         }
 
         $ini->db->transStart();
@@ -122,15 +126,10 @@ final class BenihKurikulum
         $id   = $ada === null ? null : (int) $ada['id'];
 
         if ($ada === null) {
-            $this->catat('dibuat', "BUAT   {$kode} mata kuliah \"{$m['nama']}\"");
-            if ($this->tulis) {
-                $this->db->table('courses')->insert([
-                    'code' => $kode, 'name' => $m['nama'], 'owner_id' => $pengampu['id'],
-                    'created_at' => Waktu::kini(), 'updated_at' => Waktu::kini(),
-                ]);
-                $id = (int) $this->db->insertID();
-                $this->audit('matkul.dibuat', 'course', $id, ['code' => $kode, 'name' => $m['nama'], 'owner_id' => $pengampu['id']], $id);
-            }
+            // Mata kuliah adalah baris roster: sejak tahap A2 hanya Akun Lokandita yang membuatnya.
+            $this->catat('beda', "KURANG {$kode} mata kuliah \"{$m['nama']}\": belum ada. Buat di Akun Lokandita, lalu ulangi; pertemuan dan kelasnya dilewati");
+
+            return;
         } elseif ($ada['owner_id'] !== $pengampu['id']) {
             $this->catat('beda', "BEDA   {$kode} mata kuliah: pengampunya bukan {$pengampu['nomor_induk']}; tidak diubah");
         } elseif ($ada['name'] !== $m['nama']) {
@@ -258,15 +257,8 @@ final class BenihKurikulum
 
             return;
         }
-        $this->catat('dibuat', "BUAT   {$kode} kelas {$nama} ({$tahun['label']})");
-        if ($this->tulis) {
-            $this->db->table('classes')->insert([
-                'course_id' => $matkulId, 'academic_year_id' => $tahun['id'], 'name' => $nama,
-                'created_at' => Waktu::kini(), 'updated_at' => Waktu::kini(),
-            ]);
-            $id = (int) $this->db->insertID();
-            $this->audit('kelas.dibuat', 'class', $id, ['name' => $nama, 'capacity' => null, 'tahun' => $tahun['label']], $matkulId, $id);
-        }
+        // Kelas adalah baris roster: sejak tahap A2 hanya Akun Lokandita yang membuatnya.
+        $this->catat('beda', "KURANG {$kode} kelas {$nama} ({$tahun['label']}): belum ada. Buat di Akun Lokandita");
     }
 
     private function catat(string $jenis, string $baris): void

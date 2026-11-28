@@ -2,6 +2,13 @@
 
 // نصوص LokaKode: البنية الأكاديمية (SPEC.md §5).
 return [
+    // Sejak tahap A2 roster dikelola di Akun Lokandita (KONTRAK.md §18).
+    'roster' => [
+        'nav' => 'إدارة الصفوف',
+        'kelolaKelas' => 'إدارة هذا الصف في Akun Lokandita',
+        'kelolaMatkul' => 'إدارة المقررات في Akun Lokandita',
+        'dikelolaAdmin' => 'يدير المشرف العام الصفوف والمحاضرين وقوائم الطلاب في Akun Lokandita. تواصل مع المشرف العام إذا لزم تغيير شيء.',
+    ],
     'tidakDitemukan' => 'ما تبحث عنه غير موجود، أو لا يحق لك الاطلاع عليه.',
     'navigasi'       => 'قائمة LokaKode',
     'kosong'         => 'لا توجد بيانات بعد.',

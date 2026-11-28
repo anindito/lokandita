@@ -163,15 +163,15 @@ final class NotifikasiTest extends KodeCase
         $this->db->query("UPDATE meetings SET enabled = 1 WHERE id = {$d['pertemuanX1']}");
         // Mahasiswa yang mengundurkan diri atau sudah lulus.
         foreach (['MENGUNDURKAN_DIRI', 'LULUS'] as $status) {
-            $this->db->query("UPDATE enrollments SET status = '{$status}' WHERE id = {$d['daftarA']}");
+            $this->roster->query("UPDATE enrollments SET status = '{$status}' WHERE id = {$d['daftarA']}");
             $periksa($status);
         }
         // Tahun ajaran diarsipkan.
-        $this->db->query("UPDATE enrollments SET status = 'AKTIF' WHERE id = {$d['daftarA']}");
-        $this->db->query("UPDATE academic_years SET status = 'archived' WHERE id = {$d['tahun']}");
+        $this->roster->query("UPDATE enrollments SET status = 'AKTIF' WHERE id = {$d['daftarA']}");
+        $this->roster->query("UPDATE academic_years SET status = 'archived' WHERE id = {$d['tahun']}");
         $periksa('tahun arsip');
         // Pembanding: dengan semuanya kembali normal, pemberitahuannya ada.
-        $this->db->query("UPDATE academic_years SET status = 'active' WHERE id = {$d['tahun']}");
+        $this->roster->query("UPDATE academic_years SET status = 'active' WHERE id = {$d['tahun']}");
         $a->get('/notifikasi');
         $this->assertCount(1, $this->baris($d['mhsA']['id']));
     }
