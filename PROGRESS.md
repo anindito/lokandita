@@ -2441,3 +2441,28 @@ Not verified: no page was opened in a browser — the agent has no account. Arab
 What happens with the commit that holds this entry: `infra/deploy.sh auth` only, then `infra/smoke.sh`. Check 0 will fail for `lokakode`, `portal` and `lokaujian`, which stay on the A1 commit on purpose until step 2. The output is in the session and is recorded in the next entry.
 
 Open — step 2, after the owner says the screens are proven: remove LokaKode's management screens and redirect their addresses, end `lokakode_app`'s write rights, copy LokaKode's old roster audit rows, move `data:pengajar` and `data:pendaftaran`, stop the curriculum seed creating courses and classes, roster stamp in the leaderboard cache key, test fixtures through `auth_app`, `SPEC.md` §3 and §5, `SPEC-LOKAUJIAN.md` §2 and §4, backup, deploy of all apps, smoke, gate, tag.
+
+### Stage A2, step 2 — only Akun Lokandita writes the roster; deployed (2026-11-28)
+
+The stage is built and deployed; **the owner's gate is open and there is no tag yet.** Branch `a2-roster`, deployed commit `217b141`.
+
+Step 1 on production first: `infra/deploy.sh auth` at `0bb415c` passed (the first attempt had been refused by the session's permission system, so the owner at first found no menu). `infra/smoke.sh` then: 101 pass, 5 fail — all five the commit check of components left on the A1 commit on purpose (`lokakode`, `portal`, `lokaujian`, judge worker, LokaUjian scheduler; the entry above named only three). The owner tried the screens on class DDP101 7E and wrote "sudah dilakukan semua". What the audit log shows of that trial: pengajar removed and assigned twice, one enrolment moved to 7A and back, one empty class deleted — seven rows with `app = roster`. Enrolling from a list, withdrawing and graduating were not in the trial.
+
+Done in step 2 (`DECISIONS.md`, 2026-11-28; `KONTRAK.md` §18):
+
+- LokaKode: the management screens for academic years, courses, classes, pengajar and enrolment are removed. Their old addresses redirect a superadmin to the same page under `auth.lokandita.com/admin/`; an old `POST` changes nothing. `/mata-kuliah`, `/mata-kuliah/{id}` and `/kelas/{id}` are read pages; password reset stays.
+- `lokakode_app` has `SELECT` only on the six roster tables (`infra/mysql-pindah-roster.sh pasang`, run by the deploy of `lokakode`).
+- `infra/mysql-salin-audit-roster.sh`: LokaKode's old roster audit rows copied to `identity.audit_log` with `app = 'roster'`; originals kept. `/admin/audit` sorts by time.
+- `data:pengajar` and `data:pendaftaran` now run in `auth`; `benih:kurikulum` no longer creates courses or classes.
+- Leaderboard cache key carries a stamp of the enrolments.
+- Test code of LokaKode, LokaUjian and the judge writes roster rows as `auth_app`.
+
+Tests on the committed tree, real containers: `auth` → `OK (132 tests, 3110 assertions)`; `lokakode` → `OK (269 tests, 16508 assertions)` (300 before: four files of the removed screens went, their cases live in `apps/auth/tests/Roster/`); `lokaujian` → `OK (127 tests, 14445 assertions)`; `portal` → `OK (104 tests, 15000 assertions)`; `judge` → `259 passed`. One failure on the way: the new test expected MySQL error 1142 for a write through an old-name view and got 1356; both are refusals for lack of rights, the test and smoke accept either.
+
+Production, 2026-11-28 about 16:04–16:10 UTC, on the owner's instruction in the session: 0 unfinished judge jobs, 0 sessions active in 10 minutes, 0 exam attempts running; `infra/backup.sh` → `backup SELESAI`; `infra/cek-env.sh` → `cek-env: LULUS`; `infra/deploy.sh` for `auth`, `lokakode`, `portal`, `lokaujian`, `judge` each `LULUS` at `217b141`. Audit copy: before 290 roster rows in `lokakode.audit_log`, 0 copied, `identity.audit_log` 3213 rows; after 290 copied, `identity.audit_log` 3503 rows (297 with `app = roster`), `lokakode.audit_log` unchanged at 1090. `infra/smoke.sh` → **`smoke: 109 lulus, 0 gagal`**, including: `lokakode_app` reads six tables and is refused eight writes (`1356` seven times through the old names, `1142` directly). Real requests without a cookie: `GET https://lokakode.lokandita.com/tahun-ajaran` and `/kelas/12/ubah` → 302 to the login page.
+
+Not verified by the agent (no account, no browser): the redirect of a logged-in superadmin from an old LokaKode address to Akun Lokandita, the read-only class and course pages as a superadmin and as a dosen, the copied history on `/admin/audit`, Arabic right-to-left and dark mode. The Arabic of the new sentences (eleven in Akun, four in LokaKode) was written by the agent and not read by an Arabic speaker.
+
+For LokaKelas: a new reader needs no new grant or view (`ROSTER_READER_DSN`). Two things it must know: an empty class can be deleted in Akun although a reader has stored something for it (a reader has no foreign key); and a reader that caches by class must key its cache on the enrolments' state or keep it short, as LokaKode's leaderboard now does.
+
+Open: the owner's gate; then tag `tahap-a2`, merge of `a2-roster`, and "A2 done" in `LOKAKELAS-PLAN.md`. Unused language keys of the removed LokaKode screens are still in `Kode.php`.
