@@ -2375,3 +2375,27 @@ State of production: the six tables are still in `lokakode`; the schema `roster`
 Not verified: the rehearsal containers had fresh users with random passwords, so it did not exercise the real `roster_reader` login of LokaUjian; no request of LokaKode or LokaUjian has run against the moved production layout; `uji-restore.sh`'s roster section has only run its "before the move" branch.
 
 Open: the production move (needs the owner's `SETUJU=produksi`), deploy, smoke, merge into `main`, tag `tahap-a1`.
+
+### Stage A1 — the roster is in the core in production (2026-11-28, 12:00–12:15 WIB)
+
+On the owner's "do it now" to the plan shown in the session. LokaKode and LokaUjian in maintenance from 12:05 WIB; Portal and Akun stayed open.
+
+1. Before: every `judge_jobs` row `DONE`, none made in the last 15 minutes, 0 attempts in progress. Rows 1 / 3 / 11 / 11 / 238 / 1 (years, courses, classes, teachers, enrolments, moves); `CHECKSUM TABLE` of the six kept.
+2. `infra/backup.sh` → `backup SELESAI` (05:05 UTC, the last backup of the old layout); `infra/uji-restore.sh` → `LULUS — 70 skema/tabel`.
+3. `SETUJU=produksi infra/mysql-pindah-roster.sh pindah lokakode` → exit 0; `status`: `di lokakode: 0 tabel dan 6 view; di roster: 6 tabel`. Same six row counts in `roster` and through the views; **the six checksums equal those taken before the move**; 6 foreign keys from `lokakode` into `roster`.
+4. `ROSTER_READER_DSN` in `apps/lokaujian/.env` now ends in `roster`; `infra/cek-env.sh` → LULUS.
+5. `infra/deploy.sh lokakode` and `lokaujian` at `ee5ace5` → both verified by `/healthz`, the scheduler by its heartbeat.
+6. `infra/smoke.sh` → **96 pass, 3 fail**: checks 13 and 20 (roster) pass in full — `roster_reader` reads the five views (1, 3, 11, 11, 238 rows) and is refused the tables; the layout, the 6 keys and the rights are as the contract says. The three failures were the commit check of `auth`, `portal` and the worker, not yet deployed from this branch.
+7. As `lokakode_app`, from inside the LokaKode container: a join of the `classes` view with `meeting_class_windows` (14 rows), 238 enrolments through the view, an `UPDATE` and an `INSERT` through the views accepted (no value changed, rolled back), `CREATE TABLE` in `roster` refused (1142).
+
+**Not verified: no page was opened while logged in** — the agent has no account. The owner must open, in LokaKode, a class page, the participants list and the class-move screen; in LokaUjian, the class list and one exam's participants.
+
+What happens with the commit that holds this entry, in this order; the output is in the session, and this file is not changed afterwards, because a later commit would make the commit check fail:
+
+1. Merge `a1-roster` into `main`, push; `infra/deploy.sh` for `auth`, `lokakode`, `portal`, `lokaujian`, `judge`.
+2. `infra/smoke.sh`; the tag `tahap-a1` only when it passes with 0 failures; then maintenance off for LokaKode and LokaUjian.
+3. `infra/backup.sh` and `infra/uji-restore.sh` — the first backup of the new layout, and the first run of the roster section of the restore test.
+
+If a step fails, the steps after it are not taken and the owner is told in the session; this entry then describes an intention until a later entry corrects it.
+
+Open after A1: backups from before 05:10 UTC of 2026-11-28 fit only the old layout (`docs/RESTORE.md`, "The roster lives in two schemas"). `lokakode_app` still writes the roster until A2. Everything listed as open after U6 is still open. Next: A2 (class management screens move to Akun Lokandita). Not started.
