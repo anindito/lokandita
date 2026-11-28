@@ -2356,3 +2356,22 @@ If a step fails, the steps after it are not taken and the owner is told in the s
 - The header-on-phones gate (not a stage) is still open.
 - Next by `SPEC-LOKAUJIAN.md` §15: the platform stages A1 and A2, not part of LokaUjian. Not started.
 
+
+### Stage A1 — roster to the core: built and rehearsed, production NOT moved (2026-11-28)
+
+The stage is **open**: no tag, nothing deployed. Branch `a1-roster`. Decisions: `DECISIONS.md`, 2026-11-28; contract: `KONTRAK.md` §18.
+
+Done:
+
+- `infra/mysql-pindah-roster.sh` (`status`, `pindah`, `pasang`, `balik`); `mysql-init.sh` creates `roster` and `roster_test` for `auth_app`; `backup.sh` dumps `roster` before `lokakode`; `uji-restore.sh`, `smoke.sh` (checks 13 and 20), `deploy.sh lokakode` (`pasang` only), the test harness and `docs/RESTORE.md` follow the new layout.
+- The test schemas are moved (`lokakode_test`: 6 views; `roster_test`: 6 tables). On that layout: `infra/tes.sh lokakode` → `OK (300 tests, 16794 assertions)`; `lokaujian` → `OK (127 tests, 14445 assertions)`; `judge` → `259 passed`; `auth` → `OK (111 tests, 1706 assertions)`; `portal` → `OK (104 tests, 15000 assertions)`.
+- `infra/backup.sh` → `lokandita-20261128-044528`, `backup SELESAI`; `infra/uji-restore.sh` → `LULUS — 70 skema/tabel` (old layout: "backup ini dibuat SEBELUM tabel roster pindah").
+- **Rehearsal of the move on a copy of that backup**, in two temporary MySQL containers without network, removed afterwards: `pindah` took 3.4 s; rows before and after 1 / 3 / 11 / 11 / 238 / 1 (years, courses, classes, teachers, enrolments, moves), the same through the old-name views and the contract views; 6 foreign keys from `lokakode` into `roster`; a dump of the new layout loaded into the second container with the same counts and 6 keys; `balik` put everything back, 0 keys into `roster`.
+
+State of production: the six tables are still in `lokakode`; the schema `roster` exists and is empty (`mysql-init.sh` was run); `ROSTER_READER_DSN` of LokaUjian still ends in `lokakode`. All containers run the commit of the U6 closing deploy.
+
+**Until the move is made, on this branch:** `infra/deploy.sh lokakode` stops at `pasang` (by design: it refuses while the tables are in `lokakode`), and `infra/smoke.sh` fails checks 13 and 20. The nightly backup works (shown above).
+
+Not verified: the rehearsal containers had fresh users with random passwords, so it did not exercise the real `roster_reader` login of LokaUjian; no request of LokaKode or LokaUjian has run against the moved production layout; `uji-restore.sh`'s roster section has only run its "before the move" branch.
+
+Open: the production move (needs the owner's `SETUJU=produksi`), deploy, smoke, merge into `main`, tag `tahap-a1`.
